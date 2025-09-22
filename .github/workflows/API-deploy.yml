@@ -77,15 +77,17 @@ jobs:
 
       - name: Run database migrations
         run: |
-          # Install EF Core tools
-          dotnet tool install --global dotnet-ef
+          # Install FluentMigrator CLI
+          dotnet tool install --global FluentMigrator.DotNet.Cli --version 3.4.0
           
           # Set connection string for migrations
-          export ConnectionStrings__DefaultConnection="${{ steps.get-connection-string.outputs.connection_string }}"
+          export CONNECTION_STRING="${{ steps.get-connection-string.outputs.connection_string }}"
           
-          # Run migrations
-          cd 4-Persistence/HotshotLogistics.Data
-          dotnet ef database update --connection "${{ steps.get-connection-string.outputs.connection_string }}"
+          # Build the data project so the assembly is available
+          dotnet build 4-Persistence/HotshotLogistics.Data/HotshotLogistics.Data.csproj --configuration Release
+          
+          # Run FluentMigrator migrations against SQL Server
+          dotnet fm migrate -a 4-Persistence/HotshotLogistics.Data/bin/Release/net8.0/HotshotLogistics.Data.dll -c "${CONNECTION_STRING}" -p sqlserver
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.DAVIDS_AZURE_SUB }}

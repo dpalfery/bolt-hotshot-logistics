@@ -1,11 +1,11 @@
 # HotshotLogistics.Data
 
-Entity Framework Core data access layer and migrations.
+Native ADO.NET data access layer and FluentMigrator migrations.
 This project implements the **Persistence**/Infrastructure concerns of the Clean
 Architecture, providing repositories that the Application layer depends upon.
 
 ## Tech Stack
-- EF Core with SQL Server
+- ADO.Net with SQL Server
 
 ## Build
 

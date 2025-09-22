@@ -1,9 +1,11 @@
 namespace HotshotLogistics.Contracts.Models;
 
+using HotshotLogistics.Contracts.Models;
+
 /// <summary>
 /// Data Transfer Object for Driver information.
 /// </summary>
-public class DriverDto : IDriver
+public class DriverDto
 {
     /// <inheritdoc/>
     public int Id { get; set; }

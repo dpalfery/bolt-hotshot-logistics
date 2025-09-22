@@ -4,177 +4,139 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Data;
+using System.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
 using HotshotLogistics.Contracts.Models;
 using HotshotLogistics.Contracts.Repositories;
+using HotshotLogistics.Core.Repositories;
 using HotshotLogistics.Domain.Models;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace HotshotLogistics.Data.Repositories
 {
     /// <summary>
-    /// Repository for managing Job entities.
+    /// Repository for managing Job entities using native ADO.NET.
     /// </summary>
-    internal class JobRepository : IJobRepository
+    internal class JobRepository : BaseRepository<JobDto>, IJobRepository
     {
-        private readonly HotshotDbContext dbContext;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="JobRepository"/> class.
         /// </summary>
-        /// <param name="dbContext">The database context.</param>
-        public JobRepository(HotshotDbContext dbContext)
+        /// <param name="configuration">The application configuration.</param>
+        public JobRepository(IConfiguration configuration) : base(configuration)
         {
-            this.dbContext = dbContext;
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Job>> GetAllAsync()
-        {
-            return await dbContext.Jobs
-                .Include(j => j.AssignedDriver)
-                .ToListAsync();
-        }
+        protected override string GetTableName() => "Jobs";
 
         /// <inheritdoc/>
-        public async Task<Job?> GetByIdAsync(string id)
-        {
-            return await dbContext.Jobs
-                .Include(j => j.AssignedDriver)
-                .FirstOrDefaultAsync(j => j.Id == id);
-        }
+        protected override string GetPrimaryKeyColumnName() => "Id";
 
         /// <inheritdoc/>
-        public async Task<Job> AddAsync(Job job)
+        protected override JobDto MapReaderToEntity(SqlDataReader reader)
         {
-            await dbContext.Jobs.AddAsync(job);
-            await dbContext.SaveChangesAsync();
-            return job;
-        }
-
-        /// <inheritdoc/>
-        public async Task<Job> UpdateAsync(Job job)
-        {
-            dbContext.Jobs.Update(job);
-            await dbContext.SaveChangesAsync();
-            return job;
-        }
-
-        /// <inheritdoc/>
-        public async Task DeleteAsync(string id)
-        {
-            var job = await dbContext.Jobs.FindAsync(id);
-            if (job != null)
-            {
-                dbContext.Jobs.Remove(job);
-                await dbContext.SaveChangesAsync();
-            }
-        }
-
-        /// <inheritdoc/>
-        public async Task<IJob> CreateJobAsync(IJob jobDto, CancellationToken cancellationToken = default)
-        {
-            var job = new Job
-            {
-                Id = string.IsNullOrEmpty(jobDto.Id) ? Guid.NewGuid().ToString() : jobDto.Id,
-                Title = jobDto.Title,
-                PickupAddress = jobDto.PickupAddress,
-                DropoffAddress = jobDto.DropoffAddress,
-                Status = jobDto.Status,
-                Priority = jobDto.Priority,
-                Amount = jobDto.Amount,
-                EstimatedDeliveryTime = jobDto.EstimatedDeliveryTime,
-                AssignedDriverId = jobDto.AssignedDriverId,
-                CreatedAt = DateTime.UtcNow,
-            };
-
-            dbContext.Jobs.Add(job);
-            await dbContext.SaveChangesAsync(cancellationToken);
-            // Map to JobDto
             return new JobDto
             {
-                Id = job.Id,
-                Title = job.Title,
-                PickupAddress = job.PickupAddress,
-                DropoffAddress = job.DropoffAddress,
-                Status = job.Status,
-                Priority = job.Priority,
-                Amount = job.Amount,
-                EstimatedDeliveryTime = job.EstimatedDeliveryTime,
-                AssignedDriverId = job.AssignedDriverId,
-                CreatedAt = job.CreatedAt,
-                UpdatedAt = job.UpdatedAt,
+                Id = reader.GetString(reader.GetOrdinal("Id")),
+                Title = reader.GetString(reader.GetOrdinal("Title")),
+                PickupAddress = reader.GetString(reader.GetOrdinal("PickupAddress")),
+                DropoffAddress = reader.GetString(reader.GetOrdinal("DeliveryAddress")),
+                Status = (JobStatus)reader.GetInt32(reader.GetOrdinal("Status")),
+                Priority = (JobPriority)reader.GetInt32(reader.GetOrdinal("Priority")),
+                Amount = reader.GetDecimal(reader.GetOrdinal("TotalAmount")),
+                EstimatedDeliveryTimeString = reader.GetDateTime(reader.GetOrdinal("EstimatedDeliveryTime")).ToString("O"),
+                AssignedDriverId = reader.IsDBNull(reader.GetOrdinal("AssignedDriverId")) ? null : reader.GetInt32(reader.GetOrdinal("AssignedDriverId")),
+                CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
+                UpdatedAt = reader.IsDBNull(reader.GetOrdinal("UpdatedAt")) ? null : reader.GetDateTime(reader.GetOrdinal("UpdatedAt"))
             };
         }
 
         /// <inheritdoc/>
-        public async Task<IJob?> GetJobByIdAsync(string id, CancellationToken cancellationToken = default)
+        protected override SqlParameter[] GetInsertParameters(JobDto entity)
         {
-            var job = await dbContext.Jobs
-                                     .AsNoTracking()
+            return new[]
+            {
+                new SqlParameter("@Id", SqlDbType.NVarChar) { Value = entity.Id },
+                new SqlParameter("@Title", SqlDbType.NVarChar) { Value = entity.Title },
+                new SqlParameter("@PickupAddress", SqlDbType.NVarChar) { Value = entity.PickupAddress },
+                new SqlParameter("@DeliveryAddress", SqlDbType.NVarChar) { Value = entity.DropoffAddress },
+                new SqlParameter("@Status", SqlDbType.Int) { Value = (int)entity.Status },
+                new SqlParameter("@Priority", SqlDbType.Int) { Value = (int)entity.Priority },
+                new SqlParameter("@TotalAmount", SqlDbType.Decimal) { Value = entity.Amount },
+                new SqlParameter("@EstimatedDeliveryTime", SqlDbType.DateTime2) { Value = DateTime.Parse(entity.EstimatedDeliveryTimeString) },
+                new SqlParameter("@AssignedDriverId", SqlDbType.Int) { Value = (object?)entity.AssignedDriverId ?? DBNull.Value }
+            };
+        }
 
-                                     .FirstOrDefaultAsync(j => j.Id == id, cancellationToken);
-
-            return job;
+        /// <inheritdoc/>
+        protected override SqlParameter[] GetUpdateParameters(JobDto entity)
+        {
+            return new[]
+            {
+                new SqlParameter("@Id", SqlDbType.NVarChar) { Value = entity.Id },
+                new SqlParameter("@Title", SqlDbType.NVarChar) { Value = entity.Title },
+                new SqlParameter("@PickupAddress", SqlDbType.NVarChar) { Value = entity.PickupAddress },
+                new SqlParameter("@DeliveryAddress", SqlDbType.NVarChar) { Value = entity.DropoffAddress },
+                new SqlParameter("@Status", SqlDbType.Int) { Value = (int)entity.Status },
+                new SqlParameter("@Priority", SqlDbType.Int) { Value = (int)entity.Priority },
+                new SqlParameter("@TotalAmount", SqlDbType.Decimal) { Value = entity.Amount },
+                new SqlParameter("@EstimatedDeliveryTime", SqlDbType.DateTime2) { Value = DateTime.Parse(entity.EstimatedDeliveryTimeString) },
+                new SqlParameter("@AssignedDriverId", SqlDbType.Int) { Value = (object?)entity.AssignedDriverId ?? DBNull.Value }
+            };
         }
 
         /// <inheritdoc/>
         public async Task<IEnumerable<IJob>> GetJobsAsync(CancellationToken cancellationToken = default)
         {
-            var jobs = await dbContext.Jobs
-                                      .AsNoTracking()
-                                      .ToListAsync(cancellationToken);
-            return jobs;
+            return await GetAllAsync();
         }
 
         /// <inheritdoc/>
-        public async Task<IJob?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
+        public async Task<IJob?> GetJobByIdAsync(string id, CancellationToken cancellationToken = default)
         {
-            var job = await dbContext.Jobs
-                                     .AsNoTracking()
-                                     .FirstOrDefaultAsync(j => j.Id == id, cancellationToken);
-            return job;
+            return await GetByIdAsync(id);
+        }
+
+        /// <inheritdoc/>
+        public async Task<IJob> CreateJobAsync(IJob job, CancellationToken cancellationToken = default)
+        {
+            var jobDto = (JobDto)job;
+            jobDto.CreatedAt = DateTime.UtcNow;
+            return await AddAsync(jobDto);
         }
 
         /// <inheritdoc/>
         public async Task<IJob?> UpdateJobAsync(string id, IJob jobDetails, CancellationToken cancellationToken = default)
         {
-            var job = await dbContext.Jobs.FindAsync(new object[] { id }, cancellationToken);
-            if (job == null)
+            var existingJob = await GetByIdAsync(id);
+            if (existingJob == null)
             {
                 return null;
             }
 
-            job.Title = jobDetails.Title;
-            job.PickupAddress = jobDetails.PickupAddress;
-            job.DropoffAddress = jobDetails.DropoffAddress;
-            job.Status = jobDetails.Status;
-            job.Priority = jobDetails.Priority;
-            job.Amount = jobDetails.Amount;
-            job.EstimatedDeliveryTime = jobDetails.EstimatedDeliveryTime;
-            job.AssignedDriverId = jobDetails.AssignedDriverId;
-            job.UpdatedAt = DateTime.UtcNow;
+            var jobDto = (JobDto)existingJob;
+            var detailsDto = (JobDto)jobDetails;
 
-            this.dbContext.Jobs.Update(job);
-            await this.dbContext.SaveChangesAsync(cancellationToken);
+            jobDto.Title = detailsDto.Title;
+            jobDto.PickupAddress = detailsDto.PickupAddress;
+            jobDto.DropoffAddress = detailsDto.DropoffAddress;
+            jobDto.Status = detailsDto.Status;
+            jobDto.Priority = detailsDto.Priority;
+            jobDto.Amount = detailsDto.Amount;
+            jobDto.EstimatedDeliveryTimeString = detailsDto.EstimatedDeliveryTimeString;
+            jobDto.AssignedDriverId = detailsDto.AssignedDriverId;
+            jobDto.UpdatedAt = DateTime.UtcNow;
 
-            return job;
+            return await UpdateAsync(jobDto);
         }
 
         /// <inheritdoc/>
         public async Task<bool> DeleteJobAsync(string id, CancellationToken cancellationToken = default)
         {
-            var job = await dbContext.Jobs.FindAsync(new object[] { id }, cancellationToken);
-            if (job == null)
-            {
-                return false;
-            }
-
-            dbContext.Jobs.Remove(job);
-            await dbContext.SaveChangesAsync(cancellationToken);
-            return true;
+            return await DeleteAsync(id);
         }
     }
 }
