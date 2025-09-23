@@ -17,6 +17,12 @@ public class Customer : ICustomer
     public string? TaxId { get; set; }
 
     /// <inheritdoc/>
+    public string? Email { get; set; }
+
+    /// <inheritdoc/>
+    public string? Phone { get; set; }
+
+    /// <inheritdoc/>
     public Address BillingAddress { get; set; } = new Address();
 
     /// <inheritdoc/>
@@ -128,9 +134,10 @@ public class Customer : ICustomer
     public bool IsValid()
     {
         return !string.IsNullOrWhiteSpace(CompanyName) &&
-               !string.IsNullOrWhiteSpace(Id) &&
-               BillingAddress != null &&
-               Contacts.Any(c => !string.IsNullOrWhiteSpace(c.Email)) &&
-               CreditLimit >= 0;
+                !string.IsNullOrWhiteSpace(Id) &&
+                BillingAddress != null &&
+                Contacts.Any(c => !string.IsNullOrWhiteSpace(c.Email)) &&
+                CreditLimit >= 0 &&
+                !string.IsNullOrWhiteSpace(Email);
     }
 }

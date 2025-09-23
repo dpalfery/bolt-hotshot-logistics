@@ -25,7 +25,8 @@ namespace HotshotLogistics.Data.Repositories
         /// Initializes a new instance of the <see cref="DriverRepository"/> class.
         /// </summary>
         /// <param name="configuration">The application configuration.</param>
-        public DriverRepository(IConfiguration configuration) : base(configuration)
+        public DriverRepository(IConfiguration configuration)
+            : base(configuration)
         {
         }
 
@@ -51,7 +52,7 @@ namespace HotshotLogistics.Data.Repositories
                 License = new LicenseInfo
                 {
                     LicenseNumber = reader.GetString(reader.GetOrdinal("LicenseNumber")),
-                    LicenseExpiryDate = reader.GetDateTime(reader.GetOrdinal("LicenseExpiryDate"))
+                    LicenseExpiryDate = reader.GetDateTime(reader.GetOrdinal("LicenseExpiryDate")),
                 },
                 IsActive = reader.GetBoolean(reader.GetOrdinal("IsActive")),
                 CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
@@ -70,7 +71,7 @@ namespace HotshotLogistics.Data.Repositories
                 new SqlParameter("@PhoneNumber", SqlDbType.NVarChar) { Value = entity.PersonalInfo.PhoneNumber },
                 new SqlParameter("@LicenseNumber", SqlDbType.NVarChar) { Value = entity.License.LicenseNumber },
                 new SqlParameter("@LicenseExpiryDate", SqlDbType.DateTime2) { Value = entity.License.LicenseExpiryDate },
-                new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive }
+                new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive },
             };
         }
 
@@ -86,7 +87,7 @@ namespace HotshotLogistics.Data.Repositories
                 new SqlParameter("@PhoneNumber", SqlDbType.NVarChar) { Value = entity.PersonalInfo.PhoneNumber },
                 new SqlParameter("@LicenseNumber", SqlDbType.NVarChar) { Value = entity.License.LicenseNumber },
                 new SqlParameter("@LicenseExpiryDate", SqlDbType.DateTime2) { Value = entity.License.LicenseExpiryDate },
-                new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive }
+                new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive },
             };
         }
 
@@ -131,7 +132,7 @@ namespace HotshotLogistics.Data.Repositories
             var parameters = new[]
             {
                 new SqlParameter("@Id", SqlDbType.Int) { Value = id },
-                new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = DateTime.UtcNow }
+                new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = DateTime.UtcNow },
             };
             await ExecuteNonQueryAsync(sql, parameters);
         }
@@ -160,6 +161,39 @@ namespace HotshotLogistics.Data.Repositories
             const string sql = "SELECT * FROM Drivers WHERE IsActive = 1 ORDER BY LastName, FirstName";
             var drivers = await ExecuteQueryAsync(sql);
             return drivers.Cast<IDriver>();
+        }
+
+        // Explicit interface implementations to bridge concrete/interface types
+        async Task<IDriver?> IDriverRepository.GetByIdAsync(object id)
+        {
+            return await GetByIdAsync(id);
+        }
+
+        async Task<IEnumerable<IDriver>> IDriverRepository.GetAllAsync()
+        {
+            return (await GetAllAsync()).Cast<IDriver>();
+        }
+
+        async Task<IDriver> IDriverRepository.AddAsync(IDriver entity)
+        {
+            var driver = entity as Driver ?? throw new ArgumentException("Entity must be Driver", nameof(entity));
+            return await AddAsync(driver);
+        }
+
+        async Task<IDriver> IDriverRepository.UpdateAsync(IDriver entity)
+        {
+            var driver = entity as Driver ?? throw new ArgumentException("Entity must be Driver", nameof(entity));
+            return await UpdateAsync(driver);
+        }
+
+        async Task<bool> IDriverRepository.DeleteAsync(object id)
+        {
+            return await DeleteAsync(id);
+        }
+
+        async Task<bool> IDriverRepository.ExistsAsync(object id)
+        {
+            return await ExistsAsync(id);
         }
     }
 }

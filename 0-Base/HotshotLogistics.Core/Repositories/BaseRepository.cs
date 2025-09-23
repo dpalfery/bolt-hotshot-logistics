@@ -3,6 +3,7 @@ namespace HotshotLogistics.Core.Repositories;
 using System.Data;
 using System.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using HotshotLogistics.Contracts.Repositories;
 
 /// <summary>
 /// Base repository implementation using native ADO.NET.
@@ -21,6 +22,11 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
         _connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new ArgumentNullException(nameof(configuration), "Connection string 'DefaultConnection' is required");
     }
+
+    /// <summary>
+    /// Gets the connection string for database operations.
+    /// </summary>
+    protected string ConnectionString => _connectionString;
 
     /// <summary>
     /// Gets the table name for the entity.
@@ -172,7 +178,8 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
         await using var command = new SqlCommand(string.Format(sql, GetTableName(), GetPrimaryKeyColumnName()), connection);
         command.Parameters.AddWithValue("@Id", id);
 
-        var count = (int)await command.ExecuteScalarAsync();
+        var result = await command.ExecuteScalarAsync();
+        var count = result as int? ?? 0;
         return count > 0;
     }
 
@@ -243,6 +250,10 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
         }
 
         var result = await command.ExecuteScalarAsync();
+        if (result == null)
+        {
+            throw new InvalidOperationException("Query returned null");
+        }
         return (TResult)result;
     }
 }

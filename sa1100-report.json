@@ -1,0 +1,307 @@
+﻿[
+    {
+        "project":  "HotshotLogistics.Data",
+        "relativeFilePath":  "4-Persistence\\HotshotLogistics.Data\\Repositories\\CustomerRepository.cs",
+        "line":  210,
+        "column":  22,
+        "message":  "Do not prefix calls with base unless local implementation exists",
+        "rawBuildLine":  "c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\Repositories\\CustomerRepository.cs(210,22): warning SA1100: Do not prefix calls with base unless local implementation exists (https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md) [c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\HotshotLogistics.Data.csproj]",
+        "snippet":  [
+                        "207 |     // Explicit interface implementations to bridge concrete/interface types",
+                        "208 |     async Task\u003cICustomer?\u003e ICustomerRepository.GetByIdAsync(object id)",
+                        "209 |     {",
+                        "210 |         return await base.GetByIdAsync(id);",
+                        "211 |     }",
+                        "212 | ",
+                        "213 |     async Task\u003cIEnumerable\u003cICustomer\u003e\u003e ICustomerRepository.GetAllAsync()"
+                    ]
+    },
+    {
+        "project":  "HotshotLogistics.Data",
+        "relativeFilePath":  "4-Persistence\\HotshotLogistics.Data\\Repositories\\CustomerRepository.cs",
+        "line":  215,
+        "column":  23,
+        "message":  "Do not prefix calls with base unless local implementation exists",
+        "rawBuildLine":  "c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\Repositories\\CustomerRepository.cs(215,23): warning SA1100: Do not prefix calls with base unless local implementation exists (https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md) [c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\HotshotLogistics.Data.csproj]",
+        "snippet":  [
+                        "212 | ",
+                        "213 |     async Task\u003cIEnumerable\u003cICustomer\u003e\u003e ICustomerRepository.GetAllAsync()",
+                        "214 |     {",
+                        "215 |         return (await base.GetAllAsync()).Cast\u003cICustomer\u003e();",
+                        "216 |     }",
+                        "217 | ",
+                        "218 |     async Task\u003cICustomer\u003e ICustomerRepository.AddAsync(ICustomer entity)"
+                    ]
+    },
+    {
+        "project":  "HotshotLogistics.Data",
+        "relativeFilePath":  "4-Persistence\\HotshotLogistics.Data\\Repositories\\CustomerRepository.cs",
+        "line":  221,
+        "column":  22,
+        "message":  "Do not prefix calls with base unless local implementation exists",
+        "rawBuildLine":  "c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\Repositories\\CustomerRepository.cs(221,22): warning SA1100: Do not prefix calls with base unless local implementation exists (https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md) [c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\HotshotLogistics.Data.csproj]",
+        "snippet":  [
+                        "218 |     async Task\u003cICustomer\u003e ICustomerRepository.AddAsync(ICustomer entity)",
+                        "219 |     {",
+                        "220 |         var customer = entity as Customer ?? throw new ArgumentException(\"Entity must be Customer\", nameof(entity));",
+                        "221 |         return await base.AddAsync(customer);",
+                        "222 |     }",
+                        "223 | ",
+                        "224 |     async Task\u003cICustomer\u003e ICustomerRepository.UpdateAsync(ICustomer entity)"
+                    ]
+    },
+    {
+        "project":  "HotshotLogistics.Data",
+        "relativeFilePath":  "4-Persistence\\HotshotLogistics.Data\\Repositories\\CustomerRepository.cs",
+        "line":  227,
+        "column":  22,
+        "message":  "Do not prefix calls with base unless local implementation exists",
+        "rawBuildLine":  "c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\Repositories\\CustomerRepository.cs(227,22): warning SA1100: Do not prefix calls with base unless local implementation exists (https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md) [c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\HotshotLogistics.Data.csproj]",
+        "snippet":  [
+                        "224 |     async Task\u003cICustomer\u003e ICustomerRepository.UpdateAsync(ICustomer entity)",
+                        "225 |     {",
+                        "226 |         var customer = entity as Customer ?? throw new ArgumentException(\"Entity must be Customer\", nameof(entity));",
+                        "227 |         return await base.UpdateAsync(customer);",
+                        "228 |     }",
+                        "229 | ",
+                        "230 |     async Task\u003cbool\u003e ICustomerRepository.DeleteAsync(object id)"
+                    ]
+    },
+    {
+        "project":  "HotshotLogistics.Data",
+        "relativeFilePath":  "4-Persistence\\HotshotLogistics.Data\\Repositories\\CustomerRepository.cs",
+        "line":  232,
+        "column":  22,
+        "message":  "Do not prefix calls with base unless local implementation exists",
+        "rawBuildLine":  "c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\Repositories\\CustomerRepository.cs(232,22): warning SA1100: Do not prefix calls with base unless local implementation exists (https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md) [c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\HotshotLogistics.Data.csproj]",
+        "snippet":  [
+                        "229 | ",
+                        "230 |     async Task\u003cbool\u003e ICustomerRepository.DeleteAsync(object id)",
+                        "231 |     {",
+                        "232 |         return await base.DeleteAsync(id);",
+                        "233 |     }",
+                        "234 | ",
+                        "235 |     async Task\u003cbool\u003e ICustomerRepository.ExistsAsync(object id)"
+                    ]
+    },
+    {
+        "project":  "HotshotLogistics.Data",
+        "relativeFilePath":  "4-Persistence\\HotshotLogistics.Data\\Repositories\\CustomerRepository.cs",
+        "line":  237,
+        "column":  22,
+        "message":  "Do not prefix calls with base unless local implementation exists",
+        "rawBuildLine":  "c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\Repositories\\CustomerRepository.cs(237,22): warning SA1100: Do not prefix calls with base unless local implementation exists (https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md) [c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\HotshotLogistics.Data.csproj]",
+        "snippet":  [
+                        "234 | ",
+                        "235 |     async Task\u003cbool\u003e ICustomerRepository.ExistsAsync(object id)",
+                        "236 |     {",
+                        "237 |         return await base.ExistsAsync(id);",
+                        "238 |     }",
+                        "239 | }"
+                    ]
+    },
+    {
+        "project":  "HotshotLogistics.Data",
+        "relativeFilePath":  "4-Persistence\\HotshotLogistics.Data\\Repositories\\DriverRepository.cs",
+        "line":  169,
+        "column":  26,
+        "message":  "Do not prefix calls with base unless local implementation exists",
+        "rawBuildLine":  "c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\Repositories\\DriverRepository.cs(169,26): warning SA1100: Do not prefix calls with base unless local implementation exists (https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md) [c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\HotshotLogistics.Data.csproj]",
+        "snippet":  [
+                        "166 |         // Explicit interface implementations to bridge concrete/interface types",
+                        "167 |         async Task\u003cIDriver?\u003e IDriverRepository.GetByIdAsync(object id)",
+                        "168 |         {",
+                        "169 |             return await base.GetByIdAsync(id);",
+                        "170 |         }",
+                        "171 | ",
+                        "172 |         async Task\u003cIEnumerable\u003cIDriver\u003e\u003e IDriverRepository.GetAllAsync()"
+                    ]
+    },
+    {
+        "project":  "HotshotLogistics.Data",
+        "relativeFilePath":  "4-Persistence\\HotshotLogistics.Data\\Repositories\\DriverRepository.cs",
+        "line":  174,
+        "column":  27,
+        "message":  "Do not prefix calls with base unless local implementation exists",
+        "rawBuildLine":  "c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\Repositories\\DriverRepository.cs(174,27): warning SA1100: Do not prefix calls with base unless local implementation exists (https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md) [c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\HotshotLogistics.Data.csproj]",
+        "snippet":  [
+                        "171 | ",
+                        "172 |         async Task\u003cIEnumerable\u003cIDriver\u003e\u003e IDriverRepository.GetAllAsync()",
+                        "173 |         {",
+                        "174 |             return (await base.GetAllAsync()).Cast\u003cIDriver\u003e();",
+                        "175 |         }",
+                        "176 | ",
+                        "177 |         async Task\u003cIDriver\u003e IDriverRepository.AddAsync(IDriver entity)"
+                    ]
+    },
+    {
+        "project":  "HotshotLogistics.Data",
+        "relativeFilePath":  "4-Persistence\\HotshotLogistics.Data\\Repositories\\DriverRepository.cs",
+        "line":  180,
+        "column":  26,
+        "message":  "Do not prefix calls with base unless local implementation exists",
+        "rawBuildLine":  "c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\Repositories\\DriverRepository.cs(180,26): warning SA1100: Do not prefix calls with base unless local implementation exists (https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md) [c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\HotshotLogistics.Data.csproj]",
+        "snippet":  [
+                        "177 |         async Task\u003cIDriver\u003e IDriverRepository.AddAsync(IDriver entity)",
+                        "178 |         {",
+                        "179 |             var driver = entity as Driver ?? throw new ArgumentException(\"Entity must be Driver\", nameof(entity));",
+                        "180 |             return await base.AddAsync(driver);",
+                        "181 |         }",
+                        "182 | ",
+                        "183 |         async Task\u003cIDriver\u003e IDriverRepository.UpdateAsync(IDriver entity)"
+                    ]
+    },
+    {
+        "project":  "HotshotLogistics.Data",
+        "relativeFilePath":  "4-Persistence\\HotshotLogistics.Data\\Repositories\\DriverRepository.cs",
+        "line":  186,
+        "column":  26,
+        "message":  "Do not prefix calls with base unless local implementation exists",
+        "rawBuildLine":  "c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\Repositories\\DriverRepository.cs(186,26): warning SA1100: Do not prefix calls with base unless local implementation exists (https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md) [c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\HotshotLogistics.Data.csproj]",
+        "snippet":  [
+                        "183 |         async Task\u003cIDriver\u003e IDriverRepository.UpdateAsync(IDriver entity)",
+                        "184 |         {",
+                        "185 |             var driver = entity as Driver ?? throw new ArgumentException(\"Entity must be Driver\", nameof(entity));",
+                        "186 |             return await base.UpdateAsync(driver);",
+                        "187 |         }",
+                        "188 | ",
+                        "189 |         async Task\u003cbool\u003e IDriverRepository.DeleteAsync(object id)"
+                    ]
+    },
+    {
+        "project":  "HotshotLogistics.Data",
+        "relativeFilePath":  "4-Persistence\\HotshotLogistics.Data\\Repositories\\DriverRepository.cs",
+        "line":  191,
+        "column":  26,
+        "message":  "Do not prefix calls with base unless local implementation exists",
+        "rawBuildLine":  "c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\Repositories\\DriverRepository.cs(191,26): warning SA1100: Do not prefix calls with base unless local implementation exists (https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md) [c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\HotshotLogistics.Data.csproj]",
+        "snippet":  [
+                        "188 | ",
+                        "189 |         async Task\u003cbool\u003e IDriverRepository.DeleteAsync(object id)",
+                        "190 |         {",
+                        "191 |             return await base.DeleteAsync(id);",
+                        "192 |         }",
+                        "193 | ",
+                        "194 |         async Task\u003cbool\u003e IDriverRepository.ExistsAsync(object id)"
+                    ]
+    },
+    {
+        "project":  "HotshotLogistics.Data",
+        "relativeFilePath":  "4-Persistence\\HotshotLogistics.Data\\Repositories\\DriverRepository.cs",
+        "line":  196,
+        "column":  26,
+        "message":  "Do not prefix calls with base unless local implementation exists",
+        "rawBuildLine":  "c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\Repositories\\DriverRepository.cs(196,26): warning SA1100: Do not prefix calls with base unless local implementation exists (https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md) [c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\HotshotLogistics.Data.csproj]",
+        "snippet":  [
+                        "193 | ",
+                        "194 |         async Task\u003cbool\u003e IDriverRepository.ExistsAsync(object id)",
+                        "195 |         {",
+                        "196 |             return await base.ExistsAsync(id);",
+                        "197 |         }",
+                        "198 |     }",
+                        "199 | }"
+                    ]
+    },
+    {
+        "project":  "HotshotLogistics.Data",
+        "relativeFilePath":  "4-Persistence\\HotshotLogistics.Data\\Repositories\\JobRepository.cs",
+        "line":  485,
+        "column":  26,
+        "message":  "Do not prefix calls with base unless local implementation exists",
+        "rawBuildLine":  "c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\Repositories\\JobRepository.cs(485,26): warning SA1100: Do not prefix calls with base unless local implementation exists (https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md) [c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\HotshotLogistics.Data.csproj]",
+        "snippet":  [
+                        "482 |         // Explicit interface implementations to bridge concrete/interface types",
+                        "483 |         async Task\u003cIJob?\u003e IJobRepository.GetByIdAsync(object id)",
+                        "484 |         {",
+                        "485 |             return await base.GetByIdAsync(id);",
+                        "486 |         }",
+                        "487 | ",
+                        "488 |         async Task\u003cIEnumerable\u003cIJob\u003e\u003e IJobRepository.GetAllAsync()"
+                    ]
+    },
+    {
+        "project":  "HotshotLogistics.Data",
+        "relativeFilePath":  "4-Persistence\\HotshotLogistics.Data\\Repositories\\JobRepository.cs",
+        "line":  490,
+        "column":  26,
+        "message":  "Do not prefix calls with base unless local implementation exists",
+        "rawBuildLine":  "c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\Repositories\\JobRepository.cs(490,26): warning SA1100: Do not prefix calls with base unless local implementation exists (https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md) [c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\HotshotLogistics.Data.csproj]",
+        "snippet":  [
+                        "487 | ",
+                        "488 |         async Task\u003cIEnumerable\u003cIJob\u003e\u003e IJobRepository.GetAllAsync()",
+                        "489 |         {",
+                        "490 |             return await base.GetAllAsync();",
+                        "491 |         }",
+                        "492 | ",
+                        "493 |         async Task\u003cIJob\u003e IJobRepository.AddAsync(IJob entity)"
+                    ]
+    },
+    {
+        "project":  "HotshotLogistics.Data",
+        "relativeFilePath":  "4-Persistence\\HotshotLogistics.Data\\Repositories\\JobRepository.cs",
+        "line":  496,
+        "column":  26,
+        "message":  "Do not prefix calls with base unless local implementation exists",
+        "rawBuildLine":  "c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\Repositories\\JobRepository.cs(496,26): warning SA1100: Do not prefix calls with base unless local implementation exists (https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md) [c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\HotshotLogistics.Data.csproj]",
+        "snippet":  [
+                        "493 |         async Task\u003cIJob\u003e IJobRepository.AddAsync(IJob entity)",
+                        "494 |         {",
+                        "495 |             var jobDto = entity as JobDto ?? throw new ArgumentException(\"Entity must be JobDto\", nameof(entity));",
+                        "496 |             return await base.AddAsync(jobDto);",
+                        "497 |         }",
+                        "498 | ",
+                        "499 |         async Task\u003cIJob\u003e IJobRepository.UpdateAsync(IJob entity)"
+                    ]
+    },
+    {
+        "project":  "HotshotLogistics.Data",
+        "relativeFilePath":  "4-Persistence\\HotshotLogistics.Data\\Repositories\\JobRepository.cs",
+        "line":  502,
+        "column":  26,
+        "message":  "Do not prefix calls with base unless local implementation exists",
+        "rawBuildLine":  "c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\Repositories\\JobRepository.cs(502,26): warning SA1100: Do not prefix calls with base unless local implementation exists (https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md) [c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\HotshotLogistics.Data.csproj]",
+        "snippet":  [
+                        "499 |         async Task\u003cIJob\u003e IJobRepository.UpdateAsync(IJob entity)",
+                        "500 |         {",
+                        "501 |             var jobDto = entity as JobDto ?? throw new ArgumentException(\"Entity must be JobDto\", nameof(entity));",
+                        "502 |             return await base.UpdateAsync(jobDto);",
+                        "503 |         }",
+                        "504 | ",
+                        "505 |         async Task\u003cbool\u003e IJobRepository.DeleteAsync(object id)"
+                    ]
+    },
+    {
+        "project":  "HotshotLogistics.Data",
+        "relativeFilePath":  "4-Persistence\\HotshotLogistics.Data\\Repositories\\JobRepository.cs",
+        "line":  507,
+        "column":  26,
+        "message":  "Do not prefix calls with base unless local implementation exists",
+        "rawBuildLine":  "c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\Repositories\\JobRepository.cs(507,26): warning SA1100: Do not prefix calls with base unless local implementation exists (https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md) [c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\HotshotLogistics.Data.csproj]",
+        "snippet":  [
+                        "504 | ",
+                        "505 |         async Task\u003cbool\u003e IJobRepository.DeleteAsync(object id)",
+                        "506 |         {",
+                        "507 |             return await base.DeleteAsync(id);",
+                        "508 |         }",
+                        "509 | ",
+                        "510 |         async Task\u003cbool\u003e IJobRepository.ExistsAsync(object id)"
+                    ]
+    },
+    {
+        "project":  "HotshotLogistics.Data",
+        "relativeFilePath":  "4-Persistence\\HotshotLogistics.Data\\Repositories\\JobRepository.cs",
+        "line":  512,
+        "column":  26,
+        "message":  "Do not prefix calls with base unless local implementation exists",
+        "rawBuildLine":  "c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\Repositories\\JobRepository.cs(512,26): warning SA1100: Do not prefix calls with base unless local implementation exists (https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md) [c:\\git\\bolt-hotshot-logistics\\4-Persistence\\HotshotLogistics.Data\\HotshotLogistics.Data.csproj]",
+        "snippet":  [
+                        "509 | ",
+                        "510 |         async Task\u003cbool\u003e IJobRepository.ExistsAsync(object id)",
+                        "511 |         {",
+                        "512 |             return await base.ExistsAsync(id);",
+                        "513 |         }",
+                        "514 | ",
+                        "515 |         public async Task\u003cIEnumerable\u003cIJob\u003e\u003e GetByDriverIdAsync(int driverId, CancellationToken cancellationToken = default)"
+                    ]
+    }
+]

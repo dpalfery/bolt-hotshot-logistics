@@ -43,7 +43,7 @@ namespace HotshotLogistics.Api.Functions
         public async Task<HttpResponseData> GetJobs(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "jobs")] HttpRequestData req)
         {
-            var jobs = await this.jobService.GetJobsAsync();
+            var jobs = await this.jobService.GetJobsAsync(CancellationToken.None);
             var response = req.CreateResponse(HttpStatusCode.OK);
             await response.WriteAsJsonAsync(jobs);
             return response;

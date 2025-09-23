@@ -13,6 +13,7 @@ namespace HotshotLogistics.Tests
     using HotshotLogistics.Contracts.Repositories;
     using HotshotLogistics.Contracts.Services;
     using HotshotLogistics.Domain.Models;
+    using Microsoft.Extensions.Logging;
     using Moq;
     using Xunit;
 
@@ -62,20 +63,64 @@ namespace HotshotLogistics.Tests
             var newJob = new JobDto
             {
                 Id = Guid.NewGuid().ToString(),
+                CustomerId = "CUST001",
                 Title = "Integration Test Job",
                 PickupAddress = "Test Pickup",
                 DropoffAddress = "Test Dropoff",
                 Status = JobStatus.Pending,
                 Priority = JobPriority.Low,
                 Amount = 10.0m,
-                EstimatedDeliveryTimeString = DateTime.UtcNow.AddHours(4).ToString("O")
+                EstimatedDeliveryTimeString = DateTime.UtcNow.AddHours(4).ToString("O"),
+                PickupLocation = new Location {
+                    Address = "Test Pickup",
+                    City = "New York",
+                    State = "NY",
+                    PostalCode = "10001",
+                    Latitude = 40.7128m,
+                    Longitude = -74.0060m
+                },
+                DeliveryLocation = new Location {
+                    Address = "Test Dropoff",
+                    City = "New York",
+                    State = "NY",
+                    PostalCode = "10002",
+                    Latitude = 40.7589m,
+                    Longitude = -73.9851m
+                },
+                Cargo = new CargoDetails {
+                    Description = "Test cargo",
+                    Weight = 100,
+                    Value = 1000,
+                    Quantity = 1
+                },
+                Pricing = new PricingDetails {
+                    BaseRate = 100,
+                    MileageRate = 2.5m,
+                    FuelSurcharge = 10,
+                    TollCharges = 5,
+                    AdditionalCharges = 0,
+                    TotalAmount = 115,
+                    Discount = 0,
+                    Tax = 0,
+                    TaxRate = 0
+                },
+                ScheduledPickupTime = DateTime.UtcNow.AddHours(2),
+                EstimatedDeliveryTime = DateTime.UtcNow.AddHours(8)
             };
 
+            var customer = new Customer { Id = "CUST001", IsActive = true };
+
             mockRepo.Setup(r => r.CreateJobAsync(It.IsAny<IJob>(), It.IsAny<CancellationToken>()))
-                    .ReturnsAsync((IJob j, CancellationToken _) => (IJob)j)
+                    .ReturnsAsync((IJob j, CancellationToken _) => j)
                     .Verifiable();
 
-            var service = new JobService(mockRepo.Object);
+            var customerRepoMock = new Mock<ICustomerRepository>();
+            var driverRepoMock = new Mock<IDriverRepository>();
+            var notificationServiceMock = new Mock<INotificationService>();
+            var loggerMock = new Mock<ILogger<JobService>>();
+
+            customerRepoMock.Setup(r => r.GetByIdAsync("CUST001")).ReturnsAsync(customer);
+            var service = new JobService(mockRepo.Object, customerRepoMock.Object, driverRepoMock.Object, notificationServiceMock.Object, loggerMock.Object);
 
             var created = await service.CreateJobAsync(newJob);
 

@@ -21,7 +21,8 @@ internal class JobAssignmentRepository : BaseRepository<JobAssignmentDto>, IJobA
     /// Initializes a new instance of the <see cref="JobAssignmentRepository"/> class.
     /// </summary>
     /// <param name="configuration">The application configuration.</param>
-    public JobAssignmentRepository(IConfiguration configuration) : base(configuration)
+    public JobAssignmentRepository(IConfiguration configuration)
+        : base(configuration)
     {
     }
 
@@ -62,7 +63,7 @@ internal class JobAssignmentRepository : BaseRepository<JobAssignmentDto>, IJobA
                 Amount = reader.GetDecimal(reader.GetOrdinal("JobAmount")),
                 EstimatedDeliveryTimeString = reader.GetDateTime(reader.GetOrdinal("JobEstimatedDeliveryTime")).ToString("O"),
                 CreatedAt = reader.GetDateTime(reader.GetOrdinal("JobCreatedAt")),
-                UpdatedAt = reader.IsDBNull(reader.GetOrdinal("JobUpdatedAt")) ? null : reader.GetDateTime(reader.GetOrdinal("JobUpdatedAt"))
+                UpdatedAt = reader.IsDBNull(reader.GetOrdinal("JobUpdatedAt")) ? null : reader.GetDateTime(reader.GetOrdinal("JobUpdatedAt")),
             }
         };
     }
@@ -76,7 +77,7 @@ internal class JobAssignmentRepository : BaseRepository<JobAssignmentDto>, IJobA
             new SqlParameter("@JobId", SqlDbType.NVarChar) { Value = entity.JobId },
             new SqlParameter("@DriverId", SqlDbType.Int) { Value = entity.DriverId },
             new SqlParameter("@AssignedAt", SqlDbType.DateTime2) { Value = entity.AssignedAt },
-            new SqlParameter("@Status", SqlDbType.Int) { Value = (int)entity.Status }
+            new SqlParameter("@Status", SqlDbType.Int) { Value = (int)entity.Status },
         };
     }
 
@@ -89,7 +90,7 @@ internal class JobAssignmentRepository : BaseRepository<JobAssignmentDto>, IJobA
             new SqlParameter("@JobId", SqlDbType.NVarChar) { Value = entity.JobId },
             new SqlParameter("@DriverId", SqlDbType.Int) { Value = entity.DriverId },
             new SqlParameter("@AssignedAt", SqlDbType.DateTime2) { Value = entity.AssignedAt },
-            new SqlParameter("@Status", SqlDbType.Int) { Value = (int)entity.Status }
+            new SqlParameter("@Status", SqlDbType.Int) { Value = (int)entity.Status },
         };
     }
 

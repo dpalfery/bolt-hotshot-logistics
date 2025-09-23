@@ -1,294 +1,244 @@
-namespace HotshotLogistics.Domain.Models;
+// <copyright file="Invoice.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using HotshotLogistics.Contracts.Models;
-
-/// <summary>
-/// Represents an invoice in the system.
-/// </summary>
-public class Invoice : IInvoice
+namespace HotshotLogistics.Domain.Models
 {
-    /// <inheritdoc/>
-    public string Id { get; set; } = string.Empty;
-
-    /// <inheritdoc/>
-    public string InvoiceNumber { get; set; } = string.Empty;
-
-    /// <inheritdoc/>
-    public string CustomerId { get; set; } = string.Empty;
-
-    /// <inheritdoc/>
-    public string? JobId { get; set; }
-
-    /// <inheritdoc/>
-    public DateTime InvoiceDate { get; set; }
-
-    /// <inheritdoc/>
-    public DateTime DueDate { get; set; }
-
-    /// <inheritdoc/>
-    public InvoiceStatus Status { get; set; }
-
-    /// <inheritdoc/>
-    public List<InvoiceLineItem> LineItems { get; set; } = new List<InvoiceLineItem>();
-
-    /// <inheritdoc/>
-    public decimal SubTotal { get; set; }
-
-    /// <inheritdoc/>
-    public decimal TaxRate { get; set; }
-
-    /// <inheritdoc/>
-    public decimal TaxAmount { get; set; }
-
-    /// <inheritdoc/>
-    public decimal DiscountAmount { get; set; }
-
-    /// <inheritdoc/>
-    public decimal TotalAmount { get; set; }
-
-    /// <inheritdoc/>
-    public decimal PaidAmount { get; set; }
-
-    /// <inheritdoc/>
-    public decimal BalanceDue => TotalAmount - PaidAmount;
-
-    /// <inheritdoc/>
-    public PaymentTerms Terms { get; set; } = new PaymentTerms();
-
-    /// <inheritdoc/>
-    public string Notes { get; set; } = string.Empty;
-
-    /// <inheritdoc/>
-    public DateTime CreatedAt { get; set; }
-
-    /// <inheritdoc/>
-    public DateTime? UpdatedAt { get; set; }
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using HotshotLogistics.Contracts.Models;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Invoice"/> class.
+    /// Represents an invoice in the system.
     /// </summary>
-    public Invoice()
+    public class Invoice : IInvoice
     {
-        if (CreatedAt == default)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Invoice"/> class.
+        /// </summary>
+        public Invoice()
+        {
+            Id = Guid.NewGuid().ToString();
+            LineItems = new List<InvoiceLineItem>();
+            Terms = new PaymentTerms();
             CreatedAt = DateTime.UtcNow;
+            Status = InvoiceStatus.Draft;
+        }
 
-        if (InvoiceDate == default)
-            InvoiceDate = DateTime.UtcNow.Date;
+        /// <inheritdoc/>
+        public string Id { get; set; } = string.Empty;
 
-        if (DueDate == default)
-            DueDate = InvoiceDate.AddDays(Terms.Days);
-    }
+        /// <inheritdoc/>
+        public string InvoiceNumber { get; set; } = string.Empty;
 
-    /// <summary>
-    /// Calculates the totals for the invoice.
-    /// </summary>
-    public void CalculateTotals()
-    {
-        SubTotal = LineItems.Sum(item => item.Amount);
-        TaxAmount = LineItems.Where(item => item.TaxApplicable).Sum(item => item.Amount * TaxRate);
-        TotalAmount = SubTotal + TaxAmount - DiscountAmount;
-    }
+        /// <inheritdoc/>
+        public string CustomerId { get; set; } = string.Empty;
 
-    /// <summary>
-    /// Adds a line item to the invoice.
-    /// </summary>
-    /// <param name="lineItem">The line item to add.</param>
-    public void AddLineItem(InvoiceLineItem lineItem)
-    {
-        lineItem.SortOrder = LineItems.Count + 1;
-        LineItems.Add(lineItem);
-        CalculateTotals();
-    }
+        /// <inheritdoc/>
+        public string? JobId { get; set; }
 
-    /// <summary>
-    /// Removes a line item from the invoice.
-    /// </summary>
-    /// <param name="lineItemId">The ID of the line item to remove.</param>
-    public void RemoveLineItem(int lineItemId)
-    {
-        var lineItem = LineItems.FirstOrDefault(item => item.Id == lineItemId);
-        if (lineItem != null)
+        /// <inheritdoc/>
+        public DateTime InvoiceDate { get; set; }
+
+        /// <inheritdoc/>
+        public DateTime DueDate { get; set; }
+
+        /// <inheritdoc/>
+        public InvoiceStatus Status { get; set; }
+
+        /// <inheritdoc/>
+        public List<InvoiceLineItem> LineItems { get; set; }
+
+        /// <inheritdoc/>
+        public decimal SubTotal { get; set; }
+
+        /// <inheritdoc/>
+        public decimal TaxRate { get; set; }
+
+        /// <inheritdoc/>
+        public decimal TaxAmount { get; set; }
+
+        /// <inheritdoc/>
+        public decimal DiscountAmount { get; set; }
+
+        /// <inheritdoc/>
+        public decimal TotalAmount { get; set; }
+
+        /// <inheritdoc/>
+        public decimal PaidAmount { get; set; }
+
+        /// <inheritdoc/>
+        public decimal BalanceDue => TotalAmount - PaidAmount;
+
+        /// <inheritdoc/>
+        public PaymentTerms Terms { get; set; }
+
+        /// <inheritdoc/>
+        public string Notes { get; set; } = string.Empty;
+
+        /// <inheritdoc/>
+        public DateTime CreatedAt { get; set; }
+
+        /// <inheritdoc/>
+        public DateTime? UpdatedAt { get; set; }
+
+        /// <summary>
+        /// Adds a line item to the invoice.
+        /// </summary>
+        /// <param name="lineItem">The line item to add.</param>
+        public void AddLineItem(InvoiceLineItem lineItem)
         {
-            LineItems.Remove(lineItem);
-            // Reorder remaining items
-            for (int i = 0; i < LineItems.Count; i++)
+            if (lineItem == null)
+                throw new ArgumentNullException(nameof(lineItem));
+
+            lineItem.SortOrder = LineItems.Count + 1;
+            LineItems.Add(lineItem);
+            CalculateTotals();
+        }
+
+        /// <summary>
+        /// Removes a line item from the invoice.
+        /// </summary>
+        /// <param name="lineItemId">The line item ID to remove.</param>
+        /// <returns>True if the item was removed, false otherwise.</returns>
+        public bool RemoveLineItem(int lineItemId)
+        {
+            var item = LineItems.FirstOrDefault(li => li.Id == lineItemId);
+            if (item != null)
             {
-                LineItems[i].SortOrder = i + 1;
+                LineItems.Remove(item);
+                CalculateTotals();
+                return true;
             }
-            CalculateTotals();
-        }
-    }
-
-    /// <summary>
-    /// Updates a line item on the invoice.
-    /// </summary>
-    /// <param name="lineItemId">The ID of the line item to update.</param>
-    /// <param name="updatedItem">The updated line item data.</param>
-    public void UpdateLineItem(int lineItemId, InvoiceLineItem updatedItem)
-    {
-        var existingItem = LineItems.FirstOrDefault(item => item.Id == lineItemId);
-        if (existingItem != null)
-        {
-            existingItem.Description = updatedItem.Description;
-            existingItem.Quantity = updatedItem.Quantity;
-            existingItem.UnitPrice = updatedItem.UnitPrice;
-            existingItem.TaxApplicable = updatedItem.TaxApplicable;
-            CalculateTotals();
-        }
-    }
-
-    /// <summary>
-    /// Applies a payment to the invoice.
-    /// </summary>
-    /// <param name="paymentAmount">The amount to apply.</param>
-    /// <returns>The remaining balance after payment.</returns>
-    public decimal ApplyPayment(decimal paymentAmount)
-    {
-        PaidAmount += paymentAmount;
-        if (PaidAmount >= TotalAmount)
-        {
-            Status = InvoiceStatus.Paid;
-            PaidAmount = TotalAmount; // Don't allow overpayment
-        }
-        else if (PaidAmount > 0)
-        {
-            Status = InvoiceStatus.PartiallyPaid;
+            return false;
         }
 
-        UpdatedAt = DateTime.UtcNow;
-        return BalanceDue;
-    }
-
-    /// <summary>
-    /// Marks the invoice as sent to the customer.
-    /// </summary>
-    public void MarkAsSent()
-    {
-        Status = InvoiceStatus.Sent;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    /// <summary>
-    /// Marks the invoice as viewed by the customer.
-    /// </summary>
-    public void MarkAsViewed()
-    {
-        if (Status == InvoiceStatus.Sent)
+        /// <summary>
+        /// Calculates the invoice totals based on line items.
+        /// </summary>
+        public void CalculateTotals()
         {
-            Status = InvoiceStatus.Viewed;
+            SubTotal = LineItems.Sum(li => li.Amount);
+            
+            var taxableAmount = LineItems.Where(li => li.TaxApplicable).Sum(li => li.Amount);
+            TaxAmount = taxableAmount * TaxRate;
+            
+            TotalAmount = SubTotal + TaxAmount - DiscountAmount;
             UpdatedAt = DateTime.UtcNow;
         }
-    }
 
-    /// <summary>
-    /// Cancels the invoice.
-    /// </summary>
-    public void Cancel()
-    {
-        Status = InvoiceStatus.Cancelled;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    /// <summary>
-    /// Checks if the invoice is overdue.
-    /// </summary>
-    /// <returns>True if the invoice is overdue, false otherwise.</returns>
-    public bool IsOverdue()
-    {
-        return Status != InvoiceStatus.Paid &&
-               Status != InvoiceStatus.Cancelled &&
-               DateTime.UtcNow.Date > DueDate.Date;
-    }
-
-    /// <summary>
-    /// Gets the number of days overdue.
-    /// </summary>
-    /// <returns>The number of days overdue, or 0 if not overdue.</returns>
-    public int GetDaysOverdue()
-    {
-        if (!IsOverdue())
-            return 0;
-
-        return (DateTime.UtcNow.Date - DueDate.Date).Days;
-    }
-
-    /// <summary>
-    /// Calculates the early payment discount amount.
-    /// </summary>
-    /// <param name="paymentDate">The proposed payment date.</param>
-    /// <returns>The discount amount available.</returns>
-    public decimal CalculateEarlyPaymentDiscount(DateTime paymentDate)
-    {
-        if (Terms.EarlyPaymentDiscount <= 0 || Terms.EarlyPaymentDiscountDays <= 0)
-            return 0;
-
-        var daysFromInvoice = (paymentDate.Date - InvoiceDate.Date).Days;
-        if (daysFromInvoice <= Terms.EarlyPaymentDiscountDays)
+        /// <summary>
+        /// Applies a discount to the invoice.
+        /// </summary>
+        /// <param name="discountAmount">The discount amount.</param>
+        public void ApplyDiscount(decimal discountAmount)
         {
-            return TotalAmount * Terms.EarlyPaymentDiscount;
+            if (discountAmount < 0)
+                throw new ArgumentException("Discount amount cannot be negative", nameof(discountAmount));
+
+            DiscountAmount = Math.Min(discountAmount, SubTotal);
+            CalculateTotals();
         }
 
-        return 0;
-    }
-
-    /// <summary>
-    /// Calculates the late payment penalty.
-    /// </summary>
-    /// <returns>The penalty amount.</returns>
-    public decimal CalculateLatePaymentPenalty()
-    {
-        if (Terms.LatePaymentPenalty <= 0 || Terms.LatePaymentPenaltyDays <= 0)
-            return 0;
-
-        var daysOverdue = GetDaysOverdue();
-        if (daysOverdue > Terms.LatePaymentPenaltyDays)
+        /// <summary>
+        /// Applies a payment to the invoice.
+        /// </summary>
+        /// <param name="paymentAmount">The payment amount.</param>
+        public void ApplyPayment(decimal paymentAmount)
         {
-            return BalanceDue * Terms.LatePaymentPenalty;
-        }
+            if (paymentAmount < 0)
+                throw new ArgumentException("Payment amount cannot be negative", nameof(paymentAmount));
 
-        return 0;
-    }
+            if (paymentAmount > BalanceDue)
+                throw new ArgumentException("Payment amount cannot exceed balance due", nameof(paymentAmount));
 
-    /// <summary>
-    /// Validates the invoice data.
-    /// </summary>
-    /// <returns>True if the invoice data is valid, false otherwise.</returns>
-    public bool IsValid()
-    {
-        return !string.IsNullOrWhiteSpace(Id) &&
-               !string.IsNullOrWhiteSpace(InvoiceNumber) &&
-               !string.IsNullOrWhiteSpace(CustomerId) &&
-               InvoiceDate <= DateTime.UtcNow.Date &&
-               DueDate >= InvoiceDate &&
-               LineItems.Any() &&
-               TotalAmount >= 0 &&
-               PaidAmount >= 0 &&
-               PaidAmount <= TotalAmount;
-    }
-
-    /// <summary>
-    /// Creates a copy of the invoice for adjustments.
-    /// </summary>
-    /// <returns>A new invoice with copied data.</returns>
-    public Invoice CreateAdjustmentCopy()
-    {
-        return new Invoice
-        {
-            CustomerId = this.CustomerId,
-            JobId = this.JobId,
-            LineItems = this.LineItems.Select(item => new InvoiceLineItem
+            PaidAmount += paymentAmount;
+            
+            // Update status based on payment
+            if (BalanceDue == 0)
             {
-                Description = item.Description,
-                Quantity = item.Quantity,
-                UnitPrice = item.UnitPrice,
-                TaxApplicable = item.TaxApplicable,
-                SortOrder = item.SortOrder
-            }).ToList(),
-            Terms = this.Terms,
-            Notes = $"Adjustment for invoice {this.InvoiceNumber}"
-        };
+                Status = InvoiceStatus.Paid;
+            }
+            else if (PaidAmount > 0)
+            {
+                Status = InvoiceStatus.PartiallyPaid;
+            }
+
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        /// <summary>
+        /// Checks if the invoice is overdue.
+        /// </summary>
+        /// <returns>True if the invoice is overdue, false otherwise.</returns>
+        public bool IsOverdue()
+        {
+            return DateTime.UtcNow.Date > DueDate.Date && BalanceDue > 0;
+        }
+
+        /// <summary>
+        /// Gets the number of days overdue.
+        /// </summary>
+        /// <returns>The number of days overdue, or 0 if not overdue.</returns>
+        public int DaysOverdue()
+        {
+            if (!IsOverdue())
+                return 0;
+
+            return (DateTime.UtcNow.Date - DueDate.Date).Days;
+        }
+
+        /// <summary>
+        /// Calculates early payment discount if applicable.
+        /// </summary>
+        /// <returns>The early payment discount amount.</returns>
+        public decimal CalculateEarlyPaymentDiscount()
+        {
+            if (Terms.EarlyPaymentDiscount <= 0 || Terms.EarlyPaymentDiscountDays <= 0)
+                return 0;
+
+            var discountDeadline = InvoiceDate.AddDays(Terms.EarlyPaymentDiscountDays);
+            if (DateTime.UtcNow.Date <= discountDeadline.Date)
+            {
+                return TotalAmount * Terms.EarlyPaymentDiscount;
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// Calculates late payment penalty if applicable.
+        /// </summary>
+        /// <returns>The late payment penalty amount.</returns>
+        public decimal CalculateLatePenalty()
+        {
+            if (!IsOverdue() || Terms.LatePaymentPenalty <= 0)
+                return 0;
+
+            var penaltyStartDate = DueDate.AddDays(Terms.LatePaymentPenaltyDays);
+            if (DateTime.UtcNow.Date > penaltyStartDate.Date)
+            {
+                return TotalAmount * Terms.LatePaymentPenalty;
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// Validates the invoice data.
+        /// </summary>
+        /// <returns>True if the invoice is valid, false otherwise.</returns>
+        public bool IsValid()
+        {
+            return !string.IsNullOrWhiteSpace(CustomerId) &&
+                   !string.IsNullOrWhiteSpace(InvoiceNumber) &&
+                   InvoiceDate != default &&
+                   DueDate >= InvoiceDate &&
+                   LineItems.Any() &&
+                   TotalAmount >= 0 &&
+                   PaidAmount >= 0 &&
+                   PaidAmount <= TotalAmount;
+        }
     }
 }

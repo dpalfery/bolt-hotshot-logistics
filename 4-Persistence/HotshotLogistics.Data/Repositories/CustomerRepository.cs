@@ -11,13 +11,14 @@ using Microsoft.Extensions.Configuration;
 /// <summary>
 /// Repository for customer data access using native ADO.NET.
 /// </summary>
-public class CustomerRepository : BaseRepository<ICustomer>, ICustomerRepository
+internal class CustomerRepository : BaseRepository<ICustomer>, ICustomerRepository
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="CustomerRepository"/> class.
     /// </summary>
     /// <param name="configuration">The application configuration.</param>
-    public CustomerRepository(IConfiguration configuration) : base(configuration)
+    public CustomerRepository(IConfiguration configuration)
+        : base(configuration)
     {
     }
 
@@ -43,7 +44,7 @@ public class CustomerRepository : BaseRepository<ICustomer>, ICustomerRepository
                 ZipCode = reader.GetString(reader.GetOrdinal("ZipCode")),
                 Country = reader.GetString(reader.GetOrdinal("Country")),
                 Latitude = reader.GetDouble(reader.GetOrdinal("Latitude")),
-                Longitude = reader.GetDouble(reader.GetOrdinal("Longitude"))
+                Longitude = reader.GetDouble(reader.GetOrdinal("Longitude")),
             },
             CreditLimit = reader.GetDecimal(reader.GetOrdinal("CreditLimit")),
             IsActive = reader.GetBoolean(reader.GetOrdinal("IsActive")),
@@ -68,7 +69,7 @@ public class CustomerRepository : BaseRepository<ICustomer>, ICustomerRepository
             new SqlParameter("@Latitude", SqlDbType.Decimal) { Value = entity.BillingAddress.Latitude },
             new SqlParameter("@Longitude", SqlDbType.Decimal) { Value = entity.BillingAddress.Longitude },
             new SqlParameter("@CreditLimit", SqlDbType.Decimal) { Value = entity.CreditLimit },
-            new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive }
+            new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive },
         };
     }
 
@@ -88,7 +89,7 @@ public class CustomerRepository : BaseRepository<ICustomer>, ICustomerRepository
             new SqlParameter("@Latitude", SqlDbType.Decimal) { Value = entity.BillingAddress.Latitude },
             new SqlParameter("@Longitude", SqlDbType.Decimal) { Value = entity.BillingAddress.Longitude },
             new SqlParameter("@CreditLimit", SqlDbType.Decimal) { Value = entity.CreditLimit },
-            new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive }
+            new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive },
         };
     }
 
@@ -111,7 +112,7 @@ public class CustomerRepository : BaseRepository<ICustomer>, ICustomerRepository
         var parameters = new[]
         {
             new SqlParameter("@MinLimit", SqlDbType.Decimal) { Value = minLimit },
-            new SqlParameter("@MaxLimit", SqlDbType.Decimal) { Value = maxLimit }
+            new SqlParameter("@MaxLimit", SqlDbType.Decimal) { Value = maxLimit },
         };
 
         return await ExecuteQueryAsync(sql, parameters);
@@ -166,7 +167,7 @@ public class CustomerRepository : BaseRepository<ICustomer>, ICustomerRepository
         {
             new SqlParameter("@CustomerId", SqlDbType.NVarChar) { Value = customerId },
             new SqlParameter("@CreditLimit", SqlDbType.Decimal) { Value = newLimit },
-            new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = DateTime.UtcNow }
+            new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = DateTime.UtcNow },
         };
 
         var rowsAffected = await ExecuteNonQueryAsync(sql, parameters);
@@ -181,7 +182,7 @@ public class CustomerRepository : BaseRepository<ICustomer>, ICustomerRepository
         var parameters = new[]
         {
             new SqlParameter("@CustomerId", SqlDbType.NVarChar) { Value = customerId },
-            new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = DateTime.UtcNow }
+            new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = DateTime.UtcNow },
         };
 
         var rowsAffected = await ExecuteNonQueryAsync(sql, parameters);
@@ -196,10 +197,43 @@ public class CustomerRepository : BaseRepository<ICustomer>, ICustomerRepository
         var parameters = new[]
         {
             new SqlParameter("@CustomerId", SqlDbType.NVarChar) { Value = customerId },
-            new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = DateTime.UtcNow }
+            new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = DateTime.UtcNow },
         };
 
         var rowsAffected = await ExecuteNonQueryAsync(sql, parameters);
         return rowsAffected > 0;
+    }
+
+    // Explicit interface implementations to bridge concrete/interface types
+    async Task<ICustomer?> ICustomerRepository.GetByIdAsync(object id)
+    {
+        return await GetByIdAsync(id);
+    }
+
+    async Task<IEnumerable<ICustomer>> ICustomerRepository.GetAllAsync()
+    {
+        return (await GetAllAsync()).Cast<ICustomer>();
+    }
+
+    async Task<ICustomer> ICustomerRepository.AddAsync(ICustomer entity)
+    {
+        var customer = entity as Customer ?? throw new ArgumentException("Entity must be Customer", nameof(entity));
+        return await AddAsync(customer);
+    }
+
+    async Task<ICustomer> ICustomerRepository.UpdateAsync(ICustomer entity)
+    {
+        var customer = entity as Customer ?? throw new ArgumentException("Entity must be Customer", nameof(entity));
+        return await UpdateAsync(customer);
+    }
+
+    async Task<bool> ICustomerRepository.DeleteAsync(object id)
+    {
+        return await DeleteAsync(id);
+    }
+
+    async Task<bool> ICustomerRepository.ExistsAsync(object id)
+    {
+        return await ExistsAsync(id);
     }
 }

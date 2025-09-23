@@ -1,5 +1,6 @@
 using HotshotLogistics.Application.Services;
 using HotshotLogistics.Contracts.Services;
+using HotshotLogistics.Contracts.Hubs;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HotshotLogistics.Application;
@@ -20,6 +21,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDriverService, DriverService>();
         services.AddScoped<IJobService, JobService>();
         services.AddScoped<IJobAssignmentService, JobAssignmentService>();
+        services.AddScoped<IRealtimeService, RealtimeService>();
+        services.AddScoped<ISignalRClientWrapper, SignalRClientWrapper>();
 
         return services;
     }

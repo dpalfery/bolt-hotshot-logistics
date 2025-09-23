@@ -4,62 +4,569 @@
 
 namespace HotshotLogistics.Application.Services
 {
+    using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using HotshotLogistics.Contracts.Models;
     using HotshotLogistics.Contracts.Repositories;
     using HotshotLogistics.Contracts.Services;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
-    /// Service for managing jobs.
+    /// Service for managing jobs with lifecycle management.
     /// </summary>
     public class JobService : IJobService
     {
         private readonly IJobRepository jobRepository;
+        private readonly ICustomerRepository customerRepository;
+        private readonly IDriverRepository driverRepository;
+        private readonly INotificationService notificationService;
+        private readonly ILogger<JobService> logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JobService"/> class.
         /// </summary>
         /// <param name="jobRepository">The job repository.</param>
-        public JobService(IJobRepository jobRepository)
+        /// <param name="customerRepository">The customer repository.</param>
+        /// <param name="driverRepository">The driver repository.</param>
+        /// <param name="notificationService">The notification service.</param>
+        /// <param name="logger">The logger.</param>
+        public JobService(
+            IJobRepository jobRepository,
+            ICustomerRepository customerRepository,
+            IDriverRepository driverRepository,
+            INotificationService notificationService,
+            ILogger<JobService> logger)
         {
-            this.jobRepository = jobRepository;
+            this.jobRepository = jobRepository ?? throw new ArgumentNullException(nameof(jobRepository));
+            this.customerRepository = customerRepository ?? throw new ArgumentNullException(nameof(customerRepository));
+            this.driverRepository = driverRepository ?? throw new ArgumentNullException(nameof(driverRepository));
+            this.notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <inheritdoc/>
-        public Task<IJob> CreateJobAsync(IJob job, CancellationToken cancellationToken = default)
+        public async Task<IJob> CreateJobAsync(IJob job, CancellationToken cancellationToken = default)
         {
-            // Add any business logic, validation, etc., here before calling the repository
+            logger.LogInformation("Creating job with ID: {JobId}", job.Id);
 
-            return this.jobRepository.CreateJobAsync(job, cancellationToken);
+            // Validate the job
+            if (!await ValidateJobAsync(job, cancellationToken))
+            {
+                throw new ArgumentException("Job validation failed", nameof(job));
+            }
+
+            // Verify customer exists and is active
+            var customer = await customerRepository.GetByIdAsync(job.CustomerId);
+            if (customer == null || !customer.IsActive)
+            {
+                throw new ArgumentException($"Customer {job.CustomerId} not found or inactive", nameof(job));
+            }
+
+            // Set initial job status and timestamps
+            job.Status = JobStatus.Pending;
+            job.CreatedAt = DateTime.UtcNow;
+            job.UpdatedAt = DateTime.UtcNow;
+
+            // Generate unique ID if not provided
+            if (string.IsNullOrWhiteSpace(job.Id))
+            {
+                job.Id = Guid.NewGuid().ToString();
+            }
+
+            // Calculate estimated delivery time if not provided
+            if (job.EstimatedDeliveryTime == default)
+            {
+                job.EstimatedDeliveryTime = await CalculateEstimatedDeliveryTimeAsync(job, cancellationToken);
+            }
+
+            // Initialize tracking info
+            if (job.Tracking == null)
+            {
+                job.Tracking = new TrackingInfo
+                {
+                    CurrentStatus = "Job Created",
+                    IsActive = false
+                };
+            }
+
+            var createdJob = await jobRepository.CreateJobAsync(job, cancellationToken);
+
+            // Send notification for job creation
+            try
+            {
+                await notificationService.SendNotificationAsync(
+                    job.CustomerId,
+                    NotificationType.JobCreated,
+                    "Job Created",
+                    $"Your job '{job.Title}' has been created and is pending assignment.",
+                    cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to send job creation notification for job {JobId}", job.Id);
+            }
+
+            logger.LogInformation("Job created successfully with ID: {JobId}", createdJob.Id);
+            return createdJob;
         }
 
         /// <inheritdoc/>
         public Task<IJob?> GetJobByIdAsync(string id, CancellationToken cancellationToken = default)
         {
-            return this.jobRepository.GetJobByIdAsync(id, cancellationToken);
+            return jobRepository.GetJobByIdAsync(id, cancellationToken);
         }
 
         /// <inheritdoc/>
         public Task<IEnumerable<IJob>> GetJobsAsync(CancellationToken cancellationToken = default)
         {
-            return this.jobRepository.GetJobsAsync(cancellationToken);
+            return jobRepository.GetJobsAsync(cancellationToken);
         }
 
         /// <inheritdoc/>
-        public Task<IJob?> UpdateJobAsync(string id, IJob jobDetails, CancellationToken cancellationToken = default)
+        public Task<PagedResult<IJob>> GetJobsAsync(
+            JobFilter? filter = null,
+            PaginationParameters? pagination = null,
+            SortParameters? sort = null,
+            CancellationToken cancellationToken = default)
         {
-            // Add any business logic, validation, etc.
-
-            return this.jobRepository.UpdateJobAsync(id, jobDetails, cancellationToken);
+            logger.LogInformation("Getting jobs with filter: {@Filter}, pagination: {@Pagination}, sort: {@Sort}", 
+                filter, pagination, sort);
+            
+            return jobRepository.GetJobsAsync(filter, pagination, sort, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public Task<bool> DeleteJobAsync(string id, CancellationToken cancellationToken = default)
+        public async Task<IJob?> UpdateJobAsync(string id, IJob jobDetails, CancellationToken cancellationToken = default)
         {
-            // Add any business logic (e.g., check if job can be deleted)
-            return this.jobRepository.DeleteJobAsync(id, cancellationToken);
+            logger.LogInformation("Updating job with ID: {JobId}", id);
+
+            var existingJob = await jobRepository.GetJobByIdAsync(id, cancellationToken);
+            if (existingJob == null)
+            {
+                logger.LogWarning("Job not found with ID: {JobId}", id);
+                return null;
+            }
+
+            // Validate the updated job details
+            if (!await ValidateJobAsync(jobDetails, cancellationToken))
+            {
+                throw new ArgumentException("Job validation failed", nameof(jobDetails));
+            }
+
+            jobDetails.UpdatedAt = DateTime.UtcNow;
+            var updatedJob = await jobRepository.UpdateJobAsync(id, jobDetails, cancellationToken);
+
+            logger.LogInformation("Job updated successfully with ID: {JobId}", id);
+            return updatedJob;
+        }
+
+        /// <inheritdoc/>
+        public async Task<bool> DeleteJobAsync(string id, CancellationToken cancellationToken = default)
+        {
+            logger.LogInformation("Deleting job with ID: {JobId}", id);
+
+            var job = await jobRepository.GetJobByIdAsync(id, cancellationToken);
+            if (job == null)
+            {
+                logger.LogWarning("Job not found with ID: {JobId}", id);
+                return false;
+            }
+
+            // Check if job can be deleted (only allow deletion of jobs that haven't started)
+            if (job.Status != JobStatus.Pending && job.Status != JobStatus.Cancelled)
+            {
+                logger.LogWarning("Cannot delete job with status: {Status}", job.Status);
+                throw new InvalidOperationException($"Cannot delete job with status: {job.Status}");
+            }
+
+            var result = await jobRepository.DeleteJobAsync(id, cancellationToken);
+
+            if (result)
+            {
+                logger.LogInformation("Job deleted successfully with ID: {JobId}", id);
+            }
+
+            return result;
+        }
+
+        /// <inheritdoc/>
+        public async Task<IJob> AssignDriverAsync(string jobId, int driverId, CancellationToken cancellationToken = default)
+        {
+            logger.LogInformation("Assigning driver {DriverId} to job {JobId}", driverId, jobId);
+
+            var job = await jobRepository.GetJobByIdAsync(jobId, cancellationToken);
+            if (job == null)
+            {
+                throw new ArgumentException($"Job {jobId} not found", nameof(jobId));
+            }
+
+            var driver = await driverRepository.GetByIdAsync(driverId);
+            if (driver == null)
+            {
+                throw new ArgumentException($"Driver {driverId} not found", nameof(driverId));
+            }
+
+            // Check if driver is available
+            if (!await IsDriverAvailableAsync(driverId, job.EstimatedDeliveryTime, cancellationToken: cancellationToken))
+            {
+                throw new InvalidOperationException($"Driver {driverId} is not available for the job timeframe");
+            }
+
+            // Update job with driver assignment
+            job.AssignedDriverId = driverId;
+            job.Status = JobStatus.Assigned;
+            job.UpdatedAt = DateTime.UtcNow;
+
+            var updatedJob = await jobRepository.UpdateJobAsync(jobId, job, cancellationToken);
+            if (updatedJob == null)
+            {
+                throw new InvalidOperationException($"Failed to update job {jobId}");
+            }
+
+            // Send notification to driver
+            try
+            {
+                await notificationService.SendNotificationAsync(
+                    driverId.ToString(),
+                    NotificationType.JobAssignment,
+                    "New Job Assignment",
+                    $"You have been assigned to job {job.Title}",
+                    cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to send job assignment notification to driver {DriverId}", driverId);
+            }
+
+            logger.LogInformation("Driver {DriverId} assigned to job {JobId} successfully", driverId, jobId);
+            return updatedJob;
+        }
+
+        /// <inheritdoc/>
+        public async Task<IJob> UpdateJobStatusAsync(string jobId, JobStatus status, CancellationToken cancellationToken = default)
+        {
+            logger.LogInformation("Updating job {JobId} status to {Status}", jobId, status);
+
+            var job = await jobRepository.GetJobByIdAsync(jobId, cancellationToken);
+            if (job == null)
+            {
+                throw new ArgumentException($"Job {jobId} not found", nameof(jobId));
+            }
+
+            var previousStatus = job.Status;
+            job.Status = status;
+            job.UpdatedAt = DateTime.UtcNow;
+
+            // Update specific timestamps based on status
+            switch (status)
+            {
+                case JobStatus.EnRoute:
+                    // Driver is en route to pickup
+                    job.Tracking.CurrentStatus = "En route to pickup";
+                    break;
+                case JobStatus.InProgress:
+                    // Pickup completed, en route to delivery
+                    job.Tracking.CurrentStatus = "In progress - en route to delivery";
+                    break;
+                case JobStatus.Completed:
+                    job.Tracking.CurrentStatus = "Delivered";
+                    job.Tracking.IsActive = false;
+                    break;
+                case JobStatus.Cancelled:
+                    job.Tracking.CurrentStatus = "Cancelled";
+                    job.Tracking.IsActive = false;
+                    break;
+            }
+
+            var updatedJob = await jobRepository.UpdateJobAsync(jobId, job, cancellationToken);
+            if (updatedJob == null)
+            {
+                throw new InvalidOperationException($"Failed to update job {jobId}");
+            }
+
+            // Send notifications for status changes
+            try
+            {
+                await SendStatusChangeNotificationsAsync(updatedJob, previousStatus, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to send status change notifications for job {JobId}", jobId);
+            }
+
+            logger.LogInformation("Job {JobId} status updated to {Status} successfully", jobId, status);
+            return updatedJob;
+        }
+
+        /// <inheritdoc/>
+        public Task<bool> ValidateJobAsync(IJob job, CancellationToken cancellationToken = default)
+        {
+            if (job == null)
+            {
+                logger.LogWarning("Job validation failed: job is null");
+                return Task.FromResult(false);
+            }
+
+            if (string.IsNullOrWhiteSpace(job.CustomerId))
+            {
+                logger.LogWarning("Job validation failed: customer ID is empty");
+                return Task.FromResult(false);
+            }
+
+            if (string.IsNullOrWhiteSpace(job.Title))
+            {
+                logger.LogWarning("Job validation failed: job title is empty");
+                return Task.FromResult(false);
+            }
+
+            // Validate pickup location
+            if (job.PickupLocation == null || !job.PickupLocation.IsValid())
+            {
+                logger.LogWarning("Job validation failed: pickup location is invalid");
+                return Task.FromResult(false);
+            }
+
+            // Validate delivery location
+            if (job.DeliveryLocation == null || !job.DeliveryLocation.IsValid())
+            {
+                logger.LogWarning("Job validation failed: delivery location is invalid");
+                return Task.FromResult(false);
+            }
+
+            // Validate cargo details
+            if (job.Cargo == null || !job.Cargo.IsValid())
+            {
+                logger.LogWarning("Job validation failed: cargo details are invalid");
+                return Task.FromResult(false);
+            }
+
+            // Validate pricing details
+            if (job.Pricing == null || !job.Pricing.IsValid())
+            {
+                logger.LogWarning("Job validation failed: pricing details are invalid");
+                return Task.FromResult(false);
+            }
+
+            // Validate scheduled pickup time
+            if (job.ScheduledPickupTime <= DateTime.UtcNow)
+            {
+                logger.LogWarning("Job validation failed: scheduled pickup time is in the past");
+                return Task.FromResult(false);
+            }
+
+            // Validate estimated delivery time
+            if (job.EstimatedDeliveryTime <= job.ScheduledPickupTime)
+            {
+                logger.LogWarning("Job validation failed: estimated delivery time must be after pickup time");
+                return Task.FromResult(false);
+            }
+
+            return Task.FromResult(true);
+        }
+
+        /// <summary>
+        /// Calculates the estimated delivery time based on job details.
+        /// </summary>
+        /// <param name="job">The job to calculate delivery time for.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The estimated delivery time.</returns>
+        private Task<DateTime> CalculateEstimatedDeliveryTimeAsync(IJob job, CancellationToken cancellationToken = default)
+        {
+            // Basic calculation: add travel time based on distance
+            var distance = job.PickupLocation.DistanceTo(job.DeliveryLocation) ?? 100; // Default 100 miles if no coordinates
+            var averageSpeed = 55; // Average highway speed in mph
+            var travelTimeHours = distance / averageSpeed;
+            var loadingTime = 1; // 1 hour for loading/unloading
+            
+            var totalTimeHours = travelTimeHours + loadingTime;
+            
+            // Add buffer based on priority
+            var bufferHours = job.Priority switch
+            {
+                JobPriority.High => 0.5, // 30 minutes buffer for high priority
+                JobPriority.Medium => 1.0, // 1 hour buffer for medium priority
+                JobPriority.Low => 2.0, // 2 hours buffer for low priority
+                _ => 1.0
+            };
+
+            return Task.FromResult(job.ScheduledPickupTime.AddHours(totalTimeHours + bufferHours));
+        }
+
+        /// <summary>
+        /// Calculates the current estimated time of arrival for a job in progress.
+        /// </summary>
+        /// <param name="jobId">The job identifier.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The estimated time of arrival.</returns>
+        public async Task<DateTime?> CalculateCurrentETAAsync(string jobId, CancellationToken cancellationToken = default)
+        {
+            logger.LogInformation("Calculating current ETA for job {JobId}", jobId);
+
+            var job = await jobRepository.GetJobByIdAsync(jobId, cancellationToken);
+            if (job == null)
+            {
+                logger.LogWarning("Job not found for ETA calculation: {JobId}", jobId);
+                return null;
+            }
+
+            if (job.Status == JobStatus.Completed || job.Status == JobStatus.Cancelled)
+            {
+                return null; // No ETA needed for completed/cancelled jobs
+            }
+
+            var currentLocation = job.Tracking?.CurrentLocation;
+            if (currentLocation == null)
+            {
+                // No tracking data, use original estimate
+                return job.EstimatedDeliveryTime;
+            }
+
+            // Calculate remaining distance based on current location
+            var targetLocation = job.Status == JobStatus.Assigned || job.Status == JobStatus.EnRoute
+                ? job.PickupLocation
+                : job.DeliveryLocation;
+
+            var remainingDistance = currentLocation.DistanceTo(targetLocation) ?? 0;
+            var averageSpeed = job.Tracking?.GetAverageSpeed() ?? 45; // Default to 45 mph if no speed data
+            var remainingTimeHours = (double)remainingDistance / (double)averageSpeed;
+
+            var eta = DateTime.UtcNow.AddHours(remainingTimeHours);
+
+            // Add buffer time for loading/unloading if still need to pickup
+            if (job.Status == JobStatus.Assigned || job.Status == JobStatus.EnRoute)
+            {
+                eta = eta.AddMinutes(30); // 30 minutes for pickup
+
+                // Add delivery time after pickup
+                var deliveryDistance = job.PickupLocation.DistanceTo(job.DeliveryLocation) ?? 0;
+                var deliveryTimeHours = deliveryDistance / 55; // Highway speed for delivery
+                eta = eta.AddHours(deliveryTimeHours).AddMinutes(30); // 30 minutes for delivery
+            }
+
+            logger.LogInformation("Calculated ETA for job {JobId}: {ETA}", jobId, eta);
+            return eta;
+        }
+
+        /// <summary>
+        /// Optimizes the route for a job (placeholder for future mapping service integration).
+        /// </summary>
+        /// <param name="jobId">The job identifier.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>True if route was optimized successfully.</returns>
+        public async Task<bool> OptimizeRouteAsync(string jobId, CancellationToken cancellationToken = default)
+        {
+            logger.LogInformation("Optimizing route for job {JobId}", jobId);
+
+            var job = await jobRepository.GetJobByIdAsync(jobId, cancellationToken);
+            if (job == null)
+            {
+                logger.LogWarning("Job not found for route optimization: {JobId}", jobId);
+                return false;
+            }
+
+            // TODO: Integrate with mapping service (Google Maps, Azure Maps, etc.)
+            // For now, just update the estimated delivery time based on current conditions
+            try
+            {
+                var optimizedETA = await CalculateCurrentETAAsync(jobId, cancellationToken);
+                if (optimizedETA.HasValue)
+                {
+                    job.EstimatedDeliveryTime = optimizedETA.Value;
+                    job.UpdatedAt = DateTime.UtcNow;
+                    await jobRepository.UpdateJobAsync(jobId, job, cancellationToken);
+
+                    logger.LogInformation("Route optimized for job {JobId}, new ETA: {ETA}", jobId, optimizedETA);
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to optimize route for job {JobId}", jobId);
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public async Task<bool> IsDriverAvailableAsync(int driverId, DateTime startTime, DateTime? endTime = null, CancellationToken cancellationToken = default)
+        {
+            var driver = await driverRepository.GetByIdAsync(driverId);
+            if (driver == null || !driver.IsActive)
+            {
+                return false;
+            }
+
+            // Check if driver has any conflicting jobs
+            var driverJobs = await jobRepository.GetByDriverIdAsync(driverId, cancellationToken);
+            var activeJobs = driverJobs.Where(j =>
+                j.Status == JobStatus.Assigned ||
+                j.Status == JobStatus.InProgress ||
+                j.Status == JobStatus.EnRoute);
+
+            foreach (var activeJob in activeJobs)
+            {
+                var jobEndTime = activeJob.ActualDeliveryTime ?? activeJob.EstimatedDeliveryTime;
+                var jobStartTime = activeJob.ActualPickupTime ?? activeJob.CreatedAt;
+
+                // Check for time overlap
+                if (startTime < jobEndTime && (endTime ?? startTime.AddHours(8)) > jobStartTime)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Sends notifications for job status changes.
+        /// </summary>
+        /// <param name="job">The job that changed status.</param>
+        /// <param name="previousStatus">The previous status.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        private async Task SendStatusChangeNotificationsAsync(IJob job, JobStatus previousStatus, CancellationToken cancellationToken)
+        {
+            var statusMessage = job.Status switch
+            {
+                JobStatus.Assigned => "Your job has been assigned to a driver",
+                JobStatus.EnRoute => "Driver is en route for pickup",
+                JobStatus.InProgress => "Your job is now in progress - driver is en route to delivery",
+                JobStatus.Completed => "Your job has been completed successfully",
+                JobStatus.Cancelled => "Your job has been cancelled",
+                _ => $"Your job status has been updated to {job.Status}"
+            };
+
+            // Notify customer
+            await notificationService.SendNotificationAsync(
+                job.CustomerId,
+                NotificationType.JobStatusUpdate,
+                "Job Status Update",
+                statusMessage,
+                cancellationToken);
+
+            // Notify driver if assigned
+            if (job.AssignedDriverId.HasValue)
+            {
+                var driverMessage = job.Status switch
+                {
+                    JobStatus.EnRoute => "Please proceed to pickup location",
+                    JobStatus.InProgress => "Pickup completed - proceed to delivery location",
+                    JobStatus.Completed => "Job has been marked as completed",
+                    JobStatus.Cancelled => "Job has been cancelled",
+                    _ => $"Job status updated to {job.Status}"
+                };
+
+                await notificationService.SendNotificationAsync(
+                    job.AssignedDriverId.Value.ToString(),
+                    NotificationType.JobStatusUpdate,
+                    "Job Status Update",
+                    driverMessage,
+                    cancellationToken);
+            }
         }
     }
 }

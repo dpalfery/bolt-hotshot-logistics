@@ -1,0 +1,549 @@
+namespace HotshotLogistics.Data.Repositories;
+
+using System.Data.SqlClient;
+using System.Text;
+using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Contracts.Repositories;
+using HotshotLogistics.Core.Repositories;
+using HotshotLogistics.Domain.Models;
+using Microsoft.Extensions.Configuration;
+
+/// <summary>
+/// Repository implementation for invoice operations using native ADO.NET.
+/// </summary>
+internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
+{
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InvoiceRepository"/> class.
+    /// </summary>
+    /// <param name="configuration">The application configuration.</param>
+    public InvoiceRepository(IConfiguration configuration)
+        : base(configuration)
+    {
+    }
+
+    /// <inheritdoc/>
+    protected override string GetTableName() => "Invoices";
+
+    /// <inheritdoc/>
+    protected override string GetPrimaryKeyColumnName() => "Id";
+
+    /// <inheritdoc/>
+    protected override Invoice MapReaderToEntity(SqlDataReader reader)
+    {
+        return new Invoice
+        {
+            Id = reader.GetString(reader.GetOrdinal("Id")),
+            InvoiceNumber = reader.GetString(reader.GetOrdinal("InvoiceNumber")),
+            CustomerId = reader.GetString(reader.GetOrdinal("CustomerId")),
+            JobId = reader.IsDBNull(reader.GetOrdinal("JobId")) ? null : reader.GetString(reader.GetOrdinal("JobId")),
+            InvoiceDate = reader.GetDateTime(reader.GetOrdinal("InvoiceDate")),
+            DueDate = reader.GetDateTime(reader.GetOrdinal("DueDate")),
+            Status = (InvoiceStatus)reader.GetInt32(reader.GetOrdinal("Status")),
+            SubTotal = reader.GetDecimal(reader.GetOrdinal("SubTotal")),
+            TaxRate = reader.GetDecimal(reader.GetOrdinal("TaxRate")),
+            TaxAmount = reader.GetDecimal(reader.GetOrdinal("TaxAmount")),
+            DiscountAmount = reader.GetDecimal(reader.GetOrdinal("DiscountAmount")),
+            TotalAmount = reader.GetDecimal(reader.GetOrdinal("TotalAmount")),
+            PaidAmount = reader.GetDecimal(reader.GetOrdinal("PaidAmount")),
+            Terms = new PaymentTerms
+            {
+                Days = reader.GetInt32(reader.GetOrdinal("TermsDays")),
+                EarlyPaymentDiscount = reader.GetDecimal(reader.GetOrdinal("EarlyPaymentDiscount")),
+                EarlyPaymentDiscountDays = reader.GetInt32(reader.GetOrdinal("EarlyPaymentDiscountDays")),
+                LatePaymentPenalty = reader.GetDecimal(reader.GetOrdinal("LatePaymentPenalty")),
+                LatePaymentPenaltyDays = reader.GetInt32(reader.GetOrdinal("LatePaymentPenaltyDays")),
+            },
+            Notes = reader.IsDBNull(reader.GetOrdinal("Notes")) ? string.Empty : reader.GetString(reader.GetOrdinal("Notes")),
+            CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
+            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("UpdatedAt")) ? null : reader.GetDateTime(reader.GetOrdinal("UpdatedAt")),
+        };
+    }
+
+    /// <inheritdoc/>
+    protected override SqlParameter[] GetInsertParameters(Invoice entity)
+    {
+        return new[]
+        {
+            new SqlParameter("@Id", entity.Id),
+            new SqlParameter("@InvoiceNumber", entity.InvoiceNumber),
+            new SqlParameter("@CustomerId", entity.CustomerId),
+            new SqlParameter("@JobId", (object?)entity.JobId ?? DBNull.Value),
+            new SqlParameter("@InvoiceDate", entity.InvoiceDate),
+            new SqlParameter("@DueDate", entity.DueDate),
+            new SqlParameter("@Status", (int)entity.Status),
+            new SqlParameter("@SubTotal", entity.SubTotal),
+            new SqlParameter("@TaxRate", entity.TaxRate),
+            new SqlParameter("@TaxAmount", entity.TaxAmount),
+            new SqlParameter("@DiscountAmount", entity.DiscountAmount),
+            new SqlParameter("@TotalAmount", entity.TotalAmount),
+            new SqlParameter("@PaidAmount", entity.PaidAmount),
+            new SqlParameter("@TermsDays", entity.Terms.Days),
+            new SqlParameter("@EarlyPaymentDiscount", entity.Terms.EarlyPaymentDiscount),
+            new SqlParameter("@EarlyPaymentDiscountDays", entity.Terms.EarlyPaymentDiscountDays),
+            new SqlParameter("@LatePaymentPenalty", entity.Terms.LatePaymentPenalty),
+            new SqlParameter("@LatePaymentPenaltyDays", entity.Terms.LatePaymentPenaltyDays),
+            new SqlParameter("@Notes", (object?)entity.Notes ?? DBNull.Value),
+            new SqlParameter("@CreatedAt", entity.CreatedAt),
+        };
+    }
+
+    /// <inheritdoc/>
+    public async Task<IInvoice?> GetByIdAsync(string id)
+    {
+        return await base.GetByIdAsync(id);
+    }
+
+    /// <inheritdoc/>
+    public new async Task<IEnumerable<IInvoice>> GetAllAsync()
+    {
+        var invoices = await base.GetAllAsync();
+        return invoices.Cast<IInvoice>();
+    }
+
+    /// <inheritdoc/>
+    public async Task<IInvoice> AddAsync(IInvoice invoice)
+    {
+        if (invoice is not Invoice invoiceEntity)
+        {
+            throw new ArgumentException("Invoice must be of type Invoice", nameof(invoice));
+        }
+
+        return await base.AddAsync(invoiceEntity);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IInvoice> UpdateAsync(IInvoice invoice)
+    {
+        if (invoice is not Invoice invoiceEntity)
+        {
+            throw new ArgumentException("Invoice must be of type Invoice", nameof(invoice));
+        }
+
+        return await base.UpdateAsync(invoiceEntity);
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> DeleteAsync(string id)
+    {
+        return await base.DeleteAsync(id);
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> ExistsAsync(string id)
+    {
+        return await base.ExistsAsync(id);
+    }
+
+    /// <inheritdoc/>
+    protected override SqlParameter[] GetUpdateParameters(Invoice entity)
+    {
+        return new[]
+        {
+            new SqlParameter("@Id", entity.Id),
+            new SqlParameter("@InvoiceNumber", entity.InvoiceNumber),
+            new SqlParameter("@CustomerId", entity.CustomerId),
+            new SqlParameter("@JobId", (object?)entity.JobId ?? DBNull.Value),
+            new SqlParameter("@InvoiceDate", entity.InvoiceDate),
+            new SqlParameter("@DueDate", entity.DueDate),
+            new SqlParameter("@Status", (int)entity.Status),
+            new SqlParameter("@SubTotal", entity.SubTotal),
+            new SqlParameter("@TaxRate", entity.TaxRate),
+            new SqlParameter("@TaxAmount", entity.TaxAmount),
+            new SqlParameter("@DiscountAmount", entity.DiscountAmount),
+            new SqlParameter("@TotalAmount", entity.TotalAmount),
+            new SqlParameter("@PaidAmount", entity.PaidAmount),
+            new SqlParameter("@TermsDays", entity.Terms.Days),
+            new SqlParameter("@EarlyPaymentDiscount", entity.Terms.EarlyPaymentDiscount),
+            new SqlParameter("@EarlyPaymentDiscountDays", entity.Terms.EarlyPaymentDiscountDays),
+            new SqlParameter("@LatePaymentPenalty", entity.Terms.LatePaymentPenalty),
+            new SqlParameter("@LatePaymentPenaltyDays", entity.Terms.LatePaymentPenaltyDays),
+            new SqlParameter("@Notes", (object?)entity.Notes ?? DBNull.Value),
+            new SqlParameter("@UpdatedAt", entity.UpdatedAt ?? DateTime.UtcNow),
+        };
+    }
+
+    /// <inheritdoc/>
+    public async Task<IEnumerable<IInvoice>> GetByCustomerIdAsync(string customerId)
+    {
+        const string sql = @"
+            SELECT * FROM Invoices 
+            WHERE CustomerId = @CustomerId 
+            ORDER BY InvoiceDate DESC";
+
+        var parameters = new[] { new SqlParameter("@CustomerId", customerId) };
+        return await ExecuteQueryAsync(sql, parameters);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IEnumerable<IInvoice>> GetByJobIdAsync(string jobId)
+    {
+        const string sql = @"
+            SELECT * FROM Invoices 
+            WHERE JobId = @JobId 
+            ORDER BY InvoiceDate DESC";
+
+        var parameters = new[] { new SqlParameter("@JobId", jobId) };
+        return await ExecuteQueryAsync(sql, parameters);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IEnumerable<IInvoice>> GetByStatusAsync(InvoiceStatus status)
+    {
+        const string sql = @"
+            SELECT * FROM Invoices 
+            WHERE Status = @Status 
+            ORDER BY InvoiceDate DESC";
+
+        var parameters = new[] { new SqlParameter("@Status", (int)status) };
+        return await ExecuteQueryAsync(sql, parameters);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IEnumerable<IInvoice>> GetOverdueInvoicesAsync()
+    {
+        const string sql = @"
+            SELECT * FROM Invoices 
+            WHERE Status NOT IN (@PaidStatus, @CancelledStatus) 
+            AND DueDate < @CurrentDate 
+            ORDER BY DueDate ASC";
+
+        var parameters = new[]
+        {
+            new SqlParameter("@PaidStatus", (int)InvoiceStatus.Paid),
+            new SqlParameter("@CancelledStatus", (int)InvoiceStatus.Cancelled),
+            new SqlParameter("@CurrentDate", DateTime.UtcNow.Date),
+        };
+
+        return await ExecuteQueryAsync(sql, parameters);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IEnumerable<IInvoice>> GetInvoicesDueWithinDaysAsync(int days)
+    {
+        const string sql = @"
+            SELECT * FROM Invoices 
+            WHERE Status NOT IN (@PaidStatus, @CancelledStatus) 
+            AND DueDate BETWEEN @CurrentDate AND @FutureDate 
+            ORDER BY DueDate ASC";
+
+        var parameters = new[]
+        {
+            new SqlParameter("@PaidStatus", (int)InvoiceStatus.Paid),
+            new SqlParameter("@CancelledStatus", (int)InvoiceStatus.Cancelled),
+            new SqlParameter("@CurrentDate", DateTime.UtcNow.Date),
+            new SqlParameter("@FutureDate", DateTime.UtcNow.Date.AddDays(days)),
+        };
+
+        return await ExecuteQueryAsync(sql, parameters);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IEnumerable<IInvoice>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
+    {
+        const string sql = @"
+            SELECT * FROM Invoices 
+            WHERE InvoiceDate BETWEEN @StartDate AND @EndDate 
+            ORDER BY InvoiceDate DESC";
+
+        var parameters = new[]
+        {
+            new SqlParameter("@StartDate", startDate.Date),
+            new SqlParameter("@EndDate", endDate.Date),
+        };
+
+        return await ExecuteQueryAsync(sql, parameters);
+    } 
+   /// <inheritdoc/>
+    public async Task<PagedResult<IInvoice>> GetPagedAsync(InvoiceFilter filter)
+    {
+        var whereClause = new StringBuilder();
+        var parameters = new List<SqlParameter>();
+        var conditions = new List<string>();
+
+        // Build WHERE clause based on filter criteria
+        if (!string.IsNullOrWhiteSpace(filter.CustomerId))
+        {
+            conditions.Add("CustomerId = @CustomerId");
+            parameters.Add(new SqlParameter("@CustomerId", filter.CustomerId));
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.JobId))
+        {
+            conditions.Add("JobId = @JobId");
+            parameters.Add(new SqlParameter("@JobId", filter.JobId));
+        }
+
+        if (filter.Status.HasValue)
+        {
+            conditions.Add("Status = @Status");
+            parameters.Add(new SqlParameter("@Status", (int)filter.Status.Value));
+        }
+
+        if (filter.StartDate.HasValue)
+        {
+            conditions.Add("InvoiceDate >= @StartDate");
+            parameters.Add(new SqlParameter("@StartDate", filter.StartDate.Value.Date));
+        }
+
+        if (filter.EndDate.HasValue)
+        {
+            conditions.Add("InvoiceDate <= @EndDate");
+            parameters.Add(new SqlParameter("@EndDate", filter.EndDate.Value.Date));
+        }
+
+        if (filter.MinAmount.HasValue)
+        {
+            conditions.Add("TotalAmount >= @MinAmount");
+            parameters.Add(new SqlParameter("@MinAmount", filter.MinAmount.Value));
+        }
+
+        if (filter.MaxAmount.HasValue)
+        {
+            conditions.Add("TotalAmount <= @MaxAmount");
+            parameters.Add(new SqlParameter("@MaxAmount", filter.MaxAmount.Value));
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
+        {
+            conditions.Add("(InvoiceNumber LIKE @SearchTerm OR CustomerId IN (SELECT Id FROM Customers WHERE CompanyName LIKE @SearchTerm))");
+            parameters.Add(new SqlParameter("@SearchTerm", $"%{filter.SearchTerm}%"));
+        }
+
+        if (filter.IsOverdue.HasValue && filter.IsOverdue.Value)
+        {
+            conditions.Add("Status NOT IN (@PaidStatus, @CancelledStatus) AND DueDate < @CurrentDate");
+            parameters.Add(new SqlParameter("@PaidStatus", (int)InvoiceStatus.Paid));
+            parameters.Add(new SqlParameter("@CancelledStatus", (int)InvoiceStatus.Cancelled));
+            parameters.Add(new SqlParameter("@CurrentDate", DateTime.UtcNow.Date));
+        }
+
+        if (conditions.Any())
+        {
+            whereClause.Append("WHERE ").Append(string.Join(" AND ", conditions));
+        }
+
+        // Build ORDER BY clause
+        var validSortFields = new[] { "InvoiceDate", "DueDate", "TotalAmount", "InvoiceNumber", "Status" };
+        var sortBy = validSortFields.Contains(filter.SortBy) ? filter.SortBy : "InvoiceDate";
+        var sortDirection = filter.SortDirection.ToUpper() == "ASC" ? "ASC" : "DESC";
+
+        // Count query
+        var countSql = $"SELECT COUNT(*) FROM Invoices {whereClause}";
+        var totalCount = await ExecuteScalarAsync<int>(countSql, parameters.ToArray());
+
+        // Data query with pagination - create new parameter array
+        var offset = (filter.PageNumber - 1) * filter.PageSize;
+        var dataSql = $@"
+            SELECT * FROM Invoices 
+            {whereClause}
+            ORDER BY {sortBy} {sortDirection}
+            OFFSET @Offset ROWS 
+            FETCH NEXT @PageSize ROWS ONLY";
+
+        var dataParameters = new List<SqlParameter>();
+        foreach (var param in parameters)
+        {
+            dataParameters.Add(new SqlParameter(param.ParameterName, param.Value));
+        }
+        dataParameters.Add(new SqlParameter("@Offset", offset));
+        dataParameters.Add(new SqlParameter("@PageSize", filter.PageSize));
+
+        var invoices = await ExecuteQueryAsync(dataSql, dataParameters.ToArray());
+
+        return new PagedResult<IInvoice>
+        {
+            Items = invoices.Cast<IInvoice>().ToList(),
+            TotalCount = totalCount,
+            PageNumber = filter.PageNumber,
+            PageSize = filter.PageSize,
+        };
+    }
+
+    /// <inheritdoc/>
+    public async Task<string> GetNextInvoiceNumberAsync()
+    {
+        const string sql = @"
+            SELECT ISNULL(MAX(CAST(SUBSTRING(InvoiceNumber, 4, LEN(InvoiceNumber) - 3) AS INT)), 0) + 1 
+            FROM Invoices 
+            WHERE InvoiceNumber LIKE 'INV%' AND ISNUMERIC(SUBSTRING(InvoiceNumber, 4, LEN(InvoiceNumber) - 3)) = 1";
+
+        var nextNumber = await ExecuteScalarAsync<int>(sql);
+        return $"INV{nextNumber:D6}";
+    }
+
+    /// <inheritdoc/>
+    public async Task<IEnumerable<AgingReportEntry>> GetAgingReportAsync()
+    {
+        const string sql = @"
+            SELECT 
+                i.CustomerId,
+                c.CompanyName as CustomerName,
+                SUM(CASE WHEN DATEDIFF(day, i.DueDate, GETUTCDATE()) <= 0 THEN i.TotalAmount - i.PaidAmount ELSE 0 END) as [Current],
+                SUM(CASE WHEN DATEDIFF(day, i.DueDate, GETUTCDATE()) BETWEEN 1 AND 30 THEN i.TotalAmount - i.PaidAmount ELSE 0 END) as Days31To60,
+                SUM(CASE WHEN DATEDIFF(day, i.DueDate, GETUTCDATE()) BETWEEN 31 AND 90 THEN i.TotalAmount - i.PaidAmount ELSE 0 END) as Days61To90,
+                SUM(CASE WHEN DATEDIFF(day, i.DueDate, GETUTCDATE()) > 90 THEN i.TotalAmount - i.PaidAmount ELSE 0 END) as Over90Days,
+                SUM(i.TotalAmount - i.PaidAmount) as TotalBalance
+            FROM Invoices i
+            INNER JOIN Customers c ON i.CustomerId = c.Id
+            WHERE i.Status NOT IN (@PaidStatus, @CancelledStatus)
+            AND i.TotalAmount > i.PaidAmount
+            GROUP BY i.CustomerId, c.CompanyName
+            HAVING SUM(i.TotalAmount - i.PaidAmount) > 0
+            ORDER BY TotalBalance DESC";
+
+        var parameters = new[]
+        {
+            new SqlParameter("@PaidStatus", (int)InvoiceStatus.Paid),
+            new SqlParameter("@CancelledStatus", (int)InvoiceStatus.Cancelled),
+        };
+
+        var entries = new List<AgingReportEntry>();
+
+        await using var connection = new SqlConnection(ConnectionString);
+        await connection.OpenAsync();
+
+        await using var command = new SqlCommand(sql, connection);
+        command.Parameters.AddRange(parameters);
+
+        await using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            entries.Add(new AgingReportEntry
+            {
+                CustomerId = reader.GetString(reader.GetOrdinal("CustomerId")),
+                CustomerName = reader.GetString(reader.GetOrdinal("CustomerName")),
+                Current = reader.GetDecimal(reader.GetOrdinal("Current")),
+                Days31To60 = reader.GetDecimal(reader.GetOrdinal("Days31To60")),
+                Days61To90 = reader.GetDecimal(reader.GetOrdinal("Days61To90")),
+                Over90Days = reader.GetDecimal(reader.GetOrdinal("Over90Days")),
+                TotalBalance = reader.GetDecimal(reader.GetOrdinal("TotalBalance")),
+            });
+        }
+
+        return entries;
+    }
+
+    /// <inheritdoc/>
+    public async Task<decimal> GetOutstandingBalanceAsync(string customerId)
+    {
+        const string sql = @"
+            SELECT ISNULL(SUM(TotalAmount - PaidAmount), 0) 
+            FROM Invoices 
+            WHERE CustomerId = @CustomerId 
+            AND Status NOT IN (@PaidStatus, @CancelledStatus)";
+
+        var parameters = new[]
+        {
+            new SqlParameter("@CustomerId", customerId),
+            new SqlParameter("@PaidStatus", (int)InvoiceStatus.Paid),
+            new SqlParameter("@CancelledStatus", (int)InvoiceStatus.Cancelled),
+        };
+
+        return await ExecuteScalarAsync<decimal>(sql, parameters);
+    }
+
+    /// <inheritdoc/>
+    public async Task<InvoiceSummary> GetInvoiceSummaryAsync()
+    {
+        const string sql = @"
+            SELECT 
+                COUNT(*) as TotalInvoices,
+                ISNULL(SUM(TotalAmount), 0) as TotalAmount,
+                ISNULL(SUM(PaidAmount), 0) as TotalPaid,
+                ISNULL(SUM(TotalAmount - PaidAmount), 0) as TotalOutstanding,
+                SUM(CASE WHEN Status NOT IN (@PaidStatus, @CancelledStatus) AND DueDate < @CurrentDate THEN 1 ELSE 0 END) as OverdueCount,
+                ISNULL(SUM(CASE WHEN Status NOT IN (@PaidStatus, @CancelledStatus) AND DueDate < @CurrentDate THEN TotalAmount - PaidAmount ELSE 0 END), 0) as OverdueAmount,
+                ISNULL(AVG(CAST(CASE WHEN Status = @PaidStatus THEN DATEDIFF(day, InvoiceDate, UpdatedAt) END AS FLOAT)), 0) as AverageDaysToPayment
+            FROM Invoices";
+
+        var parameters = new[]
+        {
+            new SqlParameter("@PaidStatus", (int)InvoiceStatus.Paid),
+            new SqlParameter("@CancelledStatus", (int)InvoiceStatus.Cancelled),
+            new SqlParameter("@CurrentDate", DateTime.UtcNow.Date),
+        };
+
+        await using var connection = new SqlConnection(ConnectionString);
+        await connection.OpenAsync();
+
+        await using var command = new SqlCommand(sql, connection);
+        command.Parameters.AddRange(parameters);
+
+        await using var reader = await command.ExecuteReaderAsync();
+        if (await reader.ReadAsync())
+        {
+            return new InvoiceSummary
+            {
+                TotalInvoices = reader.GetInt32(reader.GetOrdinal("TotalInvoices")),
+                TotalAmount = reader.GetDecimal(reader.GetOrdinal("TotalAmount")),
+                TotalPaid = reader.GetDecimal(reader.GetOrdinal("TotalPaid")),
+                TotalOutstanding = reader.GetDecimal(reader.GetOrdinal("TotalOutstanding")),
+                OverdueCount = reader.GetInt32(reader.GetOrdinal("OverdueCount")),
+                OverdueAmount = reader.GetDecimal(reader.GetOrdinal("OverdueAmount")),
+                AverageDaysToPayment = reader.GetDouble(reader.GetOrdinal("AverageDaysToPayment")),
+            };
+        }
+
+        return new InvoiceSummary();
+    }
+
+    /// <inheritdoc/>
+    public async Task<IEnumerable<IInvoice>> SearchByInvoiceNumberAsync(string invoiceNumber)
+    {
+        const string sql = @"
+            SELECT * FROM Invoices 
+            WHERE InvoiceNumber LIKE @InvoiceNumber 
+            ORDER BY InvoiceNumber";
+
+        var parameters = new[] { new SqlParameter("@InvoiceNumber", $"%{invoiceNumber}%") };
+        return await ExecuteQueryAsync(sql, parameters);
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> UpdatePaidAmountAsync(string invoiceId, decimal paidAmount)
+    {
+        const string sql = @"
+            UPDATE Invoices 
+            SET PaidAmount = @PaidAmount,
+                Status = CASE 
+                    WHEN @PaidAmount >= TotalAmount THEN @PaidStatus
+                    WHEN @PaidAmount > 0 THEN @PartiallyPaidStatus
+                    ELSE Status
+                END,
+                UpdatedAt = @UpdatedAt
+            WHERE Id = @Id";
+
+        var parameters = new[]
+        {
+            new SqlParameter("@Id", invoiceId),
+            new SqlParameter("@PaidAmount", paidAmount),
+            new SqlParameter("@PaidStatus", (int)InvoiceStatus.Paid),
+            new SqlParameter("@PartiallyPaidStatus", (int)InvoiceStatus.PartiallyPaid),
+            new SqlParameter("@UpdatedAt", DateTime.UtcNow),
+        };
+
+        var rowsAffected = await ExecuteNonQueryAsync(sql, parameters);
+        return rowsAffected > 0;
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> UpdateStatusAsync(string invoiceId, InvoiceStatus status)
+    {
+        const string sql = @"
+            UPDATE Invoices 
+            SET Status = @Status,
+                UpdatedAt = @UpdatedAt
+            WHERE Id = @Id";
+
+        var parameters = new[]
+        {
+            new SqlParameter("@Id", invoiceId),
+            new SqlParameter("@Status", (int)status),
+            new SqlParameter("@UpdatedAt", DateTime.UtcNow),
+        };
+
+        var rowsAffected = await ExecuteNonQueryAsync(sql, parameters);
+        return rowsAffected > 0;
+    }
+}
