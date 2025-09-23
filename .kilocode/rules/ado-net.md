@@ -1,21 +1,21 @@
 # ADO.NET Rule
 
-This rule enforces the exclusive use of native ADO.NET for all data access operations in the Hotshot Logistics project, prohibiting Entity Framework usage to maintain fine-grained control over SQL execution, performance optimization, and database operations.
+Enforces exclusive native ADO.NET use for data access, prohibiting Entity Framework to maintain SQL control, performance, and operations.
 
 ## Core Requirements
 
 ### Entity Framework Prohibition
-- **No Entity Framework dependencies**: Projects must not reference EntityFrameworkCore, EntityFramework, or any EF-related packages
-- **No DbContext usage**: All database operations must use native ADO.NET classes (`SqlConnection`, `SqlCommand`, `SqlDataReader`, etc.)
-- **No LINQ to Entities**: Database queries must be written as raw SQL or stored procedures
-- **No migrations via EF**: Schema changes must use FluentMigrator exclusively
+- No Entity Framework dependencies: Avoid referencing EntityFrameworkCore, EntityFramework, or EF packages
+- No DbContext usage: Use native ADO.NET classes (`SqlConnection`, `SqlCommand`, `SqlDataReader`, etc.)
+- No LINQ to Entities: Write queries as raw SQL or stored procedures
+- No EF migrations: Use FluentMigrator exclusively for schema changes
 
 ### ADO.NET Implementation Requirements
-- **Native ADO.NET only**: Use `System.Data.SqlClient` or `Microsoft.Data.SqlClient` for SQL Server operations
-- **Connection management**: Implement proper connection pooling and disposal patterns using `await using` statements
-- **Parameterized queries**: All SQL queries must use parameterized commands to prevent SQL injection
-- **Async operations**: All database operations must be asynchronous using `SqlConnection.OpenAsync()`, `SqlCommand.ExecuteReaderAsync()`, etc.
-- **Repository pattern**: Encapsulate all data access logic in repository classes that implement interfaces defined in the Domain layer
+- Native ADO.NET only: Use `System.Data.SqlClient` or `Microsoft.Data.SqlClient` for SQL Server
+- Connection management: Implement connection pooling and disposal with `await using`
+- Parameterized queries: Use parameterized commands to prevent SQL injection
+- Async operations: Use async methods like `SqlConnection.OpenAsync()`, `SqlCommand.ExecuteReaderAsync()`
+- Repository pattern: Encapsulate data access in repository classes implementing Domain interfaces
 
 ## Implementation Guidelines
 
@@ -49,16 +49,16 @@ public async Task<IEnumerable<Customer>> GetAllAsync()
 ```
 
 ### Repository Pattern Structure
-- **Interface in Domain layer**: Define repository interfaces in `3-Domain/HotshotLogistics.Contracts/Repositories/`
-- **Implementation in Persistence layer**: Implement repositories in `4-Persistence/HotshotLogistics.Data/Repositories/`
-- **Base repository**: Use shared base repository class in `0-Base/HotshotLogistics.Core/Repositories/`
-- **Dependency injection**: Register repositories in the DI container with proper lifetime management
+- Interface in Domain layer: Define in `3-Domain/HotshotLogistics.Contracts/Repositories/`
+- Implementation in Persistence layer: Implement in `4-Persistence/HotshotLogistics.Data/Repositories/`
+- Base repository: Use shared class in `0-Base/HotshotLogistics.Core/Repositories/`
+- Dependency injection: Register in DI container with proper lifetimes
 
 ### SQL Best Practices
-- **Stored procedures**: Use stored procedures for complex operations and CRUD operations where appropriate
-- **Query optimization**: Write efficient SQL with proper indexing considerations
-- **Transaction management**: Use `SqlTransaction` for multi-statement operations requiring ACID compliance
-- **Batch operations**: Use `SqlDataAdapter` or `SqlBulkCopy` for bulk operations when needed
+- Stored procedures: Use for complex and CRUD operations
+- Query optimization: Write efficient SQL with indexing
+- Transaction management: Use `SqlTransaction` for ACID-compliant multi-statement operations
+- Batch operations: Use `SqlDataAdapter` or `SqlBulkCopy` for bulk data
 
 ### Error Handling
 ```csharp
@@ -96,19 +96,19 @@ public async Task<Customer> GetByIdAsync(int id)
 ```
 
 ### Performance Considerations
-- **Connection pooling**: Rely on built-in connection pooling rather than implementing custom pooling
-- **Command reuse**: Reuse `SqlCommand` objects when executing similar queries
-- **Reader efficiency**: Use `SqlDataReader` for forward-only, read-only access patterns
-- **Batch size optimization**: Configure appropriate batch sizes for bulk operations
-- **Query plan caching**: Design queries to benefit from SQL Server's query plan caching
+- Connection pooling: Rely on built-in pooling
+- Command reuse: Reuse `SqlCommand` for similar queries
+- Reader efficiency: Use `SqlDataReader` for forward-only, read-only access
+- Batch size optimization: Configure appropriate sizes for bulk operations
+- Query plan caching: Design queries for SQL Server caching
 
 ## Integration with FluentMigrator
 
 ### Schema Management
-- **No EF migrations**: All database schema changes must be implemented as FluentMigrator migrations
-- **Migration-first approach**: Create migration scripts for all schema changes before implementing data access code
-- **Rollback support**: Ensure all migrations support rollback operations
-- **Seed data**: Include seed data in migrations for development and testing environments
+- No EF migrations: Implement all schema changes as FluentMigrator migrations
+- Migration-first approach: Create migration scripts before data access code
+- Rollback support: Ensure migrations support rollback
+- Seed data: Include in migrations for development and testing
 
 ### Migration Structure
 ```csharp
@@ -136,10 +136,10 @@ public class CreateCustomersTable : Migration
 ## Testing Requirements
 
 ### Repository Testing
-- **Unit tests**: Mock repository interfaces for testing application services
-- **Integration tests**: Test repository implementations against real database instances
-- **Test data management**: Use FluentMigrator for test database setup and teardown
-- **Transaction rollbacks**: Use transactions in integration tests to ensure clean state
+- Unit tests: Mock repository interfaces for application service testing
+- Integration tests: Test implementations against real databases
+- Test data management: Use FluentMigrator for setup and teardown
+- Transaction rollbacks: Use transactions for clean integration test state
 
 ### Mock Implementation Example
 ```csharp
@@ -171,8 +171,8 @@ public class MockCustomerRepository : ICustomerRepository
 - [ ] Integration with FluentMigrator for schema changes
 
 ### Automated Checks
-- Build pipeline should fail if Entity Framework packages are detected
-- Static analysis should flag direct database access outside repository pattern
+- Build pipeline fails if Entity Framework packages detected
+- Static analysis flags direct database access outside repository pattern
 - Code coverage requirements for repository classes
 - Performance benchmarks for database operations
 

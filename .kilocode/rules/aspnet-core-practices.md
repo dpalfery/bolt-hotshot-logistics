@@ -1,32 +1,32 @@
 # ASP.NET Core Practices Rule
 
-This rule enforces best practices for ASP.NET Core applications in the Hotshot Logistics project, ensuring secure, performant, and maintainable services.
+Enforces best practices for ASP.NET Core applications in Hotshot Logistics, ensuring secure, performant, maintainable services.
 
 ## When to Apply
-Apply these practices whenever developing or modifying ASP.NET Core APIs, controllers, or services in .NET 8+ projects.
+Apply when developing/modifying ASP.NET Core APIs, controllers, services in .NET 8+ projects.
 
 ## Configuration
-- Centralize settings using the **Options pattern** with dependency injection.
-- Use `IOptions<T>`, `IOptionsSnapshot<T>`, or `IOptionsMonitor<T>` for configuration binding.
-- Override settings via `appsettings.{Environment}.json` and environment variables.
-- Never hardcode configuration values.
+- Centralize settings with Options pattern and DI.
+- Use `IOptions<T>`, `IOptionsSnapshot<T>`, `IOptionsMonitor<T>` for binding.
+- Override via `appsettings.{Environment}.json` and environment variables.
+- Never hardcode values.
 
 ## Logging
 - Use `ILogger<T>` for structured logging with semantic values.
-- Include correlation IDs for request tracing.
-- Configure logging providers per environment (console, file, Application Insights, etc.).
-- Log at appropriate levels: Debug, Information, Warning, Error, Critical.
+- Include correlation IDs for tracing.
+- Configure providers per environment (console, file, Application Insights, etc.).
+- Log at levels: Debug, Information, Warning, Error, Critical.
 
 ## API Documentation
-- Generate OpenAPI specifications using `Microsoft.AspNetCore.OpenApi`.
-- Provide Swagger UI via Swashbuckle for interactive documentation.
-- Version APIs using URL versioning or header versioning.
-- Include XML documentation comments on public APIs.
+- Generate OpenAPI specs with `Microsoft.AspNetCore.OpenApi`.
+- Provide Swagger UI via Swashbuckle.
+- Version APIs with URL or header versioning.
+- Include XML comments on public APIs.
 
 ## Middleware Order
-Configure middleware in the correct order for security and functionality:
+Configure middleware in this order:
 1. `UseHttpsRedirection` - Redirect HTTP to HTTPS
-2. `UseCors` - Enable Cross-Origin Resource Sharing
+2. `UseCors` - Enable CORS
 3. `UseRateLimiter` - Apply rate limiting
 4. `UseAuthentication` - Authenticate requests
 5. `UseAuthorization` - Authorize requests
@@ -35,13 +35,13 @@ Configure middleware in the correct order for security and functionality:
 
 ## Performance Practices
 - Use async/await for all I/O operations.
-- Reuse HttpClient instances via `IHttpClientFactory`.
-- Implement output/response caching for cacheable GET endpoints.
+- Reuse HttpClient via `IHttpClientFactory`.
+- Implement caching for cacheable GET endpoints.
 - Use rate limiting to prevent abuse.
 - Measure performance with diagnostics and Application Insights.
 
 ## Health Checks
-- Implement `/health` endpoints with database, queue, and API checks.
+- Implement `/health` endpoints with database, queue, API checks.
 - Integrate with orchestrators like Kubernetes for readiness/liveness probes.
 - Use `Microsoft.AspNetCore.Diagnostics.HealthChecks` package.
 

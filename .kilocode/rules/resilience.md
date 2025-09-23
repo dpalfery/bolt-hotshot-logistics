@@ -1,12 +1,12 @@
 # Resilience Rule
 
-This rule enforces resilience patterns for ASP.NET Core applications in the Hotshot Logistics project, ensuring robust handling of failures and external dependencies.
+Enforces resilience patterns for ASP.NET Core applications in Hotshot Logistics, ensuring robust failure and external dependency handling.
 
 ## When to Apply
-Apply these practices whenever implementing external API calls, database operations, or other potentially failing operations in ASP.NET Core services.
+Apply when implementing external API calls, database operations, or other potentially failing operations in ASP.NET Core services.
 
 ## Polly Usage
-- Use Polly for implementing resilience patterns (retry, circuit breaker, timeout).
+- Use Polly for resilience patterns (retry, circuit breaker, timeout).
 - Configure policies for database connections and external API calls.
 - Define appropriate retry counts and backoff strategies.
 - Implement circuit breakers to prevent cascading failures.

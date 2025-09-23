@@ -23,77 +23,6 @@ internal class CustomerRepository : BaseRepository<ICustomer>, ICustomerReposito
     }
 
     /// <inheritdoc/>
-    protected override string GetTableName() => "Customers";
-
-    /// <inheritdoc/>
-    protected override string GetPrimaryKeyColumnName() => "Id";
-
-    /// <inheritdoc/>
-    protected override ICustomer MapReaderToEntity(SqlDataReader reader)
-    {
-        return new Customer
-        {
-            Id = reader.GetString(reader.GetOrdinal("Id")),
-            CompanyName = reader.GetString(reader.GetOrdinal("CompanyName")),
-            TaxId = reader.IsDBNull(reader.GetOrdinal("TaxId")) ? null : reader.GetString(reader.GetOrdinal("TaxId")),
-            BillingAddress = new Address
-            {
-                Street = reader.GetString(reader.GetOrdinal("BillingAddress")),
-                City = reader.GetString(reader.GetOrdinal("City")),
-                State = reader.GetString(reader.GetOrdinal("State")),
-                ZipCode = reader.GetString(reader.GetOrdinal("ZipCode")),
-                Country = reader.GetString(reader.GetOrdinal("Country")),
-                Latitude = reader.GetDouble(reader.GetOrdinal("Latitude")),
-                Longitude = reader.GetDouble(reader.GetOrdinal("Longitude")),
-            },
-            CreditLimit = reader.GetDecimal(reader.GetOrdinal("CreditLimit")),
-            IsActive = reader.GetBoolean(reader.GetOrdinal("IsActive")),
-            CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
-            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("UpdatedAt")) ? null : reader.GetDateTime(reader.GetOrdinal("UpdatedAt"))
-        };
-    }
-
-    /// <inheritdoc/>
-    protected override SqlParameter[] GetInsertParameters(ICustomer entity)
-    {
-        return new[]
-        {
-            new SqlParameter("@Id", SqlDbType.NVarChar) { Value = entity.Id },
-            new SqlParameter("@CompanyName", SqlDbType.NVarChar) { Value = entity.CompanyName },
-            new SqlParameter("@TaxId", SqlDbType.NVarChar) { Value = (object?)entity.TaxId ?? DBNull.Value },
-            new SqlParameter("@BillingAddress", SqlDbType.NVarChar) { Value = $"{entity.BillingAddress.Street}, {entity.BillingAddress.City}, {entity.BillingAddress.State} {entity.BillingAddress.ZipCode}" },
-            new SqlParameter("@City", SqlDbType.NVarChar) { Value = entity.BillingAddress.City },
-            new SqlParameter("@State", SqlDbType.NVarChar) { Value = entity.BillingAddress.State },
-            new SqlParameter("@ZipCode", SqlDbType.NVarChar) { Value = entity.BillingAddress.ZipCode },
-            new SqlParameter("@Country", SqlDbType.NVarChar) { Value = entity.BillingAddress.Country },
-            new SqlParameter("@Latitude", SqlDbType.Decimal) { Value = entity.BillingAddress.Latitude },
-            new SqlParameter("@Longitude", SqlDbType.Decimal) { Value = entity.BillingAddress.Longitude },
-            new SqlParameter("@CreditLimit", SqlDbType.Decimal) { Value = entity.CreditLimit },
-            new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive },
-        };
-    }
-
-    /// <inheritdoc/>
-    protected override SqlParameter[] GetUpdateParameters(ICustomer entity)
-    {
-        return new[]
-        {
-            new SqlParameter("@Id", SqlDbType.NVarChar) { Value = entity.Id },
-            new SqlParameter("@CompanyName", SqlDbType.NVarChar) { Value = entity.CompanyName },
-            new SqlParameter("@TaxId", SqlDbType.NVarChar) { Value = (object?)entity.TaxId ?? DBNull.Value },
-            new SqlParameter("@BillingAddress", SqlDbType.NVarChar) { Value = $"{entity.BillingAddress.Street}, {entity.BillingAddress.City}, {entity.BillingAddress.State} {entity.BillingAddress.ZipCode}" },
-            new SqlParameter("@City", SqlDbType.NVarChar) { Value = entity.BillingAddress.City },
-            new SqlParameter("@State", SqlDbType.NVarChar) { Value = entity.BillingAddress.State },
-            new SqlParameter("@ZipCode", SqlDbType.NVarChar) { Value = entity.BillingAddress.ZipCode },
-            new SqlParameter("@Country", SqlDbType.NVarChar) { Value = entity.BillingAddress.Country },
-            new SqlParameter("@Latitude", SqlDbType.Decimal) { Value = entity.BillingAddress.Latitude },
-            new SqlParameter("@Longitude", SqlDbType.Decimal) { Value = entity.BillingAddress.Longitude },
-            new SqlParameter("@CreditLimit", SqlDbType.Decimal) { Value = entity.CreditLimit },
-            new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive },
-        };
-    }
-
-    /// <inheritdoc/>
     public async Task<ICustomer?> GetByTaxIdAsync(string taxId)
     {
         const string sql = "SELECT * FROM Customers WHERE TaxId = @TaxId";
@@ -202,6 +131,77 @@ internal class CustomerRepository : BaseRepository<ICustomer>, ICustomerReposito
 
         var rowsAffected = await ExecuteNonQueryAsync(sql, parameters);
         return rowsAffected > 0;
+    }
+
+    /// <inheritdoc/>
+    protected override string GetTableName() => "Customers";
+
+    /// <inheritdoc/>
+    protected override string GetPrimaryKeyColumnName() => "Id";
+
+    /// <inheritdoc/>
+    protected override ICustomer MapReaderToEntity(SqlDataReader reader)
+    {
+        return new Customer
+        {
+            Id = reader.GetString(reader.GetOrdinal("Id")),
+            CompanyName = reader.GetString(reader.GetOrdinal("CompanyName")),
+            TaxId = reader.IsDBNull(reader.GetOrdinal("TaxId")) ? null : reader.GetString(reader.GetOrdinal("TaxId")),
+            BillingAddress = new Address
+            {
+                Street = reader.GetString(reader.GetOrdinal("BillingAddress")),
+                City = reader.GetString(reader.GetOrdinal("City")),
+                State = reader.GetString(reader.GetOrdinal("State")),
+                ZipCode = reader.GetString(reader.GetOrdinal("ZipCode")),
+                Country = reader.GetString(reader.GetOrdinal("Country")),
+                Latitude = reader.GetDouble(reader.GetOrdinal("Latitude")),
+                Longitude = reader.GetDouble(reader.GetOrdinal("Longitude")),
+            },
+            CreditLimit = reader.GetDecimal(reader.GetOrdinal("CreditLimit")),
+            IsActive = reader.GetBoolean(reader.GetOrdinal("IsActive")),
+            CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
+            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("UpdatedAt")) ? null : reader.GetDateTime(reader.GetOrdinal("UpdatedAt")),
+        };
+    }
+
+    /// <inheritdoc/>
+    protected override SqlParameter[] GetInsertParameters(ICustomer entity)
+    {
+        return new[]
+        {
+            new SqlParameter("@Id", SqlDbType.NVarChar) { Value = entity.Id },
+            new SqlParameter("@CompanyName", SqlDbType.NVarChar) { Value = entity.CompanyName },
+            new SqlParameter("@TaxId", SqlDbType.NVarChar) { Value = (object?)entity.TaxId ?? DBNull.Value },
+            new SqlParameter("@BillingAddress", SqlDbType.NVarChar) { Value = $"{entity.BillingAddress.Street}, {entity.BillingAddress.City}, {entity.BillingAddress.State} {entity.BillingAddress.ZipCode}" },
+            new SqlParameter("@City", SqlDbType.NVarChar) { Value = entity.BillingAddress.City },
+            new SqlParameter("@State", SqlDbType.NVarChar) { Value = entity.BillingAddress.State },
+            new SqlParameter("@ZipCode", SqlDbType.NVarChar) { Value = entity.BillingAddress.ZipCode },
+            new SqlParameter("@Country", SqlDbType.NVarChar) { Value = entity.BillingAddress.Country },
+            new SqlParameter("@Latitude", SqlDbType.Decimal) { Value = entity.BillingAddress.Latitude },
+            new SqlParameter("@Longitude", SqlDbType.Decimal) { Value = entity.BillingAddress.Longitude },
+            new SqlParameter("@CreditLimit", SqlDbType.Decimal) { Value = entity.CreditLimit },
+            new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive },
+        };
+    }
+
+    /// <inheritdoc/>
+    protected override SqlParameter[] GetUpdateParameters(ICustomer entity)
+    {
+        return new[]
+        {
+            new SqlParameter("@Id", SqlDbType.NVarChar) { Value = entity.Id },
+            new SqlParameter("@CompanyName", SqlDbType.NVarChar) { Value = entity.CompanyName },
+            new SqlParameter("@TaxId", SqlDbType.NVarChar) { Value = (object?)entity.TaxId ?? DBNull.Value },
+            new SqlParameter("@BillingAddress", SqlDbType.NVarChar) { Value = $"{entity.BillingAddress.Street}, {entity.BillingAddress.City}, {entity.BillingAddress.State} {entity.BillingAddress.ZipCode}" },
+            new SqlParameter("@City", SqlDbType.NVarChar) { Value = entity.BillingAddress.City },
+            new SqlParameter("@State", SqlDbType.NVarChar) { Value = entity.BillingAddress.State },
+            new SqlParameter("@ZipCode", SqlDbType.NVarChar) { Value = entity.BillingAddress.ZipCode },
+            new SqlParameter("@Country", SqlDbType.NVarChar) { Value = entity.BillingAddress.Country },
+            new SqlParameter("@Latitude", SqlDbType.Decimal) { Value = entity.BillingAddress.Latitude },
+            new SqlParameter("@Longitude", SqlDbType.Decimal) { Value = entity.BillingAddress.Longitude },
+            new SqlParameter("@CreditLimit", SqlDbType.Decimal) { Value = entity.CreditLimit },
+            new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive },
+        };
     }
 
     // Explicit interface implementations to bridge concrete/interface types

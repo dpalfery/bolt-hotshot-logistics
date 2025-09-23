@@ -17,6 +17,7 @@ using HotshotLogistics.Domain.Models;
 using Microsoft.Extensions.Configuration;
 
 namespace HotshotLogistics.Data.Repositories
+#pragma warning disable SA1202 // False positive - public members are correctly ordered before private members
 {
     /// <summary>
     /// Repository for managing Job entities using native ADO.NET.
@@ -30,75 +31,6 @@ namespace HotshotLogistics.Data.Repositories
         public JobRepository(IConfiguration configuration)
             : base(configuration)
         {
-        }
-
-        /// <inheritdoc/>
-        protected override string GetTableName() => "Jobs";
-
-        /// <inheritdoc/>
-        protected override string GetPrimaryKeyColumnName() => "Id";
-
-        /// <inheritdoc/>
-        protected override JobDto MapReaderToEntity(SqlDataReader reader)
-        {
-            return new JobDto
-            {
-                Id = reader.GetString(reader.GetOrdinal("Id")),
-                CustomerId = reader.IsDBNull(reader.GetOrdinal("CustomerId")) ? string.Empty : reader.GetString(reader.GetOrdinal("CustomerId")),
-                Title = reader.GetString(reader.GetOrdinal("Title")),
-                PickupAddress = reader.GetString(reader.GetOrdinal("PickupAddress")),
-                DropoffAddress = reader.GetString(reader.GetOrdinal("DeliveryAddress")),
-                Status = (JobStatus)reader.GetInt32(reader.GetOrdinal("Status")),
-                Priority = (JobPriority)reader.GetInt32(reader.GetOrdinal("Priority")),
-                Amount = reader.GetDecimal(reader.GetOrdinal("TotalAmount")),
-                Pricing = new PricingDetails { TotalAmount = reader.GetDecimal(reader.GetOrdinal("TotalAmount")) },
-                EstimatedDeliveryTimeString = reader.GetDateTime(reader.GetOrdinal("EstimatedDeliveryTime")).ToString("O"),
-                ScheduledPickupTime = reader.IsDBNull(reader.GetOrdinal("ScheduledPickupTime")) ? DateTime.UtcNow : reader.GetDateTime(reader.GetOrdinal("ScheduledPickupTime")),
-                AssignedDriverId = reader.IsDBNull(reader.GetOrdinal("AssignedDriverId")) ? null : reader.GetInt32(reader.GetOrdinal("AssignedDriverId")),
-                CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
-                UpdatedAt = reader.IsDBNull(reader.GetOrdinal("UpdatedAt")) ? null : reader.GetDateTime(reader.GetOrdinal("UpdatedAt")),
-                SpecialInstructions = reader.IsDBNull(reader.GetOrdinal("SpecialInstructions")) ? string.Empty : reader.GetString(reader.GetOrdinal("SpecialInstructions")),
-            };
-        }
-
-        /// <inheritdoc/>
-        protected override SqlParameter[] GetInsertParameters(JobDto entity)
-        {
-            return new[]
-            {
-                new SqlParameter("@Id", SqlDbType.NVarChar) { Value = entity.Id },
-                new SqlParameter("@CustomerId", SqlDbType.NVarChar) { Value = entity.CustomerId },
-                new SqlParameter("@Title", SqlDbType.NVarChar) { Value = entity.Title },
-                new SqlParameter("@PickupAddress", SqlDbType.NVarChar) { Value = entity.PickupAddress },
-                new SqlParameter("@DeliveryAddress", SqlDbType.NVarChar) { Value = entity.DropoffAddress },
-                new SqlParameter("@Status", SqlDbType.Int) { Value = (int)entity.Status },
-                new SqlParameter("@Priority", SqlDbType.Int) { Value = (int)entity.Priority },
-                new SqlParameter("@TotalAmount", SqlDbType.Decimal) { Value = entity.Amount },
-                new SqlParameter("@EstimatedDeliveryTime", SqlDbType.DateTime2) { Value = DateTime.Parse(entity.EstimatedDeliveryTimeString) },
-                new SqlParameter("@ScheduledPickupTime", SqlDbType.DateTime2) { Value = entity.ScheduledPickupTime },
-                new SqlParameter("@AssignedDriverId", SqlDbType.Int) { Value = (object?)entity.AssignedDriverId ?? DBNull.Value },
-                new SqlParameter("@SpecialInstructions", SqlDbType.NVarChar) { Value = (object?)entity.SpecialInstructions ?? DBNull.Value },
-            };
-        }
-
-        /// <inheritdoc/>
-        protected override SqlParameter[] GetUpdateParameters(JobDto entity)
-        {
-            return new[]
-            {
-                new SqlParameter("@Id", SqlDbType.NVarChar) { Value = entity.Id },
-                new SqlParameter("@CustomerId", SqlDbType.NVarChar) { Value = entity.CustomerId },
-                new SqlParameter("@Title", SqlDbType.NVarChar) { Value = entity.Title },
-                new SqlParameter("@PickupAddress", SqlDbType.NVarChar) { Value = entity.PickupAddress },
-                new SqlParameter("@DeliveryAddress", SqlDbType.NVarChar) { Value = entity.DropoffAddress },
-                new SqlParameter("@Status", SqlDbType.Int) { Value = (int)entity.Status },
-                new SqlParameter("@Priority", SqlDbType.Int) { Value = (int)entity.Priority },
-                new SqlParameter("@TotalAmount", SqlDbType.Decimal) { Value = entity.Amount },
-                new SqlParameter("@EstimatedDeliveryTime", SqlDbType.DateTime2) { Value = DateTime.Parse(entity.EstimatedDeliveryTimeString) },
-                new SqlParameter("@ScheduledPickupTime", SqlDbType.DateTime2) { Value = entity.ScheduledPickupTime },
-                new SqlParameter("@AssignedDriverId", SqlDbType.Int) { Value = (object?)entity.AssignedDriverId ?? DBNull.Value },
-                new SqlParameter("@SpecialInstructions", SqlDbType.NVarChar) { Value = (object?)entity.SpecialInstructions ?? DBNull.Value },
-            };
         }
 
         /// <inheritdoc/>
@@ -210,7 +142,17 @@ namespace HotshotLogistics.Data.Repositories
                 PageNumber = pagination.PageNumber,
                 PageSize = pagination.PageSize,
             };
+    
+            
+            return new PagedResult<IJob>
+            {
+                Items = jobs,
+                TotalCount = totalCount,
+                PageNumber = pagination.PageNumber,
+                PageSize = pagination.PageSize,
+            };
         }
+        
 
         /// <inheritdoc/>
         public async Task<IEnumerable<IJob>> GetJobsByStatusAsync(JobStatus status, CancellationToken cancellationToken = default)
@@ -279,8 +221,8 @@ namespace HotshotLogistics.Data.Repositories
         public async Task<IEnumerable<IJob>> GetOverdueJobsAsync(CancellationToken cancellationToken = default)
         {
             var query = $@"
-                SELECT * FROM {GetTableName()} 
-                WHERE EstimatedDeliveryTime < @CurrentTime 
+                SELECT * FROM {GetTableName()}
+                WHERE EstimatedDeliveryTime < @CurrentTime
                 AND Status NOT IN (@DeliveredStatus, @CancelledStatus)
                 ORDER BY EstimatedDeliveryTime ASC";
             var jobs = new List<IJob>();
@@ -317,119 +259,78 @@ namespace HotshotLogistics.Data.Repositories
             return (int)await command.ExecuteScalarAsync(cancellationToken);
         }
 
-        /// <summary>
-        /// Builds the WHERE clause for filtering jobs.
-        /// </summary>
-        /// <param name="filter">The filter criteria.</param>
-        /// <returns>A tuple containing the WHERE clause string and SQL parameters.</returns>
-        private static (string whereClause, List<SqlParameter> parameters) BuildWhereClause(JobFilter? filter)
+        public async Task<IEnumerable<IJob>> GetByDriverIdAsync(int driverId, CancellationToken cancellationToken = default)
         {
-            var parameters = new List<SqlParameter>();
-            if (filter == null)
-                return (string.Empty, parameters);
+            return await GetJobsByDriverAsync(driverId, cancellationToken);
+        }
 
-            var conditions = new List<string>();
+        /// <inheritdoc/>
+        protected override string GetTableName() => "Jobs";
 
-            if (filter.Status.HasValue)
+        /// <inheritdoc/>
+        protected override string GetPrimaryKeyColumnName() => "Id";
+
+        /// <inheritdoc/>
+        protected override JobDto MapReaderToEntity(SqlDataReader reader)
+        {
+            return new JobDto
             {
-                conditions.Add("Status = @Status");
-                parameters.Add(new SqlParameter("@Status", (int)filter.Status.Value));
-            }
+                Id = reader.GetString(reader.GetOrdinal("Id")),
+                CustomerId = reader.IsDBNull(reader.GetOrdinal("CustomerId")) ? string.Empty : reader.GetString(reader.GetOrdinal("CustomerId")),
+                Title = reader.GetString(reader.GetOrdinal("Title")),
+                PickupAddress = reader.GetString(reader.GetOrdinal("PickupAddress")),
+                DropoffAddress = reader.GetString(reader.GetOrdinal("DeliveryAddress")),
+                Status = (JobStatus)reader.GetInt32(reader.GetOrdinal("Status")),
+                Priority = (JobPriority)reader.GetInt32(reader.GetOrdinal("Priority")),
+                Amount = reader.GetDecimal(reader.GetOrdinal("TotalAmount")),
+                Pricing = new PricingDetails { TotalAmount = reader.GetDecimal(reader.GetOrdinal("TotalAmount")) },
+                EstimatedDeliveryTimeString = reader.GetDateTime(reader.GetOrdinal("EstimatedDeliveryTime")).ToString("O"),
+                ScheduledPickupTime = reader.IsDBNull(reader.GetOrdinal("ScheduledPickupTime")) ? DateTime.UtcNow : reader.GetDateTime(reader.GetOrdinal("ScheduledPickupTime")),
+                AssignedDriverId = reader.IsDBNull(reader.GetOrdinal("AssignedDriverId")) ? null : reader.GetInt32(reader.GetOrdinal("AssignedDriverId")),
+                CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
+                UpdatedAt = reader.IsDBNull(reader.GetOrdinal("UpdatedAt")) ? null : reader.GetDateTime(reader.GetOrdinal("UpdatedAt")),
+                SpecialInstructions = reader.IsDBNull(reader.GetOrdinal("SpecialInstructions")) ? string.Empty : reader.GetString(reader.GetOrdinal("SpecialInstructions")),
+            };
+        }
 
-            if (filter.StatusList?.Any() == true)
+        /// <inheritdoc/>
+        protected override SqlParameter[] GetInsertParameters(JobDto entity)
+        {
+            return new[]
             {
-                var statusParams = new List<string>();
-                for (int i = 0; i < filter.StatusList.Count; i++)
-                {
-                    var paramName = $"@Status{i}";
-                    parameters.Add(new SqlParameter(paramName, (int)filter.StatusList[i]));
-                    statusParams.Add(paramName);
-                }
-                conditions.Add($"Status IN ({string.Join(",", statusParams)})");
-            }
+                new SqlParameter("@Id", SqlDbType.NVarChar) { Value = entity.Id },
+                new SqlParameter("@CustomerId", SqlDbType.NVarChar) { Value = entity.CustomerId },
+                new SqlParameter("@Title", SqlDbType.NVarChar) { Value = entity.Title },
+                new SqlParameter("@PickupAddress", SqlDbType.NVarChar) { Value = entity.PickupAddress },
+                new SqlParameter("@DeliveryAddress", SqlDbType.NVarChar) { Value = entity.DropoffAddress },
+                new SqlParameter("@Status", SqlDbType.Int) { Value = (int)entity.Status },
+                new SqlParameter("@Priority", SqlDbType.Int) { Value = (int)entity.Priority },
+                new SqlParameter("@TotalAmount", SqlDbType.Decimal) { Value = entity.Amount },
+                new SqlParameter("@EstimatedDeliveryTime", SqlDbType.DateTime2) { Value = DateTime.Parse(entity.EstimatedDeliveryTimeString) },
+                new SqlParameter("@ScheduledPickupTime", SqlDbType.DateTime2) { Value = entity.ScheduledPickupTime },
+                new SqlParameter("@AssignedDriverId", SqlDbType.Int) { Value = (object?)entity.AssignedDriverId ?? DBNull.Value },
+                new SqlParameter("@SpecialInstructions", SqlDbType.NVarChar) { Value = (object?)entity.SpecialInstructions ?? DBNull.Value },
+            };
+        }
 
-            if (filter.Priority.HasValue)
+        /// <inheritdoc/>
+        protected override SqlParameter[] GetUpdateParameters(JobDto entity)
+        {
+            return new[]
             {
-                conditions.Add("Priority = @Priority");
-                parameters.Add(new SqlParameter("@Priority", (int)filter.Priority.Value));
-            }
-
-            if (!string.IsNullOrWhiteSpace(filter.CustomerId))
-            {
-                conditions.Add("CustomerId = @CustomerId");
-                parameters.Add(new SqlParameter("@CustomerId", filter.CustomerId));
-            }
-
-            if (filter.AssignedDriverId.HasValue)
-            {
-                conditions.Add("AssignedDriverId = @AssignedDriverId");
-                parameters.Add(new SqlParameter("@AssignedDriverId", filter.AssignedDriverId.Value));
-            }
-
-            if (filter.HasAssignedDriver.HasValue)
-            {
-                if (filter.HasAssignedDriver.Value)
-                {
-                    conditions.Add("AssignedDriverId IS NOT NULL");
-                }
-                else
-                {
-                    conditions.Add("AssignedDriverId IS NULL");
-                }
-            }
-
-            if (filter.CreatedAfter.HasValue)
-            {
-                conditions.Add("CreatedAt >= @CreatedAfter");
-                parameters.Add(new SqlParameter("@CreatedAfter", filter.CreatedAfter.Value));
-            }
-
-            if (filter.CreatedBefore.HasValue)
-            {
-                conditions.Add("CreatedAt <= @CreatedBefore");
-                parameters.Add(new SqlParameter("@CreatedBefore", filter.CreatedBefore.Value));
-            }
-
-            if (filter.ScheduledAfter.HasValue)
-            {
-                conditions.Add("ScheduledPickupTime >= @ScheduledAfter");
-                parameters.Add(new SqlParameter("@ScheduledAfter", filter.ScheduledAfter.Value));
-            }
-
-            if (filter.ScheduledBefore.HasValue)
-            {
-                conditions.Add("ScheduledPickupTime <= @ScheduledBefore");
-                parameters.Add(new SqlParameter("@ScheduledBefore", filter.ScheduledBefore.Value));
-            }
-
-            if (filter.MinAmount.HasValue)
-            {
-                conditions.Add("TotalAmount >= @MinAmount");
-                parameters.Add(new SqlParameter("@MinAmount", filter.MinAmount.Value));
-            }
-
-            if (filter.MaxAmount.HasValue)
-            {
-                conditions.Add("TotalAmount <= @MaxAmount");
-                parameters.Add(new SqlParameter("@MaxAmount", filter.MaxAmount.Value));
-            }
-
-            if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
-            {
-                conditions.Add("(Title LIKE @SearchTerm OR PickupAddress LIKE @SearchTerm OR DeliveryAddress LIKE @SearchTerm OR SpecialInstructions LIKE @SearchTerm)");
-                parameters.Add(new SqlParameter("@SearchTerm", $"%{filter.SearchTerm}%"));
-            }
-
-            if (filter.IsOverdue.HasValue && filter.IsOverdue.Value)
-            {
-                conditions.Add("EstimatedDeliveryTime < @CurrentTime AND Status NOT IN (@DeliveredStatus, @CancelledStatus)");
-                parameters.Add(new SqlParameter("@CurrentTime", DateTime.UtcNow));
-                parameters.Add(new SqlParameter("@DeliveredStatus", (int)JobStatus.Completed));
-                parameters.Add(new SqlParameter("@CancelledStatus", (int)JobStatus.Cancelled));
-            }
-
-            var whereClause = conditions.Any() ? $" WHERE {string.Join(" AND ", conditions)}" : string.Empty;
-            return (whereClause, parameters);
+                new SqlParameter("@Id", SqlDbType.NVarChar) { Value = entity.Id },
+                new SqlParameter("@CustomerId", SqlDbType.NVarChar) { Value = entity.CustomerId },
+                new SqlParameter("@Title", SqlDbType.NVarChar) { Value = entity.Title },
+                new SqlParameter("@PickupAddress", SqlDbType.NVarChar) { Value = entity.PickupAddress },
+                new SqlParameter("@DeliveryAddress", SqlDbType.NVarChar) { Value = entity.DropoffAddress },
+                new SqlParameter("@Status", SqlDbType.Int) { Value = (int)entity.Status },
+                new SqlParameter("@Priority", SqlDbType.Int) { Value = (int)entity.Priority },
+                new SqlParameter("@TotalAmount", SqlDbType.Decimal) { Value = entity.Amount },
+                new SqlParameter("@EstimatedDeliveryTime", SqlDbType.DateTime2) { Value = DateTime.Parse(entity.EstimatedDeliveryTimeString) },
+                new SqlParameter("@ScheduledPickupTime", SqlDbType.DateTime2) { Value = entity.ScheduledPickupTime },
+                new SqlParameter("@AssignedDriverId", SqlDbType.Int) { Value = (object?)entity.AssignedDriverId ?? DBNull.Value },
+                new SqlParameter("@SpecialInstructions", SqlDbType.NVarChar) { Value = (object?)entity.SpecialInstructions ?? DBNull.Value },
+            };
         }
 
         /// <summary>
@@ -473,7 +374,7 @@ namespace HotshotLogistics.Data.Repositories
                 // Create a new parameter to avoid reuse issues
                 var newParam = new SqlParameter(parameter.ParameterName, parameter.SqlDbType)
                 {
-                    Value = parameter.Value
+                    Value = parameter.Value,
                 };
                 command.Parameters.Add(newParam);
             }
@@ -510,11 +411,6 @@ namespace HotshotLogistics.Data.Repositories
         async Task<bool> IJobRepository.ExistsAsync(object id)
         {
             return await ExistsAsync(id);
-        }
-
-        public async Task<IEnumerable<IJob>> GetByDriverIdAsync(int driverId, CancellationToken cancellationToken = default)
-        {
-            return await GetJobsByDriverAsync(driverId, cancellationToken);
         }
     }
 }

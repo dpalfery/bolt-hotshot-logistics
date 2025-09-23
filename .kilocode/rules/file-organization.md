@@ -1,13 +1,13 @@
 # File Organization Rule
 
-This rule enforces the Clean Architecture numbered folder structure for all file operations in the Hotshot Logistics project. It must be applied whenever files are created, moved, added, or searched to maintain separation of concerns and dependency direction.
+Enforces Clean Architecture numbered folder structure for file operations in Hotshot Logistics. Apply when creating, moving, adding, or searching files to maintain separation of concerns and dependency direction.
 
 ## File Placement Guidelines
 
-When creating, moving, or adding files, place them in the appropriate numbered folder based on their purpose and architectural layer:
+Place files in appropriate numbered folder based on purpose and architectural layer:
 
 ### 0-Base/
-**Foundational code and abstractions shared across layers**
+**Shared foundational code and abstractions**
 - Base classes, interfaces, utilities, extensions
 - Cross-cutting concerns (logging, error handling, result types)
 - Shared constants, enums, extension methods
@@ -64,15 +64,15 @@ When creating, moving, or adding files, place them in the appropriate numbered f
 
 ## Search Guidelines
 
-When performing file searches:
-1. First search within the most relevant architectural layer based on the query context
+When searching files:
+1. Search within most relevant architectural layer based on query context
 2. If not found, expand to related layers following dependency direction
 3. Use folder prefixes (e.g., "2-Application/") to narrow searches
 4. For cross-cutting concerns, check 0-Base/ first
 
 ## Enforcement
 
-- All new files must be placed in the correct folder immediately upon creation
+- Place new files in correct folder immediately upon creation
 - File moves must maintain architectural integrity
-- Regular audits should verify adherence to this structure
+- Regular audits verify adherence to this structure
 - Exceptions require explicit architectural review and documentation

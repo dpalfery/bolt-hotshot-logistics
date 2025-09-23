@@ -1,0 +1,154 @@
+[
+  {
+    "code": "SA1202",
+    "message": "'public' members should come before 'protected' members",
+    "file": "4-Persistence/HotshotLogistics.Data/Repositories/DriverRepository.cs",
+    "line": 95,
+    "column": 49,
+    "project": "HotshotLogistics.Data"
+  },
+  {
+    "code": "SA1202",
+    "message": "'public' members should come before 'protected' members",
+    "file": "4-Persistence/HotshotLogistics.Data/Repositories/JobAssignmentRepository.cs",
+    "line": 98,
+    "column": 42,
+    "project": "HotshotLogistics.Data"
+  },
+  {
+    "code": "SA1202",
+    "message": "'public' members should come before 'protected' members",
+    "file": "4-Persistence/HotshotLogistics.Data/Repositories/LocationTrackingRepository.cs",
+    "line": 90,
+    "column": 46,
+    "project": "HotshotLogistics.Data"
+  },
+  {
+    "code": "SA1202",
+    "message": "'public' members should come before 'protected' members",
+    "file": "4-Persistence/HotshotLogistics.Data/Repositories/CustomerRepository.cs",
+    "line": 97,
+    "column": 35,
+    "project": "HotshotLogistics.Data"
+  },
+  {
+    "code": "SA1202",
+    "message": "'public' members should come before 'protected' members",
+    "file": "4-Persistence/HotshotLogistics.Data/Repositories/InvoiceRepository.cs",
+    "line": 92,
+    "column": 34,
+    "project": "HotshotLogistics.Data"
+  },
+  {
+    "code": "SA1202",
+    "message": "'public' members should come before 'protected' members",
+    "file": "4-Persistence/HotshotLogistics.Data/Repositories/InvoiceRepository.cs",
+    "line": 167,
+    "column": 46,
+    "project": "HotshotLogistics.Data"
+  },
+  {
+    "code": "SA1202",
+    "message": "'public' members should come before 'protected' members",
+    "file": "4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs",
+    "line": 105,
+    "column": 46,
+    "project": "HotshotLogistics.Data"
+  },
+  {
+    "code": "SA1202",
+    "message": "'public' members should come before 'private' members",
+    "file": "4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs",
+    "line": 483,
+    "column": 42,
+    "project": "HotshotLogistics.Data"
+  },
+  {
+    "code": "SA1508",
+    "message": "A closing brace should not be preceded by a blank line",
+    "file": "4-Persistence/HotshotLogistics.Data/Migrations/20250101000100_CreateDriversTable.cs",
+    "line": 25,
+    "column": 5,
+    "project": "HotshotLogistics.Data"
+  },
+  {
+    "code": "SA1503",
+    "message": "Braces should not be omitted",
+    "file": "4-Persistence/HotshotLogistics.Data/Repositories/LocationTrackingRepository.cs",
+    "line": 93,
+    "column": 17,
+    "project": "HotshotLogistics.Data"
+  },
+  {
+    "code": "SA1413",
+    "message": "Use trailing comma in multi-line initializers",
+    "file": "4-Persistence/HotshotLogistics.Data/Repositories/DriverRepository.cs",
+    "line": 59,
+    "column": 17,
+    "project": "HotshotLogistics.Data"
+  },
+  {
+    "code": "SA1413",
+    "message": "Use trailing comma in multi-line initializers",
+    "file": "4-Persistence/HotshotLogistics.Data/Repositories/DriverRepository.cs",
+    "line": 50,
+    "column": 21,
+    "project": "HotshotLogistics.Data"
+  },
+  {
+    "code": "SA1413",
+    "message": "Use trailing comma in multi-line initializers",
+    "file": "4-Persistence/HotshotLogistics.Data/Repositories/CustomerRepository.cs",
+    "line": 52,
+    "column": 13,
+    "project": "HotshotLogistics.Data"
+  },
+  {
+    "code": "SA1413",
+    "message": "Use trailing comma in multi-line initializers",
+    "file": "4-Persistence/HotshotLogistics.Data/Repositories/JobAssignmentRepository.cs",
+    "line": 55,
+    "column": 13,
+    "project": "HotshotLogistics.Data"
+  },
+  {
+    "code": "SA1413",
+    "message": "Use trailing comma in multi-line initializers",
+    "file": "4-Persistence/HotshotLogistics.Data/Repositories/JobAssignmentRepository.cs",
+    "line": 53,
+    "column": 17,
+    "project": "HotshotLogistics.Data"
+  },
+  {
+    "code": "SA1503",
+    "message": "Braces should not be omitted",
+    "file": "4-Persistence/HotshotLogistics.Data/Repositories/LocationTrackingRepository.cs",
+    "line": 354,
+    "column": 17,
+    "project": "HotshotLogistics.Data"
+  },
+  {
+    "code": "SA1503",
+    "message": "Braces should not be omitted",
+    "file": "4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs",
+    "line": 329,
+    "column": 17,
+    "project": "HotshotLogistics.Data"
+  },
+  {
+    "code": "SA1413",
+    "message": "Use trailing comma in multi-line initializers",
+    "file": "4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs",
+    "line": 476,
+    "column": 21,
+    "project": "HotshotLogistics.Data"
+  },
+  {
+    "code": "SA1028",
+    "message": "Code should not contain trailing whitespace",
+    "file": "4-Persistence/HotshotLogistics.Data/Repositories/InvoiceRepository.cs",
+    "line": 256,
+    "column": 6,
+    "project": "HotshotLogistics.Data"
+  }
+]

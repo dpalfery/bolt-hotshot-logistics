@@ -1,4 +1,5 @@
 namespace HotshotLogistics.Data.Repositories;
+#pragma warning disable SA1202 // False positive - public members are correctly ordered before protected members
 
 using System.Data.SqlClient;
 using System.Text;
@@ -20,72 +21,6 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     public InvoiceRepository(IConfiguration configuration)
         : base(configuration)
     {
-    }
-
-    /// <inheritdoc/>
-    protected override string GetTableName() => "Invoices";
-
-    /// <inheritdoc/>
-    protected override string GetPrimaryKeyColumnName() => "Id";
-
-    /// <inheritdoc/>
-    protected override Invoice MapReaderToEntity(SqlDataReader reader)
-    {
-        return new Invoice
-        {
-            Id = reader.GetString(reader.GetOrdinal("Id")),
-            InvoiceNumber = reader.GetString(reader.GetOrdinal("InvoiceNumber")),
-            CustomerId = reader.GetString(reader.GetOrdinal("CustomerId")),
-            JobId = reader.IsDBNull(reader.GetOrdinal("JobId")) ? null : reader.GetString(reader.GetOrdinal("JobId")),
-            InvoiceDate = reader.GetDateTime(reader.GetOrdinal("InvoiceDate")),
-            DueDate = reader.GetDateTime(reader.GetOrdinal("DueDate")),
-            Status = (InvoiceStatus)reader.GetInt32(reader.GetOrdinal("Status")),
-            SubTotal = reader.GetDecimal(reader.GetOrdinal("SubTotal")),
-            TaxRate = reader.GetDecimal(reader.GetOrdinal("TaxRate")),
-            TaxAmount = reader.GetDecimal(reader.GetOrdinal("TaxAmount")),
-            DiscountAmount = reader.GetDecimal(reader.GetOrdinal("DiscountAmount")),
-            TotalAmount = reader.GetDecimal(reader.GetOrdinal("TotalAmount")),
-            PaidAmount = reader.GetDecimal(reader.GetOrdinal("PaidAmount")),
-            Terms = new PaymentTerms
-            {
-                Days = reader.GetInt32(reader.GetOrdinal("TermsDays")),
-                EarlyPaymentDiscount = reader.GetDecimal(reader.GetOrdinal("EarlyPaymentDiscount")),
-                EarlyPaymentDiscountDays = reader.GetInt32(reader.GetOrdinal("EarlyPaymentDiscountDays")),
-                LatePaymentPenalty = reader.GetDecimal(reader.GetOrdinal("LatePaymentPenalty")),
-                LatePaymentPenaltyDays = reader.GetInt32(reader.GetOrdinal("LatePaymentPenaltyDays")),
-            },
-            Notes = reader.IsDBNull(reader.GetOrdinal("Notes")) ? string.Empty : reader.GetString(reader.GetOrdinal("Notes")),
-            CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
-            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("UpdatedAt")) ? null : reader.GetDateTime(reader.GetOrdinal("UpdatedAt")),
-        };
-    }
-
-    /// <inheritdoc/>
-    protected override SqlParameter[] GetInsertParameters(Invoice entity)
-    {
-        return new[]
-        {
-            new SqlParameter("@Id", entity.Id),
-            new SqlParameter("@InvoiceNumber", entity.InvoiceNumber),
-            new SqlParameter("@CustomerId", entity.CustomerId),
-            new SqlParameter("@JobId", (object?)entity.JobId ?? DBNull.Value),
-            new SqlParameter("@InvoiceDate", entity.InvoiceDate),
-            new SqlParameter("@DueDate", entity.DueDate),
-            new SqlParameter("@Status", (int)entity.Status),
-            new SqlParameter("@SubTotal", entity.SubTotal),
-            new SqlParameter("@TaxRate", entity.TaxRate),
-            new SqlParameter("@TaxAmount", entity.TaxAmount),
-            new SqlParameter("@DiscountAmount", entity.DiscountAmount),
-            new SqlParameter("@TotalAmount", entity.TotalAmount),
-            new SqlParameter("@PaidAmount", entity.PaidAmount),
-            new SqlParameter("@TermsDays", entity.Terms.Days),
-            new SqlParameter("@EarlyPaymentDiscount", entity.Terms.EarlyPaymentDiscount),
-            new SqlParameter("@EarlyPaymentDiscountDays", entity.Terms.EarlyPaymentDiscountDays),
-            new SqlParameter("@LatePaymentPenalty", entity.Terms.LatePaymentPenalty),
-            new SqlParameter("@LatePaymentPenaltyDays", entity.Terms.LatePaymentPenaltyDays),
-            new SqlParameter("@Notes", (object?)entity.Notes ?? DBNull.Value),
-            new SqlParameter("@CreatedAt", entity.CreatedAt),
-        };
     }
 
     /// <inheritdoc/>
@@ -136,39 +71,11 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     }
 
     /// <inheritdoc/>
-    protected override SqlParameter[] GetUpdateParameters(Invoice entity)
-    {
-        return new[]
-        {
-            new SqlParameter("@Id", entity.Id),
-            new SqlParameter("@InvoiceNumber", entity.InvoiceNumber),
-            new SqlParameter("@CustomerId", entity.CustomerId),
-            new SqlParameter("@JobId", (object?)entity.JobId ?? DBNull.Value),
-            new SqlParameter("@InvoiceDate", entity.InvoiceDate),
-            new SqlParameter("@DueDate", entity.DueDate),
-            new SqlParameter("@Status", (int)entity.Status),
-            new SqlParameter("@SubTotal", entity.SubTotal),
-            new SqlParameter("@TaxRate", entity.TaxRate),
-            new SqlParameter("@TaxAmount", entity.TaxAmount),
-            new SqlParameter("@DiscountAmount", entity.DiscountAmount),
-            new SqlParameter("@TotalAmount", entity.TotalAmount),
-            new SqlParameter("@PaidAmount", entity.PaidAmount),
-            new SqlParameter("@TermsDays", entity.Terms.Days),
-            new SqlParameter("@EarlyPaymentDiscount", entity.Terms.EarlyPaymentDiscount),
-            new SqlParameter("@EarlyPaymentDiscountDays", entity.Terms.EarlyPaymentDiscountDays),
-            new SqlParameter("@LatePaymentPenalty", entity.Terms.LatePaymentPenalty),
-            new SqlParameter("@LatePaymentPenaltyDays", entity.Terms.LatePaymentPenaltyDays),
-            new SqlParameter("@Notes", (object?)entity.Notes ?? DBNull.Value),
-            new SqlParameter("@UpdatedAt", entity.UpdatedAt ?? DateTime.UtcNow),
-        };
-    }
-
-    /// <inheritdoc/>
     public async Task<IEnumerable<IInvoice>> GetByCustomerIdAsync(string customerId)
     {
         const string sql = @"
-            SELECT * FROM Invoices 
-            WHERE CustomerId = @CustomerId 
+            SELECT * FROM Invoices
+            WHERE CustomerId = @CustomerId
             ORDER BY InvoiceDate DESC";
 
         var parameters = new[] { new SqlParameter("@CustomerId", customerId) };
@@ -179,8 +86,8 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     public async Task<IEnumerable<IInvoice>> GetByJobIdAsync(string jobId)
     {
         const string sql = @"
-            SELECT * FROM Invoices 
-            WHERE JobId = @JobId 
+            SELECT * FROM Invoices
+            WHERE JobId = @JobId
             ORDER BY InvoiceDate DESC";
 
         var parameters = new[] { new SqlParameter("@JobId", jobId) };
@@ -191,8 +98,8 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     public async Task<IEnumerable<IInvoice>> GetByStatusAsync(InvoiceStatus status)
     {
         const string sql = @"
-            SELECT * FROM Invoices 
-            WHERE Status = @Status 
+            SELECT * FROM Invoices
+            WHERE Status = @Status
             ORDER BY InvoiceDate DESC";
 
         var parameters = new[] { new SqlParameter("@Status", (int)status) };
@@ -203,9 +110,9 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     public async Task<IEnumerable<IInvoice>> GetOverdueInvoicesAsync()
     {
         const string sql = @"
-            SELECT * FROM Invoices 
-            WHERE Status NOT IN (@PaidStatus, @CancelledStatus) 
-            AND DueDate < @CurrentDate 
+            SELECT * FROM Invoices
+            WHERE Status NOT IN (@PaidStatus, @CancelledStatus)
+            AND DueDate < @CurrentDate
             ORDER BY DueDate ASC";
 
         var parameters = new[]
@@ -222,9 +129,9 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     public async Task<IEnumerable<IInvoice>> GetInvoicesDueWithinDaysAsync(int days)
     {
         const string sql = @"
-            SELECT * FROM Invoices 
-            WHERE Status NOT IN (@PaidStatus, @CancelledStatus) 
-            AND DueDate BETWEEN @CurrentDate AND @FutureDate 
+            SELECT * FROM Invoices
+            WHERE Status NOT IN (@PaidStatus, @CancelledStatus)
+            AND DueDate BETWEEN @CurrentDate AND @FutureDate
             ORDER BY DueDate ASC";
 
         var parameters = new[]
@@ -242,8 +149,8 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     public async Task<IEnumerable<IInvoice>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
     {
         const string sql = @"
-            SELECT * FROM Invoices 
-            WHERE InvoiceDate BETWEEN @StartDate AND @EndDate 
+            SELECT * FROM Invoices
+            WHERE InvoiceDate BETWEEN @StartDate AND @EndDate
             ORDER BY InvoiceDate DESC";
 
         var parameters = new[]
@@ -253,8 +160,9 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
         };
 
         return await ExecuteQueryAsync(sql, parameters);
-    } 
-   /// <inheritdoc/>
+    }
+
+    /// <inheritdoc/>
     public async Task<PagedResult<IInvoice>> GetPagedAsync(InvoiceFilter filter)
     {
         var whereClause = new StringBuilder();
@@ -335,10 +243,10 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
         // Data query with pagination - create new parameter array
         var offset = (filter.PageNumber - 1) * filter.PageSize;
         var dataSql = $@"
-            SELECT * FROM Invoices 
+            SELECT * FROM Invoices
             {whereClause}
             ORDER BY {sortBy} {sortDirection}
-            OFFSET @Offset ROWS 
+            OFFSET @Offset ROWS
             FETCH NEXT @PageSize ROWS ONLY";
 
         var dataParameters = new List<SqlParameter>();
@@ -364,8 +272,8 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     public async Task<string> GetNextInvoiceNumberAsync()
     {
         const string sql = @"
-            SELECT ISNULL(MAX(CAST(SUBSTRING(InvoiceNumber, 4, LEN(InvoiceNumber) - 3) AS INT)), 0) + 1 
-            FROM Invoices 
+            SELECT ISNULL(MAX(CAST(SUBSTRING(InvoiceNumber, 4, LEN(InvoiceNumber) - 3) AS INT)), 0) + 1
+            FROM Invoices
             WHERE InvoiceNumber LIKE 'INV%' AND ISNUMERIC(SUBSTRING(InvoiceNumber, 4, LEN(InvoiceNumber) - 3)) = 1";
 
         var nextNumber = await ExecuteScalarAsync<int>(sql);
@@ -376,7 +284,7 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     public async Task<IEnumerable<AgingReportEntry>> GetAgingReportAsync()
     {
         const string sql = @"
-            SELECT 
+            SELECT
                 i.CustomerId,
                 c.CompanyName as CustomerName,
                 SUM(CASE WHEN DATEDIFF(day, i.DueDate, GETUTCDATE()) <= 0 THEN i.TotalAmount - i.PaidAmount ELSE 0 END) as [Current],
@@ -428,9 +336,9 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     public async Task<decimal> GetOutstandingBalanceAsync(string customerId)
     {
         const string sql = @"
-            SELECT ISNULL(SUM(TotalAmount - PaidAmount), 0) 
-            FROM Invoices 
-            WHERE CustomerId = @CustomerId 
+            SELECT ISNULL(SUM(TotalAmount - PaidAmount), 0)
+            FROM Invoices
+            WHERE CustomerId = @CustomerId
             AND Status NOT IN (@PaidStatus, @CancelledStatus)";
 
         var parameters = new[]
@@ -447,7 +355,7 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     public async Task<InvoiceSummary> GetInvoiceSummaryAsync()
     {
         const string sql = @"
-            SELECT 
+            SELECT
                 COUNT(*) as TotalInvoices,
                 ISNULL(SUM(TotalAmount), 0) as TotalAmount,
                 ISNULL(SUM(PaidAmount), 0) as TotalPaid,
@@ -492,8 +400,8 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     public async Task<IEnumerable<IInvoice>> SearchByInvoiceNumberAsync(string invoiceNumber)
     {
         const string sql = @"
-            SELECT * FROM Invoices 
-            WHERE InvoiceNumber LIKE @InvoiceNumber 
+            SELECT * FROM Invoices
+            WHERE InvoiceNumber LIKE @InvoiceNumber
             ORDER BY InvoiceNumber";
 
         var parameters = new[] { new SqlParameter("@InvoiceNumber", $"%{invoiceNumber}%") };
@@ -504,9 +412,9 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     public async Task<bool> UpdatePaidAmountAsync(string invoiceId, decimal paidAmount)
     {
         const string sql = @"
-            UPDATE Invoices 
+            UPDATE Invoices
             SET PaidAmount = @PaidAmount,
-                Status = CASE 
+                Status = CASE
                     WHEN @PaidAmount >= TotalAmount THEN @PaidStatus
                     WHEN @PaidAmount > 0 THEN @PartiallyPaidStatus
                     ELSE Status
@@ -531,7 +439,7 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     public async Task<bool> UpdateStatusAsync(string invoiceId, InvoiceStatus status)
     {
         const string sql = @"
-            UPDATE Invoices 
+            UPDATE Invoices
             SET Status = @Status,
                 UpdatedAt = @UpdatedAt
             WHERE Id = @Id";
@@ -546,4 +454,99 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
         var rowsAffected = await ExecuteNonQueryAsync(sql, parameters);
         return rowsAffected > 0;
     }
+
+    /// <inheritdoc/>
+    protected override string GetTableName() => "Invoices";
+
+    /// <inheritdoc/>
+    protected override string GetPrimaryKeyColumnName() => "Id";
+
+    /// <inheritdoc/>
+    protected override Invoice MapReaderToEntity(SqlDataReader reader)
+    {
+        return new Invoice
+        {
+            Id = reader.GetString(reader.GetOrdinal("Id")),
+            InvoiceNumber = reader.GetString(reader.GetOrdinal("InvoiceNumber")),
+            CustomerId = reader.GetString(reader.GetOrdinal("CustomerId")),
+            JobId = reader.IsDBNull(reader.GetOrdinal("JobId")) ? null : reader.GetString(reader.GetOrdinal("JobId")),
+            InvoiceDate = reader.GetDateTime(reader.GetOrdinal("InvoiceDate")),
+            DueDate = reader.GetDateTime(reader.GetOrdinal("DueDate")),
+            Status = (InvoiceStatus)reader.GetInt32(reader.GetOrdinal("Status")),
+            SubTotal = reader.GetDecimal(reader.GetOrdinal("SubTotal")),
+            TaxRate = reader.GetDecimal(reader.GetOrdinal("TaxRate")),
+            TaxAmount = reader.GetDecimal(reader.GetOrdinal("TaxAmount")),
+            DiscountAmount = reader.GetDecimal(reader.GetOrdinal("DiscountAmount")),
+            TotalAmount = reader.GetDecimal(reader.GetOrdinal("TotalAmount")),
+            PaidAmount = reader.GetDecimal(reader.GetOrdinal("PaidAmount")),
+            Terms = new PaymentTerms
+            {
+                Days = reader.GetInt32(reader.GetOrdinal("TermsDays")),
+                EarlyPaymentDiscount = reader.GetDecimal(reader.GetOrdinal("EarlyPaymentDiscount")),
+                EarlyPaymentDiscountDays = reader.GetInt32(reader.GetOrdinal("EarlyPaymentDiscountDays")),
+                LatePaymentPenalty = reader.GetDecimal(reader.GetOrdinal("LatePaymentPenalty")),
+                LatePaymentPenaltyDays = reader.GetInt32(reader.GetOrdinal("LatePaymentPenaltyDays")),
+            },
+            Notes = reader.IsDBNull(reader.GetOrdinal("Notes")) ? string.Empty : reader.GetString(reader.GetOrdinal("Notes")),
+            CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
+            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("UpdatedAt")) ? null : reader.GetDateTime(reader.GetOrdinal("UpdatedAt")),
+        };
+    }
+
+    /// <inheritdoc/>
+    protected override SqlParameter[] GetInsertParameters(Invoice entity)
+    {
+        return new[]
+        {
+            new SqlParameter("@Id", entity.Id),
+            new SqlParameter("@InvoiceNumber", entity.InvoiceNumber),
+            new SqlParameter("@CustomerId", entity.CustomerId),
+            new SqlParameter("@JobId", (object?)entity.JobId ?? DBNull.Value),
+            new SqlParameter("@InvoiceDate", entity.InvoiceDate),
+            new SqlParameter("@DueDate", entity.DueDate),
+            new SqlParameter("@Status", (int)entity.Status),
+            new SqlParameter("@SubTotal", entity.SubTotal),
+            new SqlParameter("@TaxRate", entity.TaxRate),
+            new SqlParameter("@TaxAmount", entity.TaxAmount),
+            new SqlParameter("@DiscountAmount", entity.DiscountAmount),
+            new SqlParameter("@TotalAmount", entity.TotalAmount),
+            new SqlParameter("@PaidAmount", entity.PaidAmount),
+            new SqlParameter("@TermsDays", entity.Terms.Days),
+            new SqlParameter("@EarlyPaymentDiscount", entity.Terms.EarlyPaymentDiscount),
+            new SqlParameter("@EarlyPaymentDiscountDays", entity.Terms.EarlyPaymentDiscountDays),
+            new SqlParameter("@LatePaymentPenalty", entity.Terms.LatePaymentPenalty),
+            new SqlParameter("@LatePaymentPenaltyDays", entity.Terms.LatePaymentPenaltyDays),
+            new SqlParameter("@Notes", (object?)entity.Notes ?? DBNull.Value),
+            new SqlParameter("@CreatedAt", entity.CreatedAt),
+        };
+    }
+
+    /// <inheritdoc/>
+    protected override SqlParameter[] GetUpdateParameters(Invoice entity)
+    {
+        return new[]
+        {
+            new SqlParameter("@Id", entity.Id),
+            new SqlParameter("@InvoiceNumber", entity.InvoiceNumber),
+            new SqlParameter("@CustomerId", entity.CustomerId),
+            new SqlParameter("@JobId", (object?)entity.JobId ?? DBNull.Value),
+            new SqlParameter("@InvoiceDate", entity.InvoiceDate),
+            new SqlParameter("@DueDate", entity.DueDate),
+            new SqlParameter("@Status", (int)entity.Status),
+            new SqlParameter("@SubTotal", entity.SubTotal),
+            new SqlParameter("@TaxRate", entity.TaxRate),
+            new SqlParameter("@TaxAmount", entity.TaxAmount),
+            new SqlParameter("@DiscountAmount", entity.DiscountAmount),
+            new SqlParameter("@TotalAmount", entity.TotalAmount),
+            new SqlParameter("@PaidAmount", entity.PaidAmount),
+            new SqlParameter("@TermsDays", entity.Terms.Days),
+            new SqlParameter("@EarlyPaymentDiscount", entity.Terms.EarlyPaymentDiscount),
+            new SqlParameter("@EarlyPaymentDiscountDays", entity.Terms.EarlyPaymentDiscountDays),
+            new SqlParameter("@LatePaymentPenalty", entity.Terms.LatePaymentPenalty),
+            new SqlParameter("@LatePaymentPenaltyDays", entity.Terms.LatePaymentPenaltyDays),
+            new SqlParameter("@Notes", (object?)entity.Notes ?? DBNull.Value),
+            new SqlParameter("@UpdatedAt", entity.UpdatedAt ?? DateTime.UtcNow),
+        };
+    }
+#pragma warning restore SA1202
 }
