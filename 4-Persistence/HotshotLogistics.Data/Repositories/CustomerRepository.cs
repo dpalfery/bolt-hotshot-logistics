@@ -60,7 +60,7 @@ public class CustomerRepository : BaseRepository<ICustomer>, ICustomerRepository
             new SqlParameter("@Id", SqlDbType.NVarChar) { Value = entity.Id },
             new SqlParameter("@CompanyName", SqlDbType.NVarChar) { Value = entity.CompanyName },
             new SqlParameter("@TaxId", SqlDbType.NVarChar) { Value = (object?)entity.TaxId ?? DBNull.Value },
-            new SqlParameter("@BillingAddress", SqlDbType.NVarChar) { Value = $"{entity.BillingAddress.Street}, {entity.BillingAddress.City}, {entity.BillingAddress.State} {entity.BillingAddress.ZipCode}" },
+            new SqlParameter("@BillingAddress", SqlDbType.NVarChar) { Value = entity.BillingAddress.ToFormattedString() },
             new SqlParameter("@City", SqlDbType.NVarChar) { Value = entity.BillingAddress.City },
             new SqlParameter("@State", SqlDbType.NVarChar) { Value = entity.BillingAddress.State },
             new SqlParameter("@ZipCode", SqlDbType.NVarChar) { Value = entity.BillingAddress.ZipCode },
