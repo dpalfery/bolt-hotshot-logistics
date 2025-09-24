@@ -212,6 +212,6 @@ internal class JobAssignmentRepository : BaseRepository<JobAssignmentDto>, IJobA
     /// <inheritdoc/>
     public async Task<bool> DeleteAsync(string id, CancellationToken cancellationToken = default)
     {
-        return await DeleteAsync(id);
+        return await base.DeleteAsync(id, cancellationToken);
     }
 }
