@@ -102,6 +102,39 @@ namespace HotshotLogistics.Data.Repositories
             return drivers.Cast<IDriver>();
         }
 
+        // Explicit interface implementations to bridge concrete/interface types
+        async Task<IDriver?> IDriverRepository.GetByIdAsync(object id)
+        {
+            return await GetByIdAsync(id);
+        }
+
+        async Task<IEnumerable<IDriver>> IDriverRepository.GetAllAsync()
+        {
+            return (await GetAllAsync()).Cast<IDriver>();
+        }
+
+        async Task<IDriver> IDriverRepository.AddAsync(IDriver entity)
+        {
+            var driver = entity as Driver ?? throw new ArgumentException("Entity must be Driver", nameof(entity));
+            return await AddAsync(driver);
+        }
+
+        async Task<IDriver> IDriverRepository.UpdateAsync(IDriver entity)
+        {
+            var driver = entity as Driver ?? throw new ArgumentException("Entity must be Driver", nameof(entity));
+            return await UpdateAsync(driver);
+        }
+
+        async Task<bool> IDriverRepository.DeleteAsync(object id)
+        {
+            return await DeleteAsync(id);
+        }
+
+        async Task<bool> IDriverRepository.ExistsAsync(object id)
+        {
+            return await ExistsAsync(id);
+        }
+
         /// <inheritdoc/>
         protected override string GetTableName() => "Drivers";
 
@@ -161,39 +194,6 @@ namespace HotshotLogistics.Data.Repositories
                 new SqlParameter("@LicenseExpiryDate", SqlDbType.DateTime2) { Value = entity.License.LicenseExpiryDate },
                 new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive },
             };
-        }
-
-        // Explicit interface implementations to bridge concrete/interface types
-        async Task<IDriver?> IDriverRepository.GetByIdAsync(object id)
-        {
-            return await GetByIdAsync(id);
-        }
-
-        async Task<IEnumerable<IDriver>> IDriverRepository.GetAllAsync()
-        {
-            return (await GetAllAsync()).Cast<IDriver>();
-        }
-
-        async Task<IDriver> IDriverRepository.AddAsync(IDriver entity)
-        {
-            var driver = entity as Driver ?? throw new ArgumentException("Entity must be Driver", nameof(entity));
-            return await AddAsync(driver);
-        }
-
-        async Task<IDriver> IDriverRepository.UpdateAsync(IDriver entity)
-        {
-            var driver = entity as Driver ?? throw new ArgumentException("Entity must be Driver", nameof(entity));
-            return await UpdateAsync(driver);
-        }
-
-        async Task<bool> IDriverRepository.DeleteAsync(object id)
-        {
-            return await DeleteAsync(id);
-        }
-
-        async Task<bool> IDriverRepository.ExistsAsync(object id)
-        {
-            return await ExistsAsync(id);
         }
     }
 }

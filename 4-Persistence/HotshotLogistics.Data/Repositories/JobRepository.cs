@@ -142,17 +142,7 @@ namespace HotshotLogistics.Data.Repositories
                 PageNumber = pagination.PageNumber,
                 PageSize = pagination.PageSize,
             };
-    
-            
-            return new PagedResult<IJob>
-            {
-                Items = jobs,
-                TotalCount = totalCount,
-                PageNumber = pagination.PageNumber,
-                PageSize = pagination.PageSize,
-            };
         }
-        
 
         /// <inheritdoc/>
         public async Task<IEnumerable<IJob>> GetJobsByStatusAsync(JobStatus status, CancellationToken cancellationToken = default)
@@ -331,6 +321,167 @@ namespace HotshotLogistics.Data.Repositories
                 new SqlParameter("@AssignedDriverId", SqlDbType.Int) { Value = (object?)entity.AssignedDriverId ?? DBNull.Value },
                 new SqlParameter("@SpecialInstructions", SqlDbType.NVarChar) { Value = (object?)entity.SpecialInstructions ?? DBNull.Value },
             };
+        }
+
+        /// <summary>
+        /// Builds the WHERE clause and parameters for filtering jobs.
+        /// </summary>
+        /// <param name="filter">The job filter criteria.</param>
+        /// <returns>A tuple containing the WHERE clause and SQL parameters.</returns>
+        private static (string whereClause, IEnumerable<SqlParameter> parameters) BuildWhereClause(JobFilter? filter)
+        {
+            if (filter == null)
+            {
+                return (string.Empty, new List<SqlParameter>());
+            }
+
+            var conditions = new List<string>();
+            var parameters = new List<SqlParameter>();
+
+            if (filter.Status.HasValue)
+            {
+                conditions.Add("Status = @Status");
+                parameters.Add(new SqlParameter("@Status", SqlDbType.Int) { Value = (int)filter.Status.Value });
+            }
+
+            if (!string.IsNullOrEmpty(filter.CustomerId))
+            {
+                conditions.Add("CustomerId = @CustomerId");
+                parameters.Add(new SqlParameter("@CustomerId", SqlDbType.NVarChar) { Value = filter.CustomerId });
+            }
+
+            if (filter.DriverId.HasValue)
+            {
+                conditions.Add("AssignedDriverId = @DriverId");
+                parameters.Add(new SqlParameter("@DriverId", SqlDbType.Int) { Value = filter.DriverId.Value });
+            }
+
+            if (filter.AssignedDriverId.HasValue)
+            {
+                conditions.Add("AssignedDriverId = @AssignedDriverId");
+                parameters.Add(new SqlParameter("@AssignedDriverId", SqlDbType.Int) { Value = filter.AssignedDriverId.Value });
+            }
+
+            if (filter.HasAssignedDriver.HasValue)
+            {
+                if (filter.HasAssignedDriver.Value)
+                {
+                    conditions.Add("AssignedDriverId IS NOT NULL");
+                }
+                else
+                {
+                    conditions.Add("AssignedDriverId IS NULL");
+                }
+            }
+
+            if (filter.Priority.HasValue)
+            {
+                conditions.Add("Priority = @Priority");
+                parameters.Add(new SqlParameter("@Priority", SqlDbType.Int) { Value = (int)filter.Priority.Value });
+            }
+
+            if (filter.CreatedAfter.HasValue)
+            {
+                conditions.Add("CreatedAt >= @CreatedAfter");
+                parameters.Add(new SqlParameter("@CreatedAfter", SqlDbType.DateTime2) { Value = filter.CreatedAfter.Value });
+            }
+
+            if (filter.CreatedBefore.HasValue)
+            {
+                conditions.Add("CreatedAt <= @CreatedBefore");
+                parameters.Add(new SqlParameter("@CreatedBefore", SqlDbType.DateTime2) { Value = filter.CreatedBefore.Value });
+            }
+
+            if (filter.ScheduledPickupAfter.HasValue)
+            {
+                conditions.Add("ScheduledPickupTime >= @ScheduledPickupAfter");
+                parameters.Add(new SqlParameter("@ScheduledPickupAfter", SqlDbType.DateTime2) { Value = filter.ScheduledPickupAfter.Value });
+            }
+
+            if (filter.ScheduledPickupBefore.HasValue)
+            {
+                conditions.Add("ScheduledPickupTime <= @ScheduledPickupBefore");
+                parameters.Add(new SqlParameter("@ScheduledPickupBefore", SqlDbType.DateTime2) { Value = filter.ScheduledPickupBefore.Value });
+            }
+
+            if (filter.ScheduledAfter.HasValue)
+            {
+                conditions.Add("ScheduledPickupTime >= @ScheduledAfter");
+                parameters.Add(new SqlParameter("@ScheduledAfter", SqlDbType.DateTime2) { Value = filter.ScheduledAfter.Value });
+            }
+
+            if (filter.ScheduledBefore.HasValue)
+            {
+                conditions.Add("ScheduledPickupTime <= @ScheduledBefore");
+                parameters.Add(new SqlParameter("@ScheduledBefore", SqlDbType.DateTime2) { Value = filter.ScheduledBefore.Value });
+            }
+
+            if (filter.StatusList != null && filter.StatusList.Any())
+            {
+                var statusPlaceholders = string.Join(", ", filter.StatusList.Select((_, i) => $"@Status{i}"));
+                conditions.Add($"Status IN ({statusPlaceholders})");
+                for (var i = 0; i < filter.StatusList.Count; i++)
+                {
+                    parameters.Add(new SqlParameter($"@Status{i}", SqlDbType.Int) { Value = (int)filter.StatusList[i] });
+                }
+            }
+
+            if (filter.EstimatedDeliveryAfter.HasValue)
+            {
+                conditions.Add("EstimatedDeliveryTime >= @EstimatedDeliveryAfter");
+                parameters.Add(new SqlParameter("@EstimatedDeliveryAfter", SqlDbType.DateTime2) { Value = filter.EstimatedDeliveryAfter.Value });
+            }
+
+            if (filter.EstimatedDeliveryBefore.HasValue)
+            {
+                conditions.Add("EstimatedDeliveryTime <= @EstimatedDeliveryBefore");
+                parameters.Add(new SqlParameter("@EstimatedDeliveryBefore", SqlDbType.DateTime2) { Value = filter.EstimatedDeliveryBefore.Value });
+            }
+
+            if (!string.IsNullOrEmpty(filter.SearchTerm))
+            {
+                conditions.Add("(Title LIKE @SearchTerm OR SpecialInstructions LIKE @SearchTerm)");
+                parameters.Add(new SqlParameter("@SearchTerm", SqlDbType.NVarChar) { Value = $"%{filter.SearchTerm}%" });
+            }
+
+            if (filter.MinAmount.HasValue)
+            {
+                conditions.Add("TotalAmount >= @MinAmount");
+                parameters.Add(new SqlParameter("@MinAmount", SqlDbType.Decimal) { Value = filter.MinAmount.Value });
+            }
+
+            if (filter.MaxAmount.HasValue)
+            {
+                conditions.Add("TotalAmount <= @MaxAmount");
+                parameters.Add(new SqlParameter("@MaxAmount", SqlDbType.Decimal) { Value = filter.MaxAmount.Value });
+            }
+
+            if (filter.IsActive.HasValue)
+            {
+                if (filter.IsActive.Value)
+                {
+                    conditions.Add("Status NOT IN (@CancelledStatus, @CompletedStatus)");
+                    parameters.Add(new SqlParameter("@CancelledStatus", SqlDbType.Int) { Value = (int)JobStatus.Cancelled });
+                    parameters.Add(new SqlParameter("@CompletedStatus", SqlDbType.Int) { Value = (int)JobStatus.Completed });
+                }
+                else
+                {
+                    conditions.Add("Status IN (@CancelledStatus, @CompletedStatus)");
+                    parameters.Add(new SqlParameter("@CancelledStatus", SqlDbType.Int) { Value = (int)JobStatus.Cancelled });
+                    parameters.Add(new SqlParameter("@CompletedStatus", SqlDbType.Int) { Value = (int)JobStatus.Completed });
+                }
+            }
+
+            if (filter.IsOverdue.HasValue && filter.IsOverdue.Value)
+            {
+                conditions.Add("EstimatedDeliveryTime < @CurrentTime AND Status NOT IN (@DeliveredStatus, @CancelledStatus)");
+                parameters.Add(new SqlParameter("@CurrentTime", SqlDbType.DateTime2) { Value = DateTime.UtcNow });
+                parameters.Add(new SqlParameter("@DeliveredStatus", SqlDbType.Int) { Value = (int)JobStatus.Completed });
+                parameters.Add(new SqlParameter("@CancelledStatus", SqlDbType.Int) { Value = (int)JobStatus.Cancelled });
+            }
+
+            var whereClause = conditions.Any() ? $" WHERE {string.Join(" AND ", conditions)}" : string.Empty;
+            return (whereClause, parameters);
         }
 
         /// <summary>
