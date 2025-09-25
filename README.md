@@ -7,12 +7,12 @@ This monorepo contains the full-stack solution: a React-based Admin Dashboard, a
 
 ## 🚚 Project Overview
 
-**Bolt Hotshot Logistics** is an end-to-end system for managing hotshot delivery jobs, drivers, and real-time logistics operations.  
+**Hotshot Logistics** is an end-to-end system for managing hotshot delivery jobs, drivers, and real-time logistics operations.  
 It features:
 
 - **Admin Dashboard:** Manage jobs, drivers, customers, and view analytics (React/Next.js, TailwindCSS)
 - **Driver Mobile App:** Accept & manage jobs, track deliveries, navigation (Expo React Native)
-- **Backend API:** Scalable Azure Functions (.NET 8), SQL Server, Entity Framework Core, secure config with Key Vault/App Config
+- **Backend API:** Scalable Azure Functions (.NET 8), SQL Server, native ADO.NET (Microsoft.Data.SqlClient) with schema & migrations managed by FluentMigrator, secure config with Key Vault/App Config
 
 ---
 
@@ -20,7 +20,7 @@ It features:
 
 - **Frontend (Admin):** Next.js (React 18), TailwindCSS, Recharts, React Table, React Query, Zod, Headless UI, Heroicons
 - **Mobile (Driver):** Expo (React Native 0.79+), Lucide React Native, Expo Router, Google Fonts, React Native Maps
-- **Backend:** Azure Functions v4 (.NET 8), Entity Framework Core, SQL Server provider, Azure App Configuration, Key Vault
+- **Backend:** Azure Functions v4 (.NET 8), native ADO.NET (Microsoft.Data.SqlClient) with schema & migrations managed by FluentMigrator, SQL Server provider, Azure App Configuration, Key Vault
 - **Database:** SQL Server
 - **Dev Tools:** ESLint, Prettier, TypeScript, xUnit for backend tests
 
@@ -39,7 +39,7 @@ Folder mapping:
    Functions API
 3. **2-Application** – orchestrates use cases and business rules
 4. **3-Domain** – entities and contracts that model the logistics domain
-5. **4-Persistence** – EF Core implementations and data migrations
+5. **4-Persistence** – native ADO.NET (Microsoft.Data.SqlClient) with schema & migrations managed by FluentMigrator implementations and data migrations
 6. **5-Test** – unit, integration and architecture tests
 7. **7-Deployment** – docker compose files and deployment scripts
 ## 🆕 Recent Changes
@@ -65,7 +65,7 @@ Folder mapping:
    Functions API
 3. **2-Application** – orchestrates use cases and business rules
 4. **3-Domain** – entities and contracts that model the logistics domain
-5. **4-Persistence** – EF Core implementations and data migrations
+5. **4-Persistence** – native ADO.NET (Microsoft.Data.SqlClient) with schema & migrations managed by FluentMigrator implementations and data migrations
 6. **5-Test** – unit, integration and architecture tests
 7. **7-Deployment** – docker compose files and deployment scripts
 ## 🆕 Recent Changes
@@ -98,7 +98,7 @@ root/
 │   └─ HotshotLogistics.Domain/           # domain models
 │
 ├─ 4-Persistence/
-│   ├─ HotshotLogistics.Data/             # EF Core migrations & seed data
+│   ├─ HotshotLogistics.Data/             # native ADO.NET (Microsoft.Data.SqlClient) with schema & migrations managed by FluentMigrator migrations & seed data
 │   └─ HotshotLogistics.Infrastructure/   # repository implementations
 │
 ├─ 5-Test/
@@ -180,7 +180,7 @@ dotnet run
 ### 5. Database Setup
 
 - Update `DefaultConnection` in your config to point to your SQL Server instance.
-- Apply EF Core migrations (coming soon).
+- Apply native ADO.NET (Microsoft.Data.SqlClient) with schema & migrations managed by FluentMigrator migrations (coming soon).
 - Example:
   ```json
   {

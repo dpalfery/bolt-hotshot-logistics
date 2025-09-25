@@ -72,7 +72,11 @@ namespace HotshotLogistics.Tests
         public void Can_Set_Navigation_Properties()
         {
             var job = new Job { Id = "job-1", Title = "Test Job" };
-            var driver = new Driver { Id = 1, FirstName = "Alice", LastName = "Smith" };
+            var driver = new Driver
+            {
+                Id = 1,
+                PersonalInfo = new PersonalInfo { FirstName = "Alice", LastName = "Smith" }
+            };
             var assignment = new JobAssignment
             {
                 Job = job,

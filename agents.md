@@ -10,6 +10,40 @@ The solution is organized into the following core projects:
 
 The API is built using .NET (currently targeting .NET 8+).
 
+## Kilocode Rule Summary
+
+The `.kilocode/rules` directory defines mandatory delivery constraints that every change must honor. When working in this repository you **must**:
+
+### `ado-net.md`
+- Ban Entity Framework entirely—no EF NuGet packages, `DbContext`, migrations, or LINQ-to-Entities.
+- Use **only** native ADO.NET primitives (`Microsoft.Data.SqlClient`/`System.Data.SqlClient`) with async/await, `await using` disposal, and connection pooling.
+- Parameterize every SQL command, prefer stored procedures for complex work, and reuse `SqlCommand` instances when possible.
+- Implement repositories in `4-Persistence` that fulfill contracts from `3-Domain`; all data access must live in these repositories behind interfaces.
+- Handle errors explicitly with `SqlException`, wrap in meaningful domain exceptions, and ensure schema changes ship exclusively through FluentMigrator migrations (with rollback paths and seed data where needed).
+- For multi-statement operations use `SqlTransaction`, and design queries with indexing and plan caching in mind to maintain performance.
+
+### `file-organization.md`
+- Preserve the numbered Clean Architecture folder hierarchy (`0-Base` … `7-Deployment`) when creating or moving files.
+- Place abstractions in lower layers than their implementations and avoid any dependency that points “up” the stack.
+- Scope searches to the most relevant layer first; escalate outward only as needed.
+
+### `secrets.md`
+- Never commit connection strings, API keys, tokens, credentials, or other sensitive configuration.
+- Store secrets in secure providers (Azure Key Vault, environment variables) and design with HTTPS, RBAC, least privilege, validation, and proper CORS in mind.
+
+### Memory Bank Highlights
+- **Architecture:** Clean Architecture with DI, CQRS, repository pattern, strict layer boundaries, and an expectation that tests and static analysis keep repositories fast and secure.
+- **Product:** Hotshot Logistics powers an admin dashboard (Next.js), driver mobile app (Expo React Native), and backend API (Azure Functions/.NET 8) for urgent freight orchestration.
+- **Technology:** SQL Server + FluentMigrator via native ADO.NET, React/Expo front ends, Azure cloud services, Docker/Terraform deployment tooling, xUnit + FluentAssertions testing.
+- **Mission:** Replace manual dispatching with real-time, data-driven logistics management that scales as fleets grow.
+- **Development Flow:** Remove EF remnants, build migrations first, secure data access via repositories, and keep documentation/tests current with each feature.
+
+## Project Context Snapshot
+
+- **Architecture:** Clean Architecture with CQRS, repository pattern, DI, FluentMigrator, and strict layer boundaries.
+- **Product:** Hotshot Logistics orchestrates urgent freight deliveries with an admin web dashboard, a driver mobile app, and a shared backend API.
+- **Technology Stack:** .NET 8/Azure Functions backend, SQL Server with native ADO.NET, React/Next.js admin UI, Expo React Native mobile app, Azure-based deployment tooling, and StyleCop-enabled .NET solutions.
+
 ---
 
 ## Folder Structure
@@ -58,11 +92,11 @@ The project uses a numbered folder convention to clearly express architectural l
   
   > **Note:** The Domain layer contains no business logic. Its sole purpose is to define the core structure and contracts upon which the Application layer builds. The Domain layer has no dependencies on other layers.
 
-- [`4-Persistence`](https://github.com/dpalfery/bolt-hotshot-logistics/tree/development/4-Persistence):  
+- [`4-Persistence`](https://github.com/dpalfery/bolt-hotshot-logistics/tree/development/4-Persistence):
   This folder contains all infrastructure code related to data storage and retrieval. Its primary responsibilities are:
   - Implementing the contracts and interfaces defined in the Domain layer for data access (e.g., repositories, unit of work, data stores).
-  - Integrating with databases or other storage mechanisms (such as Entity Framework Core, Dapper, MongoDB, or external APIs).
-  - Providing concrete classes for saving and retrieving entities, value objects, and other data required by the application.
+  - Integrating with databases using native ADO.NET (Microsoft.Data.SqlClient) with schema and migrations managed by FluentMigrator; other storage options (Dapper, MongoDB, external APIs) may also be used where appropriate.
+  - Providing concrete repository implementations that follow the ADO.NET patterns (parameterized SQL, async operations, proper disposal) and surface only interfaces to the Application layer.
   - Managing database context, migrations, and data seeding if relevant.
 
   > **Note:** The Persistence layer should only contain data access logic and infrastructure-specific concerns. It must not contain business logic or knowledge of the presentation layer. All communications with data stores should occur through interfaces defined in the Domain layer, ensuring a clean separation of concerns.
@@ -77,13 +111,15 @@ The project uses a numbered folder convention to clearly express architectural l
 
   > **Note:** The Test layer should not contain production code or business logic. All tests should be automated and runnable via the build pipeline to ensure ongoing code quality and regressions are quickly identified.
 
-- [`6-Lib`](https://github.com/dpalfery/bolt-hotshot-logistics/tree/development/6-Lib):   
-  This folder contains shared libraries and supporting code that are used across multiple layers or components of the solution:
-  - **Third-Party Integrations:** Wrappers or adapters for external libraries or APIs that don’t fit cleanly into other architectural layers.
-  - **Custom Middleware & Components:** Standalone components, middleware, or cross-cutting features (e.g., custom logging providers, authentication handlers) intended for reuse.
-  - **Experimental or Incubating Libraries:** New utilities or abstractions under evaluation for broader adoption.
+- [`6-Docs`](https://github.com/dpalfery/bolt-hotshot-logistics/tree/development/6-Docs):
+  This folder contains all documentation and specifications related to the project. Its responsibilities and contents include:
+  - **Project Documentation:** README files, API documentation, and user guides.
+  - **Technical Specifications:** Architecture decisions, design documents, and system specifications.
+  - **API Documentation:** OpenAPI/Swagger specifications and endpoint documentation.
+  - **Development Guides:** Contributing guidelines, coding standards, and development workflows.
+  - **Legacy Documentation:** Information about deprecated features and migration guides.
 
-  > **Note:** Contents of this folder should be kept generic and decoupled from business rules. If a library becomes specific to a single domain, consider moving it to a more appropriate layer.
+  > **Note:** The Docs folder should contain all project-related documentation that helps developers understand, maintain, and extend the system. All documentation should be kept current and reviewed regularly as part of the development process.
 
 - [`7-Deployment`](https://github.com/dpalfery/bolt-hotshot-logistics/tree/development/7-Deployment):  
   This folder contains all assets and scripts necessary for deploying the application in various environments (development, staging, production, etc). Its contents typically include:
@@ -139,7 +175,7 @@ The project uses a numbered folder convention to clearly express architectural l
   - Infrastructure depends on Application and Domain.
   - API depends on Application, Infrastructure, and Domain.
 - **Business logic** goes only in Application.
-- **Infrastructure** contains EF Core, external APIs, and implementation details.
+- **Infrastructure** contains native ADO.NET implementations, FluentMigrator migrations, external APIs, and implementation details.
 - **API** contains only presentation and configuration logic.
 - Use dependency injection for all external services and infrastructure dependencies.
 

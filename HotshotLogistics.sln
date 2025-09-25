@@ -1,4 +1,5 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -16,8 +17,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5-Test", "5-Test", "{F12345
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotshotLogistics.Core", "0-Base\HotshotLogistics.Core\HotshotLogistics.Core.csproj", "{29A80FAE-B81D-4668-A107-DB8BDAF62D32}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotshotLogistics.Infrastructure", "4-Persistence\HotshotLogistics.Infrastructure\HotshotLogistics.Infrastructure.csproj", "{205A5F3C-5476-40F4-9226-146512C2880C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotshotLogistics.Tests", "5-Test\tests\HotshotLogistics.Tests\HotshotLogistics.Tests.csproj", "{A5E1454A-6799-44A0-B672-F7398EFF431C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotshotLogistics.Api", "1-Presentation\HotshotLogistics.Api\HotshotLogistics.Api.csproj", "{2F4459A9-157D-4C80-8A2F-F2050F117AA9}"
@@ -29,6 +28,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotshotLogistics.Application", "2-Application\HotshotLogistics.Application\HotshotLogistics.Application.csproj", "{67095C39-A713-4D43-BA91-1D799A5FE645}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotshotLogistics.Contracts", "3-Domain\HotshotLogistics.Contracts\HotshotLogistics.Contracts.csproj", "{1CBB9CB9-2018-4F94-A580-0F9F7F382F1D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigrationRunner", "MigrationRunner\MigrationRunner.csproj", "{25C288C2-63ED-4CD6-8A98-56D93C14806E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,18 +53,6 @@ Global
 		{29A80FAE-B81D-4668-A107-DB8BDAF62D32}.Release|x64.Build.0 = Release|Any CPU
 		{29A80FAE-B81D-4668-A107-DB8BDAF62D32}.Release|x86.ActiveCfg = Release|Any CPU
 		{29A80FAE-B81D-4668-A107-DB8BDAF62D32}.Release|x86.Build.0 = Release|Any CPU
-		{205A5F3C-5476-40F4-9226-146512C2880C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{205A5F3C-5476-40F4-9226-146512C2880C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{205A5F3C-5476-40F4-9226-146512C2880C}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{205A5F3C-5476-40F4-9226-146512C2880C}.Debug|x64.Build.0 = Debug|Any CPU
-		{205A5F3C-5476-40F4-9226-146512C2880C}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{205A5F3C-5476-40F4-9226-146512C2880C}.Debug|x86.Build.0 = Debug|Any CPU
-		{205A5F3C-5476-40F4-9226-146512C2880C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{205A5F3C-5476-40F4-9226-146512C2880C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{205A5F3C-5476-40F4-9226-146512C2880C}.Release|x64.ActiveCfg = Release|Any CPU
-		{205A5F3C-5476-40F4-9226-146512C2880C}.Release|x64.Build.0 = Release|Any CPU
-		{205A5F3C-5476-40F4-9226-146512C2880C}.Release|x86.ActiveCfg = Release|Any CPU
-		{205A5F3C-5476-40F4-9226-146512C2880C}.Release|x86.Build.0 = Release|Any CPU
 		{A5E1454A-6799-44A0-B672-F7398EFF431C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A5E1454A-6799-44A0-B672-F7398EFF431C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A5E1454A-6799-44A0-B672-F7398EFF431C}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -136,13 +125,24 @@ Global
 		{1CBB9CB9-2018-4F94-A580-0F9F7F382F1D}.Release|x64.Build.0 = Release|Any CPU
 		{1CBB9CB9-2018-4F94-A580-0F9F7F382F1D}.Release|x86.ActiveCfg = Release|Any CPU
 		{1CBB9CB9-2018-4F94-A580-0F9F7F382F1D}.Release|x86.Build.0 = Release|Any CPU
+		{25C288C2-63ED-4CD6-8A98-56D93C14806E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25C288C2-63ED-4CD6-8A98-56D93C14806E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25C288C2-63ED-4CD6-8A98-56D93C14806E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{25C288C2-63ED-4CD6-8A98-56D93C14806E}.Debug|x64.Build.0 = Debug|Any CPU
+		{25C288C2-63ED-4CD6-8A98-56D93C14806E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{25C288C2-63ED-4CD6-8A98-56D93C14806E}.Debug|x86.Build.0 = Debug|Any CPU
+		{25C288C2-63ED-4CD6-8A98-56D93C14806E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25C288C2-63ED-4CD6-8A98-56D93C14806E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25C288C2-63ED-4CD6-8A98-56D93C14806E}.Release|x64.ActiveCfg = Release|Any CPU
+		{25C288C2-63ED-4CD6-8A98-56D93C14806E}.Release|x64.Build.0 = Release|Any CPU
+		{25C288C2-63ED-4CD6-8A98-56D93C14806E}.Release|x86.ActiveCfg = Release|Any CPU
+		{25C288C2-63ED-4CD6-8A98-56D93C14806E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{29A80FAE-B81D-4668-A107-DB8BDAF62D32} = {A1234567-B81D-4668-A107-DB8BDAF62D32}
-		{205A5F3C-5476-40F4-9226-146512C2880C} = {E1234567-B81D-4668-A107-DB8BDAF62D32}
 		{A5E1454A-6799-44A0-B672-F7398EFF431C} = {F1234567-B81D-4668-A107-DB8BDAF62D32}
 		{2F4459A9-157D-4C80-8A2F-F2050F117AA9} = {B1234567-B81D-4668-A107-DB8BDAF62D32}
 		{2B894B61-9E83-7CA3-DBCA-EDA1F6E7B2B2} = {E1234567-B81D-4668-A107-DB8BDAF62D32}

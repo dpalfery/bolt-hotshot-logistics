@@ -83,8 +83,7 @@ namespace HotshotLogistics.Api
                     // Register Azure App Configuration refresh service
                     _ = services.AddAzureAppConfiguration();
 
-                    // Register DbContext and repositories
-                    _ = services.AddHotshotDbContext(context.Configuration);
+                    // Register repositories (ADO.NET-based). DbContext removed in favor of native ADO.NET + FluentMigrator.
                     _ = services.AddHotshotRepositories();
 
                     // Register application services

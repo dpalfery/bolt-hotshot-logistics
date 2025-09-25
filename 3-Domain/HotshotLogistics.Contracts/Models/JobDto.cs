@@ -5,6 +5,7 @@
 namespace HotshotLogistics.Contracts.Models
 {
     using System;
+    using HotshotLogistics.Contracts.Models;
 
     /// <summary>
     /// Data transfer object for job information.
@@ -49,7 +50,7 @@ namespace HotshotLogistics.Contracts.Models
         /// <summary>
         /// Gets or sets the estimated delivery time for the job.
         /// </summary>
-        public string EstimatedDeliveryTime { get; set; } = string.Empty;
+        public string EstimatedDeliveryTimeString { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the ID of the assigned driver.
@@ -65,5 +66,28 @@ namespace HotshotLogistics.Contracts.Models
         /// Gets or sets the last update timestamp of the job.
         /// </summary>
         public DateTime? UpdatedAt { get; set; }
+
+        // IJob interface implementation
+        public string CustomerId { get; set; } = string.Empty;
+        public Location PickupLocation { get; set; } = new Location();
+        public Location DeliveryLocation { get; set; } = new Location();
+        public CargoDetails Cargo { get; set; } = new CargoDetails();
+        public PricingDetails Pricing { get; set; } = new PricingDetails();
+        public DateTime ScheduledPickupTime { get; set; }
+        public DateTime EstimatedDeliveryTime
+        {
+            get
+            {
+                if (DateTime.TryParse(this.EstimatedDeliveryTimeString, out var result))
+                {
+                    return result;
+                }
+                return DateTime.MinValue;
+            }
+            set => this.EstimatedDeliveryTimeString = value.ToString("O");
+        }
+        public string SpecialInstructions { get; set; } = string.Empty;
+        public List<JobDocument> Documents { get; set; } = new List<JobDocument>();
+        public TrackingInfo Tracking { get; set; } = new TrackingInfo();
     }
 }

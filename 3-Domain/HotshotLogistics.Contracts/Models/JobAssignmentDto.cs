@@ -1,9 +1,11 @@
 namespace HotshotLogistics.Contracts.Models;
 
+using HotshotLogistics.Contracts.Models;
+
 /// <summary>
 /// Data transfer object for JobAssignment.
 /// </summary>
-public class JobAssignmentDto : IJobAssignment
+public class JobAssignmentDto
 {
     /// <inheritdoc/>
     public string Id { get; set; } = string.Empty;
