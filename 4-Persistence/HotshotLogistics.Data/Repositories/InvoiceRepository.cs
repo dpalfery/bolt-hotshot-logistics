@@ -1,7 +1,7 @@
 namespace HotshotLogistics.Data.Repositories;
 #pragma warning disable SA1202 // False positive - public members are correctly ordered before protected members
 
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Text;
 using HotshotLogistics.Contracts.Models;
 using HotshotLogistics.Contracts.Repositories;

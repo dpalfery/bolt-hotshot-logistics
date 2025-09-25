@@ -83,7 +83,6 @@ namespace HotshotLogistics.Contracts.Models
         public Location DeliveryLocation { get; set; } = new Location();
         public CargoDetails Cargo { get; set; } = new CargoDetails();
         public PricingDetails Pricing { get; set; } = new PricingDetails();
-        public DateTime ScheduledPickupTime { get; set; }
         public DateTime EstimatedDeliveryTime
         {
             get
@@ -96,7 +95,8 @@ namespace HotshotLogistics.Contracts.Models
             }
             set => this.EstimatedDeliveryTimeString = value.ToString("O");
         }
-        public string SpecialInstructions { get; set; } = string.Empty;
+        public DateTime? ActualPickupTime { get; set; }
+        public DateTime? ActualDeliveryTime { get; set; }
         public List<JobDocument> Documents { get; set; } = new List<JobDocument>();
         public TrackingInfo Tracking { get; set; } = new TrackingInfo();
     }
