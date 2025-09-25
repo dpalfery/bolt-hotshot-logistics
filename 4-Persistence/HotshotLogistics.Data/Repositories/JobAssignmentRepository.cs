@@ -1,13 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using HotshotLogistics.Contracts.Models;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Core.Repositories;
 using HotshotLogistics.Domain.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
 namespace HotshotLogistics.Data.Repositories;
@@ -21,76 +23,9 @@ internal class JobAssignmentRepository : BaseRepository<JobAssignmentDto>, IJobA
     /// Initializes a new instance of the <see cref="JobAssignmentRepository"/> class.
     /// </summary>
     /// <param name="configuration">The application configuration.</param>
-    public JobAssignmentRepository(IConfiguration configuration) : base(configuration)
+    public JobAssignmentRepository(IConfiguration configuration)
+        : base(configuration)
     {
-    }
-
-    /// <inheritdoc/>
-    protected override string GetTableName() => "JobAssignments";
-
-    /// <inheritdoc/>
-    protected override string GetPrimaryKeyColumnName() => "Id";
-
-    /// <inheritdoc/>
-    protected override JobAssignmentDto MapReaderToEntity(SqlDataReader reader)
-    {
-        return new JobAssignmentDto
-        {
-            Id = reader.GetString(reader.GetOrdinal("Id")),
-            JobId = reader.GetString(reader.GetOrdinal("JobId")),
-            DriverId = reader.GetInt32(reader.GetOrdinal("DriverId")),
-            AssignedAt = reader.GetDateTime(reader.GetOrdinal("AssignedAt")),
-            Status = (JobAssignmentStatus)reader.GetInt32(reader.GetOrdinal("Status")),
-            Driver = reader.IsDBNull(reader.GetOrdinal("DriverId")) ? null : new DriverDto
-            {
-                Id = reader.GetInt32(reader.GetOrdinal("DriverId")),
-                FirstName = reader.GetString(reader.GetOrdinal("DriverFirstName")),
-                LastName = reader.GetString(reader.GetOrdinal("DriverLastName")),
-                Email = reader.GetString(reader.GetOrdinal("DriverEmail")),
-                PhoneNumber = reader.GetString(reader.GetOrdinal("DriverPhoneNumber")),
-                LicenseNumber = reader.GetString(reader.GetOrdinal("DriverLicenseNumber")),
-                LicenseExpiryDate = reader.GetDateTime(reader.GetOrdinal("DriverLicenseExpiryDate"))
-            },
-            Job = new JobDto
-            {
-                Id = reader.GetString(reader.GetOrdinal("JobId")),
-                Title = reader.GetString(reader.GetOrdinal("JobTitle")),
-                PickupAddress = reader.GetString(reader.GetOrdinal("JobPickupAddress")),
-                DropoffAddress = reader.GetString(reader.GetOrdinal("JobDeliveryAddress")),
-                Status = (JobStatus)reader.GetInt32(reader.GetOrdinal("JobStatus")),
-                Priority = (JobPriority)reader.GetInt32(reader.GetOrdinal("JobPriority")),
-                Amount = reader.GetDecimal(reader.GetOrdinal("JobAmount")),
-                EstimatedDeliveryTimeString = reader.GetDateTime(reader.GetOrdinal("JobEstimatedDeliveryTime")).ToString("O"),
-                CreatedAt = reader.GetDateTime(reader.GetOrdinal("JobCreatedAt")),
-                UpdatedAt = reader.IsDBNull(reader.GetOrdinal("JobUpdatedAt")) ? null : reader.GetDateTime(reader.GetOrdinal("JobUpdatedAt"))
-            }
-        };
-    }
-
-    /// <inheritdoc/>
-    protected override SqlParameter[] GetInsertParameters(JobAssignmentDto entity)
-    {
-        return new[]
-        {
-            new SqlParameter("@Id", SqlDbType.NVarChar) { Value = entity.Id },
-            new SqlParameter("@JobId", SqlDbType.NVarChar) { Value = entity.JobId },
-            new SqlParameter("@DriverId", SqlDbType.Int) { Value = entity.DriverId },
-            new SqlParameter("@AssignedAt", SqlDbType.DateTime2) { Value = entity.AssignedAt },
-            new SqlParameter("@Status", SqlDbType.Int) { Value = (int)entity.Status }
-        };
-    }
-
-    /// <inheritdoc/>
-    protected override SqlParameter[] GetUpdateParameters(JobAssignmentDto entity)
-    {
-        return new[]
-        {
-            new SqlParameter("@Id", SqlDbType.NVarChar) { Value = entity.Id },
-            new SqlParameter("@JobId", SqlDbType.NVarChar) { Value = entity.JobId },
-            new SqlParameter("@DriverId", SqlDbType.Int) { Value = entity.DriverId },
-            new SqlParameter("@AssignedAt", SqlDbType.DateTime2) { Value = entity.AssignedAt },
-            new SqlParameter("@Status", SqlDbType.Int) { Value = (int)entity.Status }
-        };
     }
 
     /// <inheritdoc/>
@@ -206,12 +141,80 @@ internal class JobAssignmentRepository : BaseRepository<JobAssignmentDto>, IJobA
             throw new ArgumentNullException(nameof(jobAssignment));
         }
 
-        return await UpdateAsync(jobAssignment);
+        return await base.UpdateAsync(jobAssignment);
     }
 
     /// <inheritdoc/>
     public async Task<bool> DeleteAsync(string id, CancellationToken cancellationToken = default)
     {
-        return await base.DeleteAsync(id, cancellationToken);
+        return await base.DeleteAsync(id);
+    }
+
+    /// <inheritdoc/>
+    protected override string GetTableName() => "JobAssignments";
+
+    /// <inheritdoc/>
+    protected override string GetPrimaryKeyColumnName() => "Id";
+
+    /// <inheritdoc/>
+    protected override JobAssignmentDto MapReaderToEntity(SqlDataReader reader)
+    {
+        return new JobAssignmentDto
+        {
+            Id = reader.GetString(reader.GetOrdinal("Id")),
+            JobId = reader.GetString(reader.GetOrdinal("JobId")),
+            DriverId = reader.GetInt32(reader.GetOrdinal("DriverId")),
+            AssignedAt = reader.GetDateTime(reader.GetOrdinal("AssignedAt")),
+            Status = (JobAssignmentStatus)reader.GetInt32(reader.GetOrdinal("Status")),
+            Driver = reader.IsDBNull(reader.GetOrdinal("DriverId")) ? null : new DriverDto
+            {
+                Id = reader.GetInt32(reader.GetOrdinal("DriverId")),
+                FirstName = reader.GetString(reader.GetOrdinal("DriverFirstName")),
+                LastName = reader.GetString(reader.GetOrdinal("DriverLastName")),
+                Email = reader.GetString(reader.GetOrdinal("DriverEmail")),
+                PhoneNumber = reader.GetString(reader.GetOrdinal("DriverPhoneNumber")),
+                LicenseNumber = reader.GetString(reader.GetOrdinal("DriverLicenseNumber")),
+                LicenseExpiryDate = reader.GetDateTime(reader.GetOrdinal("DriverLicenseExpiryDate")),
+            },
+            Job = new JobDto
+            {
+                Id = reader.GetString(reader.GetOrdinal("JobId")),
+                Title = reader.GetString(reader.GetOrdinal("JobTitle")),
+                PickupAddress = reader.GetString(reader.GetOrdinal("JobPickupAddress")),
+                DropoffAddress = reader.GetString(reader.GetOrdinal("JobDeliveryAddress")),
+                Status = (JobStatus)reader.GetInt32(reader.GetOrdinal("JobStatus")),
+                Priority = (JobPriority)reader.GetInt32(reader.GetOrdinal("JobPriority")),
+                Amount = reader.GetDecimal(reader.GetOrdinal("JobAmount")),
+                EstimatedDeliveryTimeString = reader.GetDateTime(reader.GetOrdinal("JobEstimatedDeliveryTime")).ToString("O"),
+                CreatedAt = reader.GetDateTime(reader.GetOrdinal("JobCreatedAt")),
+                UpdatedAt = reader.IsDBNull(reader.GetOrdinal("JobUpdatedAt")) ? null : reader.GetDateTime(reader.GetOrdinal("JobUpdatedAt")),
+            },
+        };
+    }
+
+    /// <inheritdoc/>
+    protected override SqlParameter[] GetInsertParameters(JobAssignmentDto entity)
+    {
+        return new[]
+        {
+            new SqlParameter("@Id", SqlDbType.NVarChar) { Value = entity.Id },
+            new SqlParameter("@JobId", SqlDbType.NVarChar) { Value = entity.JobId },
+            new SqlParameter("@DriverId", SqlDbType.Int) { Value = entity.DriverId },
+            new SqlParameter("@AssignedAt", SqlDbType.DateTime2) { Value = entity.AssignedAt },
+            new SqlParameter("@Status", SqlDbType.Int) { Value = (int)entity.Status },
+        };
+    }
+
+    /// <inheritdoc/>
+    protected override SqlParameter[] GetUpdateParameters(JobAssignmentDto entity)
+    {
+        return new[]
+        {
+            new SqlParameter("@Id", SqlDbType.NVarChar) { Value = entity.Id },
+            new SqlParameter("@JobId", SqlDbType.NVarChar) { Value = entity.JobId },
+            new SqlParameter("@DriverId", SqlDbType.Int) { Value = entity.DriverId },
+            new SqlParameter("@AssignedAt", SqlDbType.DateTime2) { Value = entity.AssignedAt },
+            new SqlParameter("@Status", SqlDbType.Int) { Value = (int)entity.Status },
+        };
     }
 }

@@ -10,6 +10,40 @@ The solution is organized into the following core projects:
 
 The API is built using .NET (currently targeting .NET 8+).
 
+## Kilocode Rule Summary
+
+The `.kilocode/rules` directory defines mandatory delivery constraints that every change must honor. When working in this repository you **must**:
+
+### `ado-net.md`
+- Ban Entity Framework entirely—no EF NuGet packages, `DbContext`, migrations, or LINQ-to-Entities.
+- Use **only** native ADO.NET primitives (`Microsoft.Data.SqlClient`/`System.Data.SqlClient`) with async/await, `await using` disposal, and connection pooling.
+- Parameterize every SQL command, prefer stored procedures for complex work, and reuse `SqlCommand` instances when possible.
+- Implement repositories in `4-Persistence` that fulfill contracts from `3-Domain`; all data access must live in these repositories behind interfaces.
+- Handle errors explicitly with `SqlException`, wrap in meaningful domain exceptions, and ensure schema changes ship exclusively through FluentMigrator migrations (with rollback paths and seed data where needed).
+- For multi-statement operations use `SqlTransaction`, and design queries with indexing and plan caching in mind to maintain performance.
+
+### `file-organization.md`
+- Preserve the numbered Clean Architecture folder hierarchy (`0-Base` … `7-Deployment`) when creating or moving files.
+- Place abstractions in lower layers than their implementations and avoid any dependency that points “up” the stack.
+- Scope searches to the most relevant layer first; escalate outward only as needed.
+
+### `secrets.md`
+- Never commit connection strings, API keys, tokens, credentials, or other sensitive configuration.
+- Store secrets in secure providers (Azure Key Vault, environment variables) and design with HTTPS, RBAC, least privilege, validation, and proper CORS in mind.
+
+### Memory Bank Highlights
+- **Architecture:** Clean Architecture with DI, CQRS, repository pattern, strict layer boundaries, and an expectation that tests and static analysis keep repositories fast and secure.
+- **Product:** Hotshot Logistics powers an admin dashboard (Next.js), driver mobile app (Expo React Native), and backend API (Azure Functions/.NET 8) for urgent freight orchestration.
+- **Technology:** SQL Server + FluentMigrator via native ADO.NET, React/Expo front ends, Azure cloud services, Docker/Terraform deployment tooling, xUnit + FluentAssertions testing.
+- **Mission:** Replace manual dispatching with real-time, data-driven logistics management that scales as fleets grow.
+- **Development Flow:** Remove EF remnants, build migrations first, secure data access via repositories, and keep documentation/tests current with each feature.
+
+## Project Context Snapshot
+
+- **Architecture:** Clean Architecture with CQRS, repository pattern, DI, FluentMigrator, and strict layer boundaries.
+- **Product:** Hotshot Logistics orchestrates urgent freight deliveries with an admin web dashboard, a driver mobile app, and a shared backend API.
+- **Technology Stack:** .NET 8/Azure Functions backend, SQL Server with native ADO.NET, React/Next.js admin UI, Expo React Native mobile app, Azure-based deployment tooling, and StyleCop-enabled .NET solutions.
+
 ---
 
 ## Folder Structure

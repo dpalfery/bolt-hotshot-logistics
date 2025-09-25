@@ -21,7 +21,6 @@ public class CreateDriversTable : Migration
             .WithColumn("IsActive").AsBoolean().WithDefaultValue(true)
             .WithColumn("CreatedAt").AsDateTime2().NotNullable().WithDefault(SystemMethods.CurrentDateTime)
             .WithColumn("UpdatedAt").AsDateTime2().Nullable();
-
     }
 
     public override void Down()

@@ -5,13 +5,15 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using HotshotLogistics.Contracts.Models;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Core.Repositories;
 using HotshotLogistics.Domain.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
 namespace HotshotLogistics.Data.Repositories
@@ -25,69 +27,9 @@ namespace HotshotLogistics.Data.Repositories
         /// Initializes a new instance of the <see cref="DriverRepository"/> class.
         /// </summary>
         /// <param name="configuration">The application configuration.</param>
-        public DriverRepository(IConfiguration configuration) : base(configuration)
+        public DriverRepository(IConfiguration configuration)
+            : base(configuration)
         {
-        }
-
-        /// <inheritdoc/>
-        protected override string GetTableName() => "Drivers";
-
-        /// <inheritdoc/>
-        protected override string GetPrimaryKeyColumnName() => "Id";
-
-        /// <inheritdoc/>
-        protected override Driver MapReaderToEntity(SqlDataReader reader)
-        {
-            return new Driver
-            {
-                Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                PersonalInfo = new PersonalInfo
-                {
-                    FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                    LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                    Email = reader.GetString(reader.GetOrdinal("Email")),
-                    PhoneNumber = reader.GetString(reader.GetOrdinal("PhoneNumber"))
-                },
-                License = new LicenseInfo
-                {
-                    LicenseNumber = reader.GetString(reader.GetOrdinal("LicenseNumber")),
-                    LicenseExpiryDate = reader.GetDateTime(reader.GetOrdinal("LicenseExpiryDate"))
-                },
-                IsActive = reader.GetBoolean(reader.GetOrdinal("IsActive")),
-                CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
-                UpdatedAt = reader.IsDBNull(reader.GetOrdinal("UpdatedAt")) ? null : reader.GetDateTime(reader.GetOrdinal("UpdatedAt"))
-            };
-        }
-
-        /// <inheritdoc/>
-        protected override SqlParameter[] GetInsertParameters(Driver entity)
-        {
-            return new[]
-            {
-                new SqlParameter("@FirstName", SqlDbType.NVarChar) { Value = entity.PersonalInfo.FirstName },
-                new SqlParameter("@LastName", SqlDbType.NVarChar) { Value = entity.PersonalInfo.LastName },
-                new SqlParameter("@Email", SqlDbType.NVarChar) { Value = entity.PersonalInfo.Email },
-                new SqlParameter("@PhoneNumber", SqlDbType.NVarChar) { Value = entity.PersonalInfo.PhoneNumber },
-                new SqlParameter("@LicenseNumber", SqlDbType.NVarChar) { Value = entity.License.LicenseNumber },
-                new SqlParameter("@LicenseExpiryDate", SqlDbType.DateTime2) { Value = entity.License.LicenseExpiryDate },
-                new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive }
-            };
-        }
-
-        /// <inheritdoc/>
-        protected override SqlParameter[] GetUpdateParameters(Driver entity)
-        {
-            return new[]
-            {
-                new SqlParameter("@Id", SqlDbType.Int) { Value = entity.Id },
-                new SqlParameter("@FirstName", SqlDbType.NVarChar) { Value = entity.PersonalInfo.FirstName },
-                new SqlParameter("@LastName", SqlDbType.NVarChar) { Value = entity.PersonalInfo.LastName },
-                new SqlParameter("@Email", SqlDbType.NVarChar) { Value = entity.PersonalInfo.Email },
-                new SqlParameter("@PhoneNumber", SqlDbType.NVarChar) { Value = entity.PersonalInfo.PhoneNumber },
-                new SqlParameter("@LicenseNumber", SqlDbType.NVarChar) { Value = entity.License.LicenseNumber },
-                new SqlParameter("@LicenseExpiryDate", SqlDbType.DateTime2) { Value = entity.License.LicenseExpiryDate },
-                new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive }
-            };
         }
 
         /// <inheritdoc/>
@@ -131,7 +73,7 @@ namespace HotshotLogistics.Data.Repositories
             var parameters = new[]
             {
                 new SqlParameter("@Id", SqlDbType.Int) { Value = id },
-                new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = DateTime.UtcNow }
+                new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = DateTime.UtcNow },
             };
             await ExecuteNonQueryAsync(sql, parameters);
         }
@@ -160,6 +102,67 @@ namespace HotshotLogistics.Data.Repositories
             const string sql = "SELECT * FROM Drivers WHERE IsActive = 1 ORDER BY LastName, FirstName";
             var drivers = await ExecuteQueryAsync(sql);
             return drivers.Cast<IDriver>();
+        }
+
+        /// <inheritdoc/>
+        protected override string GetTableName() => "Drivers";
+
+        /// <inheritdoc/>
+        protected override string GetPrimaryKeyColumnName() => "Id";
+
+        /// <inheritdoc/>
+        protected override Driver MapReaderToEntity(SqlDataReader reader)
+        {
+            return new Driver
+            {
+                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                PersonalInfo = new PersonalInfo
+                {
+                    FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                    LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                    Email = reader.GetString(reader.GetOrdinal("Email")),
+                    PhoneNumber = reader.GetString(reader.GetOrdinal("PhoneNumber")),
+                },
+                License = new LicenseInfo
+                {
+                    LicenseNumber = reader.GetString(reader.GetOrdinal("LicenseNumber")),
+                    LicenseExpiryDate = reader.GetDateTime(reader.GetOrdinal("LicenseExpiryDate")),
+                },
+                IsActive = reader.GetBoolean(reader.GetOrdinal("IsActive")),
+                CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
+                UpdatedAt = reader.IsDBNull(reader.GetOrdinal("UpdatedAt")) ? null : reader.GetDateTime(reader.GetOrdinal("UpdatedAt")),
+            };
+        }
+
+        /// <inheritdoc/>
+        protected override SqlParameter[] GetInsertParameters(Driver entity)
+        {
+            return new[]
+            {
+                new SqlParameter("@FirstName", SqlDbType.NVarChar) { Value = entity.PersonalInfo.FirstName },
+                new SqlParameter("@LastName", SqlDbType.NVarChar) { Value = entity.PersonalInfo.LastName },
+                new SqlParameter("@Email", SqlDbType.NVarChar) { Value = entity.PersonalInfo.Email },
+                new SqlParameter("@PhoneNumber", SqlDbType.NVarChar) { Value = entity.PersonalInfo.PhoneNumber },
+                new SqlParameter("@LicenseNumber", SqlDbType.NVarChar) { Value = entity.License.LicenseNumber },
+                new SqlParameter("@LicenseExpiryDate", SqlDbType.DateTime2) { Value = entity.License.LicenseExpiryDate },
+                new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive },
+            };
+        }
+
+        /// <inheritdoc/>
+        protected override SqlParameter[] GetUpdateParameters(Driver entity)
+        {
+            return new[]
+            {
+                new SqlParameter("@Id", SqlDbType.Int) { Value = entity.Id },
+                new SqlParameter("@FirstName", SqlDbType.NVarChar) { Value = entity.PersonalInfo.FirstName },
+                new SqlParameter("@LastName", SqlDbType.NVarChar) { Value = entity.PersonalInfo.LastName },
+                new SqlParameter("@Email", SqlDbType.NVarChar) { Value = entity.PersonalInfo.Email },
+                new SqlParameter("@PhoneNumber", SqlDbType.NVarChar) { Value = entity.PersonalInfo.PhoneNumber },
+                new SqlParameter("@LicenseNumber", SqlDbType.NVarChar) { Value = entity.License.LicenseNumber },
+                new SqlParameter("@LicenseExpiryDate", SqlDbType.DateTime2) { Value = entity.License.LicenseExpiryDate },
+                new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive },
+            };
         }
     }
 }
