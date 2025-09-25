@@ -320,3 +320,8 @@ override.tf.json
 *_override.tf.json
 .terraformrc
 terraform.rc
+
+# CodeQL database files
+codeql-db/
+*.zip
+codeql/
