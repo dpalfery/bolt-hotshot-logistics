@@ -1,6 +1,8 @@
 namespace HotshotLogistics.Core.Repositories;
 
 using System.Data;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
@@ -10,6 +12,8 @@ using Microsoft.Extensions.Configuration;
 /// <typeparam name="T">The entity type.</typeparam>
 public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
 {
+    private static readonly Regex SafeIdentifierRegex = new("^[A-Za-z_][A-Za-z0-9_]*$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
     private readonly string _connectionString;
 
     /// <summary>
@@ -58,12 +62,14 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
     /// <inheritdoc/>
     public async Task<T?> GetByIdAsync(object id)
     {
-        const string sql = "SELECT * FROM {0} WHERE {1} = @Id";
+        var tableName = FormatIdentifier(GetTableName());
+        var primaryKeyColumn = FormatIdentifier(GetPrimaryKeyColumnName());
+        var commandText = $"SELECT * FROM {tableName} WHERE {primaryKeyColumn} = @Id";
 
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync();
 
-        await using var command = new SqlCommand(string.Format(sql, GetTableName(), GetPrimaryKeyColumnName()), connection);
+        await using var command = new SqlCommand(commandText, connection);
         command.Parameters.AddWithValue("@Id", id);
 
         await using var reader = await command.ExecuteReaderAsync();
@@ -78,14 +84,15 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
     /// <inheritdoc/>
     public async Task<IEnumerable<T>> GetAllAsync()
     {
-        const string sql = "SELECT * FROM {0}";
+        var tableName = FormatIdentifier(GetTableName());
+        var commandText = $"SELECT * FROM {tableName}";
 
         var entities = new List<T>();
 
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync();
 
-        await using var command = new SqlCommand(string.Format(sql, GetTableName()), connection);
+        await using var command = new SqlCommand(commandText, connection);
         await using var reader = await command.ExecuteReaderAsync();
 
         while (await reader.ReadAsync())
@@ -99,17 +106,17 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
     /// <inheritdoc/>
     public async Task<T> AddAsync(T entity)
     {
-        const string sql = "INSERT INTO {0} ({1}) OUTPUT INSERTED.* VALUES ({2})";
+        const string sqlTemplate = "INSERT INTO {0} ({1}) OUTPUT INSERTED.* VALUES ({2})";
 
-        var tableName = GetTableName();
+        var tableName = FormatIdentifier(GetTableName());
         var parameters = GetInsertParameters(entity);
-        var columnNames = string.Join(", ", parameters.Select(p => p.ParameterName.TrimStart('@')));
+        var columnNames = string.Join(", ", parameters.Select(p => FormatIdentifier(p.ParameterName.TrimStart('@'))));
         var valuePlaceholders = string.Join(", ", parameters.Select(p => p.ParameterName));
 
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync();
 
-        await using var command = new SqlCommand(string.Format(sql, tableName, columnNames, valuePlaceholders), connection);
+        await using var command = new SqlCommand(string.Format(CultureInfo.InvariantCulture, sqlTemplate, tableName, columnNames, valuePlaceholders), connection);
         command.Parameters.AddRange(parameters);
 
         await using var reader = await command.ExecuteReaderAsync();
@@ -124,17 +131,17 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
     /// <inheritdoc/>
     public async Task<T> UpdateAsync(T entity)
     {
-        const string sql = "UPDATE {0} SET {1} OUTPUT INSERTED.* WHERE {2} = @Id";
+        const string sqlTemplate = "UPDATE {0} SET {1} OUTPUT INSERTED.* WHERE {2} = @Id";
 
-        var tableName = GetTableName();
+        var tableName = FormatIdentifier(GetTableName());
         var parameters = GetUpdateParameters(entity);
-        var setClause = string.Join(", ", parameters.Select(p => $"{p.ParameterName.TrimStart('@')} = {p.ParameterName}"));
-        var primaryKeyColumn = GetPrimaryKeyColumnName();
+        var setClause = string.Join(", ", parameters.Select(p => $"{FormatIdentifier(p.ParameterName.TrimStart('@'))} = {p.ParameterName}"));
+        var primaryKeyColumn = FormatIdentifier(GetPrimaryKeyColumnName());
 
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync();
 
-        await using var command = new SqlCommand(string.Format(sql, tableName, setClause, primaryKeyColumn), connection);
+        await using var command = new SqlCommand(string.Format(CultureInfo.InvariantCulture, sqlTemplate, tableName, setClause, primaryKeyColumn), connection);
         command.Parameters.AddRange(parameters);
 
         await using var reader = await command.ExecuteReaderAsync();
@@ -149,12 +156,14 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
     /// <inheritdoc/>
     public async Task<bool> DeleteAsync(object id)
     {
-        const string sql = "DELETE FROM {0} WHERE {1} = @Id";
+        var tableName = FormatIdentifier(GetTableName());
+        var primaryKeyColumn = FormatIdentifier(GetPrimaryKeyColumnName());
+        var commandText = $"DELETE FROM {tableName} WHERE {primaryKeyColumn} = @Id";
 
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync();
 
-        await using var command = new SqlCommand(string.Format(sql, GetTableName(), GetPrimaryKeyColumnName()), connection);
+        await using var command = new SqlCommand(commandText, connection);
         command.Parameters.AddWithValue("@Id", id);
 
         var rowsAffected = await command.ExecuteNonQueryAsync();
@@ -164,15 +173,21 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
     /// <inheritdoc/>
     public async Task<bool> ExistsAsync(object id)
     {
-        const string sql = "SELECT COUNT(1) FROM {0} WHERE {1} = @Id";
+        var tableName = FormatIdentifier(GetTableName());
+        var primaryKeyColumn = FormatIdentifier(GetPrimaryKeyColumnName());
+        var commandText = $"SELECT COUNT(1) FROM {tableName} WHERE {primaryKeyColumn} = @Id";
 
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync();
 
-        await using var command = new SqlCommand(string.Format(sql, GetTableName(), GetPrimaryKeyColumnName()), connection);
+        await using var command = new SqlCommand(commandText, connection);
         command.Parameters.AddWithValue("@Id", id);
 
-        var count = (int)await command.ExecuteScalarAsync();
+        var scalar = await command.ExecuteScalarAsync();
+        var count = scalar is null || scalar == DBNull.Value
+            ? 0
+            : Convert.ToInt32(scalar, CultureInfo.InvariantCulture);
+
         return count > 0;
     }
 
@@ -243,6 +258,31 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
         }
 
         var result = await command.ExecuteScalarAsync();
-        return (TResult)result;
+        if (result is null || result == DBNull.Value)
+        {
+            return default!;
+        }
+
+        if (result is TResult typedResult)
+        {
+            return typedResult;
+        }
+
+        return (TResult)Convert.ChangeType(result, typeof(TResult), CultureInfo.InvariantCulture);
+    }
+
+    private static string FormatIdentifier(string identifier)
+    {
+        if (string.IsNullOrWhiteSpace(identifier))
+        {
+            throw new ArgumentException("Identifier cannot be null or whitespace.", nameof(identifier));
+        }
+
+        if (!SafeIdentifierRegex.IsMatch(identifier))
+        {
+            throw new ArgumentException($"Identifier '{identifier}' contains invalid characters.", nameof(identifier));
+        }
+
+        return $"[{identifier}]";
     }
 }

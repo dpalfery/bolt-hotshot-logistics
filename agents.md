@@ -10,6 +10,38 @@ The solution is organized into the following core projects:
 
 The API is built using .NET (currently targeting .NET 8+).
 
+## Kilocode Rule Summary
+
+The `.kilocode/rules` directory defines mandatory delivery constraints that every change must honor. When working in this repository you **must**:
+
+### `ado-net.md`
+- Ban Entity Framework entirely—no EF NuGet packages, `DbContext`, or LINQ-to-Entities.
+- Use only native ADO.NET primitives (`Microsoft.Data.SqlClient`/`System.Data.SqlClient`) with asynchronous patterns and `await using` disposal.
+- Parameterize every SQL command, reuse commands when possible, and rely on connection pooling instead of rolling your own.
+- Capture `SqlException` explicitly, surface meaningful errors, and ensure schema evolution flows through FluentMigrator migrations.
+- Provide repository implementations that live in `4-Persistence` and implement contracts defined in `3-Domain`.
+
+### `file-organization.md`
+- Preserve the numbered Clean Architecture folder hierarchy (`0-Base` … `7-Deployment`) when creating or moving files.
+- Place abstractions in lower layers than their implementations and avoid any dependency that points “up” the stack.
+- Scope searches to the most relevant layer first; escalate outward only as needed.
+
+### `secrets.md`
+- Never commit connection strings, API keys, tokens, credentials, or other sensitive configuration.
+- Store secrets in secure providers (Azure Key Vault, environment variables) and design with HTTPS, RBAC, least privilege, validation, and proper CORS in mind.
+
+### Memory Bank Highlights
+- **Architecture:** Clean Architecture with DI, CQRS, repository pattern, and strict layering.
+- **Product:** Hotshot Logistics powers an admin dashboard (Next.js), driver mobile app (Expo React Native), and backend API (Azure Functions/.NET 8) for urgent freight orchestration.
+- **Technology:** SQL Server + FluentMigrator via native ADO.NET, React/Expo front ends, Azure cloud services, Docker/Terraform deployment tooling, xUnit + FluentAssertions testing.
+- **Mission:** Replace manual dispatching with real-time, data-driven logistics management that scales as fleets grow.
+
+## Project Context Snapshot
+
+- **Architecture:** Clean Architecture with CQRS, repository pattern, DI, FluentMigrator, and strict layer boundaries.
+- **Product:** Hotshot Logistics orchestrates urgent freight deliveries with an admin web dashboard, a driver mobile app, and a shared backend API.
+- **Technology Stack:** .NET 8/Azure Functions backend, SQL Server with native ADO.NET, React/Next.js admin UI, Expo React Native mobile app, Azure-based deployment tooling, and StyleCop-enabled .NET solutions.
+
 ---
 
 ## Folder Structure

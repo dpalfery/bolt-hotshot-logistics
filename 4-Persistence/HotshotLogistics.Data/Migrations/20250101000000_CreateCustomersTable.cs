@@ -16,9 +16,9 @@ public class CreateCustomersTable : Migration
             .WithColumn("State").AsString(50).Nullable()
             .WithColumn("ZipCode").AsString(20).Nullable()
             .WithColumn("Country").AsString(100).Nullable()
-            .WithColumn("Latitude").AsDecimal(9,6).Nullable()
-            .WithColumn("Longitude").AsDecimal(9,6).Nullable()
-            .WithColumn("CreditLimit").AsDecimal(18,2).WithDefaultValue(0)
+            .WithColumn("Latitude").AsDecimal(9, 6).Nullable()
+            .WithColumn("Longitude").AsDecimal(9, 6).Nullable()
+            .WithColumn("CreditLimit").AsDecimal(18, 2).WithDefaultValue(0)
             .WithColumn("IsActive").AsBoolean().WithDefaultValue(true)
             .WithColumn("CreatedAt").AsDateTime2().NotNullable().WithDefault(SystemMethods.CurrentDateTime)
             .WithColumn("UpdatedAt").AsDateTime2().Nullable();
