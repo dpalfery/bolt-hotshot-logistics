@@ -1,9 +1,6 @@
-# Scripts Rule
+# Process Examples
 
-Provides common command-line scripts for Hotshot Logistics .NET project development, building, testing, and database management.
-
-## When to Apply
-Use when working with .NET project for development, builds, testing, or database operations.
+Detailed examples for development workflows and task tracking in Hotshot Logistics .NET projects.
 
 ## Development Commands
 
@@ -49,6 +46,36 @@ Use when working with .NET project for development, builds, testing, or database
 ## Docker Commands (if applicable)
 - `docker build -t hotshot-logistics .` - Build Docker image
 - `docker run -p 8080:80 hotshot-logistics` - Run app in Docker
+
+## Task Tracking Examples
+
+### Todo List Example
+Create files like this in `6-docs/status/`:
+
+```
+# Task: Implement User Authentication
+
+- [ ] Design authentication flow
+- [ ] Implement login endpoint
+- [ ] Add JWT token validation
+- [x] Write unit tests
+- [ ] Update documentation
+```
+
+### Status Tracking Example
+```
+# Status: Database Migration
+
+Last Updated: 2025-01-01
+
+## Current Progress
+- Migration scripts created
+- Testing in progress
+
+## Next Steps
+- Deploy to staging
+- Monitor performance
+```
 
 ## Notes
 - Run commands from project root
