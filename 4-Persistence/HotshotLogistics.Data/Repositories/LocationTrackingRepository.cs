@@ -2,20 +2,21 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Contracts.Repositories;
+using HotshotLogistics.Core.Repositories;
+using HotshotLogistics.Domain.Models;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
 namespace HotshotLogistics.Data.Repositories
 #pragma warning disable SA1202 // False positive - public members are correctly ordered before protected members
 {
-    using System;
-    using System.Collections.Generic;
-    using Microsoft.Data.SqlClient;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using HotshotLogistics.Contracts.Models;
-    using HotshotLogistics.Contracts.Repositories;
-    using HotshotLogistics.Core.Repositories;
-    using HotshotLogistics.Domain.Models;
-    using Microsoft.Extensions.Configuration;
 
     /// <summary>
     /// Repository implementation for location tracking operations using native ADO.NET.

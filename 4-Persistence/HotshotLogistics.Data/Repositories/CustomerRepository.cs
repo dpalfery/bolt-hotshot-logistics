@@ -135,6 +135,39 @@ internal class CustomerRepository : BaseRepository<ICustomer>, ICustomerReposito
         return rowsAffected > 0;
     }
 
+    // Explicit interface implementations to bridge concrete/interface types
+    async Task<ICustomer?> ICustomerRepository.GetByIdAsync(object id)
+    {
+        return await GetByIdAsync(id);
+    }
+
+    async Task<IEnumerable<ICustomer>> ICustomerRepository.GetAllAsync()
+    {
+        return (await GetAllAsync()).Cast<ICustomer>();
+    }
+
+    async Task<ICustomer> ICustomerRepository.AddAsync(ICustomer entity)
+    {
+        var customer = entity as Customer ?? throw new ArgumentException("Entity must be Customer", nameof(entity));
+        return await AddAsync(customer);
+    }
+
+    async Task<ICustomer> ICustomerRepository.UpdateAsync(ICustomer entity)
+    {
+        var customer = entity as Customer ?? throw new ArgumentException("Entity must be Customer", nameof(entity));
+        return await UpdateAsync(customer);
+    }
+
+    async Task<bool> ICustomerRepository.DeleteAsync(object id)
+    {
+        return await DeleteAsync(id);
+    }
+
+    async Task<bool> ICustomerRepository.ExistsAsync(object id)
+    {
+        return await ExistsAsync(id);
+    }
+
     /// <inheritdoc/>
     protected override string GetTableName() => "Customers";
 
@@ -214,38 +247,5 @@ internal class CustomerRepository : BaseRepository<ICustomer>, ICustomerReposito
         }
 
         return $"{address.Street}, {address.City}, {address.State} {address.ZipCode}";
-    }
-
-    // Explicit interface implementations to bridge concrete/interface types
-    async Task<ICustomer?> ICustomerRepository.GetByIdAsync(object id)
-    {
-        return await GetByIdAsync(id);
-    }
-
-    async Task<IEnumerable<ICustomer>> ICustomerRepository.GetAllAsync()
-    {
-        return (await GetAllAsync()).Cast<ICustomer>();
-    }
-
-    async Task<ICustomer> ICustomerRepository.AddAsync(ICustomer entity)
-    {
-        var customer = entity as Customer ?? throw new ArgumentException("Entity must be Customer", nameof(entity));
-        return await AddAsync(customer);
-    }
-
-    async Task<ICustomer> ICustomerRepository.UpdateAsync(ICustomer entity)
-    {
-        var customer = entity as Customer ?? throw new ArgumentException("Entity must be Customer", nameof(entity));
-        return await UpdateAsync(customer);
-    }
-
-    async Task<bool> ICustomerRepository.DeleteAsync(object id)
-    {
-        return await DeleteAsync(id);
-    }
-
-    async Task<bool> ICustomerRepository.ExistsAsync(object id)
-    {
-        return await ExistsAsync(id);
     }
 }

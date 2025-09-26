@@ -323,5 +323,6 @@ terraform.rc
 
 # CodeQL database files
 codeql-db/
+hotshot-db/
 *.zip
 codeql/

@@ -137,7 +137,6 @@ namespace HotshotLogistics.Data.Repositories
             return await ExistsAsync(id);
         }
 
-
         /// <inheritdoc/>
         protected override string GetTableName() => "Drivers";
 

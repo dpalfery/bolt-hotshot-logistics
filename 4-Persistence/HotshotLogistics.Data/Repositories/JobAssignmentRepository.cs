@@ -150,7 +150,6 @@ internal class JobAssignmentRepository : BaseRepository<JobAssignmentDto>, IJobA
         return await base.DeleteAsync(id);
     }
 
-
     /// <inheritdoc/>
     protected override string GetTableName() => "JobAssignments";
 
