@@ -135,10 +135,35 @@ internal class CustomerRepository : BaseRepository<ICustomer>, ICustomerReposito
         return rowsAffected > 0;
     }
 
-    // Explicit interface implementations to bridge concrete/interface types
-    async Task<ICustomer?> ICustomerRepository.GetByIdAsync(object id)
+    /// <inheritdoc/>
+    public async Task<bool> UpdateCreditTermsAsync(string customerId, CreditTerms creditTerms)
     {
-        return await GetByIdAsync(id);
+        const string sql = @"UPDATE Customers SET
+            PaymentTermsDays = @PaymentTermsDays,
+            CreditStatus = @CreditStatus,
+            CreditApprovedDate = @CreditApprovedDate,
+            CreditExpiryDate = @CreditExpiryDate,
+            UpdatedAt = @UpdatedAt
+            WHERE Id = @CustomerId";
+
+        var parameters = new[]
+        {
+            new SqlParameter("@CustomerId", SqlDbType.NVarChar) { Value = customerId },
+            new SqlParameter("@PaymentTermsDays", SqlDbType.Int) { Value = creditTerms.PaymentTermsDays },
+            new SqlParameter("@CreditStatus", SqlDbType.Int) { Value = (int)creditTerms.Status },
+            new SqlParameter("@CreditApprovedDate", SqlDbType.DateTime2) { Value = (object?)creditTerms.ApprovedDate ?? DBNull.Value },
+            new SqlParameter("@CreditExpiryDate", SqlDbType.DateTime2) { Value = (object?)creditTerms.ExpiryDate ?? DBNull.Value },
+            new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = DateTime.UtcNow },
+        };
+
+        var rowsAffected = await ExecuteNonQueryAsync(sql, parameters);
+        return rowsAffected > 0;
+    }
+
+    // Explicit interface implementations to bridge concrete/interface types
+    async Task<ICustomer?> ICustomerRepository.GetByIdAsync(object id, CancellationToken cancellationToken = default)
+    {
+        return await GetByIdAsync(id, cancellationToken);
     }
 
     async Task<IEnumerable<ICustomer>> ICustomerRepository.GetAllAsync()
@@ -192,6 +217,13 @@ internal class CustomerRepository : BaseRepository<ICustomer>, ICustomerReposito
                 Latitude = reader.GetDouble(reader.GetOrdinal("Latitude")),
                 Longitude = reader.GetDouble(reader.GetOrdinal("Longitude")),
             },
+            CreditTerms = new CreditTerms
+            {
+                PaymentTermsDays = reader.GetInt32(reader.GetOrdinal("PaymentTermsDays")),
+                Status = (CreditStatus)reader.GetInt32(reader.GetOrdinal("CreditStatus")),
+                ApprovedDate = reader.IsDBNull(reader.GetOrdinal("CreditApprovedDate")) ? default : reader.GetDateTime(reader.GetOrdinal("CreditApprovedDate")),
+                ExpiryDate = reader.IsDBNull(reader.GetOrdinal("CreditExpiryDate")) ? null : reader.GetDateTime(reader.GetOrdinal("CreditExpiryDate")),
+            },
             CreditLimit = reader.GetDecimal(reader.GetOrdinal("CreditLimit")),
             IsActive = reader.GetBoolean(reader.GetOrdinal("IsActive")),
             CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
@@ -214,6 +246,10 @@ internal class CustomerRepository : BaseRepository<ICustomer>, ICustomerReposito
             new SqlParameter("@Country", SqlDbType.NVarChar) { Value = entity.BillingAddress.Country },
             new SqlParameter("@Latitude", SqlDbType.Decimal) { Value = entity.BillingAddress.Latitude },
             new SqlParameter("@Longitude", SqlDbType.Decimal) { Value = entity.BillingAddress.Longitude },
+            new SqlParameter("@PaymentTermsDays", SqlDbType.Int) { Value = entity.CreditTerms.PaymentTermsDays },
+            new SqlParameter("@CreditStatus", SqlDbType.Int) { Value = (int)entity.CreditTerms.Status },
+            new SqlParameter("@CreditApprovedDate", SqlDbType.DateTime2) { Value = (object?)entity.CreditTerms.ApprovedDate ?? DBNull.Value },
+            new SqlParameter("@CreditExpiryDate", SqlDbType.DateTime2) { Value = (object?)entity.CreditTerms.ExpiryDate ?? DBNull.Value },
             new SqlParameter("@CreditLimit", SqlDbType.Decimal) { Value = entity.CreditLimit },
             new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive },
         };
@@ -234,6 +270,10 @@ internal class CustomerRepository : BaseRepository<ICustomer>, ICustomerReposito
             new SqlParameter("@Country", SqlDbType.NVarChar) { Value = entity.BillingAddress.Country },
             new SqlParameter("@Latitude", SqlDbType.Decimal) { Value = entity.BillingAddress.Latitude },
             new SqlParameter("@Longitude", SqlDbType.Decimal) { Value = entity.BillingAddress.Longitude },
+            new SqlParameter("@PaymentTermsDays", SqlDbType.Int) { Value = entity.CreditTerms.PaymentTermsDays },
+            new SqlParameter("@CreditStatus", SqlDbType.Int) { Value = (int)entity.CreditTerms.Status },
+            new SqlParameter("@CreditApprovedDate", SqlDbType.DateTime2) { Value = (object?)entity.CreditTerms.ApprovedDate ?? DBNull.Value },
+            new SqlParameter("@CreditExpiryDate", SqlDbType.DateTime2) { Value = (object?)entity.CreditTerms.ExpiryDate ?? DBNull.Value },
             new SqlParameter("@CreditLimit", SqlDbType.Decimal) { Value = entity.CreditLimit },
             new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive },
         };

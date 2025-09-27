@@ -11,10 +11,13 @@ namespace HotshotLogistics.Application.Services
     using System.Threading.Tasks;
     using HotshotLogistics.Contracts.Models;
     using HotshotLogistics.Contracts.Repositories;
+    using HotshotLogistics.Domain.Repositories;
     using HotshotLogistics.Contracts.Services;
     using HotshotLogistics.Domain.Models;
     using HotshotLogistics.Core.Extensions;
     using Microsoft.Extensions.Logging;
+    using Polly;
+    using Polly.Retry;
 
     /// <summary>
     /// Service for billing and invoice management operations.
@@ -24,8 +27,12 @@ namespace HotshotLogistics.Application.Services
         private readonly IInvoiceRepository invoiceRepository;
         private readonly IJobRepository jobRepository;
         private readonly ICustomerRepository customerRepository;
+        private readonly IPaymentRepository paymentRepository;
         private readonly INotificationService notificationService;
+        private readonly PaymentProcessorFactory paymentProcessorFactory;
         private readonly ILogger<BillingService> logger;
+
+        private readonly AsyncRetryPolicy retryPolicy;
 
         // Tax rates by state (simplified for demo)
         private readonly Dictionary<string, decimal> stateTaxRates = new()
@@ -44,20 +51,37 @@ namespace HotshotLogistics.Application.Services
         /// <param name="invoiceRepository">The invoice repository.</param>
         /// <param name="jobRepository">The job repository.</param>
         /// <param name="customerRepository">The customer repository.</param>
+        /// <param name="paymentRepository">The payment repository.</param>
         /// <param name="notificationService">The notification service.</param>
+        /// <param name="paymentProcessorFactory">The payment processor factory.</param>
         /// <param name="logger">The logger.</param>
         public BillingService(
             IInvoiceRepository invoiceRepository,
             IJobRepository jobRepository,
             ICustomerRepository customerRepository,
+            IPaymentRepository paymentRepository,
             INotificationService notificationService,
+            PaymentProcessorFactory paymentProcessorFactory,
             ILogger<BillingService> logger)
         {
             this.invoiceRepository = invoiceRepository ?? throw new ArgumentNullException(nameof(invoiceRepository));
             this.jobRepository = jobRepository ?? throw new ArgumentNullException(nameof(jobRepository));
             this.customerRepository = customerRepository ?? throw new ArgumentNullException(nameof(customerRepository));
+            this.paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
             this.notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+            this.paymentProcessorFactory = paymentProcessorFactory ?? throw new ArgumentNullException(nameof(paymentProcessorFactory));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+            // Configure retry policy for payment processing
+            this.retryPolicy = Policy
+                .Handle<Exception>()
+                .WaitAndRetryAsync(
+                    retryCount: 3,
+                    sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                    onRetry: (exception, timeSpan, retryCount, context) =>
+                    {
+                        logger.LogWarning(exception, "Payment processing failed, retrying in {RetryTimeSpan}. Retry attempt {RetryCount}", timeSpan, retryCount);
+                    });
         }
 
         /// <inheritdoc/>
@@ -167,7 +191,7 @@ namespace HotshotLogistics.Application.Services
         /// <inheritdoc/>
         public async Task<bool> ProcessPaymentAsync(string invoiceId, decimal paymentAmount, string paymentMethod, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Processing payment of ${Amount} for invoice: {InvoiceId}", paymentAmount, invoiceId);
+            logger.LogInformation("Processing payment of ${Amount} for invoice: {InvoiceId} using {PaymentMethod}", paymentAmount, invoiceId, paymentMethod);
 
             var invoice = await invoiceRepository.GetByIdAsync(invoiceId);
             if (invoice == null)
@@ -185,44 +209,96 @@ namespace HotshotLogistics.Application.Services
                 throw new ArgumentException("Payment amount cannot exceed balance due", nameof(paymentAmount));
             }
 
-            // Process payment through payment gateway (simplified for demo)
-            var paymentSuccessful = await ProcessPaymentGatewayAsync(paymentAmount, paymentMethod, cancellationToken);
-            if (!paymentSuccessful)
+            // Create payment record
+            var payment = new Payment
             {
-                logger.LogWarning("Payment processing failed for invoice: {InvoiceId}", invoiceId);
-                return false;
-            }
+                Id = Guid.NewGuid().ToString(),
+                InvoiceId = invoiceId,
+                Amount = paymentAmount,
+                PaymentMethod = ParsePaymentMethod(paymentMethod),
+                Status = PaymentStatus.Processing
+            };
 
-            // Update invoice with payment
-            var success = await invoiceRepository.UpdatePaidAmountAsync(invoiceId, invoice.PaidAmount + paymentAmount);
-            if (!success)
-            {
-                logger.LogError("Failed to update invoice payment amount for invoice: {InvoiceId}", invoiceId);
-                return false;
-            }
+            await paymentRepository.AddAsync(payment);
 
-            // Get updated invoice
-            var updatedInvoice = await invoiceRepository.GetByIdAsync(invoiceId);
-            if (updatedInvoice != null)
+            try
             {
+                // Get the appropriate payment processor
+                var processor = paymentProcessorFactory.GetProcessorForPaymentMethod(payment.PaymentMethod);
+
+                // Prepare payment method details
+                var paymentMethodDetails = new PaymentMethodDetails
+                {
+                    Type = payment.PaymentMethod,
+                    Token = paymentMethod, // In real implementation, this would be a secure token
+                    AdditionalData = new Dictionary<string, string>
+                    {
+                        ["invoice_id"] = invoiceId,
+                        ["customer_id"] = invoice.CustomerId
+                    }
+                };
+
+                // Process payment with retry logic
+                var result = await retryPolicy.ExecuteAsync(async () =>
+                {
+                    var processingResult = await processor.ProcessPaymentAsync(
+                        paymentAmount,
+                        "USD", // Default currency
+                        paymentMethodDetails,
+                        new Dictionary<string, string>
+                        {
+                            ["invoice_number"] = invoice.InvoiceNumber,
+                            ["customer_id"] = invoice.CustomerId
+                        },
+                        cancellationToken);
+
+                    if (!processingResult.Success)
+                    {
+                        throw new Exception($"Payment processing failed: {processingResult.Message}");
+                    }
+
+                    return processingResult;
+                });
+
+                // Update payment with successful result
+                payment.MarkAsCompleted(result.TransactionId, result.Message);
+                await paymentRepository.UpdateAsync(payment);
+
+                // Update invoice with payment
+                var success = await invoiceRepository.UpdatePaidAmountAsync(invoiceId, invoice.PaidAmount + paymentAmount);
+                if (!success)
+                {
+                    logger.LogError("Failed to update invoice payment amount for invoice: {InvoiceId}", invoiceId);
+                    return false;
+                }
+
                 // Send payment confirmation notification
                 try
                 {
                     await notificationService.SendNotificationAsync(
-                        updatedInvoice.CustomerId,
+                        invoice.CustomerId,
                         NotificationType.PaymentReceived,
                         "Payment Received",
-                        $"Payment of ${paymentAmount:F2} received for invoice {updatedInvoice.InvoiceNumber}",
+                        $"Payment of ${paymentAmount:F2} received for invoice {invoice.InvoiceNumber}",
                         cancellationToken);
                 }
                 catch (Exception ex)
                 {
                     logger.LogWarning(ex, "Failed to send payment notification for invoice {InvoiceId}", invoiceId);
                 }
-            }
 
-            logger.LogInformation("Payment processed successfully for invoice: {InvoiceId}", invoiceId);
-            return true;
+                logger.LogInformation("Payment processed successfully for invoice: {InvoiceId}, TransactionId: {TransactionId}", invoiceId, result.TransactionId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Update payment with failed status
+                payment.MarkAsFailed(ex.Message);
+                await paymentRepository.UpdateAsync(payment);
+
+                logger.LogError(ex, "Payment processing failed for invoice: {InvoiceId}", invoiceId);
+                return false;
+            }
         }
 
         /// <inheritdoc/>
@@ -583,23 +659,22 @@ namespace HotshotLogistics.Application.Services
         }
 
         /// <summary>
-        /// Processes payment through payment gateway.
+        /// Parses the payment method string to PaymentMethodType enum.
         /// </summary>
-        /// <param name="amount">The payment amount.</param>
-        /// <param name="paymentMethod">The payment method.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>True if payment was successful.</returns>
-        private async Task<bool> ProcessPaymentGatewayAsync(decimal amount, string paymentMethod, CancellationToken cancellationToken)
+        /// <param name="paymentMethod">The payment method string.</param>
+        /// <returns>The PaymentMethodType.</returns>
+        private PaymentMethodType ParsePaymentMethod(string paymentMethod)
         {
-            // Simplified payment processing - in real implementation, integrate with Stripe, PayPal, etc.
-            logger.LogInformation("Processing ${Amount} payment via {PaymentMethod}", amount, paymentMethod);
-            
-            // Simulate payment processing delay
-            await Task.Delay(1000, cancellationToken);
-            
-            // Simulate 95% success rate
-            var random = new Random();
-            return random.NextDouble() > 0.05;
+            return paymentMethod.ToLowerInvariant() switch
+            {
+                "credit card" or "card" or "stripe" => PaymentMethodType.CreditCard,
+                "paypal" => PaymentMethodType.DigitalWallet,
+                "ach" or "bank transfer" => PaymentMethodType.ACH,
+                "check" => PaymentMethodType.Check,
+                "wire transfer" => PaymentMethodType.WireTransfer,
+                "cash" => PaymentMethodType.Cash,
+                _ => PaymentMethodType.CreditCard // Default to credit card
+            };
         }
     }
 }

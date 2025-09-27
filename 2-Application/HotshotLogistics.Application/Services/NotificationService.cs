@@ -22,6 +22,7 @@ namespace HotshotLogistics.Application.Services
     {
         private readonly IDistributedCache cache;
         private readonly ILogger<NotificationService> logger;
+        private readonly ICommunicationServiceFactory communicationFactory;
 
         // Retry configuration
         private const int MaxRetryAttempts = 3;
@@ -32,12 +33,15 @@ namespace HotshotLogistics.Application.Services
         /// </summary>
         /// <param name="cache">The distributed cache.</param>
         /// <param name="logger">The logger.</param>
+        /// <param name="communicationFactory">The communication service factory.</param>
         public NotificationService(
             IDistributedCache cache,
-            ILogger<NotificationService> logger)
+            ILogger<NotificationService> logger,
+            ICommunicationServiceFactory communicationFactory)
         {
             this.cache = cache ?? throw new ArgumentNullException(nameof(cache));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.communicationFactory = communicationFactory ?? throw new ArgumentNullException(nameof(communicationFactory));
         }
 
         /// <inheritdoc/>
@@ -56,24 +60,15 @@ namespace HotshotLogistics.Application.Services
             return await ExecuteWithRetryAsync(async () =>
             {
                 logger.LogInformation("Sending SMS to {PhoneNumber}", phoneNumber);
-                
-                // Simulate SMS sending (in real implementation, integrate with Twilio)
-                await Task.Delay(500, cancellationToken);
-                
-                // Simulate 90% success rate
-                var random = new Random();
-                var success = random.NextDouble() > 0.1;
-                
-                if (success)
+
+                var commMessage = new CommunicationMessage
                 {
-                    logger.LogInformation("SMS sent successfully to {PhoneNumber}", phoneNumber);
-                }
-                else
-                {
-                    logger.LogWarning("SMS failed to send to {PhoneNumber}", phoneNumber);
-                }
-                
-                return success;
+                    To = phoneNumber,
+                    Body = message
+                };
+
+                var service = communicationFactory.GetService(CommunicationType.Sms);
+                return await service.SendAsync(commMessage, cancellationToken);
             }, $"SMS to {phoneNumber}");
         }
 
@@ -98,24 +93,16 @@ namespace HotshotLogistics.Application.Services
             return await ExecuteWithRetryAsync(async () =>
             {
                 logger.LogInformation("Sending email to {EmailAddress} with subject: {Subject}", emailAddress, subject);
-                
-                // Simulate email sending (in real implementation, integrate with SendGrid)
-                await Task.Delay(1000, cancellationToken);
-                
-                // Simulate 95% success rate
-                var random = new Random();
-                var success = random.NextDouble() > 0.05;
-                
-                if (success)
+
+                var commMessage = new CommunicationMessage
                 {
-                    logger.LogInformation("Email sent successfully to {EmailAddress}", emailAddress);
-                }
-                else
-                {
-                    logger.LogWarning("Email failed to send to {EmailAddress}", emailAddress);
-                }
-                
-                return success;
+                    To = emailAddress,
+                    Subject = subject,
+                    Body = message
+                };
+
+                var service = communicationFactory.GetService(CommunicationType.Email);
+                return await service.SendAsync(commMessage, cancellationToken);
             }, $"Email to {emailAddress}");
         }
 
@@ -140,24 +127,16 @@ namespace HotshotLogistics.Application.Services
             return await ExecuteWithRetryAsync(async () =>
             {
                 logger.LogInformation("Sending push notification to device {DeviceToken}", deviceToken);
-                
-                // Simulate push notification sending (in real implementation, integrate with Azure Notification Hubs)
-                await Task.Delay(300, cancellationToken);
-                
-                // Simulate 85% success rate (push notifications can fail due to device offline, etc.)
-                var random = new Random();
-                var success = random.NextDouble() > 0.15;
-                
-                if (success)
+
+                var commMessage = new CommunicationMessage
                 {
-                    logger.LogInformation("Push notification sent successfully to device {DeviceToken}", deviceToken);
-                }
-                else
-                {
-                    logger.LogWarning("Push notification failed to send to device {DeviceToken}", deviceToken);
-                }
-                
-                return success;
+                    To = deviceToken,
+                    Title = title,
+                    Body = message
+                };
+
+                var service = communicationFactory.GetService(CommunicationType.Push);
+                return await service.SendAsync(commMessage, cancellationToken);
             }, $"Push notification to {deviceToken}");
         }
 

@@ -54,4 +54,34 @@ public interface IConnectionManagerService
     /// Clean up expired connections
     /// </summary>
     Task CleanupExpiredConnectionsAsync();
+
+    /// <summary>
+    /// Get all connections for a user (alias for GetConnectionsAsync)
+    /// </summary>
+    Task<List<string>> GetUserConnectionsAsync(string userId);
+
+    /// <summary>
+    /// Check if a user is currently connected
+    /// </summary>
+    Task<bool> IsUserConnectedAsync(string userId);
+
+    /// <summary>
+    /// Send a message to a specific user
+    /// </summary>
+    Task SendToUserAsync(string userId, string methodName, params object[] args);
+
+    /// <summary>
+    /// Send a message to multiple users
+    /// </summary>
+    Task SendToUsersAsync(IEnumerable<string> userIds, string methodName, params object[] args);
+
+    /// <summary>
+    /// Remove all connections for a user
+    /// </summary>
+    Task RemoveUserConnectionsAsync(string userId);
+
+    /// <summary>
+    /// Handle reconnection with exponential backoff
+    /// </summary>
+    Task<bool> HandleReconnectionAsync(string userId, string connectionId, int retryCount = 0);
 }

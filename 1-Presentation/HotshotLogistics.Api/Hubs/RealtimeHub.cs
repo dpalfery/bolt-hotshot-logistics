@@ -4,6 +4,7 @@ using Microsoft.Azure.SignalR.Management;
 using Microsoft.Extensions.Logging;
 using HotshotLogistics.Contracts.Hubs;
 using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Contracts.Services;
 using System.Text.Json;
 
 namespace HotshotLogistics.Api.Hubs;
@@ -16,12 +17,14 @@ public class RealtimeHub
     private readonly ILogger<RealtimeHub> _logger;
     private readonly ISignalRClientWrapper _signalRClient;
     private readonly ServiceHubContext _hubContext;
+    private readonly IConnectionManagerService _connectionManager;
 
-    public RealtimeHub(ILogger<RealtimeHub> logger, ISignalRClientWrapper signalRClient, ServiceHubContext hubContext)
+    public RealtimeHub(ILogger<RealtimeHub> logger, ISignalRClientWrapper signalRClient, ServiceHubContext hubContext, IConnectionManagerService connectionManager)
     {
         _logger = logger;
         _signalRClient = signalRClient;
         _hubContext = hubContext;
+        _connectionManager = connectionManager;
     }
 
     /// <summary>
@@ -134,7 +137,7 @@ public class RealtimeHub
         {
             if (!string.IsNullOrEmpty(message.UserId))
             {
-                await _signalRClient.SendToUserAsync(message.UserId, "NotificationReceived", message);
+                await _connectionManager.SendToUserAsync(message.UserId, "NotificationReceived", message);
             }
             else
             {
@@ -146,6 +149,61 @@ public class RealtimeHub
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error sending notification: {Title}", message.Title);
+        }
+    }
+
+    /// <summary>
+    /// Handle client connection
+    /// </summary>
+    public async Task OnConnectedAsync(string userId, string connectionId)
+    {
+        try
+        {
+            await _connectionManager.AddConnectionAsync(userId, connectionId);
+            _logger.LogInformation("Client connected: User {UserId}, Connection {ConnectionId}", userId, connectionId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error handling client connection for user {UserId}", userId);
+        }
+    }
+
+    /// <summary>
+    /// Handle client disconnection
+    /// </summary>
+    public async Task OnDisconnectedAsync(string userId, string connectionId)
+    {
+        try
+        {
+            await _connectionManager.RemoveConnectionAsync(connectionId);
+            _logger.LogInformation("Client disconnected: User {UserId}, Connection {ConnectionId}", userId, connectionId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error handling client disconnection for user {UserId}", userId);
+        }
+    }
+
+    /// <summary>
+    /// Handle reconnection attempts
+    /// </summary>
+    public async Task OnReconnectedAsync(string userId, string connectionId)
+    {
+        try
+        {
+            var success = await _connectionManager.HandleReconnectionAsync(userId, connectionId);
+            if (success)
+            {
+                _logger.LogInformation("Client reconnected successfully: User {UserId}, Connection {ConnectionId}", userId, connectionId);
+            }
+            else
+            {
+                _logger.LogWarning("Client reconnection failed: User {UserId}, Connection {ConnectionId}", userId, connectionId);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error handling client reconnection for user {UserId}", userId);
         }
     }
 

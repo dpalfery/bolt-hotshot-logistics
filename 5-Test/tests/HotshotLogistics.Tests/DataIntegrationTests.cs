@@ -117,10 +117,11 @@ namespace HotshotLogistics.Tests
             var customerRepoMock = new Mock<ICustomerRepository>();
             var driverRepoMock = new Mock<IDriverRepository>();
             var notificationServiceMock = new Mock<INotificationService>();
+            var mappingServiceMock = new Mock<IMappingService>();
             var loggerMock = new Mock<ILogger<JobService>>();
 
-            customerRepoMock.Setup(r => r.GetByIdAsync("CUST001")).ReturnsAsync(customer);
-            var service = new JobService(mockRepo.Object, customerRepoMock.Object, driverRepoMock.Object, notificationServiceMock.Object, loggerMock.Object);
+            customerRepoMock.Setup(r => r.GetByIdAsync("CUST001", It.IsAny<CancellationToken>())).ReturnsAsync(customer);
+            var service = new JobService(mockRepo.Object, customerRepoMock.Object, driverRepoMock.Object, notificationServiceMock.Object, mappingServiceMock.Object, loggerMock.Object);
 
             var created = await service.CreateJobAsync(newJob);
 

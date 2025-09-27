@@ -415,6 +415,97 @@ namespace HotshotLogistics.Tests
         }
 
         /// <summary>
+        /// Tests that UpdateCreditTerms updates the credit terms successfully.
+        /// </summary>
+        /// <returns>A task representing the asynchronous test.</returns>
+        [Fact]
+        public async Task UpdateCreditTerms_WithValidTerms_ReturnsNoContent()
+        {
+            // Arrange
+            var customerId = "customer-to-update";
+            var creditTerms = new CreditTerms
+            {
+                PaymentTermsDays = 45,
+                Status = CreditStatus.Approved,
+                ApprovedDate = DateTime.UtcNow,
+                ExpiryDate = DateTime.UtcNow.AddYears(1)
+            };
+
+            mockCustomerService.Setup(s => s.UpdateCreditTermsAsync(customerId, creditTerms, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await controller.UpdateCreditTerms(customerId, creditTerms);
+
+            // Assert
+            result.Should().BeOfType<NoContentResult>();
+        }
+
+        /// <summary>
+        /// Tests that UpdateCreditTerms returns BadRequest for null credit terms.
+        /// </summary>
+        /// <returns>A task representing the asynchronous test.</returns>
+        [Fact]
+        public async Task UpdateCreditTerms_WithNullTerms_ReturnsBadRequest()
+        {
+            // Arrange
+            var customerId = "customer-to-update";
+
+            // Act
+            var result = await controller.UpdateCreditTerms(customerId, null!);
+
+            // Assert
+            result.Should().BeOfType<BadRequestObjectResult>();
+        }
+
+        /// <summary>
+        /// Tests that UpdateCreditTerms returns BadRequest for invalid payment terms.
+        /// </summary>
+        /// <returns>A task representing the asynchronous test.</returns>
+        [Fact]
+        public async Task UpdateCreditTerms_WithInvalidPaymentTerms_ReturnsBadRequest()
+        {
+            // Arrange
+            var customerId = "customer-to-update";
+            var creditTerms = new CreditTerms
+            {
+                PaymentTermsDays = 0, // Invalid
+                Status = CreditStatus.Approved
+            };
+
+            // Act
+            var result = await controller.UpdateCreditTerms(customerId, creditTerms);
+
+            // Assert
+            result.Should().BeOfType<BadRequestObjectResult>();
+        }
+
+        /// <summary>
+        /// Tests that UpdateCreditTerms returns NotFound when customer doesn't exist.
+        /// </summary>
+        /// <returns>A task representing the asynchronous test.</returns>
+        [Fact]
+        public async Task UpdateCreditTerms_WhenCustomerNotFound_ReturnsNotFound()
+        {
+            // Arrange
+            var customerId = "non-existent-customer";
+            var creditTerms = new CreditTerms
+            {
+                PaymentTermsDays = 30,
+                Status = CreditStatus.Approved
+            };
+
+            mockCustomerService.Setup(s => s.UpdateCreditTermsAsync(customerId, creditTerms, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(false);
+
+            // Act
+            var result = await controller.UpdateCreditTerms(customerId, creditTerms);
+
+            // Assert
+            result.Should().BeOfType<NotFoundObjectResult>();
+        }
+
+        /// <summary>
         /// Creates a test customer for testing purposes.
         /// </summary>
         /// <param name="id">The customer ID.</param>

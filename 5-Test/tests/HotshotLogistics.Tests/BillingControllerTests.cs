@@ -11,6 +11,7 @@ namespace HotshotLogistics.Tests
     using System.Threading.Tasks;
     using FluentAssertions;
     using HotshotLogistics.Api.Controllers;
+    using HotshotLogistics.Application.Services;
     using HotshotLogistics.Contracts.Models;
     using HotshotLogistics.Contracts.Services;
     using Microsoft.AspNetCore.Mvc;
@@ -24,6 +25,7 @@ namespace HotshotLogistics.Tests
     public class BillingControllerTests
     {
         private readonly Mock<IBillingService> mockBillingService;
+        private readonly Mock<PaymentProcessorFactory> mockPaymentProcessorFactory;
         private readonly Mock<ILogger<BillingController>> mockLogger;
         private readonly BillingController controller;
 
@@ -33,8 +35,9 @@ namespace HotshotLogistics.Tests
         public BillingControllerTests()
         {
             mockBillingService = new Mock<IBillingService>();
+            mockPaymentProcessorFactory = new Mock<PaymentProcessorFactory>();
             mockLogger = new Mock<ILogger<BillingController>>();
-            controller = new BillingController(mockBillingService.Object, mockLogger.Object);
+            controller = new BillingController(mockBillingService.Object, mockPaymentProcessorFactory.Object, mockLogger.Object);
         }
 
         /// <summary>

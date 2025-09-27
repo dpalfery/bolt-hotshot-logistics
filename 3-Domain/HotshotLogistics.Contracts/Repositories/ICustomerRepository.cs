@@ -11,8 +11,9 @@ public interface ICustomerRepository
     /// Gets a customer by their identifier.
     /// </summary>
     /// <param name="id">The customer identifier.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The customer if found, null otherwise.</returns>
-    Task<ICustomer?> GetByIdAsync(object id);
+    Task<ICustomer?> GetByIdAsync(object id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets all customers.
@@ -107,4 +108,12 @@ public interface ICustomerRepository
     /// <param name="customerId">The customer identifier.</param>
     /// <returns>True if the reactivation was successful, false otherwise.</returns>
     Task<bool> ReactivateCustomerAsync(string customerId);
+
+    /// <summary>
+    /// Updates a customer's credit terms.
+    /// </summary>
+    /// <param name="customerId">The customer identifier.</param>
+    /// <param name="creditTerms">The new credit terms.</param>
+    /// <returns>True if the update was successful, false otherwise.</returns>
+    Task<bool> UpdateCreditTermsAsync(string customerId, CreditTerms creditTerms);
 }

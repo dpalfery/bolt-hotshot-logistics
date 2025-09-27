@@ -11,8 +11,9 @@ public interface IInvoiceRepository
     /// Gets an invoice by its identifier.
     /// </summary>
     /// <param name="id">The invoice identifier.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The invoice if found, null otherwise.</returns>
-    Task<IInvoice?> GetByIdAsync(string id);
+    Task<IInvoice?> GetByIdAsync(string id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets all invoices.
@@ -144,6 +145,13 @@ public interface IInvoiceRepository
     /// <param name="status">The new status.</param>
     /// <returns>True if the update was successful, false otherwise.</returns>
     Task<bool> UpdateStatusAsync(string invoiceId, InvoiceStatus status);
+
+    /// <summary>
+    /// Generates a new invoice from job data.
+    /// </summary>
+    /// <param name="jobId">The job identifier to generate invoice for.</param>
+    /// <returns>The generated invoice.</returns>
+    Task<IInvoice> GenerateInvoiceAsync(string jobId);
 }
 
 /// <summary>

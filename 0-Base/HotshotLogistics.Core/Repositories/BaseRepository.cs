@@ -66,20 +66,20 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
     protected abstract SqlParameter[] GetUpdateParameters(T entity);
 
     /// <inheritdoc/>
-    public async Task<T?> GetByIdAsync(object id)
+    public async Task<T?> GetByIdAsync(object id, CancellationToken cancellationToken = default)
     {
         var tableName = FormatIdentifier(GetTableName());
         var primaryKeyColumn = FormatIdentifier(GetPrimaryKeyColumnName());
         var commandText = $"SELECT * FROM {tableName} WHERE {primaryKeyColumn} = @Id";
 
         await using var connection = new SqlConnection(_connectionString);
-        await connection.OpenAsync();
+        await connection.OpenAsync(cancellationToken);
 
         await using var command = new SqlCommand(commandText, connection);
         command.Parameters.AddWithValue("@Id", id);
 
-        await using var reader = await command.ExecuteReaderAsync();
-        if (await reader.ReadAsync())
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        if (await reader.ReadAsync(cancellationToken))
         {
             return MapReaderToEntity(reader);
         }

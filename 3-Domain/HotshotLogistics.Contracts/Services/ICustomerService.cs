@@ -87,6 +87,15 @@ public interface ICustomerService
     Task<bool> UpdateCreditLimitAsync(string customerId, decimal newLimit, CancellationToken cancellationToken = default);
     
     /// <summary>
+    /// Updates a customer's credit terms.
+    /// </summary>
+    /// <param name="customerId">The customer ID.</param>
+    /// <param name="creditTerms">The new credit terms.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>True if the update was successful; otherwise, false.</returns>
+    Task<bool> UpdateCreditTermsAsync(string customerId, CreditTerms creditTerms, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Validates a customer for business rules.
     /// </summary>
     /// <param name="customer">The customer to validate.</param>

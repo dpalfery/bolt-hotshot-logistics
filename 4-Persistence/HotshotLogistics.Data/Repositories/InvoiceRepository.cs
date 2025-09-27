@@ -24,9 +24,9 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     }
 
     /// <inheritdoc/>
-    public async Task<IInvoice?> GetByIdAsync(string id)
+    public async Task<IInvoice?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
-        return await base.GetByIdAsync(id);
+        return await base.GetByIdAsync(id, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -214,7 +214,7 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
 
         if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
         {
-            conditions.Add("(InvoiceNumber LIKE @SearchTerm OR CustomerId IN (SELECT Id FROM Customers WHERE CompanyName LIKE @SearchTerm))");
+            conditions.Add("(i.InvoiceNumber LIKE @SearchTerm OR c.CompanyName LIKE @SearchTerm)");
             parameters.Add(new SqlParameter("@SearchTerm", $"%{filter.SearchTerm}%"));
         }
 
@@ -226,10 +226,14 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
             parameters.Add(new SqlParameter("@CurrentDate", DateTime.UtcNow.Date));
         }
 
-        if (conditions.Any())
+                if (conditions.Any())
         {
             whereClause.Append("WHERE ").Append(string.Join(" AND ", conditions));
         }
+
+        // Determine if JOIN is needed for search
+        bool hasSearchTerm = !string.IsNullOrWhiteSpace(filter.SearchTerm);
+        string joinClause = hasSearchTerm ? "LEFT JOIN Customers c ON i.CustomerId = c.Id" : string.Empty;
 
         // Build ORDER BY clause
         var validSortFields = new[] { "InvoiceDate", "DueDate", "TotalAmount", "InvoiceNumber", "Status" };
@@ -456,6 +460,138 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     }
 
     /// <inheritdoc/>
+    public async Task<IInvoice> GenerateInvoiceAsync(string jobId)
+    {
+        // First, get the job data
+        const string jobSql = @"
+            SELECT j.Id, j.CustomerId, j.Title, j.Pricing_BaseRate, j.Pricing_MileageRate,
+                   j.Pricing_FuelSurcharge, j.Pricing_TollCharges, j.Pricing_AdditionalCharges,
+                   j.Pricing_TotalAmount, j.CreatedAt
+            FROM Jobs j
+            WHERE j.Id = @JobId";
+
+        JobData? jobData = null;
+        await using var connection = new SqlConnection(ConnectionString);
+        await connection.OpenAsync();
+
+        await using var jobCommand = new SqlCommand(jobSql, connection);
+        jobCommand.Parameters.Add(new SqlParameter("@JobId", jobId));
+
+        await using var jobReader = await jobCommand.ExecuteReaderAsync();
+        if (await jobReader.ReadAsync())
+        {
+            jobData = new JobData
+            {
+                Id = jobReader.GetString(jobReader.GetOrdinal("Id")),
+                CustomerId = jobReader.GetString(jobReader.GetOrdinal("CustomerId")),
+                Title = jobReader.GetString(jobReader.GetOrdinal("Title")),
+                BaseRate = jobReader.GetDecimal(jobReader.GetOrdinal("Pricing_BaseRate")),
+                MileageRate = jobReader.GetDecimal(jobReader.GetOrdinal("Pricing_MileageRate")),
+                FuelSurcharge = jobReader.GetDecimal(jobReader.GetOrdinal("Pricing_FuelSurcharge")),
+                TollCharges = jobReader.GetDecimal(jobReader.GetOrdinal("Pricing_TollCharges")),
+                AdditionalCharges = jobReader.GetDecimal(jobReader.GetOrdinal("Pricing_AdditionalCharges")),
+                TotalAmount = jobReader.GetDecimal(jobReader.GetOrdinal("Pricing_TotalAmount")),
+                CreatedAt = jobReader.GetDateTime(jobReader.GetOrdinal("CreatedAt"))
+            };
+        }
+
+        if (jobData == null)
+        {
+            throw new ArgumentException($"Job with ID {jobId} not found", nameof(jobId));
+        }
+
+        // Generate invoice number
+        var invoiceNumber = await GetNextInvoiceNumberAsync();
+
+        // Create invoice
+        var invoice = new Invoice
+        {
+            Id = Guid.NewGuid().ToString(),
+            InvoiceNumber = invoiceNumber,
+            CustomerId = jobData.CustomerId,
+            JobId = jobId,
+            InvoiceDate = DateTime.UtcNow.Date,
+            DueDate = DateTime.UtcNow.Date.AddDays(30), // Default 30 days
+            Status = InvoiceStatus.Draft,
+            SubTotal = jobData.TotalAmount,
+            TaxRate = 0.08m, // Default tax rate
+            TaxAmount = jobData.TotalAmount * 0.08m,
+            DiscountAmount = 0.00m,
+            TotalAmount = jobData.TotalAmount * 1.08m,
+            PaidAmount = 0.00m,
+            Terms = new PaymentTerms
+            {
+                Days = 30,
+                EarlyPaymentDiscount = 0.02m,
+                EarlyPaymentDiscountDays = 10,
+                LatePaymentPenalty = 0.015m,
+                LatePaymentPenaltyDays = 5
+            },
+            Notes = $"Invoice for job: {jobData.Title}",
+            CreatedAt = DateTime.UtcNow
+        };
+
+        // Add line items based on job pricing
+        if (jobData.BaseRate > 0)
+        {
+            invoice.AddLineItem(new InvoiceLineItem
+            {
+                Description = "Base Rate",
+                Quantity = 1,
+                UnitPrice = jobData.BaseRate,
+                TaxApplicable = true
+            });
+        }
+
+        if (jobData.MileageRate > 0)
+        {
+            invoice.AddLineItem(new InvoiceLineItem
+            {
+                Description = "Mileage Charges",
+                Quantity = 1,
+                UnitPrice = jobData.MileageRate,
+                TaxApplicable = true
+            });
+        }
+
+        if (jobData.FuelSurcharge > 0)
+        {
+            invoice.AddLineItem(new InvoiceLineItem
+            {
+                Description = "Fuel Surcharge",
+                Quantity = 1,
+                UnitPrice = jobData.FuelSurcharge,
+                TaxApplicable = true
+            });
+        }
+
+        if (jobData.TollCharges > 0)
+        {
+            invoice.AddLineItem(new InvoiceLineItem
+            {
+                Description = "Toll Charges",
+                Quantity = 1,
+                UnitPrice = jobData.TollCharges,
+                TaxApplicable = true
+            });
+        }
+
+        if (jobData.AdditionalCharges > 0)
+        {
+            invoice.AddLineItem(new InvoiceLineItem
+            {
+                Description = "Additional Charges",
+                Quantity = 1,
+                UnitPrice = jobData.AdditionalCharges,
+                TaxApplicable = true
+            });
+        }
+
+        // Save the invoice
+        return await AddAsync(invoice);
+    }
+
+    /// <inheritdoc/>
     protected override string GetTableName() => "Invoices";
 
     /// <inheritdoc/>
@@ -547,6 +683,62 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
             new SqlParameter("@Notes", (object?)entity.Notes ?? DBNull.Value),
             new SqlParameter("@UpdatedAt", entity.UpdatedAt ?? DateTime.UtcNow),
         };
+    }
+
+    /// <summary>
+    /// Represents job data needed for invoice generation.
+    /// </summary>
+    private class JobData
+    {
+        /// <summary>
+        /// Gets or sets the job ID.
+        /// </summary>
+        public string Id { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the customer ID.
+        /// </summary>
+        public string CustomerId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the job title.
+        /// </summary>
+        public string Title { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the base rate.
+        /// </summary>
+        public decimal BaseRate { get; set; }
+
+        /// <summary>
+        /// Gets or sets the mileage rate.
+        /// </summary>
+        public decimal MileageRate { get; set; }
+
+        /// <summary>
+        /// Gets or sets the fuel surcharge.
+        /// </summary>
+        public decimal FuelSurcharge { get; set; }
+
+        /// <summary>
+        /// Gets or sets the toll charges.
+        /// </summary>
+        public decimal TollCharges { get; set; }
+
+        /// <summary>
+        /// Gets or sets the additional charges.
+        /// </summary>
+        public decimal AdditionalCharges { get; set; }
+
+        /// <summary>
+        /// Gets or sets the total amount.
+        /// </summary>
+        public decimal TotalAmount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the created date.
+        /// </summary>
+        public DateTime CreatedAt { get; set; }
     }
 #pragma warning restore SA1202
 }

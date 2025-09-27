@@ -6,6 +6,7 @@ using FluentAssertions;
 using HotshotLogistics.Api.Hubs;
 using HotshotLogistics.Contracts.Hubs;
 using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Contracts.Services;
 using Microsoft.Azure.Functions.Worker.Http;
 using System.Text;
 using System.Text.Json;
@@ -18,6 +19,7 @@ public class RealtimeHubTests
     private readonly Mock<ISignalRClientWrapper> _mockSignalRClient;
     private readonly Mock<ServiceHubContext> _mockHubContext;
     private readonly Mock<GroupManager> _mockGroups;
+    private readonly Mock<IConnectionManagerService> _mockConnectionManager;
     private readonly RealtimeHub _realtimeHub;
 
     public RealtimeHubTests()
@@ -26,10 +28,11 @@ public class RealtimeHubTests
         _mockSignalRClient = new Mock<ISignalRClientWrapper>();
         _mockHubContext = new Mock<ServiceHubContext>();
         _mockGroups = new Mock<GroupManager>();
+        _mockConnectionManager = new Mock<IConnectionManagerService>();
 
         _mockHubContext.Setup(x => x.Groups).Returns(_mockGroups.Object);
 
-        _realtimeHub = new RealtimeHub(_mockLogger.Object, _mockSignalRClient.Object, _mockHubContext.Object);
+        _realtimeHub = new RealtimeHub(_mockLogger.Object, _mockSignalRClient.Object, _mockHubContext.Object, _mockConnectionManager.Object);
     }
 
     [Fact]

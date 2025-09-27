@@ -8,6 +8,8 @@ namespace HotshotLogistics.Api.Controllers
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using FluentValidation;
+    using HotshotLogistics.Application.Validators;
     using HotshotLogistics.Contracts.Models;
     using HotshotLogistics.Contracts.Repositories;
     using HotshotLogistics.Contracts.Services;
@@ -25,6 +27,7 @@ namespace HotshotLogistics.Api.Controllers
         private readonly IJobService jobService;
         private readonly IJobRepository jobRepository;
         private readonly ILogger<JobController> logger;
+        private readonly IValidator<JobDto> jobValidator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JobController"/> class.
@@ -32,14 +35,17 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="jobService">The job service.</param>
         /// <param name="jobRepository">The job repository.</param>
         /// <param name="logger">The logger.</param>
+        /// <param name="jobValidator">The job validator.</param>
         public JobController(
             IJobService jobService,
             IJobRepository jobRepository,
-            ILogger<JobController> logger)
+            ILogger<JobController> logger,
+            IValidator<JobDto> jobValidator)
         {
             this.jobService = jobService ?? throw new ArgumentNullException(nameof(jobService));
             this.jobRepository = jobRepository ?? throw new ArgumentNullException(nameof(jobRepository));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.jobValidator = jobValidator ?? throw new ArgumentNullException(nameof(jobValidator));
         }
 
         /// <summary>
@@ -87,50 +93,37 @@ namespace HotshotLogistics.Api.Controllers
             [FromQuery] SortDirection sortDirection = SortDirection.Descending,
             CancellationToken cancellationToken = default)
         {
-            try
+            var filter = new JobFilter
             {
-                var filter = new JobFilter
-                {
-                    Status = status,
-                    Priority = priority,
-                    CustomerId = customerId,
-                    AssignedDriverId = assignedDriverId,
-                    CreatedAfter = createdAfter,
-                    CreatedBefore = createdBefore,
-                    ScheduledAfter = scheduledAfter,
-                    ScheduledBefore = scheduledBefore,
-                    MinAmount = minAmount,
-                    MaxAmount = maxAmount,
-                    SearchTerm = searchTerm,
-                    HasAssignedDriver = hasAssignedDriver,
-                    IsOverdue = isOverdue
-                };
+                Status = status,
+                Priority = priority,
+                CustomerId = customerId,
+                AssignedDriverId = assignedDriverId,
+                CreatedAfter = createdAfter,
+                CreatedBefore = createdBefore,
+                ScheduledAfter = scheduledAfter,
+                ScheduledBefore = scheduledBefore,
+                MinAmount = minAmount,
+                MaxAmount = maxAmount,
+                SearchTerm = searchTerm,
+                HasAssignedDriver = hasAssignedDriver,
+                IsOverdue = isOverdue
+            };
 
-                var pagination = new PaginationParameters
-                {
-                    PageNumber = pageNumber,
-                    PageSize = pageSize
-                };
-
-                var sort = new SortParameters
-                {
-                    SortBy = sortBy,
-                    SortDirection = sortDirection
-                };
-
-                var result = await jobRepository.GetJobsAsync(filter, pagination, sort, cancellationToken);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
+            var pagination = new PaginationParameters
             {
-                logger.LogWarning(ex, "Invalid parameters provided for job search");
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+
+            var sort = new SortParameters
             {
-                logger.LogError(ex, "An error occurred while retrieving jobs");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
-            }
+                SortBy = sortBy,
+                SortDirection = sortDirection
+            };
+
+            var result = await jobRepository.GetJobsAsync(filter, pagination, sort, cancellationToken);
+            return Ok(result);
         }
 
         /// <summary>
@@ -180,6 +173,22 @@ namespace HotshotLogistics.Api.Controllers
                 if (jobDto == null)
                 {
                     return BadRequest("Job data is required");
+                }
+
+                // Validate the job data
+                var validationResult = await jobValidator.ValidateAsync(jobDto, cancellationToken);
+                if (!validationResult.IsValid)
+                {
+                    logger.LogWarning("Job validation failed: {Errors}", string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)));
+                    return BadRequest(new
+                    {
+                        Message = "Job validation failed",
+                        Errors = validationResult.Errors.Select(e => new
+                        {
+                            Field = e.PropertyName,
+                            Message = e.ErrorMessage
+                        })
+                    });
                 }
 
                 var createdJob = await jobService.CreateJobAsync(jobDto, cancellationToken);

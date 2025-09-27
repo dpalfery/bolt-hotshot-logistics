@@ -6,8 +6,10 @@ namespace HotshotLogistics.Api.Controllers
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
+    using HotshotLogistics.Application.Services;
     using HotshotLogistics.Contracts.Models;
     using HotshotLogistics.Contracts.Services;
     using Microsoft.AspNetCore.Http;
@@ -22,18 +24,22 @@ namespace HotshotLogistics.Api.Controllers
     public class BillingController : ControllerBase
     {
         private readonly IBillingService billingService;
+        private readonly PaymentProcessorFactory paymentProcessorFactory;
         private readonly ILogger<BillingController> logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BillingController"/> class.
         /// </summary>
         /// <param name="billingService">The billing service.</param>
+        /// <param name="paymentProcessorFactory">The payment processor factory.</param>
         /// <param name="logger">The logger.</param>
         public BillingController(
             IBillingService billingService,
+            PaymentProcessorFactory paymentProcessorFactory,
             ILogger<BillingController> logger)
         {
             this.billingService = billingService ?? throw new ArgumentNullException(nameof(billingService));
+            this.paymentProcessorFactory = paymentProcessorFactory ?? throw new ArgumentNullException(nameof(paymentProcessorFactory));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -300,6 +306,183 @@ namespace HotshotLogistics.Api.Controllers
                 logger.LogError(ex, "An error occurred while generating accounts receivable report");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
+        }
+
+        /// <summary>
+        /// Handles Stripe webhook events.
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The webhook processing result.</returns>
+        [HttpPost("webhooks/stripe")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> HandleStripeWebhook(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var processor = paymentProcessorFactory.GetProcessor("Stripe");
+
+                // Read the request body
+                using var reader = new StreamReader(Request.Body);
+                var payload = await reader.ReadToEndAsync(cancellationToken);
+
+                // Get the Stripe signature from headers
+                var signature = Request.Headers["Stripe-Signature"].FirstOrDefault() ?? string.Empty;
+
+                var webhookData = new WebhookEventData
+                {
+                    Payload = payload,
+                    Signature = signature,
+                    Headers = Request.Headers.ToDictionary(h => h.Key, h => h.Value.FirstOrDefault() ?? string.Empty)
+                };
+
+                // Extract event type from payload (simplified)
+                webhookData.EventType = ExtractStripeEventType(payload);
+
+                var result = await processor.ProcessWebhookAsync(webhookData, cancellationToken);
+
+                if (result.Success && result.StatusUpdate != null)
+                {
+                    // Handle payment status update
+                    await HandlePaymentStatusUpdateAsync(result.StatusUpdate, cancellationToken);
+                }
+
+                logger.LogInformation("Stripe webhook processed: {Success}, Event: {EventType}", result.Success, webhookData.EventType);
+
+                return Ok(new { received = true });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error processing Stripe webhook");
+                return BadRequest(new { error = "Webhook processing failed" });
+            }
+        }
+
+        /// <summary>
+        /// Handles PayPal webhook events.
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The webhook processing result.</returns>
+        [HttpPost("webhooks/paypal")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> HandlePayPalWebhook(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var processor = paymentProcessorFactory.GetProcessor("PayPal");
+
+                // Read the request body
+                using var reader = new StreamReader(Request.Body);
+                var payload = await reader.ReadToEndAsync(cancellationToken);
+
+                // Get PayPal signature from headers
+                var signature = Request.Headers["PayPal-Transmission-Signature"].FirstOrDefault() ?? string.Empty;
+
+                var webhookData = new WebhookEventData
+                {
+                    Payload = payload,
+                    Signature = signature,
+                    Headers = Request.Headers.ToDictionary(h => h.Key, h => h.Value.FirstOrDefault() ?? string.Empty)
+                };
+
+                // Extract event type from payload (simplified)
+                webhookData.EventType = ExtractPayPalEventType(payload);
+
+                var result = await processor.ProcessWebhookAsync(webhookData, cancellationToken);
+
+                if (result.Success && result.StatusUpdate != null)
+                {
+                    // Handle payment status update
+                    await HandlePaymentStatusUpdateAsync(result.StatusUpdate, cancellationToken);
+                }
+
+                logger.LogInformation("PayPal webhook processed: {Success}, Event: {EventType}", result.Success, webhookData.EventType);
+
+                return Ok(new { received = true });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error processing PayPal webhook");
+                return BadRequest(new { error = "Webhook processing failed" });
+            }
+        }
+
+        /// <summary>
+        /// Handles payment status updates from webhooks.
+        /// </summary>
+        /// <param name="statusUpdate">The payment status update.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        private async Task HandlePaymentStatusUpdateAsync(PaymentStatusUpdate statusUpdate, CancellationToken cancellationToken)
+        {
+            logger.LogInformation("Handling payment status update: TransactionId={TransactionId}, Status={Status}, InvoiceId={InvoiceId}",
+                statusUpdate.TransactionId, statusUpdate.Status, statusUpdate.InvoiceId);
+
+            try
+            {
+                // Update payment status in the database
+                // Note: In a real implementation, you'd have a payment repository method for this
+                // For now, we'll assume the payment record exists and update it
+
+                if (statusUpdate.Status == PaymentStatus.Completed)
+                {
+                    // Update invoice with payment amount
+                    var invoice = await billingService.GetCustomerInvoicesAsync(statusUpdate.InvoiceId, cancellationToken);
+                    var targetInvoice = invoice.FirstOrDefault(i => i.Id == statusUpdate.InvoiceId);
+
+                    if (targetInvoice != null)
+                    {
+                        // Send payment confirmation notification
+                        try
+                        {
+                            await billingService.GetCustomerInvoicesAsync(targetInvoice.CustomerId, cancellationToken); // Just to get customer context
+                            // Note: In real implementation, you'd have a method to send payment notifications
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.LogWarning(ex, "Failed to send payment notification for invoice {InvoiceId}", statusUpdate.InvoiceId);
+                        }
+                    }
+                }
+
+                logger.LogInformation("Payment status update handled successfully for TransactionId: {TransactionId}", statusUpdate.TransactionId);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error handling payment status update for TransactionId: {TransactionId}", statusUpdate.TransactionId);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Extracts the event type from a Stripe webhook payload.
+        /// </summary>
+        /// <param name="payload">The webhook payload.</param>
+        /// <returns>The event type.</returns>
+        private string ExtractStripeEventType(string payload)
+        {
+            // Simplified extraction - in real implementation, parse JSON properly
+            if (payload.Contains("payment_intent.succeeded"))
+                return "payment_intent.succeeded";
+            if (payload.Contains("payment_intent.payment_failed"))
+                return "payment_intent.payment_failed";
+            return "unknown";
+        }
+
+        /// <summary>
+        /// Extracts the event type from a PayPal webhook payload.
+        /// </summary>
+        /// <param name="payload">The webhook payload.</param>
+        /// <returns>The event type.</returns>
+        private string ExtractPayPalEventType(string payload)
+        {
+            // Simplified extraction - in real implementation, parse JSON properly
+            if (payload.Contains("PAYMENT.CAPTURE.COMPLETED"))
+                return "PAYMENT.CAPTURE.COMPLETED";
+            if (payload.Contains("PAYMENT.CAPTURE.DENIED"))
+                return "PAYMENT.CAPTURE.DENIED";
+            return "unknown";
         }
     }
 

@@ -10,8 +10,9 @@ public interface IBaseRepository<T> where T : class
     /// Gets an entity by its identifier.
     /// </summary>
     /// <param name="id">The entity identifier.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The entity if found, null otherwise.</returns>
-    Task<T?> GetByIdAsync(object id);
+    Task<T?> GetByIdAsync(object id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets all entities.

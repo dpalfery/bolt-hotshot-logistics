@@ -12,7 +12,9 @@ namespace HotshotLogistics.Application.Services
     using HotshotLogistics.Contracts.Models;
     using HotshotLogistics.Contracts.Repositories;
     using HotshotLogistics.Contracts.Services;
+    using HotshotLogistics.Core.Exceptions;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Configuration;
 
     /// <summary>
     /// Service for managing jobs with lifecycle management.
@@ -23,6 +25,7 @@ namespace HotshotLogistics.Application.Services
         private readonly ICustomerRepository customerRepository;
         private readonly IDriverRepository driverRepository;
         private readonly INotificationService notificationService;
+        private readonly IMappingService mappingService;
         private readonly ILogger<JobService> logger;
 
         /// <summary>
@@ -32,18 +35,21 @@ namespace HotshotLogistics.Application.Services
         /// <param name="customerRepository">The customer repository.</param>
         /// <param name="driverRepository">The driver repository.</param>
         /// <param name="notificationService">The notification service.</param>
+        /// <param name="mappingService">The mapping service.</param>
         /// <param name="logger">The logger.</param>
         public JobService(
             IJobRepository jobRepository,
             ICustomerRepository customerRepository,
             IDriverRepository driverRepository,
             INotificationService notificationService,
+            IMappingService mappingService,
             ILogger<JobService> logger)
         {
             this.jobRepository = jobRepository ?? throw new ArgumentNullException(nameof(jobRepository));
             this.customerRepository = customerRepository ?? throw new ArgumentNullException(nameof(customerRepository));
             this.driverRepository = driverRepository ?? throw new ArgumentNullException(nameof(driverRepository));
             this.notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+            this.mappingService = mappingService ?? throw new ArgumentNullException(nameof(mappingService));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -55,14 +61,14 @@ namespace HotshotLogistics.Application.Services
             // Validate the job
             if (!await ValidateJobAsync(job, cancellationToken))
             {
-                throw new ArgumentException("Job validation failed", nameof(job));
+                throw new ValidationException("Job validation failed");
             }
 
             // Verify customer exists and is active
             var customer = await customerRepository.GetByIdAsync(job.CustomerId);
             if (customer == null || !customer.IsActive)
             {
-                throw new ArgumentException($"Customer {job.CustomerId} not found or inactive", nameof(job));
+                throw new BusinessRuleException($"Customer {job.CustomerId} not found or inactive");
             }
 
             // Set initial job status and timestamps
@@ -153,7 +159,7 @@ namespace HotshotLogistics.Application.Services
             // Validate the updated job details
             if (!await ValidateJobAsync(jobDetails, cancellationToken))
             {
-                throw new ArgumentException("Job validation failed", nameof(jobDetails));
+                throw new ValidationException("Job validation failed");
             }
 
             jobDetails.UpdatedAt = DateTime.UtcNow;
@@ -179,7 +185,7 @@ namespace HotshotLogistics.Application.Services
             if (job.Status != JobStatus.Pending && job.Status != JobStatus.Cancelled)
             {
                 logger.LogWarning("Cannot delete job with status: {Status}", job.Status);
-                throw new InvalidOperationException($"Cannot delete job with status: {job.Status}");
+                throw new BusinessRuleException($"Cannot delete job with status: {job.Status}");
             }
 
             var result = await jobRepository.DeleteJobAsync(id, cancellationToken);
@@ -200,19 +206,19 @@ namespace HotshotLogistics.Application.Services
             var job = await jobRepository.GetJobByIdAsync(jobId, cancellationToken);
             if (job == null)
             {
-                throw new ArgumentException($"Job {jobId} not found", nameof(jobId));
+                throw new BusinessRuleException($"Job {jobId} not found");
             }
 
             var driver = await driverRepository.GetByIdAsync(driverId);
             if (driver == null)
             {
-                throw new ArgumentException($"Driver {driverId} not found", nameof(driverId));
+                throw new BusinessRuleException($"Driver {driverId} not found");
             }
 
             // Check if driver is available
             if (!await IsDriverAvailableAsync(driverId, job.EstimatedDeliveryTime, cancellationToken: cancellationToken))
             {
-                throw new InvalidOperationException($"Driver {driverId} is not available for the job timeframe");
+                throw new BusinessRuleException($"Driver {driverId} is not available for the job timeframe");
             }
 
             // Update job with driver assignment
@@ -253,7 +259,7 @@ namespace HotshotLogistics.Application.Services
             var job = await jobRepository.GetJobByIdAsync(jobId, cancellationToken);
             if (job == null)
             {
-                throw new ArgumentException($"Job {jobId} not found", nameof(jobId));
+                throw new BusinessRuleException($"Job {jobId} not found");
             }
 
             var previousStatus = job.Status;
@@ -302,69 +308,131 @@ namespace HotshotLogistics.Application.Services
         }
 
         /// <inheritdoc/>
-        public Task<bool> ValidateJobAsync(IJob job, CancellationToken cancellationToken = default)
+        public async Task<bool> ValidateJobAsync(IJob job, CancellationToken cancellationToken = default)
         {
             if (job == null)
             {
                 logger.LogWarning("Job validation failed: job is null");
-                return Task.FromResult(false);
+                return false;
             }
 
             if (string.IsNullOrWhiteSpace(job.CustomerId))
             {
                 logger.LogWarning("Job validation failed: customer ID is empty");
-                return Task.FromResult(false);
+                return false;
             }
 
             if (string.IsNullOrWhiteSpace(job.Title))
             {
                 logger.LogWarning("Job validation failed: job title is empty");
-                return Task.FromResult(false);
+                return false;
             }
 
             // Validate pickup location
             if (job.PickupLocation == null || !job.PickupLocation.IsValid())
             {
                 logger.LogWarning("Job validation failed: pickup location is invalid");
-                return Task.FromResult(false);
+                return false;
+            }
+
+            // Validate pickup location with geocoding
+            if (!await ValidateLocationWithGeocodingAsync(job.PickupLocation, "pickup", cancellationToken))
+            {
+                logger.LogWarning("Job validation failed: pickup location geocoding validation failed");
+                return false;
             }
 
             // Validate delivery location
             if (job.DeliveryLocation == null || !job.DeliveryLocation.IsValid())
             {
                 logger.LogWarning("Job validation failed: delivery location is invalid");
-                return Task.FromResult(false);
+                return false;
+            }
+
+            // Validate delivery location with geocoding
+            if (!await ValidateLocationWithGeocodingAsync(job.DeliveryLocation, "delivery", cancellationToken))
+            {
+                logger.LogWarning("Job validation failed: delivery location geocoding validation failed");
+                return false;
             }
 
             // Validate cargo details
             if (job.Cargo == null || !job.Cargo.IsValid())
             {
                 logger.LogWarning("Job validation failed: cargo details are invalid");
-                return Task.FromResult(false);
+                return false;
             }
 
             // Validate pricing details
             if (job.Pricing == null || !job.Pricing.IsValid())
             {
                 logger.LogWarning("Job validation failed: pricing details are invalid");
-                return Task.FromResult(false);
+                return false;
             }
 
             // Validate scheduled pickup time
             if (job.ScheduledPickupTime <= DateTime.UtcNow)
             {
                 logger.LogWarning("Job validation failed: scheduled pickup time is in the past");
-                return Task.FromResult(false);
+                return false;
             }
 
             // Validate estimated delivery time
             if (job.EstimatedDeliveryTime <= job.ScheduledPickupTime)
             {
                 logger.LogWarning("Job validation failed: estimated delivery time must be after pickup time");
-                return Task.FromResult(false);
+                return false;
             }
 
-            return Task.FromResult(true);
+            return true;
+        }
+
+        /// <summary>
+        /// Validates a location using geocoding to ensure it's a real address.
+        /// </summary>
+        /// <param name="location">The location to validate.</param>
+        /// <param name="locationType">The type of location (pickup/delivery) for logging.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>True if the location is valid, false otherwise.</returns>
+        private async Task<bool> ValidateLocationWithGeocodingAsync(Location location, string locationType, CancellationToken cancellationToken)
+        {
+            try
+            {
+                // If coordinates are already provided, validate them with reverse geocoding
+                if (location.HasCoordinates)
+                {
+                    var reverseResult = await mappingService.ReverseGeocodeAsync(location.Latitude!.Value, location.Longitude!.Value, cancellationToken);
+                    if (!reverseResult.IsValid)
+                    {
+                        logger.LogWarning("Location validation failed: reverse geocoding failed for {LocationType} coordinates", locationType);
+                        return false;
+                    }
+                    return true;
+                }
+
+                // Otherwise, geocode the address to get coordinates
+                var geocodeResult = await mappingService.GeocodeAddressAsync(location.FullAddress, cancellationToken);
+                if (!geocodeResult.IsValid)
+                {
+                    logger.LogWarning("Location validation failed: geocoding failed for {LocationType} address: {Address}", locationType, location.FullAddress);
+                    return false;
+                }
+
+                // Update location with geocoded coordinates
+                location.Latitude = geocodeResult.Latitude;
+                location.Longitude = geocodeResult.Longitude;
+
+                logger.LogInformation("Location validated and geocoded for {LocationType}: {Address} -> ({Lat}, {Lon})",
+                    locationType, location.FullAddress, location.Latitude, location.Longitude);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error validating location with geocoding for {LocationType}: {Address}", locationType, location.FullAddress);
+                // If geocoding fails, still allow the job but log the error
+                return true;
+            }
         }
 
         /// <summary>
@@ -373,26 +441,68 @@ namespace HotshotLogistics.Application.Services
         /// <param name="job">The job to calculate delivery time for.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The estimated delivery time.</returns>
-        private Task<DateTime> CalculateEstimatedDeliveryTimeAsync(IJob job, CancellationToken cancellationToken = default)
+        private async Task<DateTime> CalculateEstimatedDeliveryTimeAsync(IJob job, CancellationToken cancellationToken = default)
         {
-            // Basic calculation: add travel time based on distance
-            var distance = job.PickupLocation.DistanceTo(job.DeliveryLocation) ?? 100; // Default 100 miles if no coordinates
-            var averageSpeed = 55; // Average highway speed in mph
-            var travelTimeHours = distance / averageSpeed;
-            var loadingTime = 1; // 1 hour for loading/unloading
-            
-            var totalTimeHours = travelTimeHours + loadingTime;
-            
-            // Add buffer based on priority
-            var bufferHours = job.Priority switch
+            try
             {
-                JobPriority.High => 0.5, // 30 minutes buffer for high priority
-                JobPriority.Medium => 1.0, // 1 hour buffer for medium priority
-                JobPriority.Low => 2.0, // 2 hours buffer for low priority
-                _ => 1.0
-            };
+                // Use mapping service to get accurate distance and duration
+                var distanceResult = await mappingService.CalculateDistanceAsync(job.PickupLocation, job.DeliveryLocation, cancellationToken);
 
-            return Task.FromResult(job.ScheduledPickupTime.AddHours(totalTimeHours + bufferHours));
+                double distance;
+                TimeSpan travelTime;
+
+                if (distanceResult.IsValid)
+                {
+                    distance = distanceResult.Distance;
+                    travelTime = distanceResult.Duration;
+                }
+                else
+                {
+                    // Fallback to basic calculation if mapping service fails
+                    logger.LogWarning("Mapping service failed for distance calculation, using fallback calculation");
+                    distance = job.PickupLocation.DistanceTo(job.DeliveryLocation) ?? 100; // Default 100 miles if no coordinates
+                    var averageSpeed = 55; // Average highway speed in mph
+                    travelTime = TimeSpan.FromHours(distance / averageSpeed);
+                }
+
+                var loadingTime = TimeSpan.FromHours(1); // 1 hour for loading/unloading
+                var totalTime = travelTime.Add(loadingTime);
+
+                // Add buffer based on priority
+                var bufferTime = job.Priority switch
+                {
+                    JobPriority.High => TimeSpan.FromMinutes(30), // 30 minutes buffer for high priority
+                    JobPriority.Medium => TimeSpan.FromHours(1.0), // 1 hour buffer for medium priority
+                    JobPriority.Low => TimeSpan.FromHours(2.0), // 2 hours buffer for low priority
+                    _ => TimeSpan.FromHours(1.0)
+                };
+
+                var estimatedDeliveryTime = job.ScheduledPickupTime.Add(totalTime).Add(bufferTime);
+
+                logger.LogInformation("Calculated delivery time for job: distance={Distance} miles, travelTime={TravelTime}, totalTime={TotalTime}, buffer={Buffer}, ETA={ETA}",
+                    distance, travelTime, totalTime, bufferTime, estimatedDeliveryTime);
+
+                return estimatedDeliveryTime;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error calculating estimated delivery time, using fallback calculation");
+
+                // Fallback calculation
+                var distance = job.PickupLocation.DistanceTo(job.DeliveryLocation) ?? 100;
+                var averageSpeed = 55;
+                var travelTimeHours = distance / averageSpeed;
+                var loadingTime = 1;
+                var bufferHours = job.Priority switch
+                {
+                    JobPriority.High => 0.5,
+                    JobPriority.Medium => 1.0,
+                    JobPriority.Low => 2.0,
+                    _ => 1.0
+                };
+
+                return job.ScheduledPickupTime.AddHours(travelTimeHours + loadingTime + bufferHours);
+            }
         }
 
         /// <summary>
@@ -424,34 +534,104 @@ namespace HotshotLogistics.Application.Services
                 return job.EstimatedDeliveryTime;
             }
 
-            // Calculate remaining distance based on current location
-            var targetLocation = job.Status == JobStatus.Assigned || job.Status == JobStatus.EnRoute
-                ? job.PickupLocation
-                : job.DeliveryLocation;
-
-            var remainingDistance = currentLocation.DistanceTo(targetLocation) ?? 0;
-            var averageSpeed = job.Tracking?.GetAverageSpeed() ?? 45; // Default to 45 mph if no speed data
-            var remainingTimeHours = (double)remainingDistance / (double)averageSpeed;
-
-            var eta = DateTime.UtcNow.AddHours(remainingTimeHours);
-
-            // Add buffer time for loading/unloading if still need to pickup
-            if (job.Status == JobStatus.Assigned || job.Status == JobStatus.EnRoute)
+            try
             {
-                eta = eta.AddMinutes(30); // 30 minutes for pickup
+                DateTime eta;
 
-                // Add delivery time after pickup
-                var deliveryDistance = job.PickupLocation.DistanceTo(job.DeliveryLocation) ?? 0;
-                var deliveryTimeHours = deliveryDistance / 55; // Highway speed for delivery
-                eta = eta.AddHours(deliveryTimeHours).AddMinutes(30); // 30 minutes for delivery
+                if (job.Status == JobStatus.Assigned || job.Status == JobStatus.EnRoute)
+                {
+                    // Driver is heading to pickup or at pickup
+                    var currentLocationAsLocation = new Location
+                    {
+                        Latitude = currentLocation.Latitude,
+                        Longitude = currentLocation.Longitude
+                    };
+                    var distanceResult = await mappingService.CalculateDistanceAsync(currentLocationAsLocation, job.PickupLocation, cancellationToken);
+                    if (distanceResult.IsValid)
+                    {
+                        eta = DateTime.UtcNow.Add(distanceResult.Duration);
+                    }
+                    else
+                    {
+                        // Fallback calculation
+                        var remainingDistance = currentLocation.DistanceTo(job.PickupLocation) ?? 0;
+                        var averageSpeed = job.Tracking?.GetAverageSpeed() ?? 45;
+                        eta = DateTime.UtcNow.AddHours((double)remainingDistance / (double)averageSpeed);
+                    }
+
+                    // Add pickup time
+                    eta = eta.AddMinutes(30);
+
+                    // Add delivery time
+                    var deliveryResult = await mappingService.CalculateDistanceAsync(job.PickupLocation, job.DeliveryLocation, cancellationToken);
+                    if (deliveryResult.IsValid)
+                    {
+                        eta = eta.Add(deliveryResult.Duration);
+                    }
+                    else
+                    {
+                        // Fallback
+                        var deliveryDistance = job.PickupLocation.DistanceTo(job.DeliveryLocation) ?? 0;
+                        eta = eta.AddHours(deliveryDistance / 55);
+                    }
+
+                    // Add delivery time
+                    eta = eta.AddMinutes(30);
+                }
+                else
+                {
+                    // Driver is heading to delivery
+                    var currentLocationAsLocation = new Location
+                    {
+                        Latitude = currentLocation.Latitude,
+                        Longitude = currentLocation.Longitude
+                    };
+                    var distanceResult = await mappingService.CalculateDistanceAsync(currentLocationAsLocation, job.DeliveryLocation, cancellationToken);
+                    if (distanceResult.IsValid)
+                    {
+                        eta = DateTime.UtcNow.Add(distanceResult.Duration);
+                    }
+                    else
+                    {
+                        // Fallback calculation
+                        var remainingDistance = currentLocation.DistanceTo(job.DeliveryLocation) ?? 0;
+                        var averageSpeed = job.Tracking?.GetAverageSpeed() ?? 45;
+                        eta = DateTime.UtcNow.AddHours((double)remainingDistance / (double)averageSpeed);
+                    }
+
+                    // Add delivery time
+                    eta = eta.AddMinutes(30);
+                }
+
+                logger.LogInformation("Calculated ETA for job {JobId}: {ETA}", jobId, eta);
+                return eta;
             }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error calculating current ETA for job {JobId}, using fallback", jobId);
 
-            logger.LogInformation("Calculated ETA for job {JobId}: {ETA}", jobId, eta);
-            return eta;
+                // Fallback to original calculation
+                var targetLocation = job.Status == JobStatus.Assigned || job.Status == JobStatus.EnRoute
+                    ? job.PickupLocation
+                    : job.DeliveryLocation;
+
+                var remainingDistance = currentLocation.DistanceTo(targetLocation) ?? 0;
+                var averageSpeed = job.Tracking?.GetAverageSpeed() ?? 45;
+                var eta = DateTime.UtcNow.AddHours((double)remainingDistance / (double)averageSpeed);
+
+                if (job.Status == JobStatus.Assigned || job.Status == JobStatus.EnRoute)
+                {
+                    eta = eta.AddMinutes(30);
+                    var deliveryDistance = job.PickupLocation.DistanceTo(job.DeliveryLocation) ?? 0;
+                    eta = eta.AddHours(deliveryDistance / 55).AddMinutes(30);
+                }
+
+                return eta;
+            }
         }
 
         /// <summary>
-        /// Optimizes the route for a job (placeholder for future mapping service integration).
+        /// Optimizes the route for a job using mapping service.
         /// </summary>
         /// <param name="jobId">The job identifier.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -467,24 +647,57 @@ namespace HotshotLogistics.Application.Services
                 return false;
             }
 
-            // TODO: Integrate with mapping service (Google Maps, Azure Maps, etc.)
-            // For now, just update the estimated delivery time based on current conditions
             try
             {
-                var optimizedETA = await CalculateCurrentETAAsync(jobId, cancellationToken);
-                if (optimizedETA.HasValue)
+                // For single pickup-delivery jobs, optimize the route between pickup and delivery
+                var waypoints = new List<Location> { job.PickupLocation, job.DeliveryLocation };
+                var optimizationResult = await mappingService.OptimizeRouteAsync(waypoints, cancellationToken);
+
+                if (optimizationResult.IsValid)
                 {
-                    job.EstimatedDeliveryTime = optimizedETA.Value;
+                    // Update estimated delivery time based on optimized route
+                    var optimizedETA = DateTime.UtcNow.Add(optimizationResult.TotalDuration);
+                    job.EstimatedDeliveryTime = optimizedETA;
                     job.UpdatedAt = DateTime.UtcNow;
                     await jobRepository.UpdateJobAsync(jobId, job, cancellationToken);
 
-                    logger.LogInformation("Route optimized for job {JobId}, new ETA: {ETA}", jobId, optimizedETA);
+                    logger.LogInformation("Route optimized for job {JobId}, new ETA: {ETA}, distance: {Distance} miles",
+                        jobId, optimizedETA, optimizationResult.TotalDistance);
                     return true;
+                }
+                else
+                {
+                    logger.LogWarning("Route optimization failed for job {JobId}: {Error}", jobId, optimizationResult.ErrorMessage);
+                    // Fallback to current ETA calculation
+                    var currentETA = await CalculateCurrentETAAsync(jobId, cancellationToken);
+                    if (currentETA.HasValue)
+                    {
+                        job.EstimatedDeliveryTime = currentETA.Value;
+                        job.UpdatedAt = DateTime.UtcNow;
+                        await jobRepository.UpdateJobAsync(jobId, job, cancellationToken);
+                        return true;
+                    }
                 }
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to optimize route for job {JobId}", jobId);
+                // Fallback to current ETA calculation
+                try
+                {
+                    var currentETA = await CalculateCurrentETAAsync(jobId, cancellationToken);
+                    if (currentETA.HasValue)
+                    {
+                        job.EstimatedDeliveryTime = currentETA.Value;
+                        job.UpdatedAt = DateTime.UtcNow;
+                        await jobRepository.UpdateJobAsync(jobId, job, cancellationToken);
+                        return true;
+                    }
+                }
+                catch (Exception fallbackEx)
+                {
+                    logger.LogError(fallbackEx, "Fallback ETA calculation also failed for job {JobId}", jobId);
+                }
             }
 
             return false;

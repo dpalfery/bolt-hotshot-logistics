@@ -14,6 +14,8 @@ namespace HotshotLogistics.Tests
     using HotshotLogistics.Contracts.Models;
     using HotshotLogistics.Contracts.Repositories;
     using HotshotLogistics.Contracts.Services;
+    using FluentValidation;
+    using HotshotLogistics.Core.Exceptions;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
     using Moq;
@@ -26,6 +28,7 @@ namespace HotshotLogistics.Tests
     {
         private readonly Mock<IJobService> mockJobService;
         private readonly Mock<IJobRepository> mockJobRepository;
+        private readonly Mock<IValidator<JobDto>> mockJobValidator;
         private readonly Mock<ILogger<JobController>> mockLogger;
         private readonly JobController controller;
 
@@ -36,8 +39,9 @@ namespace HotshotLogistics.Tests
         {
             mockJobService = new Mock<IJobService>();
             mockJobRepository = new Mock<IJobRepository>();
+            mockJobValidator = new Mock<IValidator<JobDto>>();
             mockLogger = new Mock<ILogger<JobController>>();
-            controller = new JobController(mockJobService.Object, mockJobRepository.Object, mockLogger.Object);
+            controller = new JobController(mockJobService.Object, mockJobRepository.Object, mockLogger.Object, mockJobValidator.Object);
         }
 
         /// <summary>
@@ -179,11 +183,11 @@ namespace HotshotLogistics.Tests
         }
 
         /// <summary>
-        /// Tests that CreateJob returns BadRequest when validation fails.
+        /// Tests that CreateJob throws ValidationException when validation fails.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
-        public async Task CreateJob_WithInvalidData_ReturnsBadRequest()
+        public async Task CreateJob_WithInvalidData_ThrowsValidationException()
         {
             // Arrange
             var jobDto = new JobDto
@@ -194,14 +198,10 @@ namespace HotshotLogistics.Tests
             };
 
             mockJobService.Setup(s => s.CreateJobAsync(It.IsAny<IJob>(), It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new ArgumentException("Job validation failed"));
+                .ThrowsAsync(new HotshotLogistics.Core.Exceptions.ValidationException("Job validation failed"));
 
-            // Act
-            var result = await controller.CreateJob(jobDto);
-
-            // Assert
-            result.Should().NotBeNull();
-            result.Result.Should().BeOfType<BadRequestObjectResult>();
+            // Act & Assert
+            await Assert.ThrowsAsync<HotshotLogistics.Core.Exceptions.ValidationException>(() => controller.CreateJob(jobDto));
         }
 
         /// <summary>

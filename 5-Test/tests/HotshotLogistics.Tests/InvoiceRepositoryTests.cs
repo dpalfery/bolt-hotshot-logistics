@@ -11,6 +11,7 @@ using HotshotLogistics.Contracts.Models;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Data.Repositories;
 using HotshotLogistics.Domain.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 
@@ -400,6 +401,45 @@ namespace HotshotLogistics.Tests
         }
 
         /// <summary>
+        /// Tests that GenerateInvoiceAsync creates an invoice from job data.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task GenerateInvoiceAsync_CreatesInvoiceFromJobData()
+        {
+            // Arrange
+            var jobId = await CreateTestJobAsync();
+
+            // Act
+            var result = await _invoiceRepository.GenerateInvoiceAsync(jobId);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.JobId.Should().Be(jobId);
+            result.Status.Should().Be(InvoiceStatus.Draft);
+            result.TotalAmount.Should().BeGreaterThan(0);
+            result.LineItems.Should().NotBeEmpty();
+            result.InvoiceNumber.Should().StartWith("INV");
+
+            _createdInvoiceIds.Add(result.Id);
+        }
+
+        /// <summary>
+        /// Tests that GenerateInvoiceAsync throws exception for non-existent job.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task GenerateInvoiceAsync_ThrowsExceptionForNonExistentJob()
+        {
+            // Arrange
+            var nonExistentJobId = "NONEXISTENT";
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(() =>
+                _invoiceRepository.GenerateInvoiceAsync(nonExistentJobId));
+        }
+
+        /// <summary>
         /// Creates a test invoice.
         /// </summary>
         /// <returns>A test invoice.</returns>
@@ -547,6 +587,81 @@ namespace HotshotLogistics.Tests
             var result = await _invoiceRepository.AddAsync(invoice);
             _createdInvoiceIds.Add(result.Id);
             return (Invoice)result;
+        }
+
+        /// <summary>
+        /// Creates a test job for invoice generation testing.
+        /// </summary>
+        /// <returns>The job ID of the created test job.</returns>
+        private async Task<string> CreateTestJobAsync()
+        {
+            var jobId = Guid.NewGuid().ToString();
+            const string sql = @"
+                INSERT INTO Jobs (
+                    Id, CustomerId, Title, PickupLocation_Address, PickupLocation_City, PickupLocation_State,
+                    PickupLocation_ZipCode, PickupLocation_Latitude, PickupLocation_Longitude,
+                    DeliveryLocation_Address, DeliveryLocation_City, DeliveryLocation_State,
+                    DeliveryLocation_ZipCode, DeliveryLocation_Latitude, DeliveryLocation_Longitude,
+                    Cargo_Description, Cargo_Weight, Cargo_Value, Cargo_SpecialHandling,
+                    Status, Priority, Pricing_BaseRate, Pricing_MileageRate, Pricing_FuelSurcharge,
+                    Pricing_TollCharges, Pricing_AdditionalCharges, Pricing_TotalAmount,
+                    ScheduledPickupTime, EstimatedDeliveryTime, SpecialInstructions,
+                    Tracking_CurrentStatus, Tracking_LastUpdateTime, CreatedAt
+                ) VALUES (
+                    @Id, @CustomerId, @Title, @PickupAddress, @PickupCity, @PickupState,
+                    @PickupZip, @PickupLat, @PickupLng, @DeliveryAddress, @DeliveryCity, @DeliveryState,
+                    @DeliveryZip, @DeliveryLat, @DeliveryLng, @CargoDesc, @CargoWeight, @CargoValue, @CargoSpecial,
+                    @Status, @Priority, @BaseRate, @MileageRate, @FuelSurcharge,
+                    @TollCharges, @AdditionalCharges, @TotalAmount,
+                    @ScheduledPickup, @EstimatedDelivery, @SpecialInstructions,
+                    @TrackingStatus, @LastUpdate, @CreatedAt
+                )";
+
+            var parameters = new[]
+            {
+                new SqlParameter("@Id", jobId),
+                new SqlParameter("@CustomerId", "CUST001"),
+                new SqlParameter("@Title", "Test Job for Invoice Generation"),
+                new SqlParameter("@PickupAddress", "123 Pickup St"),
+                new SqlParameter("@PickupCity", "Pickup City"),
+                new SqlParameter("@PickupState", "PC"),
+                new SqlParameter("@PickupZip", "12345"),
+                new SqlParameter("@PickupLat", 40.7128m),
+                new SqlParameter("@PickupLng", -74.0060m),
+                new SqlParameter("@DeliveryAddress", "456 Delivery Ave"),
+                new SqlParameter("@DeliveryCity", "Delivery City"),
+                new SqlParameter("@DeliveryState", "DC"),
+                new SqlParameter("@DeliveryZip", "67890"),
+                new SqlParameter("@DeliveryLat", 34.0522m),
+                new SqlParameter("@DeliveryLng", -118.2437m),
+                new SqlParameter("@CargoDesc", "Test Cargo"),
+                new SqlParameter("@CargoWeight", 1000.0),
+                new SqlParameter("@CargoValue", 5000.00m),
+                new SqlParameter("@CargoSpecial", "Handle with care"),
+                new SqlParameter("@Status", (int)JobStatus.Completed),
+                new SqlParameter("@Priority", (int)JobPriority.Normal),
+                new SqlParameter("@BaseRate", 500.00m),
+                new SqlParameter("@MileageRate", 200.00m),
+                new SqlParameter("@FuelSurcharge", 50.00m),
+                new SqlParameter("@TollCharges", 25.00m),
+                new SqlParameter("@AdditionalCharges", 75.00m),
+                new SqlParameter("@TotalAmount", 850.00m),
+                new SqlParameter("@ScheduledPickup", DateTime.UtcNow.AddDays(-1)),
+                new SqlParameter("@EstimatedDelivery", DateTime.UtcNow.AddDays(-1).AddHours(2)),
+                new SqlParameter("@SpecialInstructions", "Test instructions"),
+                new SqlParameter("@TrackingStatus", "Completed"),
+                new SqlParameter("@LastUpdate", DateTime.UtcNow.AddDays(-1)),
+                new SqlParameter("@CreatedAt", DateTime.UtcNow.AddDays(-1))
+            };
+
+            await using var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            await connection.OpenAsync();
+
+            await using var command = new SqlCommand(sql, connection);
+            command.Parameters.AddRange(parameters);
+            await command.ExecuteNonQueryAsync();
+
+            return jobId;
         }
 
         /// <summary>

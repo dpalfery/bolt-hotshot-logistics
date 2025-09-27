@@ -8,8 +8,10 @@ namespace HotshotLogistics.Api.Controllers
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using HotshotLogistics.Application.Authorization;
     using HotshotLogistics.Contracts.Models;
     using HotshotLogistics.Contracts.Services;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
@@ -19,6 +21,7 @@ namespace HotshotLogistics.Api.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class CustomerController : ControllerBase
     {
         private readonly ICustomerService customerService;
@@ -93,8 +96,10 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The created customer.</returns>
         [HttpPost]
+        [Authorize(Policy = AuthorizationPolicies.AdminOrManager)]
         [ProducesResponseType(typeof(ICustomer), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ICustomer>> CreateCustomer(
             [FromBody] ICustomer customer,
             CancellationToken cancellationToken = default)
@@ -132,8 +137,10 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The updated customer.</returns>
         [HttpPut("{id}")]
+        [Authorize(Policy = AuthorizationPolicies.AdminOrManager)]
         [ProducesResponseType(typeof(ICustomer), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ICustomer>> UpdateCustomer(
             string id,
@@ -177,7 +184,9 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>No content if successful; otherwise, 404 Not Found.</returns>
         [HttpDelete("{id}")]
+        [Authorize(Policy = AuthorizationPolicies.Admin)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteCustomer(string id, CancellationToken cancellationToken = default)
         {
@@ -307,7 +316,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="request">The credit limit update request.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>No content if successful; otherwise, appropriate error response.</returns>
-        [HttpPut("{id}/credit-limit")]
+        [HttpPost("{id}/credit-limit")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -339,6 +348,49 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occurred while updating credit limit for customer {CustomerId}", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
+        }
+
+        /// <summary>
+        /// Updates a customer's credit terms.
+        /// </summary>
+        /// <param name="id">The customer ID.</param>
+        /// <param name="creditTerms">The new credit terms.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>No content if successful; otherwise, appropriate error response.</returns>
+        [HttpPut("{id}/credit-terms")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateCreditTerms(
+            string id,
+            [FromBody] CreditTerms creditTerms,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (creditTerms == null)
+                {
+                    return BadRequest("Credit terms are required");
+                }
+
+                if (creditTerms.PaymentTermsDays <= 0)
+                {
+                    return BadRequest("Payment terms days must be greater than zero");
+                }
+
+                var result = await customerService.UpdateCreditTermsAsync(id, creditTerms, cancellationToken);
+                if (!result)
+                {
+                    return NotFound($"Customer with ID {id} not found");
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while updating credit terms for customer {CustomerId}", id);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
