@@ -114,7 +114,7 @@ namespace HotshotLogistics.Domain.Models
                 throw new ArgumentNullException(nameof(other));
 
             const double earthRadiusMiles = 3959.0;
-            
+
             var lat1Rad = (double)(Latitude * (decimal)Math.PI / 180);
             var lat2Rad = (double)(other.Latitude * (decimal)Math.PI / 180);
             var deltaLatRad = (double)((other.Latitude - Latitude) * (decimal)Math.PI / 180);
@@ -123,9 +123,9 @@ namespace HotshotLogistics.Domain.Models
             var a = Math.Sin(deltaLatRad / 2) * Math.Sin(deltaLatRad / 2) +
                     Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
                     Math.Sin(deltaLonRad / 2) * Math.Sin(deltaLonRad / 2);
-            
+
             var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-            
+
             return earthRadiusMiles * c;
         }
 

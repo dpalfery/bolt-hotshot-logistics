@@ -40,7 +40,7 @@ public class PaymentRepository : BaseRepository<Payment>, IPaymentRepository, IB
 
         var parameters = new[]
         {
-            new SqlParameter("@InvoiceId", SqlDbType.NVarChar, 50) { Value = invoiceId }
+            new SqlParameter("@InvoiceId", SqlDbType.NVarChar, 50) { Value = invoiceId },
         };
 
         return await ExecuteQueryAsync(sql, parameters);
@@ -56,7 +56,7 @@ public class PaymentRepository : BaseRepository<Payment>, IPaymentRepository, IB
 
         var parameters = new[]
         {
-            new SqlParameter("@TransactionId", SqlDbType.NVarChar, 100) { Value = transactionId }
+            new SqlParameter("@TransactionId", SqlDbType.NVarChar, 100) { Value = transactionId },
         };
 
         return (await ExecuteQueryAsync(sql, parameters)).FirstOrDefault();
@@ -73,7 +73,7 @@ public class PaymentRepository : BaseRepository<Payment>, IPaymentRepository, IB
 
         var parameters = new[]
         {
-            new SqlParameter("@Status", SqlDbType.Int) { Value = (int)status }
+            new SqlParameter("@Status", SqlDbType.Int) { Value = (int)status },
         };
 
         return await ExecuteQueryAsync(sql, parameters);
@@ -94,7 +94,7 @@ public class PaymentRepository : BaseRepository<Payment>, IPaymentRepository, IB
             new SqlParameter("@Id", SqlDbType.NVarChar, 50) { Value = paymentId },
             new SqlParameter("@Status", SqlDbType.Int) { Value = (int)status },
             new SqlParameter("@ProcessorResponse", SqlDbType.NVarChar, -1) { Value = (object?)processorResponse ?? DBNull.Value },
-            new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = DateTime.UtcNow }
+            new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = DateTime.UtcNow },
         };
 
         var result = await ExecuteNonQueryAsync(sql, parameters);
@@ -121,7 +121,7 @@ public class PaymentRepository : BaseRepository<Payment>, IPaymentRepository, IB
             ProcessorResponse = reader.IsDBNull(reader.GetOrdinal("ProcessorResponse")) ? string.Empty : reader.GetString(reader.GetOrdinal("ProcessorResponse")),
             Status = (PaymentStatus)reader.GetInt32(reader.GetOrdinal("Status")),
             CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
-            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("UpdatedAt")) ? null : reader.GetDateTime(reader.GetOrdinal("UpdatedAt"))
+            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("UpdatedAt")) ? null : reader.GetDateTime(reader.GetOrdinal("UpdatedAt")),
         };
     }
 
@@ -139,7 +139,7 @@ public class PaymentRepository : BaseRepository<Payment>, IPaymentRepository, IB
             new SqlParameter("@ProcessorResponse", SqlDbType.NVarChar, -1) { Value = entity.ProcessorResponse },
             new SqlParameter("@Status", SqlDbType.Int) { Value = (int)entity.Status },
             new SqlParameter("@CreatedAt", SqlDbType.DateTime2) { Value = entity.CreatedAt },
-            new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = entity.UpdatedAt ?? (object)DBNull.Value }
+            new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = entity.UpdatedAt ?? (object)DBNull.Value },
         };
     }
 
@@ -156,7 +156,7 @@ public class PaymentRepository : BaseRepository<Payment>, IPaymentRepository, IB
             new SqlParameter("@TransactionId", SqlDbType.NVarChar, 100) { Value = entity.TransactionId },
             new SqlParameter("@ProcessorResponse", SqlDbType.NVarChar, -1) { Value = entity.ProcessorResponse },
             new SqlParameter("@Status", SqlDbType.Int) { Value = (int)entity.Status },
-            new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = entity.UpdatedAt ?? (object)DBNull.Value }
+            new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = entity.UpdatedAt ?? (object)DBNull.Value },
         };
     }
 }

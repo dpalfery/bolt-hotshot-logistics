@@ -120,10 +120,10 @@ namespace HotshotLogistics.Domain.Models
         public void CalculateTotals()
         {
             SubTotal = LineItems.Sum(li => li.Amount);
-            
+
             var taxableAmount = LineItems.Where(li => li.TaxApplicable).Sum(li => li.Amount);
             TaxAmount = taxableAmount * TaxRate;
-            
+
             TotalAmount = SubTotal + TaxAmount - DiscountAmount;
             UpdatedAt = DateTime.UtcNow;
         }
@@ -154,7 +154,7 @@ namespace HotshotLogistics.Domain.Models
                 throw new ArgumentException("Payment amount cannot exceed balance due", nameof(paymentAmount));
 
             PaidAmount += paymentAmount;
-            
+
             // Update status based on payment
             if (BalanceDue == 0)
             {

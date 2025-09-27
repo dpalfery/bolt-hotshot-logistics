@@ -5,7 +5,7 @@ namespace HotshotLogistics.Contracts.Services;
 public interface IJobService
 {
     Task<IEnumerable<IJob>> GetJobsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets jobs with filtering, pagination, and sorting support.
     /// </summary>
@@ -19,12 +19,12 @@ public interface IJobService
         PaginationParameters? pagination = null,
         SortParameters? sort = null,
         CancellationToken cancellationToken = default);
-    
+
     Task<IJob?> GetJobByIdAsync(string id, CancellationToken cancellationToken = default);
     Task<IJob> CreateJobAsync(IJob job, CancellationToken cancellationToken = default);
     Task<IJob?> UpdateJobAsync(string id, IJob jobDetails, CancellationToken cancellationToken = default);
     Task<bool> DeleteJobAsync(string id, CancellationToken cancellationToken = default);
-    
+
     // Job lifecycle management methods
     Task<IJob> AssignDriverAsync(string jobId, int driverId, CancellationToken cancellationToken = default);
     Task<IJob> UpdateJobStatusAsync(string jobId, JobStatus status, CancellationToken cancellationToken = default);

@@ -92,10 +92,10 @@ namespace HotshotLogistics.Contracts.Repositories
         /// <param name="endTime">The end time for the search.</param>
         /// <returns>A collection of location tracking records within the geographic area.</returns>
         Task<IEnumerable<ILocationTracking>> GetByGeographicAreaAsync(
-            decimal centerLatitude, 
-            decimal centerLongitude, 
-            double radiusMiles, 
-            DateTime? startTime = null, 
+            decimal centerLatitude,
+            decimal centerLongitude,
+            double radiusMiles,
+            DateTime? startTime = null,
             DateTime? endTime = null);
 
         /// <summary>

@@ -535,7 +535,7 @@ namespace HotshotLogistics.Application.Services
                 var estimatedMiles = distanceFromCoords.HasValue
                     ? (decimal)distanceFromCoords.Value
                     : (decimal)await EstimateDistanceAsync(job.PickupLocation.FullAddress, job.DeliveryLocation.FullAddress);
-                
+
                 invoice.AddLineItem(new InvoiceLineItem
                 {
                     Description = $"Mileage Charge ({estimatedMiles:F1} miles)",
@@ -600,7 +600,7 @@ namespace HotshotLogistics.Application.Services
             {
                 var specialHandlingCharge = (job.Pricing?.BaseRate ?? 100) * 0.15m; // 15% surcharge
                 var requirements = job.Cargo.GetSpecialRequirements();
-                
+
                 invoice.AddLineItem(new InvoiceLineItem
                 {
                     Description = $"Special Handling ({requirements})",

@@ -182,10 +182,10 @@ namespace HotshotLogistics.Application.Services
 
             // Return true if at least one notification was sent successfully
             var success = results.Any() && results.Any(r => r);
-            
+
             // Log notification to history
             await LogNotificationAsync(userId, notificationType, title, message, success, cancellationToken);
-            
+
             if (success)
             {
                 logger.LogInformation("Notification sent successfully to user {UserId}", userId);
@@ -203,7 +203,7 @@ namespace HotshotLogistics.Application.Services
         {
             var cacheKey = $"notification_preferences:{userId}";
             var preferencesJson = await cache.GetStringAsync(cacheKey, cancellationToken);
-            
+
             if (!string.IsNullOrEmpty(preferencesJson))
             {
                 try
@@ -232,7 +232,7 @@ namespace HotshotLogistics.Application.Services
 
             // Cache the default preferences
             await UpdateNotificationPreferencesAsync(userId, defaultPreferences, cancellationToken);
-            
+
             return defaultPreferences;
         }
 
@@ -248,7 +248,7 @@ namespace HotshotLogistics.Application.Services
             {
                 var cacheKey = $"notification_preferences:{userId}";
                 var preferencesJson = JsonSerializer.Serialize(preferences);
-                
+
                 await cache.SetStringAsync(cacheKey, preferencesJson, new DistributedCacheEntryOptions
                 {
                     SlidingExpiration = TimeSpan.FromDays(30) // Cache for 30 days
@@ -278,9 +278,9 @@ namespace HotshotLogistics.Application.Services
 
             var cacheKey = $"notification_history:{userId}";
             var historyJson = await cache.GetStringAsync(cacheKey, cancellationToken);
-            
+
             var history = new List<NotificationHistory>();
-            
+
             if (!string.IsNullOrEmpty(historyJson))
             {
                 try
@@ -296,7 +296,7 @@ namespace HotshotLogistics.Application.Services
             // Filter by date range if specified
             if (startDate.HasValue || endDate.HasValue)
             {
-                history = history.Where(h => 
+                history = history.Where(h =>
                     (!startDate.HasValue || h.SentAt >= startDate.Value) &&
                     (!endDate.HasValue || h.SentAt <= endDate.Value)
                 ).ToList();
@@ -462,7 +462,7 @@ namespace HotshotLogistics.Application.Services
             try
             {
                 var history = await GetNotificationHistoryAsync(userId, cancellationToken: cancellationToken);
-                
+
                 var notification = new NotificationHistory
                 {
                     Id = Guid.NewGuid().ToString(),
@@ -484,7 +484,7 @@ namespace HotshotLogistics.Application.Services
 
                 var cacheKey = $"notification_history:{userId}";
                 var historyJson = JsonSerializer.Serialize(history);
-                
+
                 await cache.SetStringAsync(cacheKey, historyJson, new DistributedCacheEntryOptions
                 {
                     SlidingExpiration = TimeSpan.FromDays(30)
@@ -504,8 +504,8 @@ namespace HotshotLogistics.Application.Services
         private static bool IsValidPhoneNumber(string phoneNumber)
         {
             // Simple validation - in real implementation, use a proper phone number validation library
-            return !string.IsNullOrWhiteSpace(phoneNumber) && 
-                   phoneNumber.Length >= 10 && 
+            return !string.IsNullOrWhiteSpace(phoneNumber) &&
+                   phoneNumber.Length >= 10 &&
                    phoneNumber.All(c => char.IsDigit(c) || c == '+' || c == '-' || c == '(' || c == ')' || c == ' ');
         }
 
@@ -517,8 +517,8 @@ namespace HotshotLogistics.Application.Services
         private static bool IsValidEmail(string email)
         {
             // Simple validation - in real implementation, use a proper email validation library
-            return !string.IsNullOrWhiteSpace(email) && 
-                   email.Contains('@') && 
+            return !string.IsNullOrWhiteSpace(email) &&
+                   email.Contains('@') &&
                    email.Contains('.') &&
                    email.Length > 5;
         }
@@ -544,14 +544,14 @@ namespace HotshotLogistics.Application.Services
                     if (attempt < MaxRetryAttempts)
                     {
                         var delay = TimeSpan.FromMilliseconds(BaseRetryDelay.TotalMilliseconds * Math.Pow(2, attempt - 1));
-                        logger.LogInformation("Retrying {OperationName} in {Delay}ms (attempt {Attempt}/{MaxAttempts})", 
+                        logger.LogInformation("Retrying {OperationName} in {Delay}ms (attempt {Attempt}/{MaxAttempts})",
                             operationName, delay.TotalMilliseconds, attempt, MaxRetryAttempts);
                         await Task.Delay(delay);
                     }
                 }
                 catch (Exception ex)
                 {
-                    logger.LogWarning(ex, "Attempt {Attempt}/{MaxAttempts} failed for {OperationName}", 
+                    logger.LogWarning(ex, "Attempt {Attempt}/{MaxAttempts} failed for {OperationName}",
                         attempt, MaxRetryAttempts, operationName);
 
                     if (attempt == MaxRetryAttempts)

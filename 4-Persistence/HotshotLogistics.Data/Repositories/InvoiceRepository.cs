@@ -226,7 +226,7 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
             parameters.Add(new SqlParameter("@CurrentDate", DateTime.UtcNow.Date));
         }
 
-                if (conditions.Any())
+        if (conditions.Any())
         {
             whereClause.Append("WHERE ").Append(string.Join(" AND ", conditions));
         }
@@ -491,7 +491,7 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
                 TollCharges = jobReader.GetDecimal(jobReader.GetOrdinal("Pricing_TollCharges")),
                 AdditionalCharges = jobReader.GetDecimal(jobReader.GetOrdinal("Pricing_AdditionalCharges")),
                 TotalAmount = jobReader.GetDecimal(jobReader.GetOrdinal("Pricing_TotalAmount")),
-                CreatedAt = jobReader.GetDateTime(jobReader.GetOrdinal("CreatedAt"))
+                CreatedAt = jobReader.GetDateTime(jobReader.GetOrdinal("CreatedAt")),
             };
         }
 
@@ -525,10 +525,10 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
                 EarlyPaymentDiscount = 0.02m,
                 EarlyPaymentDiscountDays = 10,
                 LatePaymentPenalty = 0.015m,
-                LatePaymentPenaltyDays = 5
+                LatePaymentPenaltyDays = 5,
             },
             Notes = $"Invoice for job: {jobData.Title}",
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
         };
 
         // Add line items based on job pricing
@@ -539,7 +539,7 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
                 Description = "Base Rate",
                 Quantity = 1,
                 UnitPrice = jobData.BaseRate,
-                TaxApplicable = true
+                TaxApplicable = true,
             });
         }
 
@@ -550,7 +550,7 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
                 Description = "Mileage Charges",
                 Quantity = 1,
                 UnitPrice = jobData.MileageRate,
-                TaxApplicable = true
+                TaxApplicable = true,
             });
         }
 
@@ -561,7 +561,7 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
                 Description = "Fuel Surcharge",
                 Quantity = 1,
                 UnitPrice = jobData.FuelSurcharge,
-                TaxApplicable = true
+                TaxApplicable = true,
             });
         }
 
@@ -572,7 +572,7 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
                 Description = "Toll Charges",
                 Quantity = 1,
                 UnitPrice = jobData.TollCharges,
-                TaxApplicable = true
+                TaxApplicable = true,
             });
         }
 
@@ -583,7 +583,7 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
                 Description = "Additional Charges",
                 Quantity = 1,
                 UnitPrice = jobData.AdditionalCharges,
-                TaxApplicable = true
+                TaxApplicable = true,
             });
         }
 

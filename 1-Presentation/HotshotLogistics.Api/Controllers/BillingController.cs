@@ -281,7 +281,7 @@ namespace HotshotLogistics.Api.Controllers
             try
             {
                 var overdueInvoices = await billingService.GetOverdueInvoicesAsync(cancellationToken);
-                
+
                 var report = new AccountsReceivableReport
                 {
                     TotalOverdueAmount = overdueInvoices.Sum(i => i.BalanceDue),

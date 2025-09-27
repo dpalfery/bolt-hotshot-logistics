@@ -138,9 +138,9 @@ namespace HotshotLogistics.Application.Services
             SortParameters? sort = null,
             CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Getting jobs with filter: {@Filter}, pagination: {@Pagination}, sort: {@Sort}", 
+            logger.LogInformation("Getting jobs with filter: {@Filter}, pagination: {@Pagination}, sort: {@Sort}",
                 filter, pagination, sort);
-            
+
             return jobRepository.GetJobsAsync(filter, pagination, sort, cancellationToken);
         }
 

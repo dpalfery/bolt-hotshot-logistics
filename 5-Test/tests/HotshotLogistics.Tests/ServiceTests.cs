@@ -190,7 +190,8 @@ public class JobServiceTests
             Id = "1",
             CustomerId = "CUST001",
             Title = "Test Job",
-            PickupLocation = new Location {
+            PickupLocation = new Location
+            {
                 Address = "123 Pickup St",
                 City = "New York",
                 State = "NY",
@@ -198,7 +199,8 @@ public class JobServiceTests
                 Latitude = 40.7128m,
                 Longitude = -74.0060m
             },
-            DeliveryLocation = new Location {
+            DeliveryLocation = new Location
+            {
                 Address = "456 Delivery Ave",
                 City = "New York",
                 State = "NY",
@@ -206,13 +208,15 @@ public class JobServiceTests
                 Latitude = 40.7589m,
                 Longitude = -73.9851m
             },
-            Cargo = new CargoDetails {
+            Cargo = new CargoDetails
+            {
                 Description = "Test cargo",
                 Weight = 100,
                 Value = 1000,
                 Quantity = 1
             },
-            Pricing = new PricingDetails {
+            Pricing = new PricingDetails
+            {
                 BaseRate = 100,
                 MileageRate = 2.5m,
                 FuelSurcharge = 10,
@@ -251,11 +255,13 @@ public class JobServiceTests
     [Fact]
     public async Task UpdateJobAsync_CallsRepository()
     {
-        var job = new Job {
+        var job = new Job
+        {
             Id = "1",
             CustomerId = "CUST001",
             Title = "Test Job",
-            PickupLocation = new Location {
+            PickupLocation = new Location
+            {
                 Address = "123 Pickup St",
                 City = "New York",
                 State = "NY",
@@ -263,7 +269,8 @@ public class JobServiceTests
                 Latitude = 40.7128m,
                 Longitude = -74.0060m
             },
-            DeliveryLocation = new Location {
+            DeliveryLocation = new Location
+            {
                 Address = "456 Delivery Ave",
                 City = "New York",
                 State = "NY",
@@ -271,13 +278,15 @@ public class JobServiceTests
                 Latitude = 40.7589m,
                 Longitude = -73.9851m
             },
-            Cargo = new CargoDetails {
+            Cargo = new CargoDetails
+            {
                 Description = "Test cargo",
                 Weight = 100,
                 Value = 1000,
                 Quantity = 1
             },
-            Pricing = new PricingDetails {
+            Pricing = new PricingDetails
+            {
                 BaseRate = 100,
                 MileageRate = 2.5m,
                 FuelSurcharge = 10,

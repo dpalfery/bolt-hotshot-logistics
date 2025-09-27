@@ -14,7 +14,7 @@ public interface IBillingService
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The generated invoice.</returns>
     Task<IInvoice> GenerateInvoiceAsync(string jobId, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Calculates tax amount based on location and amount.
     /// </summary>
@@ -23,7 +23,7 @@ public interface IBillingService
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The calculated tax amount.</returns>
     Task<decimal> CalculateTaxAsync(decimal amount, string state, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Processes a payment for an invoice.
     /// </summary>
@@ -33,7 +33,7 @@ public interface IBillingService
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>True if payment was processed successfully.</returns>
     Task<bool> ProcessPaymentAsync(string invoiceId, decimal paymentAmount, string paymentMethod, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets all invoices for a customer.
     /// </summary>
@@ -41,7 +41,7 @@ public interface IBillingService
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The customer's invoices.</returns>
     Task<IEnumerable<IInvoice>> GetCustomerInvoicesAsync(string customerId, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets overdue invoices.
     /// </summary>

@@ -68,7 +68,7 @@ namespace HotshotLogistics.Data.Services
                 var messageOptions = new CreateMessageOptions(new PhoneNumber(message.To))
                 {
                     From = new PhoneNumber(_settings.FromPhoneNumber),
-                    Body = formattedBody
+                    Body = formattedBody,
                 };
 
                 var result = await MessageResource.CreateAsync(messageOptions);

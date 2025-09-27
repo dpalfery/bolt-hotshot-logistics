@@ -85,14 +85,14 @@ namespace HotshotLogistics.Contracts.Models
         {
             var mileageCharges = MileageRate * distance;
             var subtotal = BaseRate + mileageCharges + FuelSurcharge + TollCharges + AdditionalCharges;
-            
+
             var discountedAmount = subtotal - Discount;
-            
+
             if (applyTax && TaxRate > 0)
             {
                 Tax = discountedAmount * (TaxRate / 100);
             }
-            
+
             TotalAmount = discountedAmount + Tax;
         }
 
@@ -104,17 +104,17 @@ namespace HotshotLogistics.Contracts.Models
         public void ApplyDiscount(decimal discountAmount, bool recalculate = true)
         {
             Discount = Math.Max(0, discountAmount);
-            
+
             if (recalculate)
             {
                 var subtotal = BaseRate + FuelSurcharge + TollCharges + AdditionalCharges;
                 var discountedAmount = subtotal - Discount;
-                
+
                 if (TaxRate > 0)
                 {
                     Tax = discountedAmount * (TaxRate / 100);
                 }
-                
+
                 TotalAmount = discountedAmount + Tax;
             }
         }

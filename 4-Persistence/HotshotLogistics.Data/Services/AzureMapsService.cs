@@ -58,14 +58,14 @@ namespace HotshotLogistics.Data.Services
                         Longitude = (decimal)firstResult.Position.Lon,
                         FormattedAddress = firstResult.Address?.FreeformAddress ?? address,
                         IsValid = true,
-                        Confidence = firstResult.Confidence ?? 0.0
+                        Confidence = firstResult.Confidence ?? 0.0,
                     };
                 }
 
                 return new GeocodingResult
                 {
                     IsValid = false,
-                    ErrorMessage = "No geocoding results found"
+                    ErrorMessage = "No geocoding results found",
                 };
             }
             catch (Exception ex)
@@ -74,7 +74,7 @@ namespace HotshotLogistics.Data.Services
                 return new GeocodingResult
                 {
                     IsValid = false,
-                    ErrorMessage = ex.Message
+                    ErrorMessage = ex.Message,
                 };
             }
         }
@@ -103,14 +103,14 @@ namespace HotshotLogistics.Data.Services
                         PostalCode = address.Address?.PostalCode ?? string.Empty,
                         Country = address.Address?.CountryCode ?? string.Empty,
                         FormattedAddress = address.Address?.FreeformAddress ?? string.Empty,
-                        IsValid = true
+                        IsValid = true,
                     };
                 }
 
                 return new ReverseGeocodingResult
                 {
                     IsValid = false,
-                    ErrorMessage = "No reverse geocoding results found"
+                    ErrorMessage = "No reverse geocoding results found",
                 };
             }
             catch (Exception ex)
@@ -119,7 +119,7 @@ namespace HotshotLogistics.Data.Services
                 return new ReverseGeocodingResult
                 {
                     IsValid = false,
-                    ErrorMessage = ex.Message
+                    ErrorMessage = ex.Message,
                 };
             }
         }
@@ -141,7 +141,7 @@ namespace HotshotLogistics.Data.Services
                     return new RouteResult
                     {
                         IsValid = false,
-                        ErrorMessage = "Both origin and destination must have coordinates"
+                        ErrorMessage = "Both origin and destination must have coordinates",
                     };
                 }
 
@@ -165,14 +165,14 @@ namespace HotshotLogistics.Data.Services
                         Waypoints = new List<Location> { origin, destination },
                         Polyline = string.Empty, // Azure Maps doesn't provide polyline in basic response
                         EstimatedArrival = DateTime.UtcNow.AddSeconds(summary.TravelTimeInSeconds),
-                        IsValid = true
+                        IsValid = true,
                     };
                 }
 
                 return new RouteResult
                 {
                     IsValid = false,
-                    ErrorMessage = "No route found"
+                    ErrorMessage = "No route found",
                 };
             }
             catch (Exception ex)
@@ -181,7 +181,7 @@ namespace HotshotLogistics.Data.Services
                 return new RouteResult
                 {
                     IsValid = false,
-                    ErrorMessage = ex.Message
+                    ErrorMessage = ex.Message,
                 };
             }
         }
@@ -198,7 +198,7 @@ namespace HotshotLogistics.Data.Services
                     return new OptimizedRouteResult
                     {
                         IsValid = false,
-                        ErrorMessage = "At least 2 waypoints required"
+                        ErrorMessage = "At least 2 waypoints required",
                     };
                 }
 
@@ -214,7 +214,7 @@ namespace HotshotLogistics.Data.Services
                         return new OptimizedRouteResult
                         {
                             IsValid = false,
-                            ErrorMessage = $"Failed to calculate route segment {i}"
+                            ErrorMessage = $"Failed to calculate route segment {i}",
                         };
                     }
 
@@ -230,7 +230,7 @@ namespace HotshotLogistics.Data.Services
                     TotalDuration = totalDuration,
                     RouteSegments = segments,
                     EstimatedArrival = DateTime.UtcNow.Add(totalDuration),
-                    IsValid = true
+                    IsValid = true,
                 };
             }
             catch (Exception ex)
@@ -239,7 +239,7 @@ namespace HotshotLogistics.Data.Services
                 return new OptimizedRouteResult
                 {
                     IsValid = false,
-                    ErrorMessage = ex.Message
+                    ErrorMessage = ex.Message,
                 };
             }
         }
@@ -253,7 +253,7 @@ namespace HotshotLogistics.Data.Services
                 Distance = route.Distance,
                 Duration = route.Duration,
                 IsValid = route.IsValid,
-                ErrorMessage = route.ErrorMessage
+                ErrorMessage = route.ErrorMessage,
             };
         }
 

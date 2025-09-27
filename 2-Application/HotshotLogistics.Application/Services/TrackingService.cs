@@ -186,7 +186,7 @@ namespace HotshotLogistics.Application.Services
             // Try to get from cache first
             var cacheKey = $"location:current:{jobId}";
             var cachedLocationJson = await cache.GetStringAsync(cacheKey, cancellationToken);
-            
+
             if (!string.IsNullOrEmpty(cachedLocationJson))
             {
                 try
@@ -259,28 +259,28 @@ namespace HotshotLogistics.Application.Services
         {
             // Simplified route calculation - in real implementation, use mapping service like Google Maps or Azure Maps
             // For demo purposes, return a straight line with a few waypoints
-            
+
             await Task.Delay(100); // Simulate API call
-            
+
             var route = new List<LocationUpdate>();
-            
+
             // Generate some sample waypoints (in real implementation, get from mapping service)
             var random = new Random();
             var startLat = 40.7128m + (decimal)(random.NextDouble() - 0.5) * 0.1m; // Around NYC
             var startLon = -74.0060m + (decimal)(random.NextDouble() - 0.5) * 0.1m;
             var endLat = startLat + (decimal)(random.NextDouble() - 0.5) * 0.5m;
             var endLon = startLon + (decimal)(random.NextDouble() - 0.5) * 0.5m;
-            
+
             // Create waypoints along the route
             for (int i = 0; i <= 10; i++)
             {
                 var progress = i / 10.0m;
                 var lat = startLat + (endLat - startLat) * progress;
                 var lon = startLon + (endLon - startLon) * progress;
-                
+
                 route.Add(new LocationUpdate(lat, lon));
             }
-            
+
             return route;
         }
 
@@ -302,7 +302,7 @@ namespace HotshotLogistics.Application.Services
 
             // Generate a secure tracking token (in real implementation, use proper token generation)
             var trackingToken = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{jobId}:{DateTime.UtcNow.Ticks}"));
-            
+
             // Store tracking token in cache with expiration
             var tokenKey = $"tracking:token:{trackingToken}";
             await cache.SetStringAsync(tokenKey, jobId, new DistributedCacheEntryOptions
@@ -312,7 +312,7 @@ namespace HotshotLogistics.Application.Services
 
             // Generate tracking URL (in real implementation, use proper base URL from configuration)
             var trackingUrl = $"https://tracking.hotshotlogistics.com/track/{trackingToken}";
-            
+
             logger.LogInformation("Tracking link generated for job {JobId}: {TrackingUrl}", jobId, trackingUrl);
             return trackingUrl;
         }
@@ -348,8 +348,8 @@ namespace HotshotLogistics.Application.Services
             // Update estimated arrival time based on current location and speed
             if (locationUpdate.Speed.HasValue && locationUpdate.Speed > 0)
             {
-                var targetLocation = job.Status == JobStatus.Assigned || job.Status == JobStatus.EnRoute 
-                    ? job.PickupLocation 
+                var targetLocation = job.Status == JobStatus.Assigned || job.Status == JobStatus.EnRoute
+                    ? job.PickupLocation
                     : job.DeliveryLocation;
 
                 var remainingDistance = locationUpdate.DistanceTo(targetLocation);
@@ -387,8 +387,8 @@ namespace HotshotLogistics.Application.Services
             var statusChanged = false;
 
             // Check if driver has arrived at pickup location
-            if (job.Status == JobStatus.EnRoute && 
-                distanceToPickup.HasValue && 
+            if (job.Status == JobStatus.EnRoute &&
+                distanceToPickup.HasValue &&
                 distanceToPickup.Value <= proximityThresholdMiles)
             {
                 job.Status = JobStatus.InProgress;
@@ -396,8 +396,8 @@ namespace HotshotLogistics.Application.Services
                 statusChanged = true;
             }
             // Check if driver has arrived at delivery location
-            else if (job.Status == JobStatus.InProgress && 
-                     distanceToDelivery.HasValue && 
+            else if (job.Status == JobStatus.InProgress &&
+                     distanceToDelivery.HasValue &&
                      distanceToDelivery.Value <= proximityThresholdMiles)
             {
                 // Don't automatically mark as completed - wait for driver confirmation
@@ -459,7 +459,7 @@ namespace HotshotLogistics.Application.Services
                 statistics.TotalDuration = statistics.LastUpdate.Value - statistics.FirstUpdate.Value;
             }
 
-            logger.LogDebug("Tracking statistics calculated for job {JobId}: {TotalUpdates} updates, {TotalDistance:F2} miles", 
+            logger.LogDebug("Tracking statistics calculated for job {JobId}: {TotalUpdates} updates, {TotalDistance:F2} miles",
                 jobId, statistics.TotalUpdates, statistics.TotalDistance);
 
             return statistics;
@@ -482,7 +482,7 @@ namespace HotshotLogistics.Application.Services
             {
                 var prev = orderedLocations[i - 1];
                 var current = orderedLocations[i];
-                
+
                 if (prev is LocationTracking prevTracking && current is LocationTracking currentTracking)
                 {
                     totalDistance += (decimal)prevTracking.DistanceTo(currentTracking);
@@ -500,7 +500,7 @@ namespace HotshotLogistics.Application.Services
         private static decimal? CalculateAverageSpeed(List<ILocationTracking> locations)
         {
             var locationsWithSpeed = locations.Where(l => l.Speed.HasValue).ToList();
-            
+
             if (!locationsWithSpeed.Any())
                 return null;
 
@@ -517,7 +517,7 @@ namespace HotshotLogistics.Application.Services
         /// <returns>A task representing the asynchronous operation.</returns>
         private async Task HandleRouteDeviationAsync(string jobId, int driverId, LocationUpdate currentLocation, CancellationToken cancellationToken)
         {
-            logger.LogWarning("Route deviation detected for job {JobId} at location {Lat}, {Lon}", 
+            logger.LogWarning("Route deviation detected for job {JobId} at location {Lat}, {Lon}",
                 jobId, currentLocation.Latitude, currentLocation.Longitude);
 
             var job = await jobRepository.GetByIdAsync(jobId);

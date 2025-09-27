@@ -113,7 +113,7 @@ namespace HotshotLogistics.Contracts.Models
         public decimal? GetAverageSpeed()
         {
             var updatesWithSpeed = Updates.Where(u => u.Speed.HasValue).ToList();
-            
+
             if (!updatesWithSpeed.Any())
                 return null;
 

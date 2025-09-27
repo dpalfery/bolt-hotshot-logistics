@@ -91,7 +91,7 @@ namespace HotshotLogistics.Contracts.Models
         public string GetSummary()
         {
             var summary = $"Job {JobId}: {TotalUpdates} updates";
-            
+
             if (TotalDistance > 0)
             {
                 summary += $", {TotalDistance:F1} miles traveled";

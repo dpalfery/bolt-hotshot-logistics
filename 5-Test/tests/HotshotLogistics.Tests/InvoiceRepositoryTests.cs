@@ -60,7 +60,7 @@ namespace HotshotLogistics.Tests
             result.InvoiceNumber.Should().Be(invoice.InvoiceNumber);
             result.CustomerId.Should().Be(invoice.CustomerId);
             result.TotalAmount.Should().Be(invoice.TotalAmount);
-            
+
             _createdInvoiceIds.Add(result.Id);
         }
 
@@ -181,7 +181,7 @@ namespace HotshotLogistics.Tests
 
             // Assert
             result.Should().NotBeNull();
-            result.Should().OnlyContain(i => 
+            result.Should().OnlyContain(i =>
                 i.Status != InvoiceStatus.Paid &&
                 i.Status != InvoiceStatus.Cancelled &&
                 i.DueDate < DateTime.UtcNow.Date);
@@ -204,7 +204,7 @@ namespace HotshotLogistics.Tests
             // Assert
             result.Should().NotBeNull();
             var futureDate = DateTime.UtcNow.Date.AddDays(days);
-            result.Should().OnlyContain(i => 
+            result.Should().OnlyContain(i =>
                 i.Status != InvoiceStatus.Paid &&
                 i.Status != InvoiceStatus.Cancelled &&
                 i.DueDate >= DateTime.UtcNow.Date &&
@@ -228,7 +228,7 @@ namespace HotshotLogistics.Tests
 
             // Assert
             result.Should().NotBeNull();
-            result.Should().OnlyContain(i => 
+            result.Should().OnlyContain(i =>
                 i.InvoiceDate.Date >= startDate &&
                 i.InvoiceDate.Date <= endDate);
         }

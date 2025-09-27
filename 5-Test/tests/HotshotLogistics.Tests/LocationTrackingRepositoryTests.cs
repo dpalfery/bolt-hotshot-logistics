@@ -60,7 +60,7 @@ namespace HotshotLogistics.Tests
             result.DriverId.Should().Be(locationTracking.DriverId);
             result.Latitude.Should().Be(locationTracking.Latitude);
             result.Longitude.Should().Be(locationTracking.Longitude);
-            
+
             _createdLocationTrackingIds.Add(result.Id);
         }
 
@@ -146,7 +146,7 @@ namespace HotshotLogistics.Tests
 
             // Assert
             result.Should().NotBeNull();
-            result.Should().OnlyContain(lt => 
+            result.Should().OnlyContain(lt =>
                 lt.JobId == jobId &&
                 lt.Timestamp >= startTime &&
                 lt.Timestamp <= endTime);
@@ -171,7 +171,7 @@ namespace HotshotLogistics.Tests
 
             // Assert
             result.Should().NotBeNull();
-            result.Should().OnlyContain(lt => 
+            result.Should().OnlyContain(lt =>
                 lt.DriverId == driverId &&
                 lt.Timestamp >= startTime &&
                 lt.Timestamp <= endTime);
@@ -410,9 +410,9 @@ namespace HotshotLogistics.Tests
         /// <param name="longitude">The longitude.</param>
         /// <returns>A test location tracking record.</returns>
         private LocationTracking CreateTestLocationTracking(
-            string jobId = "JOB001", 
-            int driverId = 1, 
-            decimal latitude = 40.7128m, 
+            string jobId = "JOB001",
+            int driverId = 1,
+            decimal latitude = 40.7128m,
             decimal longitude = -74.0060m)
         {
             return new LocationTracking

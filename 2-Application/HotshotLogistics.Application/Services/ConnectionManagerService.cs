@@ -27,16 +27,16 @@ public class ConnectionManagerService : IConnectionManagerService
     {
         var key = $"user_connections:{userId}";
         var connections = await GetUserConnectionsListAsync(userId);
-        
+
         if (!connections.Contains(connectionId))
         {
             connections.Add(connectionId);
             await _cache.SetStringAsync(key, JsonSerializer.Serialize(connections));
-            
+
             // Also store connection-to-user mapping
             var connectionKey = $"connection_user:{connectionId}";
             await _cache.SetStringAsync(connectionKey, userId);
-            
+
             _logger.LogInformation("Added connection {ConnectionId} for user {UserId}", connectionId, userId);
         }
     }
@@ -45,7 +45,7 @@ public class ConnectionManagerService : IConnectionManagerService
     {
         var key = $"user_connections:{userId}";
         var connections = await GetUserConnectionsListAsync(userId);
-        
+
         if (connections.Remove(connectionId))
         {
             if (connections.Count > 0)
@@ -64,7 +64,7 @@ public class ConnectionManagerService : IConnectionManagerService
     {
         var key = $"user_connections:{userId}";
         var connectionsJson = await _cache.GetStringAsync(key);
-        
+
         if (string.IsNullOrEmpty(connectionsJson))
         {
             return new List<string>();
@@ -91,7 +91,7 @@ public class ConnectionManagerService : IConnectionManagerService
     {
         var key = $"user_groups:{userId}";
         var groups = await GetUserGroupsAsync(userId);
-        
+
         if (!groups.Contains(groupName))
         {
             groups.Add(groupName);
@@ -104,7 +104,7 @@ public class ConnectionManagerService : IConnectionManagerService
     {
         var key = $"user_groups:{userId}";
         var groups = await GetUserGroupsAsync(userId);
-        
+
         if (groups.Remove(groupName))
         {
             if (groups.Count > 0)
@@ -123,7 +123,7 @@ public class ConnectionManagerService : IConnectionManagerService
     {
         var key = $"user_groups:{userId}";
         var groupsJson = await _cache.GetStringAsync(key);
-        
+
         if (string.IsNullOrEmpty(groupsJson))
         {
             return new List<string>();
@@ -149,7 +149,7 @@ public class ConnectionManagerService : IConnectionManagerService
         {
             await RemoveConnectionAsync(userId, connectionId);
         }
-        
+
         // Also remove from connection-to-user mapping
         var connectionKey = $"connection_user:{connectionId}";
         await _cache.RemoveAsync(connectionKey);
@@ -170,7 +170,7 @@ public class ConnectionManagerService : IConnectionManagerService
     {
         var key = $"group_connections:{groupName}";
         var connections = await GetGroupConnectionsListAsync(groupName);
-        
+
         if (!connections.Contains(connectionId))
         {
             connections.Add(connectionId);
@@ -183,7 +183,7 @@ public class ConnectionManagerService : IConnectionManagerService
     {
         var key = $"group_connections:{groupName}";
         var connections = await GetGroupConnectionsListAsync(groupName);
-        
+
         if (connections.Remove(connectionId))
         {
             if (connections.Count > 0)

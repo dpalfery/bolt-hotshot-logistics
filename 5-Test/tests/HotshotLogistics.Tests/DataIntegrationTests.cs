@@ -71,7 +71,8 @@ namespace HotshotLogistics.Tests
                 Priority = JobPriority.Low,
                 Amount = 10.0m,
                 EstimatedDeliveryTimeString = DateTime.UtcNow.AddHours(4).ToString("O"),
-                PickupLocation = new Location {
+                PickupLocation = new Location
+                {
                     Address = "Test Pickup",
                     City = "New York",
                     State = "NY",
@@ -79,7 +80,8 @@ namespace HotshotLogistics.Tests
                     Latitude = 40.7128m,
                     Longitude = -74.0060m
                 },
-                DeliveryLocation = new Location {
+                DeliveryLocation = new Location
+                {
                     Address = "Test Dropoff",
                     City = "New York",
                     State = "NY",
@@ -87,13 +89,15 @@ namespace HotshotLogistics.Tests
                     Latitude = 40.7589m,
                     Longitude = -73.9851m
                 },
-                Cargo = new CargoDetails {
+                Cargo = new CargoDetails
+                {
                     Description = "Test cargo",
                     Weight = 100,
                     Value = 1000,
                     Quantity = 1
                 },
-                Pricing = new PricingDetails {
+                Pricing = new PricingDetails
+                {
                     BaseRate = 100,
                     MileageRate = 2.5m,
                     FuelSurcharge = 10,

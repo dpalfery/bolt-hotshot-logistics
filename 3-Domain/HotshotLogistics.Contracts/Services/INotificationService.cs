@@ -15,7 +15,7 @@ public interface INotificationService
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>True if SMS was sent successfully.</returns>
     Task<bool> SendSmsAsync(string phoneNumber, string message, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Sends an email notification.
     /// </summary>
@@ -25,7 +25,7 @@ public interface INotificationService
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>True if email was sent successfully.</returns>
     Task<bool> SendEmailAsync(string emailAddress, string subject, string message, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Sends a push notification.
     /// </summary>
@@ -35,7 +35,7 @@ public interface INotificationService
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>True if push notification was sent successfully.</returns>
     Task<bool> SendPushNotificationAsync(string deviceToken, string title, string message, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Sends a notification to a user based on their preferences.
     /// </summary>
@@ -46,7 +46,7 @@ public interface INotificationService
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>True if notification was sent successfully.</returns>
     Task<bool> SendNotificationAsync(string userId, NotificationType notificationType, string title, string message, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets notification preferences for a user.
     /// </summary>
@@ -54,7 +54,7 @@ public interface INotificationService
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The user's notification preferences.</returns>
     Task<NotificationPreferences?> GetNotificationPreferencesAsync(string userId, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Updates notification preferences for a user.
     /// </summary>
@@ -76,37 +76,37 @@ public class NotificationPreferences
     /// Gets or sets the user identifier.
     /// </summary>
     public string UserId { get; set; } = string.Empty;
-    
+
     /// <summary>
     /// Gets or sets a value indicating whether SMS notifications are enabled.
     /// </summary>
     public bool SmsEnabled { get; set; }
-    
+
     /// <summary>
     /// Gets or sets a value indicating whether email notifications are enabled.
     /// </summary>
     public bool EmailEnabled { get; set; }
-    
+
     /// <summary>
     /// Gets or sets a value indicating whether push notifications are enabled.
     /// </summary>
     public bool PushEnabled { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the phone number for SMS notifications.
     /// </summary>
     public string? PhoneNumber { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the email address for email notifications.
     /// </summary>
     public string? EmailAddress { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the device token for push notifications.
     /// </summary>
     public string? DeviceToken { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the notification types the user wants to receive.
     /// </summary>

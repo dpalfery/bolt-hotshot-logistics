@@ -108,7 +108,7 @@ namespace HotshotLogistics.Tests
             // Assert
             result.Should().NotBeNull();
             result.Items.Should().NotBeEmpty();
-            
+
             var amounts = result.Items.Select(j => j.Pricing.TotalAmount).ToList();
             amounts.Should().BeInAscendingOrder();
         }
@@ -131,7 +131,7 @@ namespace HotshotLogistics.Tests
             // Assert
             result.Should().NotBeNull();
             result.Items.Should().NotBeEmpty();
-            result.Items.Should().OnlyContain(j => 
+            result.Items.Should().OnlyContain(j =>
                 j.Title.Contains("Test", StringComparison.OrdinalIgnoreCase) ||
                 j.PickupLocation.Address.Contains("Test", StringComparison.OrdinalIgnoreCase) ||
                 j.DeliveryLocation.Address.Contains("Test", StringComparison.OrdinalIgnoreCase) ||
@@ -160,8 +160,8 @@ namespace HotshotLogistics.Tests
             // Assert
             result.Should().NotBeNull();
             result.Items.Should().NotBeEmpty();
-            result.Items.Should().OnlyContain(j => 
-                j.CreatedAt >= filter.CreatedAfter && 
+            result.Items.Should().OnlyContain(j =>
+                j.CreatedAt >= filter.CreatedAfter &&
                 j.CreatedAt <= filter.CreatedBefore);
         }
 
@@ -237,7 +237,7 @@ namespace HotshotLogistics.Tests
 
             // Assert
             result.Should().NotBeNull();
-            result.Should().OnlyContain(j => 
+            result.Should().OnlyContain(j =>
                 j.EstimatedDeliveryTime < DateTime.UtcNow &&
                 j.Status != JobStatus.Completed &&
                 j.Status != JobStatus.Cancelled);
@@ -282,7 +282,7 @@ namespace HotshotLogistics.Tests
             // Assert
             result.Should().NotBeNull();
             result.Items.Should().NotBeEmpty();
-            result.Items.Should().OnlyContain(j => 
+            result.Items.Should().OnlyContain(j =>
                 j.Status == JobStatus.Pending || j.Status == JobStatus.Assigned);
         }
 
@@ -307,7 +307,7 @@ namespace HotshotLogistics.Tests
 
             // Assert
             result.Should().NotBeNull();
-            result.Items.Should().OnlyContain(j => 
+            result.Items.Should().OnlyContain(j =>
                 j.Pricing.TotalAmount >= 100m && j.Pricing.TotalAmount <= 500m);
         }
 

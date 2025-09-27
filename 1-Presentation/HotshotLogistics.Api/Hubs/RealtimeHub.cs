@@ -45,7 +45,7 @@ public class RealtimeHub
             var response = req.CreateResponse();
             await response.WriteStringAsync(JsonSerializer.Serialize(negotiateResponse));
             response.Headers.Add("Content-Type", "application/json");
-            
+
             return response;
         }
         catch (Exception ex)
@@ -218,7 +218,7 @@ public class RealtimeHub
         {
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var request = JsonSerializer.Deserialize<JoinTrackingRequest>(requestBody);
-            
+
             if (request?.JobId == null)
             {
                 var badResponse = req.CreateResponse(System.Net.HttpStatusCode.BadRequest);
@@ -230,7 +230,7 @@ public class RealtimeHub
             if (connectionId != null)
             {
                 await _hubContext.Groups.AddToGroupAsync(connectionId, $"job-{request.JobId}");
-                _logger.LogInformation("Connection {ConnectionId} joined job tracking for {JobId}", 
+                _logger.LogInformation("Connection {ConnectionId} joined job tracking for {JobId}",
                     connectionId, request.JobId);
             }
 
@@ -256,7 +256,7 @@ public class RealtimeHub
         {
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var request = JsonSerializer.Deserialize<LeaveTrackingRequest>(requestBody);
-            
+
             if (request?.JobId == null)
             {
                 var badResponse = req.CreateResponse(System.Net.HttpStatusCode.BadRequest);
@@ -268,7 +268,7 @@ public class RealtimeHub
             if (connectionId != null)
             {
                 await _hubContext.Groups.RemoveFromGroupAsync(connectionId, $"job-{request.JobId}");
-                _logger.LogInformation("Connection {ConnectionId} left job tracking for {JobId}", 
+                _logger.LogInformation("Connection {ConnectionId} left job tracking for {JobId}",
                     connectionId, request.JobId);
             }
 
@@ -297,7 +297,7 @@ public class RealtimeHub
                 return "user-123"; // This should be extracted from the actual token
             }
         }
-        
+
         return null;
     }
 
@@ -308,7 +308,7 @@ public class RealtimeHub
         {
             return connectionIds.FirstOrDefault();
         }
-        
+
         return null;
     }
 }

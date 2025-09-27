@@ -15,7 +15,7 @@ public interface ITrackingService
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>True if tracking started successfully.</returns>
     Task<bool> StartTrackingAsync(string jobId, int driverId, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Updates the location for a job and driver.
     /// </summary>
@@ -25,7 +25,7 @@ public interface ITrackingService
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The created location tracking record.</returns>
     Task<ILocationTracking> UpdateLocationAsync(string jobId, int driverId, LocationUpdate locationUpdate, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Stops tracking for a job.
     /// </summary>
@@ -33,7 +33,7 @@ public interface ITrackingService
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>True if tracking stopped successfully.</returns>
     Task<bool> StopTrackingAsync(string jobId, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets the current location for a job.
     /// </summary>
@@ -41,7 +41,7 @@ public interface ITrackingService
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The latest location tracking record.</returns>
     Task<ILocationTracking?> GetCurrentLocationAsync(string jobId, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets the location history for a job.
     /// </summary>
@@ -51,7 +51,7 @@ public interface ITrackingService
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The location tracking history.</returns>
     Task<IEnumerable<ILocationTracking>> GetLocationHistoryAsync(string jobId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Checks if a driver has deviated from the expected route.
     /// </summary>
