@@ -109,12 +109,13 @@ namespace HotshotLogistics.Application.Services
         }
 
         /// <inheritdoc/>
-        public async Task<bool> ValidateCustomerAsync(ICustomer customer, CancellationToken cancellationToken = default)
+        public Task<bool> ValidateCustomerAsync(ICustomer customer, CancellationToken cancellationToken = default)
         {
             // Basic validation - can be extended
-            return !string.IsNullOrWhiteSpace(customer.CompanyName) &&
-                   !string.IsNullOrWhiteSpace(customer.Id) &&
-                   customer.CreditLimit >= 0;
+            var isValid = !string.IsNullOrWhiteSpace(customer.CompanyName) &&
+                         !string.IsNullOrWhiteSpace(customer.Id) &&
+                         customer.CreditLimit >= 0;
+            return Task.FromResult(isValid);
         }
     }
 }

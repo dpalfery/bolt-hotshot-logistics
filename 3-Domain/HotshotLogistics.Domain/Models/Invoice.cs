@@ -72,7 +72,7 @@ namespace HotshotLogistics.Domain.Models
         public decimal BalanceDue => TotalAmount - PaidAmount;
 
         /// <inheritdoc/>
-        public PaymentTerms Terms { get; set; }
+        public PaymentTerms? Terms { get; set; }
 
         /// <inheritdoc/>
         public string Notes { get; set; } = string.Empty;
@@ -195,7 +195,7 @@ namespace HotshotLogistics.Domain.Models
         /// <returns>The early payment discount amount.</returns>
         public decimal CalculateEarlyPaymentDiscount()
         {
-            if (Terms.EarlyPaymentDiscount <= 0 || Terms.EarlyPaymentDiscountDays <= 0)
+            if (Terms == null || Terms.EarlyPaymentDiscount <= 0 || Terms.EarlyPaymentDiscountDays <= 0)
                 return 0;
 
             var discountDeadline = InvoiceDate.AddDays(Terms.EarlyPaymentDiscountDays);
@@ -213,7 +213,7 @@ namespace HotshotLogistics.Domain.Models
         /// <returns>The late payment penalty amount.</returns>
         public decimal CalculateLatePenalty()
         {
-            if (!IsOverdue() || Terms.LatePaymentPenalty <= 0)
+            if (Terms == null || !IsOverdue() || Terms.LatePaymentPenalty <= 0)
                 return 0;
 
             var penaltyStartDate = DueDate.AddDays(Terms.LatePaymentPenaltyDays);

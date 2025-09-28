@@ -85,7 +85,7 @@ public class PaymentProcessorFactory
     {
         // For now, use default processor for all payment methods
         // In the future, this could route specific payment methods to specific processors
-        logger.LogDebug("Getting processor for payment method type: {PaymentMethodType}", paymentMethodType);
+        logger.LogDebug("Getting processor for payment method type");
         return GetDefaultProcessor();
     }
 

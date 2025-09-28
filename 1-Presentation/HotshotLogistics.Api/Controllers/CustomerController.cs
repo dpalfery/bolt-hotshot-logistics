@@ -84,7 +84,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while retrieving customer {CustomerId}", id);
+                logger.LogError(ex, "An error occurred while retrieving customer");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -172,7 +172,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while updating customer {CustomerId}", id);
+                logger.LogError(ex, "An error occurred while updating customer");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -202,7 +202,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while deleting customer {CustomerId}", id);
+                logger.LogError(ex, "An error occurred while deleting customer");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -274,7 +274,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while retrieving jobs for customer {CustomerId}", id);
+                logger.LogError(ex, "An error occurred while retrieving jobs for customer");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -304,7 +304,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while retrieving invoices for customer {CustomerId}", id);
+                logger.LogError(ex, "An error occurred while retrieving invoices for customer");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -347,7 +347,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while updating credit limit for customer {CustomerId}", id);
+                logger.LogError(ex, "An error occurred while updating credit limit for customer");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -390,7 +390,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while updating credit terms for customer {CustomerId}", id);
+                logger.LogError(ex, "An error occurred while updating credit terms for customer");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }

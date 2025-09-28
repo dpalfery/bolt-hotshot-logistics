@@ -65,17 +65,17 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (ArgumentException ex)
             {
-                logger.LogWarning(ex, "Invalid job ID provided for invoice generation: {JobId}", jobId);
+                logger.LogWarning(ex, "Invalid job ID provided for invoice generation");
                 return BadRequest(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
-                logger.LogWarning(ex, "Job not found for invoice generation: {JobId}", jobId);
+                logger.LogWarning(ex, "Job not found for invoice generation");
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while generating invoice for job {JobId}", jobId);
+                logger.LogError(ex, "An error occurred while generating invoice for job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -99,7 +99,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while retrieving invoice {InvoiceId}", id);
+                logger.LogError(ex, "An error occurred while retrieving invoice");
                 return Task.FromResult<ActionResult<IInvoice>>(StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request."));
             }
         }
@@ -121,7 +121,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while retrieving invoices for customer {CustomerId}", customerId);
+                logger.LogError(ex, "An error occurred while retrieving invoices for customer");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -199,17 +199,17 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (ArgumentException ex)
             {
-                logger.LogWarning(ex, "Invalid payment request for invoice {InvoiceId}: {Message}", invoiceId, ex.Message);
+                logger.LogWarning(ex, "Invalid payment request for invoice: {Message}", ex.Message);
                 return BadRequest(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
-                logger.LogWarning(ex, "Invoice not found for payment processing: {InvoiceId}", invoiceId);
+                logger.LogWarning(ex, "Invoice not found for payment processing");
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while processing payment for invoice {InvoiceId}", invoiceId);
+                logger.LogError(ex, "An error occurred while processing payment for invoice");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -347,7 +347,7 @@ namespace HotshotLogistics.Api.Controllers
                     await HandlePaymentStatusUpdateAsync(result.StatusUpdate, cancellationToken);
                 }
 
-                logger.LogInformation("Stripe webhook processed: {Success}, Event: {EventType}", result.Success, webhookData.EventType);
+                logger.LogInformation("Stripe webhook processed: {Success}", result.Success);
 
                 return Ok(new { received = true });
             }
@@ -397,7 +397,7 @@ namespace HotshotLogistics.Api.Controllers
                     await HandlePaymentStatusUpdateAsync(result.StatusUpdate, cancellationToken);
                 }
 
-                logger.LogInformation("PayPal webhook processed: {Success}, Event: {EventType}", result.Success, webhookData.EventType);
+                logger.LogInformation("PayPal webhook processed: {Success}", result.Success);
 
                 return Ok(new { received = true });
             }
@@ -416,8 +416,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <returns>A task representing the asynchronous operation.</returns>
         private async Task HandlePaymentStatusUpdateAsync(PaymentStatusUpdate statusUpdate, CancellationToken cancellationToken)
         {
-            logger.LogInformation("Handling payment status update: TransactionId={TransactionId}, Status={Status}, InvoiceId={InvoiceId}",
-                statusUpdate.TransactionId, statusUpdate.Status, statusUpdate.InvoiceId);
+            logger.LogInformation("Handling payment status update: Status={Status}", statusUpdate.Status);
 
             try
             {
@@ -446,11 +445,11 @@ namespace HotshotLogistics.Api.Controllers
                     }
                 }
 
-                logger.LogInformation("Payment status update handled successfully for TransactionId: {TransactionId}", statusUpdate.TransactionId);
+                logger.LogInformation("Payment status update handled successfully");
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error handling payment status update for TransactionId: {TransactionId}", statusUpdate.TransactionId);
+                logger.LogError(ex, "Error handling payment status update");
                 throw;
             }
         }

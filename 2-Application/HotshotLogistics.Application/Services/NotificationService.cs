@@ -92,7 +92,7 @@ namespace HotshotLogistics.Application.Services
 
             return await ExecuteWithRetryAsync(async () =>
             {
-                logger.LogInformation("Sending email to {EmailAddress} with subject: {Subject}", emailAddress, subject);
+                logger.LogInformation("Sending email with subject: {Subject} to recipient", subject);
 
                 var commMessage = new CommunicationMessage
                 {
@@ -103,7 +103,7 @@ namespace HotshotLogistics.Application.Services
 
                 var service = communicationFactory.GetService(CommunicationType.Email);
                 return await service.SendAsync(commMessage, cancellationToken);
-            }, $"Email to {emailAddress}");
+            }, "Email notification");
         }
 
         /// <inheritdoc/>

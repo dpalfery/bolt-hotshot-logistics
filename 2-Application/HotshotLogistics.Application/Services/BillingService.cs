@@ -87,7 +87,7 @@ namespace HotshotLogistics.Application.Services
         /// <inheritdoc/>
         public async Task<IInvoice> GenerateInvoiceAsync(string jobId, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Generating invoice for job: {JobId}", jobId);
+            logger.LogInformation("Generating invoice for job");
 
             var job = await jobRepository.GetByIdAsync(jobId);
             if (job == null)
@@ -110,7 +110,7 @@ namespace HotshotLogistics.Application.Services
             var existingInvoices = await invoiceRepository.GetByJobIdAsync(jobId);
             if (existingInvoices.Any())
             {
-                logger.LogWarning("Invoice already exists for job: {JobId}", jobId);
+                logger.LogWarning("Invoice already exists for job");
                 return existingInvoices.First();
             }
 
@@ -162,7 +162,7 @@ namespace HotshotLogistics.Application.Services
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to send invoice notification to customer {CustomerId}", customer.Id);
+                logger.LogWarning(ex, "Failed to send invoice notification to customer");
             }
 
             logger.LogInformation("Invoice generated successfully: {InvoiceNumber} for job: {JobId}", invoiceNumber, jobId);

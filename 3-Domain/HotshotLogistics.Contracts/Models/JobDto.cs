@@ -79,10 +79,10 @@ namespace HotshotLogistics.Contracts.Models
 
         // IJob interface implementation
         public string CustomerId { get; set; } = string.Empty;
-        public Location PickupLocation { get; set; } = new Location();
-        public Location DeliveryLocation { get; set; } = new Location();
-        public CargoDetails Cargo { get; set; } = new CargoDetails();
-        public PricingDetails Pricing { get; set; } = new PricingDetails();
+        public Location? PickupLocation { get; set; }
+        public Location? DeliveryLocation { get; set; }
+        public CargoDetails? Cargo { get; set; }
+        public PricingDetails? Pricing { get; set; }
         public DateTime EstimatedDeliveryTime
         {
             get

@@ -93,7 +93,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while starting tracking for job {JobId}", request?.JobId);
+                logger.LogError(ex, "An error occurred while starting tracking for job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -131,17 +131,17 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (ArgumentException ex)
             {
-                logger.LogWarning(ex, "Invalid stop tracking request for job {JobId}: {Message}", jobId, ex.Message);
+                logger.LogWarning(ex, "Invalid stop tracking request for job: {Message}", ex.Message);
                 return BadRequest(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
-                logger.LogWarning(ex, "Job not found for stop tracking: {JobId}", jobId);
+                logger.LogWarning(ex, "Job not found for stop tracking");
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while stopping tracking for job {JobId}", jobId);
+                logger.LogError(ex, "An error occurred while stopping tracking for job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -205,7 +205,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while updating location for job {JobId}", request?.JobId);
+                logger.LogError(ex, "An error occurred while updating location for job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -233,7 +233,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while retrieving current location for job {JobId}", jobId);
+                logger.LogError(ex, "An error occurred while retrieving current location for job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -276,7 +276,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while retrieving location history for job {JobId}", jobId);
+                logger.LogError(ex, "An error occurred while retrieving location history for job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -340,7 +340,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while checking route deviation for job {JobId}", request?.JobId);
+                logger.LogError(ex, "An error occurred while checking route deviation for job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -378,7 +378,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while retrieving public tracking info for job {JobId}", jobId);
+                logger.LogError(ex, "An error occurred while retrieving public tracking info for job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }

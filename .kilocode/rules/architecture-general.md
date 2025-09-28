@@ -1,12 +1,8 @@
-# Architecture Rule
-
-Enforces Clean Architecture principles, native ADO.NET data access, and ASP.NET Core best practices in Hotshot Logistics.
-
-## When to Apply
-
-Apply when creating, moving, adding, or searching files to maintain separation of concerns and dependency direction, and when implementing data access or ASP.NET Core features.
-
-## Clean Architecture Structure
+name: "Folder-Rule"
+description: "Enforces fundamental Clean Architecture principles and layered structure that apply across all development activities in Hotshot Logistics."
+when-to-apply:
+"Apply when creating, moving, adding, or searching files to maintain separation of concerns and dependency direction across all technology stacks."
+rule: |
 
 ### File Placement Guidelines
 
@@ -82,60 +78,8 @@ When searching files:
 - Regular audits verify adherence to this structure
 - Exceptions require explicit architectural review and documentation
 
-## Data Access (ADO.NET)
-
-See [ado-net.md](ado-net.md) for comprehensive data access rules, including:
-- Native ADO.NET implementation requirements
-- Repository pattern standards
-- Performance optimization guidelines
-- Integration with FluentMigrator
-
-## ASP.NET Core Practices
-
-### Configuration
-- Centralize settings with Options pattern and DI.
-- Use `IOptions<T>`, `IOptionsSnapshot<T>`, `IOptionsMonitor<T>` for binding.
-- Override via `appsettings.{Environment}.json` and environment variables.
-- Never hardcode values.
-
-### Logging
-- Use `ILogger<T>` for structured logging with semantic values.
-- Include correlation IDs for tracing.
-- Configure providers per environment (console, file, Application Insights, etc.).
-- Log at levels: Debug, Information, Warning, Error, Critical.
-
-### API Documentation
-- Generate OpenAPI specs with `Microsoft.AspNetCore.OpenApi`.
-- Provide Swagger UI via Swashbuckle.
-- Version APIs with URL or header versioning.
-- Include XML comments on public APIs.
-
-### Middleware Order
-Configure middleware in this order:
-1. `UseHttpsRedirection` - Redirect HTTP to HTTPS
-2. `UseCors` - Enable CORS
-3. `UseRateLimiter` - Apply rate limiting
-4. `UseAuthentication` - Authenticate requests
-5. `UseAuthorization` - Authorize requests
-6. `UseOutputCaching` or `UseResponseCaching` - Cache responses where safe
-7. Endpoint routing
-
-### Performance Practices
-- Use async/await for all I/O operations.
-- Reuse HttpClient via `IHttpClientFactory`.
-- Implement caching for cacheable GET endpoints.
-- Use rate limiting to prevent abuse.
-- Measure performance with diagnostics and Application Insights.
-
-### Health Checks
-- Implement `/health` endpoints with database, queue, API checks.
-- Integrate with orchestrators like Kubernetes for readiness/liveness probes.
-- Use `Microsoft.AspNetCore.Diagnostics.HealthChecks` package.
-
 ## References
 
-- [ADO.NET Rules](ado-net.md) - Data access implementation standards
-- [Code Quality Rules](code-quality.md) - Build and testing standards
-- [Security Rules](security.md) - Security implementation guidelines
-
-For detailed implementation examples, see 6-Docs/architecture-examples.md.
+- [Backend Architecture Rules](../backend/architecture-backend.md) - .NET-specific architectural patterns
+- [Frontend Architecture Rules](../frontend/architecture-frontend.md) - Frontend architectural patterns
+- [CI/CD Architecture Rules](../cicd/deployment-cicd.md) - Deployment and infrastructure architecture

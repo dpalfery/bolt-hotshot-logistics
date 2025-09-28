@@ -46,6 +46,11 @@ namespace HotshotLogistics.Application.Services
                         requestConfiguration.QueryParameters.Select = new[] { "id", "displayName", "givenName", "surname", "userPrincipalName", "mail", "jobTitle", "department", "officeLocation", "mobilePhone", "businessPhones", "preferredLanguage" };
                     }, cancellationToken);
 
+                if (user == null)
+                {
+                    throw new InvalidOperationException("User profile not found in Microsoft Graph");
+                }
+
                 // Get app role assignments for the current user
                 var roles = new List<string>(); // Simplified for build compatibility
 

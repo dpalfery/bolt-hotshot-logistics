@@ -149,7 +149,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while retrieving job {JobId}", id);
+                logger.LogError(ex, "An error occurred while retrieving job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -255,7 +255,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while updating job {JobId}", id);
+                logger.LogError(ex, "An error occurred while updating job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -284,12 +284,12 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                logger.LogWarning(ex, "Cannot delete job {JobId}: {Message}", id, ex.Message);
+                logger.LogWarning(ex, "Cannot delete job: {Message}", ex.Message);
                 return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while deleting job {JobId}", id);
+                logger.LogError(ex, "An error occurred while deleting job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -328,12 +328,12 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                logger.LogWarning(ex, "Cannot assign driver to job {JobId}: {Message}", id, ex.Message);
+                logger.LogWarning(ex, "Cannot assign driver to job: {Message}", ex.Message);
                 return Conflict(ex.Message);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while assigning driver to job {JobId}", id);
+                logger.LogError(ex, "An error occurred while assigning driver to job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -371,7 +371,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while updating job status for {JobId}", id);
+                logger.LogError(ex, "An error occurred while updating job status");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -395,7 +395,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while retrieving jobs by status {Status}", status);
+                logger.LogError(ex, "An error occurred while retrieving jobs by status");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -419,7 +419,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while retrieving jobs for driver {DriverId}", driverId);
+                logger.LogError(ex, "An error occurred while retrieving jobs for driver");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -443,7 +443,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while retrieving jobs for customer {CustomerId}", customerId);
+                logger.LogError(ex, "An error occurred while retrieving jobs for customer");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }

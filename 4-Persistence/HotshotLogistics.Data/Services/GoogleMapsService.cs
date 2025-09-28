@@ -119,7 +119,7 @@ namespace HotshotLogistics.Data.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to reverse geocode coordinates: {Latitude}, {Longitude}", latitude, longitude);
+                logger.LogError(ex, "Failed to reverse geocode coordinates");
                 return new ReverseGeocodingResult
                 {
                     IsValid = false,
