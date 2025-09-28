@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using HotshotLogistics.Application.Services;
 using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Contracts.Hubs;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -42,16 +43,17 @@ public class ConnectionManagerServiceTests
         var expectedKey = $"user_connections:{userId}";
         var expectedConnectionKey = $"connection_user:{connectionId}";
 
-        _cacheMock.Setup(c => c.GetStringAsync(expectedKey, default))
-            .ReturnsAsync((string)null);
+        _cacheMock.Setup(c => c.GetAsync(expectedKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((byte[]?)null);
 
         // Act
         await _service.AddConnectionAsync(userId, connectionId);
 
         // Assert
-        _cacheMock.Verify(c => c.SetStringAsync(expectedKey, It.Is<string>(s =>
-            s.Contains(connectionId)), default), Times.Once);
-        _cacheMock.Verify(c => c.SetStringAsync(expectedConnectionKey, userId, default), Times.Once);
+        _cacheMock.Verify(c => c.SetAsync(expectedKey, It.Is<byte[]>(b =>
+            Encoding.UTF8.GetString(b).Contains(connectionId)), It.IsAny<DistributedCacheEntryOptions>(), It.IsAny<CancellationToken>()), Times.Once);
+        _cacheMock.Verify(c => c.SetAsync(expectedConnectionKey, It.Is<byte[]>(b =>
+            Encoding.UTF8.GetString(b) == userId), It.IsAny<DistributedCacheEntryOptions>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -63,14 +65,14 @@ public class ConnectionManagerServiceTests
         var existingConnections = new List<string> { connectionId };
         var expectedKey = $"user_connections:{userId}";
 
-        _cacheMock.Setup(c => c.GetStringAsync(expectedKey, default))
-            .ReturnsAsync(JsonSerializer.Serialize(existingConnections));
+        _cacheMock.Setup(c => c.GetAsync(expectedKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(existingConnections)));
 
         // Act
         await _service.AddConnectionAsync(userId, connectionId);
 
         // Assert
-        _cacheMock.Verify(c => c.SetStringAsync(It.IsAny<string>(), It.IsAny<string>(), default), Times.Never);
+        _cacheMock.Verify(c => c.SetAsync(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<DistributedCacheEntryOptions>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -83,16 +85,18 @@ public class ConnectionManagerServiceTests
         var expectedKey = $"user_connections:{userId}";
         var expectedConnectionKey = $"connection_user:{connectionId}";
 
-        _cacheMock.Setup(c => c.GetStringAsync(expectedKey, default))
-            .ReturnsAsync(JsonSerializer.Serialize(existingConnections));
+        _cacheMock.Setup(c => c.GetAsync(expectedKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(existingConnections)));
+        _cacheMock.Setup(c => c.GetAsync(expectedConnectionKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Encoding.UTF8.GetBytes(userId));
 
         // Act
         await _service.RemoveConnectionAsync(connectionId);
 
         // Assert
-        _cacheMock.Verify(c => c.SetStringAsync(expectedKey, It.Is<string>(s =>
-            !s.Contains(connectionId)), default), Times.Once);
-        _cacheMock.Verify(c => c.RemoveAsync(expectedConnectionKey, default), Times.Once);
+        _cacheMock.Verify(c => c.SetAsync(expectedKey, It.Is<byte[]>(b =>
+            !Encoding.UTF8.GetString(b).Contains(connectionId)), It.IsAny<DistributedCacheEntryOptions>(), It.IsAny<CancellationToken>()), Times.Once);
+        _cacheMock.Verify(c => c.RemoveAsync(expectedConnectionKey, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -103,8 +107,8 @@ public class ConnectionManagerServiceTests
         var connections = new List<string> { "conn1", "conn2" };
         var expectedKey = $"user_connections:{userId}";
 
-        _cacheMock.Setup(c => c.GetStringAsync(expectedKey, default))
-            .ReturnsAsync(JsonSerializer.Serialize(connections));
+        _cacheMock.Setup(c => c.GetAsync(expectedKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(connections)));
 
         // Act
         var result = await _service.GetUserConnectionsAsync(userId);
@@ -120,8 +124,8 @@ public class ConnectionManagerServiceTests
         var userId = "user1";
         var expectedKey = $"user_connections:{userId}";
 
-        _cacheMock.Setup(c => c.GetStringAsync(expectedKey, default))
-            .ReturnsAsync((string)null);
+        _cacheMock.Setup(c => c.GetAsync(expectedKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((byte[])null);
 
         // Act
         var result = await _service.GetUserConnectionsAsync(userId);
@@ -138,8 +142,8 @@ public class ConnectionManagerServiceTests
         var connections = new List<string> { "conn1" };
         var expectedKey = $"user_connections:{userId}";
 
-        _cacheMock.Setup(c => c.GetStringAsync(expectedKey, default))
-            .ReturnsAsync(JsonSerializer.Serialize(connections));
+        _cacheMock.Setup(c => c.GetAsync(expectedKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(connections)));
 
         // Act
         var result = await _service.IsUserConnectedAsync(userId);
@@ -187,14 +191,16 @@ public class ConnectionManagerServiceTests
         var connections = new List<string> { "conn1", "conn2" };
         var expectedKey = $"user_connections:{userId}";
 
-        _cacheMock.Setup(c => c.GetStringAsync(expectedKey, default))
-            .ReturnsAsync(JsonSerializer.Serialize(connections));
+        _cacheMock.SetupSequence(c => c.GetAsync(expectedKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(connections))) // initial call in RemoveUserConnectionsAsync
+            .ReturnsAsync(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(connections))) // first call inside RemoveConnectionAsync (conn1)
+            .ReturnsAsync(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new List<string> { "conn2" }))); // second call inside RemoveConnectionAsync (conn2)
 
         // Act
         await _service.RemoveUserConnectionsAsync(userId);
 
         // Assert
-        _cacheMock.Verify(c => c.RemoveAsync(expectedKey, default), Times.Once);
+        _cacheMock.Verify(c => c.RemoveAsync(expectedKey, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -206,15 +212,15 @@ public class ConnectionManagerServiceTests
         var connections = new List<string> { connectionId };
         var expectedKey = $"user_connections:{userId}";
 
-        _cacheMock.Setup(c => c.GetStringAsync(expectedKey, default))
-            .ReturnsAsync(JsonSerializer.Serialize(connections));
+        _cacheMock.Setup(c => c.GetAsync(expectedKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(connections)));
 
         // Act
         var result = await _service.HandleReconnectionAsync(userId, connectionId);
 
         // Assert
         result.Should().BeTrue();
-        _cacheMock.Verify(c => c.SetStringAsync(It.IsAny<string>(), It.IsAny<string>(), default), Times.Never);
+        _cacheMock.Verify(c => c.SetAsync(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<DistributedCacheEntryOptions>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -225,16 +231,16 @@ public class ConnectionManagerServiceTests
         var connectionId = "conn1";
         var expectedKey = $"user_connections:{userId}";
 
-        _cacheMock.Setup(c => c.GetStringAsync(expectedKey, default))
-            .ReturnsAsync((string)null);
+        _cacheMock.Setup(c => c.GetAsync(expectedKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((byte[]?)null);
 
         // Act
         var result = await _service.HandleReconnectionAsync(userId, connectionId);
 
         // Assert
         result.Should().BeTrue();
-        _cacheMock.Verify(c => c.SetStringAsync(expectedKey, It.Is<string>(s =>
-            s.Contains(connectionId)), default), Times.Once);
+        _cacheMock.Verify(c => c.SetAsync(expectedKey, It.Is<byte[]>(b =>
+            Encoding.UTF8.GetString(b).Contains(connectionId)), It.IsAny<DistributedCacheEntryOptions>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -245,10 +251,10 @@ public class ConnectionManagerServiceTests
         var connectionId = "conn1";
         var expectedKey = $"user_connections:{userId}";
 
-        _cacheMock.Setup(c => c.GetStringAsync(expectedKey, default))
-            .ReturnsAsync((string)null);
+        _cacheMock.Setup(c => c.GetAsync(expectedKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((byte[]?)null);
 
-        _cacheMock.Setup(c => c.SetStringAsync(It.IsAny<string>(), It.IsAny<string>(), default))
+        _cacheMock.Setup(c => c.SetAsync(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<DistributedCacheEntryOptions>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Redis connection failed"));
 
         // Act
@@ -266,8 +272,8 @@ public class ConnectionManagerServiceTests
         var userId = "user1";
         var expectedKey = $"connection_user:{connectionId}";
 
-        _cacheMock.Setup(c => c.GetStringAsync(expectedKey, default))
-            .ReturnsAsync(userId);
+        _cacheMock.Setup(c => c.GetAsync(expectedKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Encoding.UTF8.GetBytes(userId));
 
         // Act
         var result = await _service.GetUserIdAsync(connectionId);
@@ -284,8 +290,8 @@ public class ConnectionManagerServiceTests
         var userId = "user1";
         var expectedKey = $"connection_user:{connectionId}";
 
-        _cacheMock.Setup(c => c.GetStringAsync(expectedKey, default))
-            .ReturnsAsync(userId);
+        _cacheMock.Setup(c => c.GetAsync(expectedKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Encoding.UTF8.GetBytes(userId));
 
         // Act
         var result = await _service.ConnectionExistsAsync(connectionId);
@@ -302,8 +308,8 @@ public class ConnectionManagerServiceTests
         var connections = new List<string> { "conn1", "conn2", "conn3" };
         var expectedKey = $"user_connections:{userId}";
 
-        _cacheMock.Setup(c => c.GetStringAsync(expectedKey, default))
-            .ReturnsAsync(JsonSerializer.Serialize(connections));
+        _cacheMock.Setup(c => c.GetAsync(expectedKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(connections)));
 
         // Act
         var result = await _service.GetUserConnectionCountAsync(userId);

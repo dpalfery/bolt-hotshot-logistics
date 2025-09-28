@@ -30,12 +30,13 @@ public class CreateJobValidator : AbstractValidator<JobDto>
             .LessThanOrEqualTo(100000).WithMessage("Job amount cannot exceed $100,000.");
 
         RuleFor(x => x.ScheduledPickupTime)
-            .GreaterThan(DateTime.UtcNow.AddMinutes(-30)).WithMessage("Scheduled pickup time must be in the future.")
+            .GreaterThan(DateTime.UtcNow).WithMessage("Scheduled pickup time must be in the future.")
             .LessThan(DateTime.UtcNow.AddDays(365)).WithMessage("Scheduled pickup time cannot be more than 365 days in the future.");
 
         RuleFor(x => x.EstimatedDeliveryTime)
             .GreaterThan(x => x.ScheduledPickupTime).WithMessage("Estimated delivery time must be after scheduled pickup time.")
-            .LessThan(x => x.ScheduledPickupTime.AddDays(30)).WithMessage("Estimated delivery time cannot be more than 30 days after pickup.");
+            .LessThan(x => x.ScheduledPickupTime.AddDays(30)).WithMessage("Estimated delivery time cannot be more than 30 days after pickup.")
+            .When(x => !string.IsNullOrWhiteSpace(x.EstimatedDeliveryTimeString));
 
         RuleFor(x => x.CustomerId)
             .NotEmpty().WithMessage("Customer ID is required.");

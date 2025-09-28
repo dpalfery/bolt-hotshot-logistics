@@ -78,8 +78,3 @@ When searching files:
 - Regular audits verify adherence to this structure
 - Exceptions require explicit architectural review and documentation
 
-## References
-
-- [Backend Architecture Rules](../backend/architecture-backend.md) - .NET-specific architectural patterns
-- [Frontend Architecture Rules](../frontend/architecture-frontend.md) - Frontend architectural patterns
-- [CI/CD Architecture Rules](../cicd/deployment-cicd.md) - Deployment and infrastructure architecture

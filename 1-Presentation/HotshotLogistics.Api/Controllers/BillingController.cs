@@ -24,7 +24,7 @@ namespace HotshotLogistics.Api.Controllers
     public class BillingController : ControllerBase
     {
         private readonly IBillingService billingService;
-        private readonly PaymentProcessorFactory paymentProcessorFactory;
+        private readonly IPaymentProcessorFactory paymentProcessorFactory;
         private readonly ILogger<BillingController> logger;
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="logger">The logger.</param>
         public BillingController(
             IBillingService billingService,
-            PaymentProcessorFactory paymentProcessorFactory,
+            IPaymentProcessorFactory paymentProcessorFactory,
             ILogger<BillingController> logger)
         {
             this.billingService = billingService ?? throw new ArgumentNullException(nameof(billingService));

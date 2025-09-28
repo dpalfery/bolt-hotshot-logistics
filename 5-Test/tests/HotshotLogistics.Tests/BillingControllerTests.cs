@@ -25,7 +25,7 @@ namespace HotshotLogistics.Tests
     public class BillingControllerTests
     {
         private readonly Mock<IBillingService> mockBillingService;
-        private readonly Mock<PaymentProcessorFactory> mockPaymentProcessorFactory;
+        private readonly Mock<HotshotLogistics.Contracts.Services.IPaymentProcessorFactory> mockPaymentProcessorFactory;
         private readonly Mock<ILogger<BillingController>> mockLogger;
         private readonly BillingController controller;
 
@@ -35,7 +35,7 @@ namespace HotshotLogistics.Tests
         public BillingControllerTests()
         {
             mockBillingService = new Mock<IBillingService>();
-            mockPaymentProcessorFactory = new Mock<PaymentProcessorFactory>();
+            mockPaymentProcessorFactory = new Mock<HotshotLogistics.Contracts.Services.IPaymentProcessorFactory>();
             mockLogger = new Mock<ILogger<BillingController>>();
             controller = new BillingController(mockBillingService.Object, mockPaymentProcessorFactory.Object, mockLogger.Object);
         }

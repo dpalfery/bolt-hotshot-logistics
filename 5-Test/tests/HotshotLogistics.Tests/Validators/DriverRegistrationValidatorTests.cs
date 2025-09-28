@@ -33,7 +33,7 @@ public class DriverRegistrationValidatorTests
             Email = "john.doe@example.com",
             PhoneNumber = "+1-555-123-4567",
             LicenseNumber = "DL123456789",
-            LicenseExpiryDate = DateTime.UtcNow.AddMonths(8), // Valid for more than 6 months
+            LicenseExpiryDate = DateTime.UtcNow.AddYears(3), // Valid for more than 2 years (current age validation requirement)
             IsActive = true
         };
 

@@ -15,6 +15,7 @@ namespace HotshotLogistics.Tests
     using HotshotLogistics.Contracts.Repositories;
     using HotshotLogistics.Contracts.Services;
     using FluentValidation;
+    using FluentValidation.Results;
     using HotshotLogistics.Core.Exceptions;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
@@ -154,7 +155,10 @@ namespace HotshotLogistics.Tests
 
             var createdJob = CreateTestJob(jobDto.Id, jobDto.Status);
 
-            mockJobService.Setup(s => s.CreateJobAsync(It.IsAny<IJob>(), It.IsAny<CancellationToken>()))
+            mockJobValidator.Setup(v => v.ValidateAsync(jobDto, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new ValidationResult());
+
+            mockJobService.Setup(s => s.CreateJobAsync(jobDto, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(createdJob);
 
             // Act
@@ -162,9 +166,14 @@ namespace HotshotLogistics.Tests
 
             // Assert
             result.Should().NotBeNull();
-            var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
-            var returnedJob = createdResult.Value.Should().BeAssignableTo<IJob>().Subject;
-            returnedJob.Id.Should().Be(jobDto.Id);
+            var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+            // The controller returns the job object directly
+            okResult.Value.Should().NotBeNull();
+            // Check that the response contains the job ID
+            var responseData = okResult.Value;
+            var idProperty = responseData.GetType().GetProperty("Id");
+            idProperty.Should().NotBeNull();
+            idProperty.GetValue(responseData).Should().Be(jobDto.Id);
         }
 
         /// <summary>
@@ -183,11 +192,11 @@ namespace HotshotLogistics.Tests
         }
 
         /// <summary>
-        /// Tests that CreateJob throws ValidationException when validation fails.
+        /// Tests that CreateJob returns BadRequest when validation fails.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
-        public async Task CreateJob_WithInvalidData_ThrowsValidationException()
+        public async Task CreateJob_WithInvalidData_ReturnsBadRequest()
         {
             // Arrange
             var jobDto = new JobDto
@@ -197,11 +206,28 @@ namespace HotshotLogistics.Tests
                 CustomerId = "customer1"
             };
 
-            mockJobService.Setup(s => s.CreateJobAsync(It.IsAny<IJob>(), It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new HotshotLogistics.Core.Exceptions.ValidationException("Job validation failed"));
+            // Setup validator to return validation failures
+            var validationFailures = new List<FluentValidation.Results.ValidationFailure>
+            {
+                new FluentValidation.Results.ValidationFailure("Title", "Job title is required.")
+            };
+            var validationResult = new FluentValidation.Results.ValidationResult(validationFailures);
 
-            // Act & Assert
-            await Assert.ThrowsAsync<HotshotLogistics.Core.Exceptions.ValidationException>(() => controller.CreateJob(jobDto));
+            mockJobValidator.Setup(v => v.ValidateAsync(jobDto, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(validationResult);
+
+            // Act
+            var result = await controller.CreateJob(jobDto);
+
+            // Assert
+            result.Should().NotBeNull();
+            var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
+            var errorResponse = badRequestResult.Value.Should().BeAssignableTo<object>().Subject;
+            // The controller returns an anonymous object with Message and Errors properties
+            var errorObj = errorResponse.GetType().GetProperties()
+                .ToDictionary(p => p.Name, p => p.GetValue(errorResponse));
+            errorObj.Should().ContainKey("Message");
+            errorObj["Message"].Should().Be("Job validation failed");
         }
 
         /// <summary>

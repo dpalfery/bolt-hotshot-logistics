@@ -27,7 +27,7 @@ public class CreateInvoiceValidator : AbstractValidator<Invoice>
 
         RuleFor(x => x.InvoiceDate)
             .NotEmpty().WithMessage("Invoice date is required.")
-            .LessThanOrEqualTo(DateTime.UtcNow.Date.AddDays(1)).WithMessage("Invoice date cannot be in the future.");
+            .LessThanOrEqualTo(_ => DateTime.UtcNow.Date).WithMessage("Invoice date cannot be in the future.");
 
         RuleFor(x => x.DueDate)
             .NotEmpty().WithMessage("Due date is required.")
@@ -46,11 +46,11 @@ public class CreateInvoiceValidator : AbstractValidator<Invoice>
             .Equal(x => x.LineItems.Sum(li => li.Amount)).WithMessage("Subtotal must equal the sum of line item amounts.");
 
         RuleFor(x => x.TaxRate)
-            .InclusiveBetween(0, 100).WithMessage("Tax rate must be between 0 and 100 percent.");
+            .InclusiveBetween(0, 1).WithMessage("Tax rate must be between 0 and 100 percent.");
 
         RuleFor(x => x.TaxAmount)
             .GreaterThanOrEqualTo(0).WithMessage("Tax amount cannot be negative.")
-            .Equal(x => Math.Round(x.SubTotal * (x.TaxRate / 100), 2)).WithMessage("Tax amount must be correctly calculated.");
+            .Equal(x => Math.Round(x.SubTotal * x.TaxRate, 2)).WithMessage("Tax amount must be correctly calculated.");
 
         RuleFor(x => x.DiscountAmount)
             .GreaterThanOrEqualTo(0).WithMessage("Discount amount cannot be negative.")
@@ -109,7 +109,7 @@ public class InvoiceLineItemValidator : AbstractValidator<InvoiceLineItem>
             .NotNull().WithMessage("Tax applicable flag is required.");
 
         RuleFor(x => x.SortOrder)
-            .GreaterThan(0).WithMessage("Sort order must be greater than zero.");
+            .GreaterThanOrEqualTo(0).WithMessage("Sort order must be zero or greater.");
     }
 }
 

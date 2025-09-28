@@ -29,7 +29,7 @@ namespace HotshotLogistics.Application.Services
         private readonly ICustomerRepository customerRepository;
         private readonly IPaymentRepository paymentRepository;
         private readonly INotificationService notificationService;
-        private readonly PaymentProcessorFactory paymentProcessorFactory;
+        private readonly IPaymentProcessorFactory paymentProcessorFactory;
         private readonly ILogger<BillingService> logger;
 
         private readonly AsyncRetryPolicy retryPolicy;
@@ -61,7 +61,7 @@ namespace HotshotLogistics.Application.Services
             ICustomerRepository customerRepository,
             IPaymentRepository paymentRepository,
             INotificationService notificationService,
-            PaymentProcessorFactory paymentProcessorFactory,
+            IPaymentProcessorFactory paymentProcessorFactory,
             ILogger<BillingService> logger)
         {
             this.invoiceRepository = invoiceRepository ?? throw new ArgumentNullException(nameof(invoiceRepository));

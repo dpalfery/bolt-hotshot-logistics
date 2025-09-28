@@ -17,7 +17,7 @@ using Microsoft.Extensions.Logging;
 /// <summary>
 /// Repository for payment operations.
 /// </summary>
-public class PaymentRepository : BaseRepository<Payment>, IPaymentRepository, IBaseRepository<Payment>
+internal class PaymentRepository : BaseRepository<Payment>, IPaymentRepository, IBaseRepository<Payment>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="PaymentRepository"/> class.

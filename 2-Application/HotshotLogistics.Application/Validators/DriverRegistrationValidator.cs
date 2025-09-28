@@ -39,9 +39,11 @@ public class DriverRegistrationValidator : AbstractValidator<DriverDto>
             .Matches(@"^[A-Z0-9\-]+$").WithMessage("License number can only contain letters, numbers, and hyphens.");
 
         RuleFor(x => x.LicenseExpiryDate)
-            .NotEmpty().WithMessage("License expiry date is required.")
-            .GreaterThan(DateTime.UtcNow.AddDays(30)).WithMessage("License must be valid for at least 30 days.")
-            .LessThan(DateTime.UtcNow.AddYears(10)).WithMessage("License expiry date cannot be more than 10 years in the future.");
+            .NotEmpty().WithMessage("License expiry date is required.");
+
+        RuleFor(x => x)
+            .Must(x => x.LicenseExpiryDate > DateTime.UtcNow.AddDays(30)).WithMessage("License must be valid for at least 30 days.")
+            .Must(x => x.LicenseExpiryDate < DateTime.UtcNow.AddYears(10)).WithMessage("License expiry date cannot be more than 10 years in the future.");
 
         // Business rules for driver registration
         RuleFor(x => x)
@@ -56,9 +58,11 @@ public class DriverRegistrationValidator : AbstractValidator<DriverDto>
     /// <returns>True if the driver is at least 18 years old, false otherwise.</returns>
     private bool BeAtLeast18YearsOld(DriverDto driver)
     {
-        // Note: In a real implementation, we would need birth date or age field
-        // For now, we'll assume the license expiry date indicates experience
-        return driver.LicenseExpiryDate > DateTime.UtcNow.AddYears(1);
+        // TODO: Add DateOfBirth field to DriverDto for proper age validation
+        // Current implementation uses license expiry as a proxy for driver experience
+        // A license valid for at least 2 years suggests the driver has had their license for a while
+        // This is a temporary solution until proper DateOfBirth validation is implemented
+        return driver.LicenseExpiryDate > DateTime.UtcNow.AddYears(2);
     }
 
     /// <summary>

@@ -13,7 +13,7 @@ namespace HotshotLogistics.Application.Services;
 /// <summary>
 /// Factory for creating payment processor instances.
 /// </summary>
-public class PaymentProcessorFactory
+public class PaymentProcessorFactory : IPaymentProcessorFactory
 {
     private readonly IServiceProvider serviceProvider;
     private readonly IConfiguration configuration;

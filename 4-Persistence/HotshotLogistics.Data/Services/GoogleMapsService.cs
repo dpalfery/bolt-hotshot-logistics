@@ -276,6 +276,7 @@ namespace HotshotLogistics.Data.Services
 
         private class GeocodeResult
         {
+            [System.Text.Json.Serialization.JsonPropertyName("formatted_address")]
             public string FormattedAddress { get; set; } = string.Empty;
             public Geometry Geometry { get; set; } = new Geometry();
             public List<AddressComponent> AddressComponents { get; set; } = new List<AddressComponent>();
@@ -283,12 +284,15 @@ namespace HotshotLogistics.Data.Services
 
         private class Geometry
         {
+            [System.Text.Json.Serialization.JsonPropertyName("location")]
             public Coordinate Location { get; set; } = new Coordinate();
         }
 
         private class Coordinate
         {
+            [System.Text.Json.Serialization.JsonPropertyName("lat")]
             public double Lat { get; set; }
+            [System.Text.Json.Serialization.JsonPropertyName("lng")]
             public double Lng { get; set; }
         }
 
@@ -307,6 +311,7 @@ namespace HotshotLogistics.Data.Services
         private class DirectionsRoute
         {
             public List<DirectionsLeg> Legs { get; set; } = new List<DirectionsLeg>();
+            [System.Text.Json.Serialization.JsonPropertyName("overview_polyline")]
             public Polyline OverviewPolyline { get; set; } = new Polyline();
         }
 
@@ -318,16 +323,19 @@ namespace HotshotLogistics.Data.Services
 
         private class Distance
         {
+            [System.Text.Json.Serialization.JsonPropertyName("value")]
             public int Value { get; set; } // meters
         }
 
         private class Duration
         {
+            [System.Text.Json.Serialization.JsonPropertyName("value")]
             public int Value { get; set; } // seconds
         }
 
         private class Polyline
         {
+            [System.Text.Json.Serialization.JsonPropertyName("points")]
             public string Points { get; set; } = string.Empty;
         }
     }

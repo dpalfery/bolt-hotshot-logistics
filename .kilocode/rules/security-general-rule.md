@@ -16,6 +16,22 @@ rule: |
 - Implement comprehensive validation and authorization.
 - Use rate limiting to prevent abuse.
 
+## Log Security
+
+### Prevent Log Forging
+- Never include unsanitized user-provided data directly in log entries
+- Sanitize user data before logging: remove newlines, carriage returns, and control characters
+- Use structured logging with placeholders instead of string concatenation
+
+### Safe Logging Practices
+- **Structured Logging**: Use parameterized logging with named parameters
+- **Input Sanitization**: Replace newlines with spaces, escape special characters
+- **Correlation IDs**: Log user actions with IDs and metadata, not raw user content
+- **Log Levels**: Avoid user data in ERROR/CRITICAL logs; use INFO/DEBUG for user actions
+- **Examples**:
+  - ✅ `logger.LogInformation("User {UserId} performed {Action}", userId, action)`
+  - ❌ `logger.LogInformation($"User {userInput} performed {action}")` // Vulnerable
+
 ## Threat Modeling Guidelines
 
 ### STRIDE Framework

@@ -156,7 +156,7 @@ public class RealtimeHubTests
         await _realtimeHub.NotificationReceived(message);
 
         // Assert
-        _mockSignalRClient.Verify(x => x.SendToUserAsync(message.UserId, "NotificationReceived", message), Times.Once);
+        _mockConnectionManager.Verify(x => x.SendToUserAsync(message.UserId, "NotificationReceived", message), Times.Once);
 
         // Verify logging
         _mockLogger.Verify(

@@ -192,10 +192,7 @@ namespace HotshotLogistics.Api.Controllers
                 }
 
                 var createdJob = await jobService.CreateJobAsync(jobDto, cancellationToken);
-                return CreatedAtAction(
-                    nameof(GetJobById),
-                    new { id = createdJob.Id },
-                    createdJob);
+                return Ok(createdJob);
             }
             catch (ArgumentException ex)
             {

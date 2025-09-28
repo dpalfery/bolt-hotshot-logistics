@@ -34,7 +34,7 @@ namespace HotshotLogistics.Tests
             var configBuilder = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    ["ConnectionStrings:DefaultConnection"] = "Server=(localdb)\\mssqllocaldb;Database=HotshotLogisticsTest;Trusted_Connection=true;MultipleActiveResultSets=true"
+                    ["ConnectionStrings:DefaultConnection"] = "Server=localhost,1433;Database=HotshotLogisticsTest;User Id=sa;Password=Hotshot123!;TrustServerCertificate=true;MultipleActiveResultSets=true"
                 });
 
             _configuration = configBuilder.Build();
@@ -598,23 +598,16 @@ namespace HotshotLogistics.Tests
             var jobId = Guid.NewGuid().ToString();
             const string sql = @"
                 INSERT INTO Jobs (
-                    Id, CustomerId, Title, PickupLocation_Address, PickupLocation_City, PickupLocation_State,
-                    PickupLocation_ZipCode, PickupLocation_Latitude, PickupLocation_Longitude,
-                    DeliveryLocation_Address, DeliveryLocation_City, DeliveryLocation_State,
-                    DeliveryLocation_ZipCode, DeliveryLocation_Latitude, DeliveryLocation_Longitude,
-                    Cargo_Description, Cargo_Weight, Cargo_Value, Cargo_SpecialHandling,
-                    Status, Priority, Pricing_BaseRate, Pricing_MileageRate, Pricing_FuelSurcharge,
-                    Pricing_TollCharges, Pricing_AdditionalCharges, Pricing_TotalAmount,
-                    ScheduledPickupTime, EstimatedDeliveryTime, SpecialInstructions,
-                    Tracking_CurrentStatus, Tracking_LastUpdateTime, CreatedAt
+                    Id, CustomerId, Title, PickupAddress, PickupLatitude, PickupLongitude,
+                    DeliveryAddress, DeliveryLatitude, DeliveryLongitude,
+                    CargoDescription, CargoWeight, CargoValue,
+                    Status, Priority, BaseRate, MileageRate, TotalAmount,
+                    EstimatedDeliveryTime, SpecialInstructions, CreatedAt
                 ) VALUES (
-                    @Id, @CustomerId, @Title, @PickupAddress, @PickupCity, @PickupState,
-                    @PickupZip, @PickupLat, @PickupLng, @DeliveryAddress, @DeliveryCity, @DeliveryState,
-                    @DeliveryZip, @DeliveryLat, @DeliveryLng, @CargoDesc, @CargoWeight, @CargoValue, @CargoSpecial,
-                    @Status, @Priority, @BaseRate, @MileageRate, @FuelSurcharge,
-                    @TollCharges, @AdditionalCharges, @TotalAmount,
-                    @ScheduledPickup, @EstimatedDelivery, @SpecialInstructions,
-                    @TrackingStatus, @LastUpdate, @CreatedAt
+                    @Id, @CustomerId, @Title, @PickupAddress, @PickupLat, @PickupLng,
+                    @DeliveryAddress, @DeliveryLat, @DeliveryLng, @CargoDesc, @CargoWeight, @CargoValue,
+                    @Status, @Priority, @BaseRate, @MileageRate, @TotalAmount,
+                    @EstimatedDelivery, @SpecialInstructions, @CreatedAt
                 )";
 
             var parameters = new[]
@@ -642,9 +635,6 @@ namespace HotshotLogistics.Tests
                 new SqlParameter("@Priority", (int)JobPriority.Normal),
                 new SqlParameter("@BaseRate", 500.00m),
                 new SqlParameter("@MileageRate", 200.00m),
-                new SqlParameter("@FuelSurcharge", 50.00m),
-                new SqlParameter("@TollCharges", 25.00m),
-                new SqlParameter("@AdditionalCharges", 75.00m),
                 new SqlParameter("@TotalAmount", 850.00m),
                 new SqlParameter("@ScheduledPickup", DateTime.UtcNow.AddDays(-1)),
                 new SqlParameter("@EstimatedDelivery", DateTime.UtcNow.AddDays(-1).AddHours(2)),

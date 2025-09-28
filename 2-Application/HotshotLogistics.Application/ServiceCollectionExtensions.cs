@@ -35,10 +35,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<ITrackingService, TrackingService>();
 
-        // Register payment processors
+        /* Register payment processors */
         services.AddScoped<StripePaymentProcessor>();
         services.AddScoped<PayPalPaymentProcessor>();
-        services.AddScoped<PaymentProcessorFactory>();
+        services.AddScoped<IPaymentProcessorFactory, PaymentProcessorFactory>();
 
         // Register mapping services
         services.AddScoped<MappingServiceFactory>();

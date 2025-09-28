@@ -32,7 +32,7 @@ namespace HotshotLogistics.Tests
             var configBuilder = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    ["ConnectionStrings:DefaultConnection"] = "Server=(localdb)\\mssqllocaldb;Database=HotshotLogisticsTest;Trusted_Connection=true;MultipleActiveResultSets=true"
+                    ["ConnectionStrings:DefaultConnection"] = "Server=localhost,1433;Database=HotshotLogisticsTest;User Id=sa;Password=Hotshot123!;TrustServerCertificate=true;MultipleActiveResultSets=true"
                 });
 
             _configuration = configBuilder.Build();

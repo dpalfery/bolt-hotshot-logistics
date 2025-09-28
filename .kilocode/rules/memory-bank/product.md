@@ -102,13 +102,6 @@ Hotshot Logistics was created to address the critical need for modernization in 
 - Support for 1000+ concurrent users
 - Mobile app responsiveness on all devices
 
-### Security Standards
-- End-to-end encryption for all data
-- PCI DSS compliance for payments
-- GDPR compliance for customer data
-- Multi-factor authentication
-- Comprehensive audit logging
-
 ### Integration Capabilities
 - RESTful APIs for third-party integrations
 - Webhook support for real-time events

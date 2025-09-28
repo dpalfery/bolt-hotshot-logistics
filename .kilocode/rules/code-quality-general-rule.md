@@ -126,8 +126,3 @@ rule: |
 - Automated quality checks.
 - Continuous refactoring.
 
-## References
-
-- [Backend Code Quality Rules](../backend/code-quality-backend.md) - .NET-specific code quality standards
-- [Frontend Code Quality Rules](../frontend/code-quality-frontend.md) - Frontend-specific code quality standards
-- [CI/CD Code Quality Rules](../cicd/code-quality-cicd.md) - Build pipeline quality gates and automation

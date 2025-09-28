@@ -107,10 +107,12 @@ namespace HotshotLogistics.Tests
             errorResponse.Message.Should().Be("Payment failed");
             errorResponse.ErrorCode.Should().Be("PAYMENT_PROCESSING_ERROR");
             errorResponse.Details.Should().NotBeNull();
+            
+            var detailsJson = errorResponse.Details.ToString();
+            var detailsElement = JsonSerializer.Deserialize<JsonElement>(detailsJson!);
 
-            var details = JsonSerializer.Deserialize<Dictionary<string, object>>(errorResponse.Details.ToString()!);
-            details.Should().ContainKey("TransactionId").WhoseValue.Should().Be("txn123");
-            details.Should().ContainKey("ProviderErrorCode").WhoseValue.Should().Be("CARD_DECLINED");
+            detailsElement.GetProperty("transactionId").GetString().Should().Be("txn123");
+            detailsElement.GetProperty("providerErrorCode").GetString().Should().Be("CARD_DECLINED");
         }
 
         /// <summary>
@@ -132,11 +134,13 @@ namespace HotshotLogistics.Tests
             errorResponse.Message.Should().Be("Service unavailable");
             errorResponse.ErrorCode.Should().Be("EXTERNAL_SERVICE_ERROR");
             errorResponse.Details.Should().NotBeNull();
+            
+            var detailsJson = errorResponse.Details.ToString();
+            var detailsElement = JsonSerializer.Deserialize<JsonElement>(detailsJson!);
 
-            var details = JsonSerializer.Deserialize<Dictionary<string, object>>(errorResponse.Details.ToString()!);
-            details.Should().ContainKey("ServiceName").WhoseValue.Should().Be("MapsAPI");
-            details.Should().ContainKey("StatusCode").WhoseValue.Should().Be(503);
-            details.Should().ContainKey("Endpoint").WhoseValue.Should().Be("/geocode");
+            detailsElement.GetProperty("serviceName").GetString().Should().Be("MapsAPI");
+            detailsElement.GetProperty("statusCode").GetInt32().Should().Be(503);
+            detailsElement.GetProperty("endpoint").GetString().Should().Be("/geocode");
         }
 
         /// <summary>
