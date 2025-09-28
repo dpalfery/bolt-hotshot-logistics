@@ -602,7 +602,7 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
                 new SqlParameter("@Quantity", lineItem.Quantity),
                 new SqlParameter("@UnitPrice", lineItem.UnitPrice),
                 new SqlParameter("@TaxApplicable", lineItem.TaxApplicable),
-                new SqlParameter("@SortOrder", lineItem.SortOrder)
+                new SqlParameter("@SortOrder", lineItem.SortOrder),
             };
 
             await using var command = new SqlCommand(sql, connection);
@@ -617,7 +617,7 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     /// <param name="sql">The SQL query.</param>
     /// <param name="parameters">The query parameters.</param>
     /// <returns>A list of entities.</returns>
-    protected new async Task<IEnumerable<Invoice>> ExecuteQueryAsync(string sql, SqlParameter[]? parameters = null)
+    protected new async Task<IEnumerable<Invoice>> ExecuteQueryAsync(string sql, SqlParameter[] ? parameters = null)
     {
         var entities = new List<Invoice>();
 
@@ -673,7 +673,7 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
                 Quantity = reader.GetDecimal(reader.GetOrdinal("Quantity")),
                 UnitPrice = reader.GetDecimal(reader.GetOrdinal("UnitPrice")),
                 TaxApplicable = reader.GetBoolean(reader.GetOrdinal("TaxApplicable")),
-                SortOrder = reader.GetInt32(reader.GetOrdinal("SortOrder"))
+                SortOrder = reader.GetInt32(reader.GetOrdinal("SortOrder")),
             });
         }
 

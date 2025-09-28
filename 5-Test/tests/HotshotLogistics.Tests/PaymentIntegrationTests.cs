@@ -61,10 +61,10 @@ public class PaymentIntegrationTests
             .Returns(mockStripeProcessor.Object);
         mockServiceProvider.Setup(sp => sp.GetService(typeof(PayPalPaymentProcessor)))
             .Returns(mockPayPalProcessor.Object);
-        
+
         // Setup configuration
         mockConfiguration.Setup(c => c["Payment:DefaultProcessor"]).Returns("Stripe");
-        
+
         // Use the mocked factory in tests so Moq can create the proxy without hitting concrete ctor
         paymentProcessorFactory = mockPaymentProcessorFactory.Object;
     }

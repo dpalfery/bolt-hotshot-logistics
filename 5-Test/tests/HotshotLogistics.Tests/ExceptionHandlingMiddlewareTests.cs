@@ -107,7 +107,7 @@ namespace HotshotLogistics.Tests
             errorResponse.Message.Should().Be("Payment failed");
             errorResponse.ErrorCode.Should().Be("PAYMENT_PROCESSING_ERROR");
             errorResponse.Details.Should().NotBeNull();
-            
+
             var detailsJson = errorResponse.Details.ToString();
             var detailsElement = JsonSerializer.Deserialize<JsonElement>(detailsJson!);
 
@@ -134,7 +134,7 @@ namespace HotshotLogistics.Tests
             errorResponse.Message.Should().Be("Service unavailable");
             errorResponse.ErrorCode.Should().Be("EXTERNAL_SERVICE_ERROR");
             errorResponse.Details.Should().NotBeNull();
-            
+
             var detailsJson = errorResponse.Details.ToString();
             var detailsElement = JsonSerializer.Deserialize<JsonElement>(detailsJson!);
 
