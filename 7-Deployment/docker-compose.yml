@@ -6,7 +6,7 @@ services:
     container_name: hotshot_sqlserver
     environment:
       ACCEPT_EULA: Y
-      SA_PASSWORD: Hotshot123!
+      SA_PASSWORD: ${SQL_SA_PASSWORD}
       MSSQL_PID: Developer
     ports:
       - "1433:1433"
@@ -16,4 +16,4 @@ services:
 
 volumes:
   sqlserver_data:
-    name: hotshot_sqlserver_data 
+    name: hotshot_sqlserver_data  
