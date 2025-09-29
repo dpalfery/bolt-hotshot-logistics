@@ -21,6 +21,16 @@ public interface ICustomer
     string? TaxId { get; set; }
 
     /// <summary>
+    /// Gets or sets the email address.
+    /// </summary>
+    string? Email { get; set; }
+
+    /// <summary>
+    /// Gets or sets the phone number.
+    /// </summary>
+    string? Phone { get; set; }
+
+    /// <summary>
     /// Gets or sets the billing address.
     /// </summary>
     Address BillingAddress { get; set; }

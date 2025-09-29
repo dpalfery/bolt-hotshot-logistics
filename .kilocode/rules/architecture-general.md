@@ -1,19 +1,21 @@
-# File Organization Rule
+name: "Folder-Rule"
+description: "Enforces fundamental Clean Architecture principles and layered structure that apply across all development activities in Hotshot Logistics."
+when-to-apply:
+"Apply when creating, moving, adding, or searching files to maintain separation of concerns and dependency direction across all technology stacks."
+rule: |
 
-This rule enforces the Clean Architecture numbered folder structure for all file operations in the Hotshot Logistics project. It must be applied whenever files are created, moved, added, or searched to maintain separation of concerns and dependency direction.
+### File Placement Guidelines
 
-## File Placement Guidelines
+Place files in appropriate numbered folder based on purpose and architectural layer:
 
-When creating, moving, or adding files, place them in the appropriate numbered folder based on their purpose and architectural layer:
-
-### 0-Base/
-**Foundational code and abstractions shared across layers**
+#### 0-Base/
+**Shared foundational code and abstractions**
 - Base classes, interfaces, utilities, extensions
 - Cross-cutting concerns (logging, error handling, result types)
 - Shared constants, enums, extension methods
 - No dependencies on higher layers
 
-### 1-Presentation/
+#### 1-Presentation/
 **Presentation layer projects and components**
 - API controllers, functions, endpoints (Azure Functions)
 - Web dashboard components (Next.js/React)
@@ -21,7 +23,7 @@ When creating, moving, or adding files, place them in the appropriate numbered f
 - HTTP request/response handling, routing, UI rendering
 - Depends only on Application layer
 
-### 2-Application/
+#### 2-Application/
 **Core business logic and orchestration**
 - Use cases, application services, business workflows
 - Command/query handlers (CQRS)
@@ -29,50 +31,50 @@ When creating, moving, or adding files, place them in the appropriate numbered f
 - DTOs for layer communication
 - Depends only on Domain layer
 
-### 3-Domain/
+#### 3-Domain/
 **Domain models, contracts, and interfaces**
 - Entity definitions, value objects, domain models
 - Repository interfaces, service contracts
 - Domain events, specifications
 - No dependencies on other layers
 
-### 4-Persistence/
+#### 4-Persistence/
 **Data access implementations**
 - Native ADO.NET implementations with schema and migrations managed by FluentMigrator
 - Repository implementations using ADO.NET (parameterized SQL, async operations, proper disposal)
 - Database seeding, external API integrations
 - Implements Domain contracts
 
-### 5-Test/
+#### 5-Test/
 **Testing infrastructure and test files**
 - Unit tests, integration tests, architecture tests
 - Test utilities, fixtures, mock data
 - Test configurations and helpers
 - Uses xUnit, FluentAssertions
 
-### 6-Docs/
+#### 6-Docs/
 **Documentation and specifications**
 - README files, API documentation, guides
 - Technical specifications, architecture docs
 - Development workflows, contributing guidelines
 
-### 7-Deployment/
+#### 7-Deployment/
 **Infrastructure and deployment assets**
 - CI/CD pipelines, Docker configurations
 - Infrastructure as Code (Terraform, Bicep, Ansible)
 - Deployment scripts, environment configurations
 
-## Search Guidelines
+### Search Guidelines
 
-When performing file searches:
-1. First search within the most relevant architectural layer based on the query context
+When searching files:
+1. Search within most relevant architectural layer based on query context
 2. If not found, expand to related layers following dependency direction
 3. Use folder prefixes (e.g., "2-Application/") to narrow searches
 4. For cross-cutting concerns, check 0-Base/ first
 
-## Enforcement
-
-- All new files must be placed in the correct folder immediately upon creation
+### Enforcement
+- Place new files in correct folder immediately upon creation
 - File moves must maintain architectural integrity
-- Regular audits should verify adherence to this structure
+- Regular audits verify adherence to this structure
 - Exceptions require explicit architectural review and documentation
+

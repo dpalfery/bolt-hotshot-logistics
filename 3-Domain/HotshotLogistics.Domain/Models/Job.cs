@@ -6,6 +6,7 @@ namespace HotshotLogistics.Domain.Models
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using HotshotLogistics.Contracts.Models;
 
     /// <summary>
@@ -69,9 +70,24 @@ namespace HotshotLogistics.Domain.Models
         public DateTime EstimatedDeliveryTime { get; set; }
 
         /// <summary>
+        /// Gets or sets the actual pickup time for the job.
+        /// </summary>
+        public DateTime? ActualPickupTime { get; set; }
+
+        /// <summary>
+        /// Gets or sets the actual delivery time for the job.
+        /// </summary>
+        public DateTime? ActualDeliveryTime { get; set; }
+
+        /// <summary>
         /// Gets or sets the special instructions for the job.
         /// </summary>
         public string SpecialInstructions { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the ID of the assigned driver.
+        /// </summary>
+        public int? AssignedDriverId { get; set; }
 
         /// <summary>
         /// Gets or sets the list of documents associated with the job.

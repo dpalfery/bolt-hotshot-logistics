@@ -101,6 +101,15 @@ public interface IInvoice
     /// Gets or sets the last update timestamp.
     /// </summary>
     DateTime? UpdatedAt { get; set; }
+
+    /// <summary>
+    /// Determines if the invoice is overdue.
+    /// </summary>
+    /// <returns>True if the invoice is overdue, false otherwise.</returns>
+    bool IsOverdue()
+    {
+        return DateTime.UtcNow > DueDate && Status != InvoiceStatus.Paid && Status != InvoiceStatus.Cancelled;
+    }
 }
 
 /// <summary>

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\4-Persistence\HotshotLogistics.Data\HotshotLogistics.Data.csproj" />
+    <ProjectReference Include="..\HotshotLogistics.Data\HotshotLogistics.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>

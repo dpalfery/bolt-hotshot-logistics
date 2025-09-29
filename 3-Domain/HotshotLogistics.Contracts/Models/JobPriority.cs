@@ -6,6 +6,7 @@ namespace HotshotLogistics.Contracts.Models
     public enum JobPriority
     {
         Low,
+        Normal,
         Medium,
         High
     }

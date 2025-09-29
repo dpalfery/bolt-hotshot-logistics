@@ -36,6 +36,7 @@ jobs:
         run: |
           export PATH="$HOME/.dotnet/tools:$PATH"
           for proj in $(find . -name '*.csproj'); do
+            dotnet format "$proj" --verbosity diagnostic
             dotnet format "$proj" --verify-no-changes --no-restore
           done
       - name: Build

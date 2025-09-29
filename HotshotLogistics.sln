@@ -29,7 +29,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotshotLogistics.Applicatio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotshotLogistics.Contracts", "3-Domain\HotshotLogistics.Contracts\HotshotLogistics.Contracts.csproj", "{1CBB9CB9-2018-4F94-A580-0F9F7F382F1D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigrationRunner", "MigrationRunner\MigrationRunner.csproj", "{25C288C2-63ED-4CD6-8A98-56D93C14806E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigrationRunner", "4-Persistence\MigrationRunner\MigrationRunner.csproj", "{25C288C2-63ED-4CD6-8A98-56D93C14806E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

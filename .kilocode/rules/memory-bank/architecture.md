@@ -1,9 +1,108 @@
-The Hotshot Logistics project follows Clean Architecture principles with a numbered folder structure to enforce separation of concerns and dependency direction. See [`file-organization.md`](file-organization.md) for detailed folder structure and file placement rules.
+# Hotshot Logistics Platform - Architecture
 
-Key architectural decisions:
-- Dependency injection throughout
-- CQRS for command/query separation
-- Repository pattern for data access
-- Service layer for business logic
-- Strict layering prevents circular dependencies
-- Testable design with mocked dependencies
+## System Architecture Overview
+
+The Hotshot Logistics project follows Clean Architecture principles with a numbered folder structure to enforce separation of concerns and dependency direction. The architecture is designed for scalability, maintainability, and real-time operations in a cloud-native environment.
+
+### Key Technical Decisions
+
+1. **Native ADO.NET over ORM**: Direct SQL control for performance and flexibility in logistics operations
+2. **Azure Functions**: Serverless architecture for cost-effective scaling of API endpoints
+3. **SignalR for Real-time**: WebSocket-based communication for live driver tracking and updates
+4. **FluentMigrator**: Database versioning without Entity Framework dependencies
+5. **Repository Pattern**: Abstraction over data access for flexibility across logistics workflows
+6. **CQRS Pattern**: Separation of read and write operations for complex job management
+7. **Azure Cloud Native**: Leveraging Azure services for scalability and reliability in logistics operations
+8. **Cross-platform Mobile**: React Native for iOS and Android driver app coverage
+
+### Component Architecture
+
+#### Backend API (.NET 8 Azure Functions)
+- **HTTP APIs**: RESTful endpoints for CRUD operations on jobs, drivers, customers
+- **Real-time Communication**: SignalR hubs for live GPS tracking and dispatch updates
+- **Background Processing**: Azure Functions for automated billing and notification scheduling
+- **External Integrations**: Payment gateways, mapping services, SMS/email for logistics operations
+
+#### Admin Dashboard (Next.js/React)
+- **Component Architecture**: Atomic design with reusable UI components for logistics workflows
+- **State Management**: React Query for server state, Context API for local state
+- **Real-time Updates**: WebSocket integration for live job status and driver location
+- **Authentication**: Azure AD integration with role-based access for logistics managers
+
+#### Mobile App (React Native/Expo)
+- **Cross-platform**: Single codebase for iOS and Android driver operations
+- **Offline Support**: Local data storage and sync for remote delivery areas
+- **Background Processing**: Location tracking and push notifications for job assignments
+- **Native Integration**: Camera for proof of delivery, GPS for real-time tracking
+
+### Data Architecture
+
+#### Database Design
+- **Primary Database**: SQL Server with optimized schema for logistics operations (jobs, drivers, customers, tracking)
+- **Caching Layer**: Redis for session management and real-time location data
+- **File Storage**: Azure Blob Storage for delivery proofs and driver documents
+- **Message Queue**: Azure Service Bus for decoupled processing of logistics events
+
+#### Key Domain Models
+
+**Job Management**
+- Jobs with pickup/delivery locations, cargo details, pricing
+- Real-time tracking with location updates and ETAs
+- Status workflow: Pending → Assigned → In Progress → Completed
+
+**Driver Management**
+- Driver profiles with vehicle info, certifications, performance metrics
+- Availability tracking and automated scheduling
+- Earnings calculation and payment processing
+
+**Customer Management**
+- Customer profiles with credit terms and billing preferences
+- Contract management and pricing agreements
+- Communication preferences and history
+
+**Financial Management**
+- Automated invoice generation from completed jobs
+- Payment processing with multiple gateways
+- Accounts receivable tracking and reporting
+
+### Integration Architecture
+
+#### External Service Integrations
+- **Payment Processing**: Stripe, PayPal for customer payments and driver earnings
+- **Mapping Services**: Google Maps, Azure Maps for routing and geocoding in logistics
+- **Communication**: Twilio SMS, SendGrid email, Azure Notification Hubs for delivery updates
+- **Authentication**: Azure Active Directory for user management across platforms
+
+#### API Design
+- **RESTful Endpoints**: Resource-based URLs with proper HTTP methods for logistics operations
+- **Versioning Strategy**: URL-based versioning (/api/v1/) for backward compatibility
+- **Authentication**: JWT tokens with Azure AD integration
+- **Documentation**: OpenAPI/Swagger with interactive testing for API consumers
+
+### Performance Architecture
+
+#### Scalability Patterns
+- **Horizontal Scaling**: Azure Functions auto-scaling based on logistics operation load
+- **Database Optimization**: Read replicas and query optimization for real-time tracking
+- **Caching Strategy**: Multi-level caching with Redis for location data and job status
+- **CDN Integration**: Azure Front Door for global content delivery of logistics assets
+
+#### Real-time Architecture
+- **WebSocket Communication**: SignalR for bidirectional communication in logistics operations
+- **Event Streaming**: Azure Service Bus for event distribution of job updates
+- **Live Updates**: Real-time dashboard updates and mobile notifications for delivery tracking
+- **Location Tracking**: Efficient GPS data processing and storage for fleet management
+
+### Deployment Architecture
+
+#### Infrastructure as Code
+- **Azure Resources**: Functions, SQL Database, Storage, Redis Cache for logistics platform
+- **Networking**: Virtual networks, security groups, private endpoints for data security
+- **Monitoring**: Application Insights, Azure Monitor, health checks for operational visibility
+- **Security**: Key Vault, managed identities, RBAC for logistics data protection
+
+#### CI/CD Pipeline
+- **Build Process**: Automated builds with dependency management for .NET, React, React Native
+- **Testing**: Unit, integration, and performance tests for logistics workflows
+- **Deployment**: Blue-green deployments with zero downtime for continuous operations
+- **Rollback**: Automated rollback capabilities for logistics platform stability

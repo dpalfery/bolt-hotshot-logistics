@@ -8,12 +8,19 @@ namespace HotshotLogistics.Api
     using System.IO;
     using System.Text.Json;
     using Azure.Identity;
+    using HotshotLogistics.Api.Middleware;
     using HotshotLogistics.Application;
+    using HotshotLogistics.Application.Authorization;
     using HotshotLogistics.Data;
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
+    using Microsoft.Azure.Functions.Worker;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.Identity.Web;
+    using FluentValidation.AspNetCore;
 
     /// <summary>
     /// The main program class.
@@ -83,6 +90,16 @@ namespace HotshotLogistics.Api
                     // Register Azure App Configuration refresh service
                     _ = services.AddAzureAppConfiguration();
 
+                    // Add Microsoft Identity Web authentication for Azure AD B2C
+                    _ = services.AddAuthentication("Bearer")
+                        .AddMicrosoftIdentityWebApi(context.Configuration.GetSection("AzureAdB2C"));
+
+                    // Add Microsoft Graph integration
+                    _ = services.AddMicrosoftIdentityWebAppAuthentication(context.Configuration.GetSection("AzureAdB2C"))
+                        .EnableTokenAcquisitionToCallDownstreamApi()
+                        .AddMicrosoftGraph()
+                        .AddInMemoryTokenCaches();
+
                     // Register repositories (ADO.NET-based). DbContext removed in favor of native ADO.NET + FluentMigrator.
                     _ = services.AddHotshotRepositories();
 
@@ -91,6 +108,39 @@ namespace HotshotLogistics.Api
 
                     // Add controllers
                     services.AddControllers();
+
+                    // Add FluentValidation
+                    services.AddFluentValidationAutoValidation();
+                    services.AddFluentValidationClientsideAdapters();
+
+                    // Add authorization
+                    _ = services.AddAuthorization(options =>
+                    {
+                        // Role-based policies
+                        options.AddPolicy(AuthorizationPolicies.Admin, policy =>
+                            policy.RequireRole("Admin"));
+                        options.AddPolicy(AuthorizationPolicies.Manager, policy =>
+                            policy.RequireRole("Manager"));
+                        options.AddPolicy(AuthorizationPolicies.Driver, policy =>
+                            policy.RequireRole("Driver"));
+                        options.AddPolicy(AuthorizationPolicies.Customer, policy =>
+                            policy.RequireRole("Customer"));
+
+                        // Composite role policies
+                        options.AddPolicy(AuthorizationPolicies.AdminOrManager, policy =>
+                            policy.RequireRole("Admin", "Manager"));
+                        options.AddPolicy(AuthorizationPolicies.ManagerOrDriver, policy =>
+                            policy.RequireRole("Manager", "Driver"));
+
+                        // Resource-based policies
+                        options.AddPolicy(AuthorizationPolicies.OwnResource, policy =>
+                            policy.AddRequirements(new ResourceOwnerRequirement("Own")));
+                        options.AddPolicy(AuthorizationPolicies.CustomerResource, policy =>
+                            policy.AddRequirements(new ResourceOwnerRequirement("Customer")));
+                    });
+
+                    // Register authorization handlers
+                    services.AddSingleton<IAuthorizationHandler, ResourceOwnerAuthorizationHandler>();
                 })
                 .Build();
 

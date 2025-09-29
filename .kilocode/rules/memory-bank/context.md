@@ -1,12 +1,94 @@
-Hotshot Logistics was created to modernize and streamline hotshot delivery operations, which are typically small, urgent freight shipments that require fast, reliable transportation. The platform addresses the challenges of coordinating drivers, managing jobs, and tracking deliveries in real-time through a comprehensive digital solution.
+# Hotshot Logistics Platform - Context
 
-The system emerged from the need to replace manual processes with automated, scalable technology that supports both administrative oversight and field operations. By leveraging cloud-native architecture and cross-platform mobile development, it enables logistics companies to operate more efficiently, reduce errors, and provide better service to customers.
+## Current Work Focus
 
-Key motivations include:
-- Eliminating paper-based job assignments and manual tracking
-- Providing real-time visibility into delivery operations
-- Supporting driver autonomy with mobile-first tools
-- Enabling data-driven decision making through analytics
-- Ensuring scalability for growing logistics businesses
+The Hotshot Logistics platform is in active development with a focus on completing the core backend infrastructure and preparing for frontend development. The project has a solid foundation with database schema, domain models, and repository implementations in place.
 
-The project follows Clean Architecture principles to maintain separation of concerns, testability, and long-term maintainability as the system evolves.
+## Recent Changes and Implementation Status
+
+### ✅ Completed Components
+
+**Database Infrastructure**
+- Complete SQL Server schema with all core tables (Customers, Jobs, Drivers, Invoices, Payments, LocationTracking)
+- FluentMigrator migrations for schema versioning and deployment
+- Comprehensive indexing strategy for performance optimization
+
+**Domain Layer**
+- Enhanced domain models with Location, CargoDetails, TrackingInfo, and PerformanceMetrics
+- Complete contract interfaces for all repositories and services
+- Value objects for addresses, pricing, and payment terms
+
+**Repository Layer**
+- Full implementation of native ADO.NET repositories with BaseRepository pattern
+- Advanced querying with filtering, pagination, and search capabilities
+- InvoiceRepository with complex billing calculations and aging reports
+- LocationTrackingRepository for real-time GPS data management
+
+**Application Services**
+- JobService with lifecycle management and driver assignment
+- BillingService with automated invoice generation and payment processing
+- TrackingService with real-time location updates and route deviation detection
+- NotificationService with multi-channel communication support
+
+**API Layer**
+- RESTful controllers for Jobs, Customers, Billing, and Tracking
+- SignalR hub implementation for real-time WebSocket communication
+- Comprehensive error handling and validation middleware
+
+### 🔄 In Progress Components
+
+**Authentication & Authorization**
+- Azure AD integration setup (partially implemented)
+- Role-based access control configuration
+- JWT token management and validation
+
+**External Integrations**
+- Payment gateway implementations (Stripe, PayPal)
+- Mapping service integrations (Azure Maps, Google Maps)
+- Communication services (Twilio SMS, SendGrid email)
+
+**Testing Infrastructure**
+- Unit tests for services and repositories
+- Integration tests for API endpoints
+- Test data builders and fixtures
+
+### 📋 Next Priority Tasks
+
+1. **Complete Authentication System**
+   - Finish Azure AD B2C tenant configuration
+   - Implement role-based authorization policies
+   - Add multi-factor authentication support
+
+2. **External Service Integration**
+   - Complete payment processor implementations
+   - Add mapping and geocoding services
+   - Implement SMS and email notification providers
+
+3. **Frontend Development**
+   - Begin admin dashboard implementation
+   - Start driver mobile app development
+   - Create real-time data synchronization
+
+4. **Advanced Features**
+   - Route optimization algorithms
+   - Analytics and reporting engine
+   - Document management system
+
+## Current Development State
+
+The project has a production-ready backend foundation with:
+- Scalable Azure Functions API
+- Robust data access layer with native ADO.NET
+- Real-time communication capabilities
+- Comprehensive error handling and validation
+- Security infrastructure (partially implemented)
+
+The next phase focuses on completing the authentication system, external integrations, and beginning frontend development to deliver a complete end-to-end logistics platform.
+
+## Key Technical Achievements
+
+- **Native ADO.NET Implementation**: Successfully implemented high-performance data access without Entity Framework
+- **Clean Architecture Compliance**: Strict layer separation with proper dependency direction
+- **Real-time Infrastructure**: SignalR hubs and Redis caching for live updates
+- **Comprehensive Testing**: Unit and integration test coverage for critical components
+- **Cloud-Ready Architecture**: Azure Functions with proper scaling and monitoring
