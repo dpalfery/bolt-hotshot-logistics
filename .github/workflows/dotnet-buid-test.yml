@@ -87,7 +87,7 @@ jobs:
         with:
           # For pull requests, we need the merge commit and base branch
           # For push events, we only need the current commit
-          fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 1 }}
+          fetch-depth: 0
 
       - name: Run TruffleHog (Pull Request)
         if: github.event_name == 'pull_request'
