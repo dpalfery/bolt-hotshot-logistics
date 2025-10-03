@@ -31,10 +31,12 @@ namespace HotshotLogistics.Tests
         /// </summary>
         public InvoiceRepositoryTests()
         {
+            var testDbPassword = Environment.GetEnvironmentVariable("TEST_DB_PASSWORD")
+                ?? throw new InvalidOperationException("TEST_DB_PASSWORD environment variable is required for tests");
             var configBuilder = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    ["ConnectionStrings:DefaultConnection"] = "Server=localhost,1433;Database=HotshotLogisticsTest;User Id=sa;Password=Hotshot123!;TrustServerCertificate=true;MultipleActiveResultSets=true"
+                    ["ConnectionStrings:DefaultConnection"] = $"Server=localhost,1433;Database=HotshotLogisticsTest;User Id=sa;Password={testDbPassword};TrustServerCertificate=true;MultipleActiveResultSets=true"
                 });
 
             _configuration = configBuilder.Build();

@@ -58,7 +58,6 @@ rule: |
 - Multi-day development efforts
 - Tasks with unclear requirements needing iterative refinement
 - When working with unfamiliar codebase sections
-
 #### Todo List Format
 - Use markdown checklist format with [ ] for pending, [x] for completed, [-] for in progress
 - List tasks in logical execution order

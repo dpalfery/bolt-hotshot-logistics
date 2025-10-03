@@ -4,5 +4,14 @@
     "azureFunctions.projectRuntime": "~4",
     "debug.internalConsoleOptions": "neverOpen",
     "azureFunctions.preDeployTask": "publish (functions)",
-    "azureFunctions.projectSubpath": "2-Application\\HotshotLogistics.Api"
+    "azureFunctions.projectSubpath": "2-Application\\HotshotLogistics.Api",
+    "chat.edits2.enabled": true,
+    "chat.emptyState.history.enabled": true,
+    "chat.instructionsFilesLocations": {
+        "kilocode/rules": true
+    },
+    "chat.mcp.assisted.nuget.enabled": true,
+    "chat.promptFilesRecommendations": {},
+    "chat.useChatSessionsForCloudButton": true,
+    "inlineChat.enableV2": true
 }

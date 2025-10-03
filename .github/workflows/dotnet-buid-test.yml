@@ -6,6 +6,14 @@ on:
       - '**/*.cs'
       - '**/*.csproj'
       - '.github/workflows/**'
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - '**/*.cs'
+      - '**/*.csproj'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 permissions:
@@ -76,11 +84,26 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          # For pull requests, we need the merge commit and base branch
+          # For push events, we only need the current commit
+          fetch-depth: 0
 
-      - name: Run TruffleHog
+      - name: Run TruffleHog (Pull Request)
+        if: github.event_name == 'pull_request'
         uses: trufflesecurity/trufflehog@main
         with:
-          args: --only-verified --fail --no-update
+          path: ./
+          base: ${{ github.event.pull_request.base.sha }}
+          head: ${{ github.event.pull_request.head.sha }}
+          extra_args: --only-verified --fail --no-update
+
+      - name: Run TruffleHog (Push/Workflow Dispatch)
+        if: github.event_name != 'pull_request'
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          extra_args: --only-verified --fail --no-update
 
   dependabot:
     runs-on: ubuntu-latest

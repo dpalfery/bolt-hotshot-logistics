@@ -7,122 +7,97 @@ rule: |
 ## Build Quality
 
 ### Zero Tolerance Policy
-- Fix all build errors immediately - no exceptions.
+- Fix all build errors immediately. No exceptions.
 - Resolve all warnings before merging or deploying.
 - Treat warnings as errors in CI/CD to prevent technical debt.
 
 ### Configuration & Monitoring
 - Set warning and error policies in project configuration files.
-- Suppress specific warnings only when documented with justification.
-- Implement CI/CD quality gates that fail on errors/warnings.
-- Generate build reports with warning trends and alerts for degradation.
+- Document the justification for any suppressed warnings.
+- Implement CI/CD quality gates that fail on errors or warnings.
+- Generate build reports that track warning trends and raise alerts.
 
 ### Development Workflow
-- Configure IDEs to show violations as warnings/errors.
-- Enable auto-format on save and use formatting tools in pre-commit hooks.
+- Configure IDEs to surface violations as warnings or errors.
+- Enable auto-format on save and enforce formatting via pre-commit hooks.
 
 ### Enforcement
-- Local Development: Fail builds on errors, warnings, or violations.
-- CI/CD Requirements: Generate and archive quality reports, block PRs with new warnings.
-- Code Reviews: Verify zero warnings before approval, address all violations in PRs, document suppression justifications.
+- Fail local builds on errors or violations.
+- Archive CI/CD quality reports and block PRs that introduce new warnings.
+- Require zero warnings at code review and document any accepted suppressions.
 
 ## Validation
 
 ### Input Validation
-- Validate all user inputs on client and server sides.
-- Never trust client data; validate and sanitize inputs.
-- Implement comprehensive validation for all user-facing endpoints.
+- Validate all user inputs on both client and server.
+- Sanitize and normalize inputs before use.
+- Enforce server-side validation for all public endpoints.
 
 ### Error Handling
 - Return consistent error responses across all APIs.
-- Use appropriate status codes for different error types.
-- Include meaningful error messages without exposing sensitive information.
-- Standardize error response format across all platforms.
+- Use appropriate status codes for error conditions.
+- Keep error messages useful but do not expose sensitive system details.
+- Handle exceptions gracefully and log sanitized diagnostic information.
 
-### Security Considerations
-- Prevent injection attacks through validation.
-- Validate file uploads and size limits.
-- Implement rate limiting to prevent abuse.
-- Log validation failures for monitoring.
+### Security Cross-Reference
+- For security-specific validation, input-escaping, secrets handling, authentication, authorization, rate limiting, and incident logging, follow the authoritative security rules in [`security-general-rule.md`](.kilocode/rules/security-general-rule.md:1).
 
 ## Observability
 
 ### Structured Logging
-- Use structured logging with semantic values and correlation IDs.
+- Use structured logging with semantic properties.
 - Configure logging providers per environment.
 - Log at appropriate levels: Debug, Information, Warning, Error, Critical.
-- Include correlation IDs for request tracing across services.
+- Use message templates and properties when logging structured data.
+- For incident-response logging requirements (correlation IDs, retention, and forensic detail), follow [`security-general-rule.md`](.kilocode/rules/security-general-rule.md:1).
 
 ### Metrics
-- Implement metrics collection and monitoring.
-- Track KPIs (response times, error rates, throughput).
+- Implement metrics collection for key KPIs: response times, error rates, throughput.
 - Configure exporters for monitoring dashboards.
 
 ### Tracing
-- Implement distributed tracing for request flows across services.
-- Use correlation IDs to link related operations.
-- Include contextual information in trace spans.
+- Implement distributed tracing for request flows.
+- Include contextual metadata in trace spans.
 
 ### Implementation Guidelines
-- Configure observability in application startup.
+- Configure observability during application startup.
 - Use consistent naming for metrics and traces.
-- Implement health checks including observability status.
-- Log structured data with message templates and properties.
+- Implement health checks that surface observability status.
 
 ## Testing Standards and Coverage Requirements
 
 ### Test Coverage Standards
-- **Application and Domain layers**: Minimum 80% code coverage
-- **Infrastructure/Persistence layer**: Minimum 70% code coverage
-- **Presentation layer**: Minimum 60% code coverage
-- **Frontend components**: Minimum 70% coverage for critical user interactions
-- **Mobile app**: Minimum 65% coverage for core functionality
+- Application and Domain layers: Minimum 80% code coverage.
+- Infrastructure/Persistence layer: Minimum 70% code coverage.
+- Presentation layer: Minimum 60% code coverage.
+- Frontend components: Minimum 70% coverage for critical user interactions.
+- Mobile app: Minimum 65% coverage for core functionality.
 
 ### Test Organization
-- Place tests in appropriate test directories following project structure
-- Use descriptive test class and method names
-- Group related tests in test classes
-- Separate unit, integration, and performance tests
+- Place tests in appropriate test directories following project structure.
+- Use descriptive test class and method names.
+- Group related tests in test classes.
+- Separate unit, integration, and performance tests.
 
 ### Test Data Management
-- Use factory methods for test data creation
-- Implement builder patterns for complex objects
-- Avoid hard-coded test data; use data builders
-- Clean up test resources in test teardown
+- Use factory methods for test data creation.
+- Implement builder patterns for complex objects.
+- Avoid hard-coded test data; use data builders.
+- Clean up test resources in test teardown.
 
 ## Code Review Quality Gates
 
 ### Automated Checks
-- Build passes without warnings.
-- All tests pass.
-- Code coverage meets requirements.
-- Static analysis tools pass.
+- Ensure builds pass without warnings.
+- Ensure all tests pass.
+- Ensure code coverage meets requirements.
+- Ensure static analysis tools pass.
 
-### Manual Review Checklist
-- Architecture compliance.
-- Code readability and maintainability.
-- Security best practices.
-- Documentation updates.
 
-### Quality Metrics
-- Cyclomatic complexity within acceptable limits.
-- Method length appropriate for technology.
-- Class responsibility focused and single-purpose.
 
-## Technical Debt Management
 
-### Identification
-- Code smells, duplicated code, long methods.
-- Outdated dependencies.
-- Performance bottlenecks.
 
-### Management Process
-- Track debt in issue tracker.
-- Prioritize based on impact.
-- Allocate time for refactoring in development cycles.
 
-### Prevention
-- Regular code reviews.
-- Automated quality checks.
-- Continuous refactoring.
+
+
 

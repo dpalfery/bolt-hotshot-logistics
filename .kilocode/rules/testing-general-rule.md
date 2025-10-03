@@ -150,8 +150,3 @@ rule: |
   - Establish performance budgets
   - Include benchmarks in development workflow
 
-  ## References
-
-  - [Backend Testing Rules](../backend/testing-backend.md) - .NET-specific testing patterns
-  - [Frontend Testing Rules](../frontend/testing-frontend.md) - Frontend-specific testing approaches
-  - [CI/CD Testing Rules](../cicd/testing-cicd.md) - Automated testing in deployment pipelines

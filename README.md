@@ -179,16 +179,34 @@ dotnet run
 
 ### 5. Database Setup
 
-- Update `DefaultConnection` in your config to point to your SQL Server instance.
-- Apply native ADO.NET (Microsoft.Data.SqlClient) with schema & migrations managed by FluentMigrator migrations (coming soon).
-- Example:
-  ```json
-  {
-    "ConnectionStrings": {
-      "DefaultConnection": "Server=localhost;Database=hotshotdb;User=root;Password=yourpassword;"
-    }
-  }
+**⚠️ SECURITY NOTICE: All environment variables are REQUIRED. No fallback passwords are provided.**
+
+- Copy `.env.example` to `.env` and configure your environment variables with secure passwords.
+- For local development, use Docker Compose to start SQL Server:
+  ```bash
+  cd 7-Deployment
+  docker-compose up -d
   ```
+- Apply native ADO.NET (Microsoft.Data.SqlClient) with schema & migrations managed by FluentMigrator migrations.
+
+**Required environment variables:**
+- `SQL_SA_PASSWORD`: Strong password for SQL Server SA account (local development)
+- `TEST_DB_PASSWORD`: Password for test database connections
+- `CONNECTIONSTRINGS__DEFAULTCONNECTION`: Full connection string for production
+
+**Security Requirements:**
+- All passwords must meet SQL Server complexity requirements
+- Never commit passwords to source control
+- Use Azure Key Vault for production secrets
+- Environment variables are mandatory - no fallback values provided
+
+Example `.env` file structure (fill in your secure passwords):
+```bash
+# Database Configuration - REQUIRED
+SQL_SA_PASSWORD=
+TEST_DB_PASSWORD=
+CONNECTIONSTRINGS__DEFAULTCONNECTION=Server=localhost;Database=hotshotdb;User Id=sa;Password=;
+```
 
 ---
 
