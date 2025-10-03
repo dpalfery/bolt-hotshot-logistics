@@ -18,7 +18,7 @@ namespace HotshotLogistics.Tests
     /// <summary>
     /// Integration tests for JobRepository.
     /// </summary>
-    public class JobRepositoryTests : IDisposable
+    public class JobRepositoryTests : IClassFixture<DatabaseTestFixture>, IDisposable
     {
         private readonly IJobRepository _jobRepository;
         private readonly IConfiguration _configuration;
@@ -27,14 +27,13 @@ namespace HotshotLogistics.Tests
         /// <summary>
         /// Initializes a new instance of the <see cref="JobRepositoryTests"/> class.
         /// </summary>
-        public JobRepositoryTests()
+        public JobRepositoryTests(DatabaseTestFixture fixture)
         {
-            var testDbPassword = Environment.GetEnvironmentVariable("TEST_DB_PASSWORD")
-                ?? throw new InvalidOperationException("TEST_DB_PASSWORD environment variable is required for tests");
+            ArgumentNullException.ThrowIfNull(fixture);
             var configBuilder = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    ["ConnectionStrings:DefaultConnection"] = $"Server=localhost,1433;Database=HotshotLogisticsTest;User Id=sa;Password={testDbPassword};TrustServerCertificate=true;MultipleActiveResultSets=true"
+                    ["ConnectionStrings:DefaultConnection"] = TestDatabaseHelper.GetConnectionString()
                 });
 
             _configuration = configBuilder.Build();

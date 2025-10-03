@@ -19,7 +19,7 @@ namespace HotshotLogistics.Tests
     /// <summary>
     /// Integration tests for LocationTrackingRepository.
     /// </summary>
-    public class LocationTrackingRepositoryTests : IDisposable
+    public class LocationTrackingRepositoryTests : IClassFixture<DatabaseTestFixture>, IDisposable
     {
         private readonly ILocationTrackingRepository _locationTrackingRepository;
         private readonly IConfiguration _configuration;
@@ -28,14 +28,13 @@ namespace HotshotLogistics.Tests
         /// <summary>
         /// Initializes a new instance of the <see cref="LocationTrackingRepositoryTests"/> class.
         /// </summary>
-        public LocationTrackingRepositoryTests()
+        public LocationTrackingRepositoryTests(DatabaseTestFixture fixture)
         {
-            var testDbPassword = Environment.GetEnvironmentVariable("TEST_DB_PASSWORD")
-                ?? throw new InvalidOperationException("TEST_DB_PASSWORD environment variable is required for tests");
+            ArgumentNullException.ThrowIfNull(fixture);
             var configBuilder = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    ["ConnectionStrings:DefaultConnection"] = $"Server=localhost,1433;Database=HotshotLogisticsTest;User Id=sa;Password={testDbPassword};TrustServerCertificate=true;MultipleActiveResultSets=true"
+                    ["ConnectionStrings:DefaultConnection"] = TestDatabaseHelper.GetConnectionString()
                 });
 
             _configuration = configBuilder.Build();
