@@ -3,106 +3,60 @@ description: "Enforces fundamental security practices that apply across all deve
 when-to-apply: "always"
 rule: |
 
+This document is authoritative for security directives; other rule files must reference it for security-related guidance.
+
 ## Secrets Management
 
+- Never use a .env file always use environment variabled. if they don't exist create them or ask the user to
 - Never check secrets into source control or store them in plain text.
-- Secure values include connection strings, passwords, tokens, API keys, and client secrets.
-- Use secure providers (Azure Key Vault, environment variables) for secret storage.
-- Implement proper access controls with RBAC and least privilege principles.
-- Validate user inputs on client and server sides.
-- Configure security properly in production environments.
-- Enforce secure communications (HTTPS, HSTS).
-- Update dependencies regularly to patch vulnerabilities.
-- Implement comprehensive validation and authorization.
-- Use rate limiting to prevent abuse.
 
-## Log Security
+#### **1. Secrets Management (Immediate Actions)**
+*   **NEVER** hardcode secrets. Reject any code containing strings like `password=`, `ConnectionString=`, `api_key=`, `token=`, or `secret=` in plain text.
+*   **ALWAYS** retrieve secrets from a secure source. In code, this must be represented as a call to:
+    *   `Environment.GetEnvironmentVariable("SECRET_NAME")` (or language equivalent).
+    *   A secure service like `AzureKeyVault.getSecret("secret-name")`.
+*   **VALIDATE** that any configuration file (e.g., `appsettings.json`, `.env`) loaded in code is excluded from version control via `.gitignore`. If you see a secret in a config file in a code block, flag it.
 
-### Prevent Log Forging
-- Never include unsanitized user-provided data directly in log entries
-- Sanitize user data before logging: remove newlines, carriage returns, and control characters
-- Use structured logging with placeholders instead of string concatenation
+#### **2. Input Validation & Sanitization (For Every User Input)**
+*   **ESCAPE ALL INPUTS** contextually before use:
+    *   **For SQL:** Use **parameterized queries ONLY**. Never construct queries with string concatenation (`"SELECT ... WHERE id = " + userInput` is forbidden).
+    *   **For HTML/UI:** Encode output (e.g., `HtmlEncode()` in C#, `escape()` in Python) before rendering to prevent XSS.
+    *   **For OS Commands:** Avoid if possible. If necessary, use APIs that accept arguments as a list, not a single command string.
+*   **SANITIZE BEFORE LOGGING:** For any user-provided data going into a log, you MUST:
+    *   Replace newlines (`\n`, `\r`) and tabs with spaces.
+    *   Use structured logging with placeholders: `logger.LogInfo("User {UserId} logged in", sanitizedUserId)`.
+    *   **NEVER** do: `logger.LogInfo("User " + rawUserInput + " logged in")`.
 
-### Safe Logging Practices
-- **Structured Logging**: Use parameterized logging with named parameters
-- **Input Sanitization**: Replace newlines with spaces, escape special characters
-- **Correlation IDs**: Log user actions with IDs and metadata, not raw user content
-- **Log Levels**: Avoid user data in ERROR/CRITICAL logs; use INFO/DEBUG for user actions
-- **Examples**:
-  - ✅ `logger.LogInformation("User {UserId} performed {Action}", userId, action)`
-  - ❌ `logger.LogInformation($"User {userInput} performed {action}")` // Vulnerable
+#### **3. Secure Communication & Configuration (Production-Readiness)**
+*   **ENFORCE HTTPS:** Any code configuring a web server must:
+    *   Redirect HTTP to HTTPS.
+    *   Set HSTS headers.
+*   **VALIDATE PRODUCTION SETTINGS:** When you see configuration code, check for insecure defaults:
+    *   Debug mode must be disabled.
+    *   Detailed error messages must not be shown to users.
+    *   CORS policies must be restrictive, not permissive (`"*"`).
 
-## Threat Modeling Guidelines
+#### **4. Authentication & Authorization (Access Controls)**
+*   **PRINCIPLE OF LEAST PRIVILEGE:** When defining roles or permissions, the default must be **no access**. Permissions are explicitly granted.
+*   **AUTHORIZE EVERY ACTION:** For any function that accesses data or performs an action, you MUST see an authorization check *after* the authentication check.
+    *   Example: `if (user.IsInRole("Admin")) { // allow action }` or `[Authorize(Roles="Admin")]` attribute.
 
-### STRIDE Framework
-- **Spoofing**: Identify authentication and authorization weaknesses.
-- **Tampering**: Protect data integrity in transit and at rest.
-- **Repudiation**: Implement audit logging for non-repudiation.
-- **Information Disclosure**: Prevent unauthorized data access.
-- **Denial of Service**: Implement rate limiting and resource protection.
-- **Elevation of Privilege**: Validate authorization controls.
+#### **5. Dependency & Operational Security**
+*   **FLAG VULNERABLE DEPENDENCIES:** If you generate a dependency file (e.g., `package.json`, `requirements.txt`), include a comment instructing the user to regularly scan for vulnerabilities using `npm audit`, `snyk test`, etc.
+*   **IMPLEMENT RATE LIMITING:** Enforce rate limiting on public APIs. Document requirements in code and infrastructure (example comment: `// TODO: enforce rate limiting - 60 reqs/min - use gateway or throttling middleware`). Advise implementers to configure API gateway rules or middleware to prevent abuse.
+### **Directives for Code Review & Threat Analysis**
 
-### Threat Modeling Process
-1. **Define Scope**: Identify system boundaries and trust zones.
-2. **Create Architecture Diagram**: Document components and data flows.
-3. **Identify Assets**: List valuable data and resources to protect.
-4. **Identify Threats**: Use STRIDE to enumerate potential threats.
-5. **Identify Vulnerabilities**: Map threats to specific weaknesses.
-6. **Determine Mitigations**: Design security controls and countermeasures.
-7. **Validate Model**: Review and update threat model regularly.
+When reviewing code, act as a security auditor. For each function or endpoint, ask these questions:
 
-### DREAD Risk Assessment
-- **Damage Potential**: Impact if threat is realized.
-- **Reproducibility**: How easy is it to exploit the vulnerability.
-- **Exploitability**: Technical difficulty of exploitation.
-- **Affected Users**: Number of users impacted.
-- **Discoverability**: How easily can the vulnerability be found.
+1.  **Spoofing (Authentication):** Is the user who they claim to be? Is there a clear login/authentication step?
+2.  **Tampering (Integrity):** Could an attacker change the data in transit or at rest? Is there input validation? Is HTTPS enforced?
+3.  **Repudiation (Logging):** Are there sufficient audit logs? Are logs tamper-resistant? Is user activity logged with a correlation ID instead of raw input?
+4.  **Information Disclosure (Secrets/Data):** Could this code leak secrets (e.g., in logs, errors)? Does it enforce authorization before returning sensitive data?
+5.  **Denial of Service (Resilience):** Could this be abused to crash the service? Is there resource limiting on expensive operations (file uploads, complex calculations)?
+6.  **Elevation of Privilege (Authorization):** Does the code check the user's permissions *every time* it accesses a resource? Can a user access another user's data by changing an ID (Insecure Direct Object Reference)?
 
-### Common Threat Scenarios
-- Authentication bypass through parameter manipulation.
-- Injection attacks through improper input handling.
-- Cross-site scripting (XSS) in web interfaces.
-- Insecure direct object references (IDOR).
-- Server-side request forgery (SSRF) in external integrations.
-- Race conditions in concurrent operations.
+### **Incident Response Readiness (Code-Level)**
+*   **LOG FOR INCIDENTS:** Ensure logs are structured and include correlation IDs. This is non-negotiable for forensic analysis.
+*   **CLEAR ERROR HANDLING:** Code must catch exceptions gracefully without exposing stack traces or internal system details to the end-user.
 
-## Incident Response Procedures
-
-### Incident Detection and Classification
-- Implement monitoring and alerting for security events.
-- Classify incidents by severity (Critical, High, Medium, Low).
-- Establish response time SLAs based on incident severity.
-- Document incident classification criteria.
-
-### Incident Response Team
-- Define roles: Incident Response Coordinator, Technical Lead, Communications Lead.
-- Maintain 24/7 contact information for response team members.
-- Conduct regular incident response training and simulations.
-- Establish escalation procedures for different incident types.
-
-### Containment and Eradication
-- Isolate affected systems to prevent spread.
-- Preserve evidence for forensic analysis.
-- Remove malicious code or configurations.
-- Patch vulnerabilities exploited in the incident.
-- Restore systems from clean backups when possible.
-
-### Recovery and Lessons Learned
-- Validate system integrity before returning to production.
-- Monitor systems closely during recovery phase.
-- Document incident timeline and response actions.
-- Conduct post-mortem analysis to identify root causes.
-- Update security controls and procedures based on lessons learned.
-
-### Communication Procedures
-- Notify affected customers and stakeholders promptly.
-- Coordinate public communications through designated channels.
-- Maintain incident status updates during response.
-- Document communications for regulatory compliance.
-- Preserve confidentiality of sensitive incident details.
-
-## References
-
-- [Backend Security Rules](../backend/security-backend.md) - .NET-specific security implementation
-- [Frontend Security Rules](../frontend/security-frontend.md) - Frontend-specific security practices
-- [CI/CD Security Rules](../cicd/security-cicd.md) - Security scanning and validation in pipelines
+These rules are not optional and should be followed always

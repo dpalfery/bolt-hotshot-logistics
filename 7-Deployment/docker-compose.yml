@@ -5,9 +5,9 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: hotshot_sqlserver
     environment:
-      ACCEPT_EULA: Y
-      SA_PASSWORD: ${SQL_SA_PASSWORD}
-      MSSQL_PID: Developer
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
+      MSSQL_PID: "Developer"
     ports:
       - "1433:1433"
     volumes:
