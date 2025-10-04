@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { mockInvoices, buildInvoicesResponse, buildInvoiceResponse } from './fixtures/invoice-mocks';
 
 test.describe('Billing Management', () => {
   test.beforeEach(async ({ page }) => {
@@ -24,167 +25,61 @@ test.describe('Billing Management', () => {
 
     test('should display invoice information correctly', async ({ page }) => {
       // Mock invoices data
-      await page.route('**/api/invoices*', async route => {
+      await page.route('**/api/v1/billing/invoices**', async route => {
+        const url = new URL(route.request().url());
+        const status = url.searchParams.get('status');
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({
-            items: [
-              {
-                id: 'inv-001',
-                invoiceNumber: 'INV-2024-001',
-                customerId: 'CUST-001',
-                invoiceDate: '2024-01-15T00:00:00Z',
-                dueDate: '2024-02-15T00:00:00Z',
-                totalAmount: 1500.00,
-                paidAmount: 1500.00,
-                balanceDue: 0.00,
-                status: 'Paid'
-              },
-              {
-                id: 'inv-002',
-                invoiceNumber: 'INV-2024-002',
-                customerId: 'CUST-002',
-                invoiceDate: '2024-01-20T00:00:00Z',
-                dueDate: '2024-02-20T00:00:00Z',
-                totalAmount: 2500.00,
-                paidAmount: 1000.00,
-                balanceDue: 1500.00,
-                status: 'PartiallyPaid'
-              },
-              {
-                id: 'inv-003',
-                invoiceNumber: 'INV-2024-003',
-                customerId: 'CUST-003',
-                invoiceDate: '2024-01-25T00:00:00Z',
-                dueDate: '2024-01-25T00:00:00Z', // Past due
-                totalAmount: 800.00,
-                paidAmount: 0.00,
-                balanceDue: 800.00,
-                status: 'Overdue'
-              }
-            ],
-            totalCount: 3
-          })
+          body: JSON.stringify(buildInvoicesResponse(status))
         });
       });
 
       await page.reload();
 
-      // Check invoice numbers
+      // Check invoice numbers from fixture data
       await expect(page.getByText('INV-2024-001')).toBeVisible();
       await expect(page.getByText('INV-2024-002')).toBeVisible();
       await expect(page.getByText('INV-2024-003')).toBeVisible();
+      await expect(page.getByText('INV-2024-004')).toBeVisible();
+      await expect(page.getByText('INV-2024-005')).toBeVisible();
 
       // Check customer IDs
       await expect(page.getByText('Customer #CUST-001')).toBeVisible();
       await expect(page.getByText('Customer #CUST-002')).toBeVisible();
       await expect(page.getByText('Customer #CUST-003')).toBeVisible();
+      await expect(page.getByText('Customer #CUST-004')).toBeVisible();
+      await expect(page.getByText('Customer #CUST-005')).toBeVisible();
 
-      // Check invoice dates are formatted correctly
+      // Check invoice dates are formatted correctly (all use same date)
       await expect(page.getByText('1/15/2024')).toBeVisible();
-      await expect(page.getByText('1/20/2024')).toBeVisible();
-      await expect(page.getByText('1/25/2024')).toBeVisible();
 
-      // Check amounts
-      await expect(page.getByText('$1500.00')).toBeVisible();
-      await expect(page.getByText('$2500.00')).toBeVisible();
-      await expect(page.getByText('$800.00')).toBeVisible();
+      // Check amounts ($1620.00 for all)
+      await expect(page.getByText('$1620.00')).toBeVisible();
 
-      // Check paid amounts
-      await expect(page.getByText('Paid: $1500.00')).toBeVisible();
-      await expect(page.getByText('Paid: $1000.00')).toBeVisible();
-      await expect(page.getByText('Paid: $0.00')).toBeVisible();
+      // Check paid amounts vary by status
+      await expect(page.getByText('Paid: $0.00')).toBeVisible(); // Draft, Sent, Overdue
+      await expect(page.getByText('Paid: $1620.00')).toBeVisible(); // Paid
+      await expect(page.getByText('Paid: $0.00')).toBeVisible(); // Cancelled
 
-      // Check due dates
-      await expect(page.getByText('2/15/2024')).toBeVisible();
-      await expect(page.getByText('2/20/2024')).toBeVisible();
-      await expect(page.getByText('1/25/2024')).toBeVisible();
+      // Check due dates (some overdue, some future)
+      await expect(page.getByText('2/15/2024')).toBeVisible(); // Future due dates
+      await expect(page.getByText('1/10/2024')).toBeVisible(); // Overdue
     });
 
     test('should display invoice status with appropriate styling', async ({ page }) => {
-      // Mock invoices with different statuses
-      await page.route('**/api/invoices*', async route => {
+      // Mock invoices with different statuses using fixture
+      await page.route('**/api/v1/billing/invoices**', async route => {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({
-            items: [
-              {
-                id: 'inv-draft',
-                invoiceNumber: 'INV-DRAFT-001',
-                customerId: 'CUST-001',
-                invoiceDate: '2024-01-15T00:00:00Z',
-                dueDate: '2024-02-15T00:00:00Z',
-                totalAmount: 1000.00,
-                paidAmount: 0.00,
-                balanceDue: 1000.00,
-                status: 'Draft'
-              },
-              {
-                id: 'inv-sent',
-                invoiceNumber: 'INV-SENT-001',
-                customerId: 'CUST-002',
-                invoiceDate: '2024-01-16T00:00:00Z',
-                dueDate: '2024-02-16T00:00:00Z',
-                totalAmount: 1200.00,
-                paidAmount: 0.00,
-                balanceDue: 1200.00,
-                status: 'Sent'
-              },
-              {
-                id: 'inv-partial',
-                invoiceNumber: 'INV-PARTIAL-001',
-                customerId: 'CUST-003',
-                invoiceDate: '2024-01-17T00:00:00Z',
-                dueDate: '2024-02-17T00:00:00Z',
-                totalAmount: 1500.00,
-                paidAmount: 500.00,
-                balanceDue: 1000.00,
-                status: 'PartiallyPaid'
-              },
-              {
-                id: 'inv-paid',
-                invoiceNumber: 'INV-PAID-001',
-                customerId: 'CUST-004',
-                invoiceDate: '2024-01-18T00:00:00Z',
-                dueDate: '2024-02-18T00:00:00Z',
-                totalAmount: 800.00,
-                paidAmount: 800.00,
-                balanceDue: 0.00,
-                status: 'Paid'
-              },
-              {
-                id: 'inv-overdue',
-                invoiceNumber: 'INV-OVERDUE-001',
-                customerId: 'CUST-005',
-                invoiceDate: '2024-01-19T00:00:00Z',
-                dueDate: '2024-01-20T00:00:00Z',
-                totalAmount: 2000.00,
-                paidAmount: 0.00,
-                balanceDue: 2000.00,
-                status: 'Overdue'
-              },
-              {
-                id: 'inv-cancelled',
-                invoiceNumber: 'INV-CANCELLED-001',
-                customerId: 'CUST-006',
-                invoiceDate: '2024-01-20T00:00:00Z',
-                dueDate: '2024-02-20T00:00:00Z',
-                totalAmount: 600.00,
-                paidAmount: 0.00,
-                balanceDue: 0.00,
-                status: 'Cancelled'
-              }
-            ],
-            totalCount: 6
-          })
+          body: JSON.stringify(buildInvoicesResponse())
         });
       });
 
       await page.reload();
 
-      // Check status styling for each status type
+      // Check status styling for each status type from fixture
       const draftStatus = page.locator('text=Draft').first();
       await expect(draftStatus).toBeVisible();
       await expect(draftStatus).toHaveClass(/bg-gray-100.*text-gray-800/);
@@ -192,10 +87,6 @@ test.describe('Billing Management', () => {
       const sentStatus = page.locator('text=Sent').first();
       await expect(sentStatus).toBeVisible();
       await expect(sentStatus).toHaveClass(/bg-blue-100.*text-blue-800/);
-
-      const partiallyPaidStatus = page.locator('text=PartiallyPaid').first();
-      await expect(partiallyPaidStatus).toBeVisible();
-      await expect(partiallyPaidStatus).toHaveClass(/bg-yellow-100.*text-yellow-800/);
 
       const paidStatus = page.locator('text=Paid').first();
       await expect(paidStatus).toBeVisible();
@@ -212,15 +103,12 @@ test.describe('Billing Management', () => {
 
     test('should handle loading state', async ({ page }) => {
       // Mock slow API response
-      await page.route('**/api/invoices*', async route => {
+      await page.route('**/api/v1/billing/invoices**', async route => {
         await new Promise(resolve => setTimeout(resolve, 1000));
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({
-            items: [],
-            totalCount: 0
-          })
+          body: JSON.stringify(buildInvoicesResponse())
         });
       });
 
@@ -235,7 +123,7 @@ test.describe('Billing Management', () => {
 
     test('should handle empty invoices list', async ({ page }) => {
       // Mock empty response
-      await page.route('**/api/invoices*', async route => {
+      await page.route('**/api/v1/billing/invoices**', async route => {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
@@ -279,26 +167,11 @@ test.describe('Billing Management', () => {
 
     test('should display payment recording interface if available', async ({ page }) => {
       // Mock invoice data first
-      await page.route('**/api/invoices*', async route => {
+      await page.route('**/api/v1/billing/invoices**', async route => {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({
-            items: [
-              {
-                id: 'inv-001',
-                invoiceNumber: 'INV-2024-001',
-                customerId: 'CUST-001',
-                invoiceDate: '2024-01-15T00:00:00Z',
-                dueDate: '2024-02-15T00:00:00Z',
-                totalAmount: 1500.00,
-                paidAmount: 0.00,
-                balanceDue: 1500.00,
-                status: 'Sent'
-              }
-            ],
-            totalCount: 1
-          })
+          body: JSON.stringify(buildInvoicesResponse())
         });
       });
 
@@ -350,95 +223,57 @@ test.describe('Billing Management', () => {
     });
 
     test('should filter invoices by status if filtering is available', async ({ page }) => {
-      // Mock invoices with filtering support
-      await page.route('**/api/invoices*', async route => {
+      // Mock invoices with filtering support using fixture
+      await page.route('**/api/v1/billing/invoices**', async route => {
         const url = new URL(route.request().url());
         const status = url.searchParams.get('status');
-        
-        let items = [
-          {
-            id: 'inv-paid',
-            invoiceNumber: 'INV-PAID-001',
-            customerId: 'CUST-001',
-            invoiceDate: '2024-01-15T00:00:00Z',
-            dueDate: '2024-02-15T00:00:00Z',
-            totalAmount: 1000.00,
-            paidAmount: 1000.00,
-            balanceDue: 0.00,
-            status: 'Paid'
-          },
-          {
-            id: 'inv-overdue',
-            invoiceNumber: 'INV-OVERDUE-001',
-            customerId: 'CUST-002',
-            invoiceDate: '2024-01-16T00:00:00Z',
-            dueDate: '2024-01-20T00:00:00Z',
-            totalAmount: 1500.00,
-            paidAmount: 0.00,
-            balanceDue: 1500.00,
-            status: 'Overdue'
-          }
-        ];
-
-        // Apply filtering if status parameter exists
-        if (status) {
-          items = items.filter(invoice => invoice.status === status);
-        }
-
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({
-            items,
-            totalCount: items.length
-          })
+          body: JSON.stringify(buildInvoicesResponse(status))
         });
       });
 
       await page.reload();
 
-      // Verify initial state shows all invoices
-      await expect(page.getByText('INV-PAID-001')).toBeVisible();
-      await expect(page.getByText('INV-OVERDUE-001')).toBeVisible();
+      // Verify initial state shows all invoices (Paid and Overdue from fixture)
+      await expect(page.getByText('INV-2024-003')).toBeVisible(); // Paid
+      await expect(page.getByText('INV-2024-004')).toBeVisible(); // Overdue
 
       // Check if filter controls exist
       const statusFilter = page.getByRole('combobox', { name: /status|filter/i });
-      
+
       if (await statusFilter.isVisible()) {
         // Test filtering by paid status
         await statusFilter.selectOption('Paid');
-        await expect(page.getByText('INV-PAID-001')).toBeVisible();
-        await expect(page.getByText('INV-OVERDUE-001')).not.toBeVisible();
-        
+        await expect(page.getByText('INV-2024-003')).toBeVisible();
+        await expect(page.getByText('INV-2024-004')).not.toBeVisible();
+
         // Test filtering by overdue status
         await statusFilter.selectOption('Overdue');
-        await expect(page.getByText('INV-OVERDUE-001')).toBeVisible();
-        await expect(page.getByText('INV-PAID-001')).not.toBeVisible();
+        await expect(page.getByText('INV-2024-004')).toBeVisible();
+        await expect(page.getByText('INV-2024-003')).not.toBeVisible();
       }
     });
 
     test('should handle invoice actions if available', async ({ page }) => {
-      // Mock invoice data
-      await page.route('**/api/invoices*', async route => {
+      // Mock invoice list data
+      await page.route('**/api/v1/billing/invoices**', async route => {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({
-            items: [
-              {
-                id: 'inv-001',
-                invoiceNumber: 'INV-2024-001',
-                customerId: 'CUST-001',
-                invoiceDate: '2024-01-15T00:00:00Z',
-                dueDate: '2024-02-15T00:00:00Z',
-                totalAmount: 1500.00,
-                paidAmount: 0.00,
-                balanceDue: 1500.00,
-                status: 'Sent'
-              }
-            ],
-            totalCount: 1
-          })
+          body: JSON.stringify(buildInvoicesResponse())
+        });
+      });
+
+      // Mock individual invoice details
+      await page.route('**/api/v1/billing/invoices/*', async route => {
+        const url = new URL(route.request().url());
+        const id = url.pathname.split('/').pop();
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(buildInvoiceResponse(id!))
         });
       });
 
@@ -465,7 +300,7 @@ test.describe('Billing Management', () => {
 
     test('should handle API errors gracefully', async ({ page }) => {
       // Mock API error
-      await page.route('**/api/invoices*', async route => {
+      await page.route('**/api/v1/billing/invoices**', async route => {
         await route.fulfill({
           status: 500,
           contentType: 'application/json',

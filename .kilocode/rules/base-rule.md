@@ -14,6 +14,7 @@ Task‑Start Requirements (must perform before changes)
 - Identify which architectural layer the work touches (0–7). ([`​.kilocode/rules/architecture-general.md`](.kilocode/rules/architecture-general.md:1))  
 - Check security constraints and secrets handling (do not hardcode secrets). ([`​.kilocode/rules/security-general-rule.md`](.kilocode/rules/security-general-rule.md:1))  
 - Ensure build compiles with zero warnings and required tests pass or are added. ([`​.kilocode/rules/code-quality-general-rule.md`](.kilocode/rules/code-quality-general-rule.md:1))
+- Always, for every task Create kilocode.status.<task-name>.md in 6-docs/ with completed work. Generate todo list at start, mark complete when finished.
 
 Situational Rule Pointers (consult only when relevant)
 - Security & Secrets: input validation, SQL param rules, secrets management → [`​.kilocode/rules/security-general-rule.md`](.kilocode/rules/security-general-rule.md:1)  

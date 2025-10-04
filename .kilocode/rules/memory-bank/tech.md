@@ -1,5 +1,8 @@
 ## Technologies and Dependencies
-
+### Custom Kilocode Modes
+- The .Net Dev and Next.JS Developer are way more targeted modes for this application. Use the Next.JS Developer for all front end work and .net dev for all backend work. If you feel strongly that one of the oob modes is better suted for the sub task then present your case to the user and ask permission for an exception
+- **.Net Dev
+- ** Next.js Developer
 ### Backend (.NET)
 - **Framework**: .NET 8, Azure Functions v4
 - **Database**: SQL Server with native ADO.NET (Microsoft.Data.SqlClient) and FluentMigrator for schema management

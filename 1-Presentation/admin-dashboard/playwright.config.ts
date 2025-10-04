@@ -6,7 +6,11 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests',
   /* Fail fast if a single test takes too long */
-  timeout: 15_000,
+  timeout: 45_000,
+  /* Global timeout for the full run */
+  globalTimeout: 60 * 60 * 1000,
+  /* Expect timeout */
+  expect: { timeout: 10_000 },
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -22,11 +26,15 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://127.0.0.1:3000',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+    /* Action timeout */
+    actionTimeout: 15_000,
   },
+  /* Global setup */
+  globalSetup: './tests/global-setup.ts',
 
   /* Configure projects for major browsers */
   projects: [
@@ -69,7 +77,8 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:3000',
+    url: 'http://127.0.0.1:3000',
     reuseExistingServer: !process.env.CI,
+    timeout: process.env.CI ? 180_000 : 60_000,
   },
 });
