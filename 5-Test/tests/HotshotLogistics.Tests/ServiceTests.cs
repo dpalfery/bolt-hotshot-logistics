@@ -240,6 +240,11 @@ public class JobServiceTests
         var mappingServiceMock = new Mock<IMappingService>();
         var loggerMock = new Mock<ILogger<JobService>>();
 
+        // Add this setup inside the test
+        mappingServiceMock
+            .Setup(m => m.ReverseGeocodeAsync(It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ReverseGeocodingResult { IsValid = true });
+
         repoMock.Setup(r => r.CreateJobAsync(job, It.IsAny<CancellationToken>())).ReturnsAsync(job);
         customerRepoMock.Setup(r => r.GetByIdAsync("CUST001", It.IsAny<CancellationToken>())).ReturnsAsync(customer);
 
@@ -338,4 +343,3 @@ public class JobServiceTests
 
     }
 }
-

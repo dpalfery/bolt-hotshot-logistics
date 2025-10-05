@@ -15,7 +15,8 @@ namespace HotshotLogistics.Api
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
-    using Microsoft.Azure.Functions.Worker;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -30,121 +31,140 @@ namespace HotshotLogistics.Api
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
-        public static void Main()
+        public static void Main(string[] args)
         {
-            var host = new HostBuilder()
-                .ConfigureAppConfiguration((hostingContext, config) =>
+            var builder = WebApplication.CreateBuilder(args);
+
+            // Configure configuration
+            builder.Configuration.AddEnvironmentVariables();
+
+            // Use local.settings.json for local development
+            if (builder.Environment.IsDevelopment())
+            {
+                builder.Configuration.AddJsonFile("local.settings.json", optional: true, reloadOnChange: true);
+
+                // Explicitly load Values from local.settings.json and add as environment variables
+                var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
+                var localSettingsPath = assemblyDirectory != null ? Path.Combine(assemblyDirectory, "local.settings.json") : string.Empty;
+                if (File.Exists(localSettingsPath))
                 {
-                    var env = hostingContext.HostingEnvironment;
-                    config.AddEnvironmentVariables();
-
-                    // Use local.settings.json for local development
-                    if (env.IsDevelopment())
+                    using var stream = File.OpenRead(localSettingsPath);
+                    using var doc = JsonDocument.Parse(stream);
+                    if (doc.RootElement.TryGetProperty("Values", out var values))
                     {
-                        config.AddJsonFile("local.settings.json", optional: true, reloadOnChange: true);
-
-                        // Explicitly load Values from local.settings.json and add as environment variables
-                        var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                        var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
-                        var localSettingsPath = assemblyDirectory != null ? Path.Combine(assemblyDirectory, "local.settings.json") : string.Empty;
-                        if (File.Exists(localSettingsPath))
+                        foreach (var prop in values.EnumerateObject())
                         {
-                            using var stream = File.OpenRead(localSettingsPath);
-                            using var doc = JsonDocument.Parse(stream);
-                            if (doc.RootElement.TryGetProperty("Values", out var values))
+                            var key = prop.Name;
+                            var value = prop.Value.GetString();
+                            if (!string.IsNullOrEmpty(key) && value != null)
                             {
-                                foreach (var prop in values.EnumerateObject())
-                                {
-                                    var key = prop.Name;
-                                    var value = prop.Value.GetString();
-                                    if (!string.IsNullOrEmpty(key) && value != null)
-                                    {
-                                        Environment.SetEnvironmentVariable(key, value);
-                                    }
-                                }
+                                Environment.SetEnvironmentVariable(key, value);
                             }
                         }
                     }
+                }
+            }
 
-                    var settings = config.Build();
-
-                    // Get Azure App Configuration endpoint from environment or local.settings.json
-                    var appConfigEndpoint = settings["AppConfig:Endpoint"];
-                    if (!string.IsNullOrEmpty(appConfigEndpoint))
-                    {
-                        _ = config.AddAzureAppConfiguration(options =>
-                        {
-                            _ = options.Connect(new Uri(appConfigEndpoint), new DefaultAzureCredential())
-                                   // Sentinel key for refresh
-                                   .ConfigureRefresh(refresh =>
-                                   {
-                                       _ = refresh.Register("Sentinel", refreshAll: true)
-                                              .SetRefreshInterval(TimeSpan.FromSeconds(30));
-                                   })
-                                   .Select("*");
-                        });
-                    }
-                })
-                .ConfigureServices((context, services) =>
+            // Get Azure App Configuration endpoint from environment or local.settings.json
+            var appConfigEndpoint = builder.Configuration["AppConfig:Endpoint"];
+            if (!string.IsNullOrEmpty(appConfigEndpoint))
+            {
+                builder.Configuration.AddAzureAppConfiguration(options =>
                 {
-                    // Register Azure App Configuration refresh service
-                    _ = services.AddAzureAppConfiguration();
+                    options.Connect(new Uri(appConfigEndpoint), new DefaultAzureCredential())
+                           .ConfigureRefresh(refresh =>
+                           {
+                               refresh.Register("Sentinel", refreshAll: true)
+                                      .SetRefreshInterval(TimeSpan.FromSeconds(30));
+                           })
+                           .Select("*");
+                });
+            }
 
-                    // Add Microsoft Identity Web authentication for Azure AD B2C
-                    _ = services.AddAuthentication("Bearer")
-                        .AddMicrosoftIdentityWebApi(context.Configuration.GetSection("AzureAdB2C"));
+            // Register Azure App Configuration refresh service
+            builder.Services.AddAzureAppConfiguration();
 
-                    // Add Microsoft Graph integration
-                    _ = services.AddMicrosoftIdentityWebAppAuthentication(context.Configuration.GetSection("AzureAdB2C"))
-                        .EnableTokenAcquisitionToCallDownstreamApi()
-                        .AddMicrosoftGraph()
-                        .AddInMemoryTokenCaches();
+            // Commented out for local development without Azure AD
+            // builder.Services.AddAuthentication("Bearer")
+            //                .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAdB2C"));
 
-                    // Register repositories (ADO.NET-based). DbContext removed in favor of native ADO.NET + FluentMigrator.
-                    _ = services.AddHotshotRepositories();
+            // builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration.GetSection("AzureAdB2C"))
+            //                .EnableTokenAcquisitionToCallDownstreamApi()
+            //                .AddMicrosoftGraph()
+            //                .AddInMemoryTokenCaches();
 
-                    // Register application services
-                    services.AddApplicationServices();
+            // Register repositories (ADO.NET-based). DbContext removed in favor of native ADO.NET + FluentMigrator.
+            builder.Services.AddHotshotRepositories();
 
-                    // Add controllers
-                    services.AddControllers();
+            // Register application services
+            builder.Services.AddApplicationServices();
 
-                    // Add FluentValidation
-                    services.AddFluentValidationAutoValidation();
-                    services.AddFluentValidationClientsideAdapters();
+            // Add controllers
+            builder.Services.AddControllers();
 
-                    // Add authorization
-                    _ = services.AddAuthorization(options =>
-                    {
-                        // Role-based policies
-                        options.AddPolicy(AuthorizationPolicies.Admin, policy =>
-                            policy.RequireRole("Admin"));
-                        options.AddPolicy(AuthorizationPolicies.Manager, policy =>
-                            policy.RequireRole("Manager"));
-                        options.AddPolicy(AuthorizationPolicies.Driver, policy =>
-                            policy.RequireRole("Driver"));
-                        options.AddPolicy(AuthorizationPolicies.Customer, policy =>
-                            policy.RequireRole("Customer"));
+            // Add FluentValidation
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddFluentValidationClientsideAdapters();
 
-                        // Composite role policies
-                        options.AddPolicy(AuthorizationPolicies.AdminOrManager, policy =>
-                            policy.RequireRole("Admin", "Manager"));
-                        options.AddPolicy(AuthorizationPolicies.ManagerOrDriver, policy =>
-                            policy.RequireRole("Manager", "Driver"));
+            // Add CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
 
-                        // Resource-based policies
-                        options.AddPolicy(AuthorizationPolicies.OwnResource, policy =>
-                            policy.AddRequirements(new ResourceOwnerRequirement("Own")));
-                        options.AddPolicy(AuthorizationPolicies.CustomerResource, policy =>
-                            policy.AddRequirements(new ResourceOwnerRequirement("Customer")));
-                    });
+            // Add authorization
+            builder.Services.AddAuthorization(options =>
+            {
+                // Role-based policies
+                options.AddPolicy(AuthorizationPolicies.Admin, policy =>
+                    policy.RequireRole("Admin"));
+                options.AddPolicy(AuthorizationPolicies.Manager, policy =>
+                    policy.RequireRole("Manager"));
+                options.AddPolicy(AuthorizationPolicies.Driver, policy =>
+                    policy.RequireRole("Driver"));
+                options.AddPolicy(AuthorizationPolicies.Customer, policy =>
+                    policy.RequireRole("Customer"));
 
-                    // Register authorization handlers
-                    services.AddSingleton<IAuthorizationHandler, ResourceOwnerAuthorizationHandler>();
-                })
-                .Build();
+                // Composite role policies
+                options.AddPolicy(AuthorizationPolicies.AdminOrManager, policy =>
+                    policy.RequireRole("Admin", "Manager"));
+                options.AddPolicy(AuthorizationPolicies.ManagerOrDriver, policy =>
+                    policy.RequireRole("Manager", "Driver"));
 
-            host.Run();
+                // Resource-based policies
+                options.AddPolicy(AuthorizationPolicies.OwnResource, policy =>
+                    policy.AddRequirements(new ResourceOwnerRequirement("Own")));
+                options.AddPolicy(AuthorizationPolicies.CustomerResource, policy =>
+                    policy.AddRequirements(new ResourceOwnerRequirement("Customer")));
+            });
+
+            // Register authorization handlers
+            builder.Services.AddSingleton<IAuthorizationHandler, ResourceOwnerAuthorizationHandler>();
+
+            var app = builder.Build();
+
+            // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            app.UseHttpsRedirection();
+
+            app.UseCors("AllowAll");
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.MapControllers();
+
+            app.Run();
         }
     }
 }

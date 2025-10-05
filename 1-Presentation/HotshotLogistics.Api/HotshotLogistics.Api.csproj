@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
     <OutputType>Exe</OutputType>
+    <UserSecretsId>a562df9b-74fa-48b9-adfc-379cdc5868a7</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />

@@ -142,19 +142,19 @@ export class ApiMocker {
   }
 
   async mockInvoicesApi(invoices: MockInvoice[] = [], totalCount?: number) {
-    await this.page.route('**/api/invoices*', async route => {
+    await this.page.route('**/api/billing/invoices**', async route => {
       const url = new URL(route.request().url());
       const status = url.searchParams.get('status');
       const search = url.searchParams.get('search');
-      
+
       let filteredInvoices = invoices;
-      
+
       if (status && status !== 'all') {
         filteredInvoices = invoices.filter(invoice => invoice.status === status);
       }
-      
+
       if (search) {
-        filteredInvoices = invoices.filter(invoice => 
+        filteredInvoices = invoices.filter(invoice =>
           invoice.id.toLowerCase().includes(search.toLowerCase()) ||
           invoice.jobId.toLowerCase().includes(search.toLowerCase())
         );
@@ -198,6 +198,44 @@ export class ApiMocker {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify(defaultStats)
+      });
+    });
+  }
+
+  async mockInvoiceSummaryApi(summary: any = {}) {
+    const defaultSummary = {
+      totalInvoiced: 0,
+      totalPaid: 0,
+      totalOutstanding: 0,
+      overdueAmount: 0,
+      ...summary
+    };
+
+    await this.page.route('**/invoices/summary*', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(defaultSummary)
+      });
+    });
+  }
+
+  async mockInvoiceAgingApi(aging: any = {}) {
+    const defaultAging = {
+      current: 0,
+      days30: 0,
+      days60: 0,
+      days90: 0,
+      over90: 0,
+      total: 0,
+      ...aging
+    };
+
+    await this.page.route('**/invoices/aging*', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(defaultAging)
       });
     });
   }
@@ -544,8 +582,52 @@ export class TestHelpers {
   async setupBasicMocks() {
     await this.apiMocker.mockJobsApi([]);
     await this.apiMocker.mockDriversApi([]);
-    await this.apiMocker.mockInvoicesApi([]);
+    // NOTE: Do NOT register a default invoices mock here.
+    // Registering a blanket invoices mock in setupBasicMocks causes the handler
+    // to fulfill requests before any per-test invoice mocks are registered,
+    // which makes tests that register their own invoice routes non-deterministic
+    // across browsers. Tests should call `page.route(...)` or
+    // `this.apiMocker.mockInvoicesApi(...)` explicitly when they need invoice data.
     await this.apiMocker.mockCustomersApi([]);
     await this.apiMocker.mockDashboardStatsApi();
+    await this.apiMocker.mockInvoiceSummaryApi();
+    await this.apiMocker.mockInvoiceAgingApi();
+  }
+
+  /**
+   * Wait for the invoices API network response to complete.
+   * Use this after calling `page.reload()` in tests that register their own
+   * invoices route handlers, so assertions wait for the deterministic mocked response.
+   *
+   * @param timeout - how long to wait (ms), defaults to 5000
+   */
+  async waitForInvoicesResponse(expectedStatus: number | 'any' = 200, timeout: number = 5000) {
+    await this.page.waitForResponse(response => {
+      const url = response.url();
+      // match both /api/billing/invoices and any query variations
+      if (!url.includes('/api/billing/invoices')) return false;
+      if (expectedStatus === 'any') return true;
+      return response.status() === expectedStatus;
+    }, { timeout });
+  }
+
+  /**
+   * Reload the page and wait for the invoices network response to complete.
+   * Uses Promise.all to avoid the race where the response happens before
+   * waitForResponse starts listening.
+   *
+   * @param expectedStatus - expected HTTP status (number) or 'any' to accept any status
+   * @param timeout - timeout in ms
+   */
+  async reloadAndWaitForInvoices(expectedStatus: number | 'any' = 200, timeout: number = 5000) {
+    await Promise.all([
+      this.page.waitForResponse(response => {
+        const url = response.url();
+        if (!url.includes('/api/billing/invoices')) return false;
+        if (expectedStatus === 'any') return true;
+        return response.status() === expectedStatus;
+      }, { timeout }),
+      this.page.reload()
+    ]);
   }
 }

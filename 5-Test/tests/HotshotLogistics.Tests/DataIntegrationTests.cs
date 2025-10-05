@@ -124,6 +124,15 @@ namespace HotshotLogistics.Tests
             var mappingServiceMock = new Mock<IMappingService>();
             var loggerMock = new Mock<ILogger<JobService>>();
 
+            // Precise Moq setup so validation passes:
+            mappingServiceMock
+                .Setup(m => m.ReverseGeocodeAsync(It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new ReverseGeocodingResult { IsValid = true });
+
+            mappingServiceMock
+                .Setup(m => m.GeocodeAddressAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new GeocodingResult { IsValid = true, Latitude = 40.7128m, Longitude = -74.0060m });
+
             customerRepoMock.Setup(r => r.GetByIdAsync("CUST001", It.IsAny<CancellationToken>())).ReturnsAsync(customer);
             var service = new JobService(mockRepo.Object, customerRepoMock.Object, driverRepoMock.Object, notificationServiceMock.Object, mappingServiceMock.Object, loggerMock.Object);
 

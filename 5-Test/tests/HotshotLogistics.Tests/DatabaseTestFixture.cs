@@ -27,33 +27,10 @@ public sealed class DatabaseTestFixture : IAsyncLifetime
                 return;
             }
 
-            var server = GetRequiredEnvironmentVariable("HOTSHOT_DB_SERVER");
-            var database = GetRequiredEnvironmentVariable("HOTSHOT_DB_NAME");
-            var appUser = GetRequiredEnvironmentVariable("HOTSHOT_DB_APP_USER");
-            var appPassword = GetRequiredEnvironmentVariable("HOTSHOT_DB_PASSWORD");
-
-            var saPassword = Environment.GetEnvironmentVariable("SQL_SA_PASSWORD");
-            string saConnectionString;
-
-            if (!string.IsNullOrWhiteSpace(saPassword))
-            {
-                saConnectionString = $"Server={server};Database=master;User Id=sa;Password={saPassword};TrustServerCertificate=true;MultipleActiveResultSets=true";
-            }
-            else
-            {
-                var envConnectionString = Environment.GetEnvironmentVariable("CI_SA_CONNECTION_STRING");
-                if (string.IsNullOrWhiteSpace(envConnectionString))
-                {
-                    throw new InvalidOperationException("SQL_SA_PASSWORD or CI_SA_CONNECTION_STRING must be set to provision the integration test database.");
-                }
-
-                saConnectionString = envConnectionString;
-            }
-
-            var solutionRoot = ResolveSolutionRoot();
-            await RunDbSetupCliAsync(solutionRoot, server, database, appUser, appPassword, saConnectionString);
-
+            // Use the pre-configured connection string from environment to match application behavior
             var connectionString = TestDatabaseHelper.GetConnectionString();
+
+            // Verify the database is reachable
             await VerifyConnectionAsync(connectionString);
 
             _initialized = true;

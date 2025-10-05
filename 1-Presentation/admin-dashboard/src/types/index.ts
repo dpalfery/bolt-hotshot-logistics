@@ -115,6 +115,7 @@ export interface Invoice {
 export enum InvoiceStatus {
   Draft = 'Draft',
   Sent = 'Sent',
+  Viewed = 'Viewed',
   PartiallyPaid = 'PartiallyPaid',
   Paid = 'Paid',
   Overdue = 'Overdue',
@@ -137,6 +138,22 @@ export interface PaymentTerms {
   earlyPaymentDiscountDays: number;
   latePaymentPenalty: number;
   latePaymentPenaltyDays: number;
+}
+
+export interface InvoiceSummaryMetrics {
+  totalInvoiced: number;
+  totalPaid: number;
+  totalOutstanding: number;
+  overdueAmount: number;
+}
+
+export interface InvoiceAgingBuckets {
+  current: number;
+  days30: number;
+  days60: number;
+  days90: number;
+  over90: number;
+  total: number;
 }
 
 // Customer types

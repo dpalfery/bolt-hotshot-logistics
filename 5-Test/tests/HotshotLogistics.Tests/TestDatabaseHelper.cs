@@ -15,10 +15,10 @@ namespace HotshotLogistics.Tests
         private static string? cachedConnectionString;
 
         /// <summary>
-        /// Builds a SQL Server connection string using environment variables provisioned by DbSetup CLI or CI configuration.
+        /// Gets the SQL Server connection string from the environment variable used by the app repos.
         /// </summary>
         /// <returns>A valid SQL Server connection string.</returns>
-        /// <exception cref="InvalidOperationException">Thrown when required environment variables are not set or the connection cannot be established.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the required environment variable is not set.</exception>
         public static string GetConnectionString()
         {
             if (cachedConnectionString is not null)
@@ -33,36 +33,15 @@ namespace HotshotLogistics.Tests
                     return cachedConnectionString;
                 }
 
-                var server = GetRequiredEnvironmentVariable("HOTSHOT_DB_SERVER");
-                var baseDatabaseName = Environment.GetEnvironmentVariable("HOTSHOT_DB_NAME");
-                var candidateDatabases = BuildCandidateDatabases(baseDatabaseName);
-                var credentialBuilders = BuildCredentialBuilders(server).ToList();
-
-                if (credentialBuilders.Count == 0)
+                // Read the connection string from environment to match application configuration
+                var conn = Environment.GetEnvironmentVariable("CONNECTIONSTRINGS__DEFAULTCONNECTION");
+                if (string.IsNullOrWhiteSpace(conn))
                 {
-                    throw new InvalidOperationException("No database credentials available. Ensure DbSetup CLI has been executed and the required environment variables are set.");
+                    throw new InvalidOperationException("Environment variable 'CONNECTIONSTRINGS__DEFAULTCONNECTION' is required for tests");
                 }
 
-                foreach (var credential in credentialBuilders)
-                {
-                    foreach (var database in candidateDatabases)
-                    {
-                        var attemptBuilder = new SqlConnectionStringBuilder(credential.ConnectionString)
-                        {
-                            InitialCatalog = database,
-                            TrustServerCertificate = true,
-                            MultipleActiveResultSets = true
-                        };
-
-                        if (TryOpenConnection(attemptBuilder.ConnectionString))
-                        {
-                            cachedConnectionString = attemptBuilder.ConnectionString;
-                            return cachedConnectionString;
-                        }
-                    }
-                }
-
-                throw new InvalidOperationException("Unable to connect to SQL Server using the configured environment variables. Verify that the database exists and the credentials provided by the DbSetup CLI are correct.");
+                cachedConnectionString = conn;
+                return cachedConnectionString;
             }
         }
 

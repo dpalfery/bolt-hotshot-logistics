@@ -1,13 +1,16 @@
-import { Job, Driver, Invoice, Customer, PagedResult, JobFilter, InvoiceFilter, PaginationParameters } from '@/types';
+import { Job, Driver, Invoice, Customer, PagedResult, JobFilter, InvoiceFilter, PaginationParameters, InvoiceSummaryMetrics, InvoiceAgingBuckets } from '@/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:7071/api';
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || '/api').trim();
 
 class ApiService {
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    query?: string
   ): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
+    const baseUrl = API_BASE_URL.replace(/\/$/, '');
+    const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const url = `${baseUrl}${normalizedEndpoint}${query ? `?${query}` : ''}`;
 
     const config: RequestInit = {
       headers: {
@@ -61,7 +64,12 @@ class ApiService {
       params.append('pageSize', pagination.pageSize.toString());
     }
 
-    return this.request<PagedResult<Job>>(`/job?${params}`);
+    const query = params.toString();
+    if (query) {
+      return this.request<PagedResult<Job>>('/job', {}, query);
+    } else {
+      return this.request<PagedResult<Job>>('/job');
+    }
   }
 
   async getJobById(id: string): Promise<Job> {
@@ -151,7 +159,12 @@ class ApiService {
       params.append('pageSize', pagination.pageSize.toString());
     }
 
-    return this.request<PagedResult<Invoice>>(`/billing/invoices?${params}`);
+    const query = params.toString();
+    if (query) {
+      return this.request<PagedResult<Invoice>>('/billing/invoices', {}, query);
+    } else {
+      return this.request<PagedResult<Invoice>>('/billing/invoices');
+    }
   }
 
   async getInvoiceById(id: string): Promise<Invoice> {
@@ -176,6 +189,14 @@ class ApiService {
     await this.request(`/billing/invoices/${id}`, {
       method: 'DELETE',
     });
+  }
+
+  async getInvoiceSummary(): Promise<InvoiceSummaryMetrics> {
+    return this.request<InvoiceSummaryMetrics>('/invoices/summary');
+  }
+
+  async getInvoiceAging(): Promise<InvoiceAgingBuckets> {
+    return this.request<InvoiceAgingBuckets>('/invoices/aging');
   }
 
   // Customer API methods
