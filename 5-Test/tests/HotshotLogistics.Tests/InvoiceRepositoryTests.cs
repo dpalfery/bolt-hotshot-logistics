@@ -259,7 +259,7 @@ namespace HotshotLogistics.Tests
             result.Should().NotBeNull();
             result.Items.Should().NotBeEmpty();
             result.Items.Should().OnlyContain(i => i.Status == InvoiceStatus.Draft);
-            result.Items.Should().HaveCountLessOrEqualTo(2);
+            result.Items.Count().Should().BeLessThanOrEqualTo(2);
             result.PageNumber.Should().Be(1);
             result.PageSize.Should().Be(2);
             result.TotalCount.Should().BeGreaterThan(0);
@@ -296,7 +296,7 @@ namespace HotshotLogistics.Tests
             var result = await _invoiceRepository.GetOutstandingBalanceAsync(customerId);
 
             // Assert
-            result.Should().BeGreaterOrEqualTo(0);
+            result.Should().BeGreaterThanOrEqualTo(0);
         }
 
         /// <summary>
@@ -316,7 +316,7 @@ namespace HotshotLogistics.Tests
             result.Should().NotBeNull();
             result.TotalInvoices.Should().BeGreaterThan(0);
             result.TotalAmount.Should().BeGreaterThan(0);
-            result.TotalOutstanding.Should().BeGreaterOrEqualTo(0);
+            result.TotalOutstanding.Should().BeGreaterThanOrEqualTo(0);
         }
 
         /// <summary>

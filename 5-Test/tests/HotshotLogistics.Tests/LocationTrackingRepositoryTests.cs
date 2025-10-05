@@ -234,9 +234,10 @@ namespace HotshotLogistics.Tests
 
             // Assert
             result.Should().NotBeNull();
-            result.Should().HaveCountLessOrEqualTo(count);
-            result.Should().OnlyContain(lt => lt.JobId == jobId);
-            result.Should().BeInDescendingOrder(lt => lt.Timestamp);
+            var records = result.ToList();
+            records.Count.Should().BeLessThanOrEqualTo(count);
+            records.Should().OnlyContain(lt => lt.JobId == jobId);
+            records.Should().BeInDescendingOrder(lt => lt.Timestamp);
         }
 
         /// <summary>
@@ -276,7 +277,7 @@ namespace HotshotLogistics.Tests
             var result = await _locationTrackingRepository.DeleteOlderThanAsync(cutoffDate);
 
             // Assert
-            result.Should().BeGreaterOrEqualTo(0);
+            result.Should().BeGreaterThanOrEqualTo(0);
         }
 
         /// <summary>
@@ -294,7 +295,7 @@ namespace HotshotLogistics.Tests
             var result = await _locationTrackingRepository.GetTotalDistanceByJobIdAsync(jobId);
 
             // Assert
-            result.Should().BeGreaterOrEqualTo(0);
+            result.Should().BeGreaterThanOrEqualTo(0);
         }
 
         /// <summary>
@@ -314,7 +315,7 @@ namespace HotshotLogistics.Tests
             var result = await _locationTrackingRepository.GetTotalDistanceByDriverIdAsync(driverId, startTime, endTime);
 
             // Assert
-            result.Should().BeGreaterOrEqualTo(0);
+            result.Should().BeGreaterThanOrEqualTo(0);
         }
 
         /// <summary>

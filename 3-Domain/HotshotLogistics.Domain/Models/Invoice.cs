@@ -72,7 +72,7 @@ namespace HotshotLogistics.Domain.Models
         public decimal BalanceDue => TotalAmount - PaidAmount;
 
         /// <inheritdoc/>
-        public PaymentTerms? Terms { get; set; }
+        public PaymentTerms Terms { get; set; } = new PaymentTerms();
 
         /// <inheritdoc/>
         public string Notes { get; set; } = string.Empty;

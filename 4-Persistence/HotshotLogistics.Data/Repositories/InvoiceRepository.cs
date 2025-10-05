@@ -617,7 +617,7 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     /// <param name="sql">The SQL query.</param>
     /// <param name="parameters">The query parameters.</param>
     /// <returns>A list of entities.</returns>
-    protected new async Task<IEnumerable<Invoice>> ExecuteQueryAsync(string sql, SqlParameter[] parameters = null)
+    protected new async Task<IEnumerable<Invoice>> ExecuteQueryAsync(string sql, SqlParameter[]? parameters = null)
     {
         var entities = new List<Invoice>();
 

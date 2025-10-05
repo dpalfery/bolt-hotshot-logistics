@@ -85,7 +85,7 @@ namespace HotshotLogistics.Tests
 
             // Assert
             result.Should().NotBeNull();
-            result.Items.Should().HaveCountLessOrEqualTo(2);
+            result.Items.Count().Should().BeLessThanOrEqualTo(2);
             result.PageNumber.Should().Be(1);
             result.PageSize.Should().Be(2);
             result.TotalCount.Should().BeGreaterThan(0);

@@ -1,22 +1,14 @@
-using FluentMigrator;
 using System;
-using System.Data;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
+using FluentMigrator;
 
 namespace HotshotLogistics.Data.Migrations;
 
 [Migration(20251004120000)]
 public class SeedLargeTestData : Migration
 {
-    private static IDbDataParameter CreateParam(IDbCommand cmd, string name, object value)
-    {
-        var p = cmd.CreateParameter();
-        p.ParameterName = name;
-        p.Value = value ?? DBNull.Value;
-        return p;
-    }
-
     public override void Up()
     {
         // This migration seeds 100 customers, a pool of drivers (200),
@@ -37,7 +29,10 @@ public class SeedLargeTestData : Migration
                 checkCmd.CommandText = "SELECT COUNT(1) FROM Customers WHERE Id = @Id";
                 checkCmd.Parameters.Add(CreateParam(checkCmd, "@Id", custId));
                 var exists = Convert.ToInt32(checkCmd.ExecuteScalar() ?? 0) > 0;
-                if (exists) continue;
+                if (exists)
+                {
+                    continue;
+                }
 
                 using var insertCmd = connection.CreateCommand();
                 insertCmd.Transaction = transaction;
@@ -54,8 +49,8 @@ VALUES (@Id, @CompanyName, @TaxId, @BillingAddress, @City, @State, @ZipCode, @Co
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@ZipCode", $"{10000 + i}"));
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@Country", "USA"));
                 // simple lat/long variation
-                insertCmd.Parameters.Add(CreateParam(insertCmd, "@Latitude", 40.0m + (decimal)(i % 10) * 0.01m));
-                insertCmd.Parameters.Add(CreateParam(insertCmd, "@Longitude", -75.0m - (decimal)(i % 10) * 0.01m));
+                insertCmd.Parameters.Add(CreateParam(insertCmd, "@Latitude", 40.0m + ((decimal)(i % 10) * 0.01m)));
+                insertCmd.Parameters.Add(CreateParam(insertCmd, "@Longitude", -75.0m - ((decimal)(i % 10) * 0.01m)));
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@CreditLimit", 5000m + (i * 10)));
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@IsActive", true));
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@CreatedAt", DateTime.UtcNow));
@@ -72,7 +67,10 @@ VALUES (@Id, @CompanyName, @TaxId, @BillingAddress, @City, @State, @ZipCode, @Co
                 checkDriver.CommandText = "SELECT COUNT(1) FROM Drivers WHERE Email = @Email";
                 checkDriver.Parameters.Add(CreateParam(checkDriver, "@Email", driverEmail));
                 var existsDriver = Convert.ToInt32(checkDriver.ExecuteScalar() ?? 0) > 0;
-                if (existsDriver) continue;
+                if (existsDriver)
+                {
+                    continue;
+                }
 
                 using var insertDriver = connection.CreateCommand();
                 insertDriver.Transaction = transaction;
@@ -128,7 +126,10 @@ VALUES (@FirstName, @LastName, @Email, @PhoneNumber, @LicenseNumber, @LicenseSta
                     checkJob.CommandText = "SELECT COUNT(1) FROM Jobs WHERE Id = @Id";
                     checkJob.Parameters.Add(CreateParam(checkJob, "@Id", jobId));
                     var jobExists = Convert.ToInt32(checkJob.ExecuteScalar() ?? 0) > 0;
-                    if (jobExists) continue;
+                    if (jobExists)
+                    {
+                        continue;
+                    }
 
                     decimal baseRate = 100m + (decimal)(rnd.NextDouble() * 400.0);
                     decimal totalAmount = Math.Round(baseRate + (decimal)(rnd.NextDouble() * 200.0), 2);
@@ -263,5 +264,21 @@ VALUES (@InvoiceId, @Description, @Quantity, @UnitPrice, @TaxApplicable, @SortOr
             delCustomers.CommandText = "DELETE FROM Customers WHERE Id LIKE 'cust-%'";
             delCustomers.ExecuteNonQuery();
         });
+    }
+
+    /// <summary>
+    /// Helper to create a parameter with null handling.
+    /// Placed after public methods to satisfy SA1202.
+    /// </summary>
+    /// <param name="cmd">The command to add the parameter to.</param>
+    /// <param name="name">The parameter name.</param>
+    /// <param name="value">The parameter value.</param>
+    /// <returns>The created parameter.</returns>
+    private static IDbDataParameter CreateParam(IDbCommand cmd, string name, object? value)
+    {
+        var p = cmd.CreateParameter();
+        p.ParameterName = name;
+        p.Value = value ?? DBNull.Value;
+        return p;
     }
 }

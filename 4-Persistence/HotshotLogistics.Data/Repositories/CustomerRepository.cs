@@ -161,7 +161,7 @@ internal class CustomerRepository : BaseRepository<ICustomer>, ICustomerReposito
     }
 
     // Explicit interface implementations to bridge concrete/interface types
-    async Task<ICustomer?> ICustomerRepository.GetByIdAsync(object id, CancellationToken cancellationToken = default)
+    async Task<ICustomer?> ICustomerRepository.GetByIdAsync(object id, CancellationToken cancellationToken)
     {
         return await GetByIdAsync(id, cancellationToken);
     }
