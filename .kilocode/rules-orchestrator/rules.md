@@ -1,1 +1,0 @@
-be sure to consider all modes when assigining task. be sure to concider the custom modes created by the user
