@@ -77,7 +77,7 @@ namespace HotshotLogistics.Application.Services
             }
 
             // Validate driver exists and is active
-            var driver = await driverRepository.GetByIdAsync(driverId);
+            var driver = await driverRepository.GetDriverByIdAsync(driverId);
             if (driver == null || !driver.IsActive)
             {
                 logger.LogWarning("Driver not found or inactive: {DriverId}", driverId);

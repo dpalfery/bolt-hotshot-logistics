@@ -65,17 +65,7 @@ rule: |
 - Break down large tasks into smaller, verifiable steps
 - Update status immediately after completing each item
 
-#### Status Tracking
-- Create status files in `6-Docs/status/` for complex tasks
-- Include task context, current progress, and next steps
-- Update status files after each significant milestone
-- Archive or delete status files after task completion
 
-#### File Management
-- Store temporary status files in `6-Docs/status/` directory
-- Use descriptive filenames (e.g., `20250126-implement-job-tracking.md`)
-- Clean up files after task completion unless needed for documentation
-- Consider moving completed status files to `6-Docs/archive/` for historical reference
 
 #### Integration with Memory Bank
 - Update memory bank context.md after significant task completion

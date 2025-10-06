@@ -7,18 +7,19 @@ The Hotshot Logistics project follows Clean Architecture principles with a numbe
 ### Key Technical Decisions
 
 1. **Native ADO.NET over ORM**: Direct SQL control for performance and flexibility in logistics operations
-2. **Azure Functions**: Serverless architecture for cost-effective scaling of API endpoints
-3. **SignalR for Real-time**: WebSocket-based communication for live driver tracking and updates
-4. **FluentMigrator**: Database versioning without Entity Framework dependencies
-5. **Repository Pattern**: Abstraction over data access for flexibility across logistics workflows
-6. **CQRS Pattern**: Separation of read and write operations for complex job management
-7. **Azure Cloud Native**: Leveraging Azure services for scalability and reliability in logistics operations
-8. **Cross-platform Mobile**: React Native for iOS and Android driver app coverage
+2. **ASP.NET Core Web API**: Scalable, full-featured framework for hosting RESTful APIs  
+3. **Azure Functions**: Event-driven compute for processing messages, queues, or other asynchronous triggers
+4. **SignalR for Real-time**: WebSocket-based communication for live driver tracking and updates
+5. **FluentMigrator**: Database versioning without Entity Framework dependencies
+6. **Repository Pattern**: Abstraction over data access for flexibility across logistics workflows
+7. **CQRS Pattern**: Separation of read and write operations for complex job management
+8. **Azure Cloud Native**: Leveraging Azure services for scalability and reliability in logistics operations
+9. **Cross-platform Mobile**: React Native for iOS and Android driver app coverage
 
 ### Component Architecture
 
-#### Backend API (.NET 8 Azure Functions)
-- **HTTP APIs**: RESTful endpoints for CRUD operations on jobs, drivers, customers
+#### Backend API (.NET 8 ASP.NET Core Web API)
+- **HTTP APIs**: ASP.NET Core Web API RESTful endpoints for CRUD operations on jobs, drivers, customers
 - **Real-time Communication**: SignalR hubs for live GPS tracking and dispatch updates
 - **Background Processing**: Azure Functions for automated billing and notification scheduling
 - **External Integrations**: Payment gateways, mapping services, SMS/email for logistics operations
@@ -82,7 +83,7 @@ The Hotshot Logistics project follows Clean Architecture principles with a numbe
 ### Performance Architecture
 
 #### Scalability Patterns
-- **Horizontal Scaling**: Azure Functions auto-scaling based on logistics operation load
+- **Horizontal Scaling**: Azure Container Apps – Consumption Plan based on logistics operation load
 - **Database Optimization**: Read replicas and query optimization for real-time tracking
 - **Caching Strategy**: Multi-level caching with Redis for location data and job status
 - **CDN Integration**: Azure Front Door for global content delivery of logistics assets
@@ -96,7 +97,7 @@ The Hotshot Logistics project follows Clean Architecture principles with a numbe
 ### Deployment Architecture
 
 #### Infrastructure as Code
-- **Azure Resources**: Functions, SQL Database, Storage, Redis Cache for logistics platform
+- **Azure Resources**: Azure Container Apps – Consumption Plan, SQL Database, Storage, Redis Cache for logistics platform
 - **Networking**: Virtual networks, security groups, private endpoints for data security
 - **Monitoring**: Application Insights, Azure Monitor, health checks for operational visibility
 - **Security**: Key Vault, managed identities, RBAC for logistics data protection

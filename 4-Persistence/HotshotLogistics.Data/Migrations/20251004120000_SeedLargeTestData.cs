@@ -15,7 +15,6 @@ public class SeedLargeTestData : Migration
         // 10-50 jobs per customer, job assignments, invoices and invoice line items.
         // Intended for local/dev use only. Task orchestrator: create and run large local seed migration.
         // Use deterministic randomness (fixed seed) to keep results repeatable.
-
         Execute.WithConnection((connection, transaction) =>
         {
             var rnd = new Random(12345); // deterministic randomness
@@ -37,12 +36,14 @@ public class SeedLargeTestData : Migration
                 using var insertCmd = connection.CreateCommand();
                 insertCmd.Transaction = transaction;
                 insertCmd.CommandText = @"
-INSERT INTO Customers (Id, CompanyName, TaxId, BillingAddress, City, State, ZipCode, Country, Latitude, Longitude, CreditLimit, IsActive, CreatedAt)
-VALUES (@Id, @CompanyName, @TaxId, @BillingAddress, @City, @State, @ZipCode, @Country, @Latitude, @Longitude, @CreditLimit, @IsActive, @CreatedAt)";
+INSERT INTO Customers (Id, CompanyName, TaxId, Email, Phone, BillingAddress, City, State, ZipCode, Country, Latitude, Longitude, CreditLimit, PaymentTermsDays, CreditStatus, IsActive, CreatedAt)
+VALUES (@Id, @CompanyName, @TaxId, @Email, @Phone, @BillingAddress, @City, @State, @ZipCode, @Country, @Latitude, @Longitude, @CreditLimit, @PaymentTermsDays, @CreditStatus, @IsActive, @CreatedAt)";
 
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@Id", custId));
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@CompanyName", $"Seed Customer {i:000}"));
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@TaxId", $"TAX-{i:000}"));
+                insertCmd.Parameters.Add(CreateParam(insertCmd, "@Email", $"customer{i:000}@seedtest.com"));
+                insertCmd.Parameters.Add(CreateParam(insertCmd, "@Phone", $"555-{2000 + i:0000}"));
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@BillingAddress", $"{i} Seed St"));
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@City", "Testville"));
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@State", "TS"));
@@ -52,6 +53,8 @@ VALUES (@Id, @CompanyName, @TaxId, @BillingAddress, @City, @State, @ZipCode, @Co
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@Latitude", 40.0m + ((decimal)(i % 10) * 0.01m)));
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@Longitude", -75.0m - ((decimal)(i % 10) * 0.01m)));
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@CreditLimit", 5000m + (i * 10)));
+                insertCmd.Parameters.Add(CreateParam(insertCmd, "@PaymentTermsDays", 30));
+                insertCmd.Parameters.Add(CreateParam(insertCmd, "@CreditStatus", 1)); // Approved
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@IsActive", true));
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@CreatedAt", DateTime.UtcNow));
 
@@ -141,8 +144,8 @@ VALUES (@FirstName, @LastName, @Email, @PhoneNumber, @LicenseNumber, @LicenseSta
                     using var insertJob = connection.CreateCommand();
                     insertJob.Transaction = transaction;
                     insertJob.CommandText = @"
-INSERT INTO Jobs (Id, CustomerId, Title, PickupAddress, DeliveryAddress, Status, Priority, BaseRate, TotalAmount, EstimatedDeliveryTime, AssignedDriverId, CreatedAt)
-VALUES (@Id, @CustomerId, @Title, @PickupAddress, @DeliveryAddress, @Status, @Priority, @BaseRate, @TotalAmount, @EstimatedDeliveryTime, @AssignedDriverId, @CreatedAt)";
+INSERT INTO Jobs (Id, CustomerId, Title, PickupAddress, DeliveryAddress, Status, Priority, BaseRate, TotalAmount, ScheduledPickupTime, EstimatedDeliveryTime, AssignedDriverId, CreatedAt)
+VALUES (@Id, @CustomerId, @Title, @PickupAddress, @DeliveryAddress, @Status, @Priority, @BaseRate, @TotalAmount, @ScheduledPickupTime, @EstimatedDeliveryTime, @AssignedDriverId, @CreatedAt)";
 
                     insertJob.Parameters.Add(CreateParam(insertJob, "@Id", jobId));
                     insertJob.Parameters.Add(CreateParam(insertJob, "@CustomerId", custId));
@@ -153,6 +156,7 @@ VALUES (@Id, @CustomerId, @Title, @PickupAddress, @DeliveryAddress, @Status, @Pr
                     insertJob.Parameters.Add(CreateParam(insertJob, "@Priority", rnd.Next(1, 4)));
                     insertJob.Parameters.Add(CreateParam(insertJob, "@BaseRate", baseRate));
                     insertJob.Parameters.Add(CreateParam(insertJob, "@TotalAmount", totalAmount));
+                    insertJob.Parameters.Add(CreateParam(insertJob, "@ScheduledPickupTime", DateTime.UtcNow));
                     insertJob.Parameters.Add(CreateParam(insertJob, "@EstimatedDeliveryTime", estimated));
                     insertJob.Parameters.Add(CreateParam(insertJob, "@AssignedDriverId", assignedDriverId));
                     insertJob.Parameters.Add(CreateParam(insertJob, "@CreatedAt", DateTime.UtcNow));

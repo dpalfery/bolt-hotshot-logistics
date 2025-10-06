@@ -1,10 +1,10 @@
 # HotshotLogistics.Api
 
-Azure Functions API for the Hotshot Logistics platform.
+ASP.NET Core Web API for the Hotshot Logistics platform, hosted on Azure Container Apps.
 
 ## Tech Stack
 
-- Azure Functions v4 (.NET 8)
+- ASP.NET Core Web API (.NET 8)
 - Native ADO.NET (Microsoft.Data.SqlClient) with FluentMigrator-managed migrations (Entity Framework is prohibited)
 - SQL Server via Microsoft provider
 - Azure App Configuration
@@ -19,7 +19,7 @@ dotnet run
 
 ## Configuration
 
-Set up your connection string in `local.settings.json` or use Azure App Configuration.
+Set up your connection string in `appsettings.json` or use Azure App Configuration and environment variables.
 
 The API listens on port 7060 by default.
 

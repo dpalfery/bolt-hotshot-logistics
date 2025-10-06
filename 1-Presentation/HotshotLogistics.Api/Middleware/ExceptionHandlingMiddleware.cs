@@ -137,7 +137,15 @@ namespace HotshotLogistics.Api.Middleware
                     "INTERNAL_SERVER_ERROR")
                 {
                     CorrelationId = correlationId,
-                    Path = path
+                    Path = path,
+                    // Include actual exception details for debugging
+                    Details = new
+                    {
+                        ExceptionType = exception.GetType().Name,
+                        Message = exception.Message,
+                        StackTrace = exception.StackTrace,
+                        InnerException = exception.InnerException?.Message
+                    }
                 }
             };
         }

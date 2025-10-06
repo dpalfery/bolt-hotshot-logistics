@@ -17,7 +17,7 @@ Place files in appropriate numbered folder based on purpose and architectural la
 
 #### 1-Presentation/
 **Presentation layer projects and components**
-- API controllers, functions, endpoints (Azure Functions)
+- API controllers,ASP.NET Core Web API, functions, endpoints (Azure Functions)
 - Web dashboard components (Next.js/React)
 - Mobile app screens and navigation (Expo React Native)
 - HTTP request/response handling, routing, UI rendering
@@ -33,6 +33,7 @@ Place files in appropriate numbered folder based on purpose and architectural la
 
 #### 3-Domain/
 **Domain models, contracts, and interfaces**
+- There are two projects in this folder Contracts and Domain. **ALL DTO Objects** go in Domain, **ALL Interfaces** go in Contracts. Interfaces or DTOs should not be defined anywhere else in the solution unless we are creating a single use project for deployment or utility and in that case you should confirm with the Human
 - Entity definitions, value objects, domain models
 - Repository interfaces, service contracts
 - Domain events, specifications

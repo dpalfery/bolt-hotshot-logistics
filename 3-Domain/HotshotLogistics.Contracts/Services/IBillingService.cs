@@ -16,6 +16,14 @@ public interface IBillingService
     Task<IInvoice> GenerateInvoiceAsync(string jobId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets an invoice by its identifier.
+    /// </summary>
+    /// <param name="invoiceId">The invoice identifier.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The invoice if found, null otherwise.</returns>
+    Task<IInvoice?> GetInvoiceByIdAsync(string invoiceId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Calculates tax amount based on location and amount.
     /// </summary>
     /// <param name="amount">The amount to calculate tax for.</param>

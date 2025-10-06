@@ -11,6 +11,7 @@ namespace HotshotLogistics.Api.Controllers
     using HotshotLogistics.Application.Authorization;
     using HotshotLogistics.Contracts.Models;
     using HotshotLogistics.Contracts.Services;
+    using HotshotLogistics.Domain.Models;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
@@ -101,7 +102,7 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ICustomer>> CreateCustomer(
-            [FromBody] ICustomer customer,
+            [FromBody] Customer customer,
             CancellationToken cancellationToken = default)
         {
             try
@@ -144,7 +145,7 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ICustomer>> UpdateCustomer(
             string id,
-            [FromBody] ICustomer customer,
+            [FromBody] Customer customer,
             CancellationToken cancellationToken = default)
         {
             try

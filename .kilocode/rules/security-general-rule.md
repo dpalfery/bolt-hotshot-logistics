@@ -1,14 +1,18 @@
 name: "Security-General-Rule"
 description: "Enforces fundamental security practices that apply across all development activities in Hotshot Logistics."
-when-to-apply: "always"
+when-to-apply: "always" At the start of every task
 rule: |
 
 This document is authoritative for security directives; other rule files must reference it for security-related guidance.
 
 ## Secrets Management
 
-- Never use a .env file always use environment variabled. if they don't exist create them or ask the user to
+- Never use a .env file always use environment variabled. if they don't exist ask the user to create one for you
 - Never check secrets into source control or store them in plain text.
+- Appsettings files are not secure and secrets and passwords should never be stored there.
+- database connection strings are secrets and should never be stored in any file. Every for any reason.
+- It is better the app not work than for a secret to be exposed. Never under any circumstances are you to put a password, secret, token or any other secure value in a file on the users computer. I mean NEVER!!!!!!!!!
+- 
 
 #### **1. Secrets Management (Immediate Actions)**
 *   **NEVER** hardcode secrets. Reject any code containing strings like `password=`, `ConnectionString=`, `api_key=`, `token=`, or `secret=` in plain text.

@@ -89,18 +89,22 @@ namespace HotshotLogistics.Api.Controllers
         [HttpGet("invoices/{id}")]
         [ProducesResponseType(typeof(IInvoice), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public Task<ActionResult<IInvoice>> GetInvoice(string id, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<IInvoice>> GetInvoice(string id, CancellationToken cancellationToken = default)
         {
             try
             {
-                // This would need to be implemented in the billing service
-                // For now, return NotFound as placeholder
-                return Task.FromResult<ActionResult<IInvoice>>(NotFound($"Invoice with ID {id} not found"));
+                var invoice = await billingService.GetInvoiceByIdAsync(id, cancellationToken);
+                if (invoice == null)
+                {
+                    return NotFound($"Invoice with ID {id} not found");
+                }
+
+                return Ok(invoice);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occurred while retrieving invoice");
-                return Task.FromResult<ActionResult<IInvoice>>(StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request."));
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
 

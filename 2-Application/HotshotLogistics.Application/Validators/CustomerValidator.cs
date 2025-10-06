@@ -37,12 +37,14 @@ public class CustomerValidator : AbstractValidator<Customer>
             .NotNull().WithMessage("Billing address is required.")
             .SetValidator(new AddressValidator());
 
+        // Contacts are optional - only validate if provided
         RuleFor(x => x.Contacts)
-            .NotEmpty().WithMessage("At least one contact is required.")
-            .Must(x => x.Any(c => !string.IsNullOrEmpty(c.Email))).WithMessage("At least one contact must have an email address.");
+            .Must(x => x == null || x.Count == 0 || x.Any(c => !string.IsNullOrEmpty(c.Email)))
+            .WithMessage("If contacts are provided, at least one contact must have an email address.");
 
         RuleForEach(x => x.Contacts)
-            .SetValidator(new ContactValidator());
+            .SetValidator(new ContactValidator())
+            .When(x => x.Contacts != null && x.Contacts.Any());
 
         RuleFor(x => x.CreditTerms)
             .NotNull().WithMessage("Credit terms are required.")
@@ -52,9 +54,10 @@ public class CustomerValidator : AbstractValidator<Customer>
             .GreaterThanOrEqualTo(0).WithMessage("Credit limit cannot be negative.")
             .LessThanOrEqualTo(1000000).WithMessage("Credit limit cannot exceed $1,000,000.");
 
-        // Business rule: Ensure only one primary contact
+        // Business rule: Ensure only one primary contact (if contacts exist)
         RuleFor(x => x.Contacts)
-            .Must(x => x.Count(c => c.IsPrimary) <= 1).WithMessage("Only one contact can be marked as primary.");
+            .Must(x => x == null || x.Count(c => c.IsPrimary) <= 1)
+            .WithMessage("Only one contact can be marked as primary.");
     }
 }
 
@@ -80,6 +83,7 @@ public class CreateCustomerValidator : AbstractValidator<Customer>
         RuleFor(x => x.BillingAddress)
             .NotNull().WithMessage("Billing address is required for new customers.");
 
+        // Contacts required for new customers
         RuleFor(x => x.Contacts)
             .NotEmpty().WithMessage("At least one contact is required for new customers.");
     }
@@ -172,4 +176,4 @@ public class CreditTermsValidator : AbstractValidator<CreditTerms>
             .GreaterThan(x => x.ApprovedDate).When(x => x.ExpiryDate.HasValue).WithMessage("Expiry date must be after approved date.")
             .GreaterThan(DateTime.UtcNow).When(x => x.ExpiryDate.HasValue).WithMessage("Expiry date must be in the future.");
     }
-}
+}

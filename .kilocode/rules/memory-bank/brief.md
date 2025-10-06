@@ -33,8 +33,8 @@ A full-stack platform consisting of three integrated components:
 - Earnings tracking and history
 - Offline capability with sync
 
-### 3. Backend API (.NET 8 Azure Functions)
-- RESTful API for all operations
+### 3. Backend API (.NET 8, ASP.NET Core Web API, Azure App Services)
+- ASP.NET Core Web API RESTful API for all operations
 - Real-time WebSocket communication (SignalR)
 - Native ADO.NET data access with SQL Server
 - Integration with external services (payment gateways, mapping, SMS/email)

@@ -6,6 +6,7 @@ namespace HotshotLogistics.Api.Controllers
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using FluentValidation;
@@ -237,6 +238,22 @@ namespace HotshotLogistics.Api.Controllers
                 // Ensure the ID in the URL matches the job data
                 jobDto.Id = id;
 
+                // Validate the job data using FluentValidation
+                var validationResult = await jobValidator.ValidateAsync(jobDto, cancellationToken);
+                if (!validationResult.IsValid)
+                {
+                    logger.LogWarning("Job validation failed during update: {Errors}", string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)));
+                    return BadRequest(new
+                    {
+                        Message = "Job validation failed",
+                        Errors = validationResult.Errors.Select(e => new
+                        {
+                            Field = e.PropertyName,
+                            Message = e.ErrorMessage
+                        })
+                    });
+                }
+
                 var updatedJob = await jobService.UpdateJobAsync(id, jobDto, cancellationToken);
                 if (updatedJob == null)
                 {
@@ -249,6 +266,19 @@ namespace HotshotLogistics.Api.Controllers
             {
                 logger.LogWarning(ex, "Invalid job data provided: {Message}", ex.Message);
                 return BadRequest(ex.Message);
+            }
+            catch (HotshotLogistics.Core.Exceptions.ValidationException ex)
+            {
+                logger.LogWarning(ex, "Job validation failed during update: {Message}", ex.Message);
+                return BadRequest(new
+                {
+                    Message = "Job validation failed",
+                    Errors = ex.Errors.SelectMany(kvp => kvp.Value.Select(error => new
+                    {
+                        Field = kvp.Key,
+                        Message = error
+                    }))
+                });
             }
             catch (Exception ex)
             {

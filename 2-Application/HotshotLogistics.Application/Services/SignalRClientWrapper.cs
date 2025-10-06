@@ -1,52 +1,57 @@
-using Microsoft.Azure.SignalR.Management;
-using Microsoft.AspNetCore.SignalR;
 using HotshotLogistics.Contracts.Hubs;
+using Microsoft.AspNetCore.SignalR;
+using HotshotLogistics.Application.Hubs;
 
 namespace HotshotLogistics.Application.Services;
 
 /// <summary>
-/// Implementation of SignalR client wrapper for real SignalR operations
+/// Implementation of SignalR client wrapper for real SignalR operations.
 /// </summary>
 public class SignalRClientWrapper : ISignalRClientWrapper
 {
-    private readonly ServiceHubContext _hubContext;
+    private readonly IHubContext<RealtimeHub, IRealtimeHubClient> _hubContext;
 
-    public SignalRClientWrapper(ServiceHubContext hubContext)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SignalRClientWrapper"/> class.
+    /// </summary>
+    /// <param name="hubContext">The hub context.</param>
+    public SignalRClientWrapper(IHubContext<RealtimeHub, IRealtimeHubClient> hubContext)
     {
         _hubContext = hubContext;
     }
 
-    /// <summary>
-    /// Send a message to a specific group
-    /// </summary>
+    /// <inheritdoc/>
     public async Task SendToGroupAsync(string groupName, string methodName, params object[] args)
     {
-        await _hubContext.Clients.Group(groupName).SendAsync(methodName, args);
+        await (Task)_hubContext.Clients.Group(groupName)
+            .GetType()
+            .GetMethod(methodName)
+            ?.Invoke(_hubContext.Clients.Group(groupName), args);
     }
 
-    /// <summary>
-    /// Send a message to a specific user
-    /// </summary>
+    /// <inheritdoc/>
     public async Task SendToUserAsync(string userId, string methodName, params object[] args)
     {
-        await _hubContext.Clients.User(userId).SendAsync(methodName, args);
+        await (Task)_hubContext.Clients.User(userId)
+            .GetType()
+            .GetMethod(methodName)
+            ?.Invoke(_hubContext.Clients.User(userId), args);
     }
 
-    /// <summary>
-    /// Send a message to all connected clients
-    /// </summary>
+    /// <inheritdoc/>
     public async Task SendToAllAsync(string methodName, params object[] args)
     {
-        await _hubContext.Clients.All.SendAsync(methodName, args);
+        await (Task)_hubContext.Clients.All
+            .GetType()
+            .GetMethod(methodName)
+            ?.Invoke(_hubContext.Clients.All, args);
     }
 
-    /// <summary>
-    /// Send a message to the caller
-    /// </summary>
+    /// <inheritdoc/>
     public Task SendToCallerAsync(string methodName, params object[] args)
     {
-        // Note: Caller is not available in Azure SignalR Service context
-        // This would need to be implemented differently for server-side hubs
-        throw new NotSupportedException("Caller is not supported in Azure SignalR Service");
+        // Note: Caller is not available in this context for server-side SignalR.
+        // This would need to be implemented differently for client-side hubs.
+        throw new NotSupportedException("Caller is not supported in server-side SignalR context.");
     }
 }

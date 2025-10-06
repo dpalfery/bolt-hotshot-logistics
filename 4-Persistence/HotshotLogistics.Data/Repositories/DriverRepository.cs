@@ -54,7 +54,7 @@ namespace HotshotLogistics.Data.Repositories
         {
             var domainDriver = (Driver)driver;
             domainDriver.CreatedAt = DateTime.UtcNow;
-            return await AddAsync(domainDriver);
+            return await base.AddAsync(domainDriver);
         }
 
         /// <inheritdoc/>
@@ -62,11 +62,11 @@ namespace HotshotLogistics.Data.Repositories
         {
             var domainDriver = (Driver)driver;
             domainDriver.UpdatedAt = DateTime.UtcNow;
-            return await UpdateAsync(domainDriver);
+            return await base.UpdateAsync(domainDriver);
         }
 
         /// <inheritdoc/>
-        public async Task DeleteDriverAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteDriverAsync(int id, CancellationToken cancellationToken = default)
         {
             // Soft delete - mark as inactive
             const string sql = "UPDATE Drivers SET IsActive = 0, UpdatedAt = @UpdatedAt WHERE Id = @Id";
@@ -75,7 +75,8 @@ namespace HotshotLogistics.Data.Repositories
                 new SqlParameter("@Id", SqlDbType.Int) { Value = id },
                 new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = DateTime.UtcNow },
             };
-            await ExecuteNonQueryAsync(sql, parameters);
+            var rowsAffected = await ExecuteNonQueryAsync(sql, parameters);
+            return rowsAffected > 0;
         }
 
         /// <inheritdoc/>
@@ -104,38 +105,6 @@ namespace HotshotLogistics.Data.Repositories
             return drivers.Cast<IDriver>();
         }
 
-        // Explicit interface implementations to bridge concrete/interface types
-        async Task<IDriver?> IDriverRepository.GetByIdAsync(object id)
-        {
-            return await GetByIdAsync(id);
-        }
-
-        async Task<IEnumerable<IDriver>> IDriverRepository.GetAllAsync()
-        {
-            return (await GetAllAsync()).Cast<IDriver>();
-        }
-
-        async Task<IDriver> IDriverRepository.AddAsync(IDriver entity)
-        {
-            var driver = entity as Driver ?? throw new ArgumentException("Entity must be Driver", nameof(entity));
-            return await AddAsync(driver);
-        }
-
-        async Task<IDriver> IDriverRepository.UpdateAsync(IDriver entity)
-        {
-            var driver = entity as Driver ?? throw new ArgumentException("Entity must be Driver", nameof(entity));
-            return await UpdateAsync(driver);
-        }
-
-        async Task<bool> IDriverRepository.DeleteAsync(object id)
-        {
-            return await DeleteAsync(id);
-        }
-
-        async Task<bool> IDriverRepository.ExistsAsync(object id)
-        {
-            return await ExistsAsync(id);
-        }
 
         /// <inheritdoc/>
         protected override string GetTableName() => "Drivers";
@@ -154,13 +123,18 @@ namespace HotshotLogistics.Data.Repositories
                     FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                     LastName = reader.GetString(reader.GetOrdinal("LastName")),
                     Email = reader.GetString(reader.GetOrdinal("Email")),
-                    PhoneNumber = reader.GetString(reader.GetOrdinal("PhoneNumber")),
+                    PhoneNumber = reader.IsDBNull(reader.GetOrdinal("PhoneNumber")) 
+                        ? string.Empty 
+                        : reader.GetString(reader.GetOrdinal("PhoneNumber")),
                 },
                 License = new LicenseInfo
                 {
                     LicenseNumber = reader.GetString(reader.GetOrdinal("LicenseNumber")),
-                    LicenseExpiryDate = reader.GetDateTime(reader.GetOrdinal("LicenseExpiryDate")),
+                    LicenseExpiryDate = reader.IsDBNull(reader.GetOrdinal("LicenseExpiryDate")) 
+                        ? DateTime.UtcNow.AddYears(1) // Default to 1 year from now if NULL
+                        : reader.GetDateTime(reader.GetOrdinal("LicenseExpiryDate")),
                 },
+                CurrentStatus = (DriverStatus)reader.GetInt32(reader.GetOrdinal("CurrentStatus")),
                 IsActive = reader.GetBoolean(reader.GetOrdinal("IsActive")),
                 CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
                 UpdatedAt = reader.IsDBNull(reader.GetOrdinal("UpdatedAt")) ? null : reader.GetDateTime(reader.GetOrdinal("UpdatedAt")),
@@ -175,9 +149,12 @@ namespace HotshotLogistics.Data.Repositories
                 new SqlParameter("@FirstName", SqlDbType.NVarChar) { Value = entity.PersonalInfo.FirstName },
                 new SqlParameter("@LastName", SqlDbType.NVarChar) { Value = entity.PersonalInfo.LastName },
                 new SqlParameter("@Email", SqlDbType.NVarChar) { Value = entity.PersonalInfo.Email },
-                new SqlParameter("@PhoneNumber", SqlDbType.NVarChar) { Value = entity.PersonalInfo.PhoneNumber },
+                new SqlParameter("@PhoneNumber", SqlDbType.NVarChar) { Value = (object?)entity.PersonalInfo.PhoneNumber ?? DBNull.Value },
                 new SqlParameter("@LicenseNumber", SqlDbType.NVarChar) { Value = entity.License.LicenseNumber },
-                new SqlParameter("@LicenseExpiryDate", SqlDbType.DateTime2) { Value = entity.License.LicenseExpiryDate },
+                new SqlParameter("@LicenseState", SqlDbType.NVarChar) { Value = (object?)entity.License.LicenseState ?? DBNull.Value },
+                new SqlParameter("@LicenseExpiryDate", SqlDbType.Date) { Value = (object?)entity.License.LicenseExpiryDate },
+                new SqlParameter("@InsuranceExpiryDate", SqlDbType.Date) { Value = entity.Vehicle?.InsuranceExpiryDate is DateTime date && date != DateTime.MinValue ? (object)date : DBNull.Value },
+                new SqlParameter("@CurrentStatus", SqlDbType.Int) { Value = (int)entity.CurrentStatus },
                 new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive },
             };
         }
@@ -191,9 +168,12 @@ namespace HotshotLogistics.Data.Repositories
                 new SqlParameter("@FirstName", SqlDbType.NVarChar) { Value = entity.PersonalInfo.FirstName },
                 new SqlParameter("@LastName", SqlDbType.NVarChar) { Value = entity.PersonalInfo.LastName },
                 new SqlParameter("@Email", SqlDbType.NVarChar) { Value = entity.PersonalInfo.Email },
-                new SqlParameter("@PhoneNumber", SqlDbType.NVarChar) { Value = entity.PersonalInfo.PhoneNumber },
+                new SqlParameter("@PhoneNumber", SqlDbType.NVarChar) { Value = (object?)entity.PersonalInfo.PhoneNumber ?? DBNull.Value },
                 new SqlParameter("@LicenseNumber", SqlDbType.NVarChar) { Value = entity.License.LicenseNumber },
-                new SqlParameter("@LicenseExpiryDate", SqlDbType.DateTime2) { Value = entity.License.LicenseExpiryDate },
+                new SqlParameter("@LicenseState", SqlDbType.NVarChar) { Value = (object?)entity.License.LicenseState ?? DBNull.Value },
+                new SqlParameter("@LicenseExpiryDate", SqlDbType.Date) { Value = (object?)entity.License.LicenseExpiryDate },
+                new SqlParameter("@InsuranceExpiryDate", SqlDbType.Date) { Value = entity.Vehicle?.InsuranceExpiryDate is DateTime date && date != DateTime.MinValue ? (object)date : DBNull.Value },
+                new SqlParameter("@CurrentStatus", SqlDbType.Int) { Value = (int)entity.CurrentStatus },
                 new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive },
             };
         }

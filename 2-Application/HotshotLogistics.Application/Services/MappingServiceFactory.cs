@@ -42,35 +42,40 @@ namespace HotshotLogistics.Application.Services
         /// <returns>The mapping service instance.</returns>
         public IMappingService CreateMappingService()
         {
-            var provider = configuration["Mapping:Provider"] ?? "AzureMaps";
-
-            var httpClient = httpClientFactory.CreateClient("MappingService");
-            httpClient.Timeout = TimeSpan.FromSeconds(30); // Set reasonable timeout for mapping APIs
+            var provider = configuration["Mapping:Provider"] ?? "Mock";
 
             switch (provider.ToLowerInvariant())
             {
+                case "mock":
+                    var mockLogger = loggerFactory.CreateLogger<MockMappingService>();
+                    return new MockMappingService(mockLogger);
+
                 case "azuremaps":
                     var azureMapsKey = configuration["Mapping:AzureMaps:SubscriptionKey"];
-                    if (string.IsNullOrEmpty(azureMapsKey))
+                    if (string.IsNullOrEmpty(azureMapsKey) || azureMapsKey == "YOUR_AZURE_MAPS_KEY_HERE")
                     {
-                        throw new InvalidOperationException("Azure Maps subscription key is not configured");
+                        throw new InvalidOperationException("Azure Maps subscription key is not configured. Set 'Mapping:AzureMaps:SubscriptionKey' in appsettings.json or use 'Mock' provider for development.");
                     }
 
+                    var httpClient = httpClientFactory.CreateClient("MappingService");
+                    httpClient.Timeout = TimeSpan.FromSeconds(30);
                     var azureLogger = loggerFactory.CreateLogger<AzureMapsService>();
                     return new AzureMapsService(httpClient, azureLogger, azureMapsKey);
 
                 case "googlemaps":
                     var googleMapsKey = configuration["Mapping:GoogleMaps:ApiKey"];
-                    if (string.IsNullOrEmpty(googleMapsKey))
+                    if (string.IsNullOrEmpty(googleMapsKey) || googleMapsKey == "YOUR_GOOGLE_MAPS_KEY_HERE")
                     {
-                        throw new InvalidOperationException("Google Maps API key is not configured");
+                        throw new InvalidOperationException("Google Maps API key is not configured. Set 'Mapping:GoogleMaps:ApiKey' in appsettings.json or use 'Mock' provider for development.");
                     }
 
+                    var googleHttpClient = httpClientFactory.CreateClient("MappingService");
+                    googleHttpClient.Timeout = TimeSpan.FromSeconds(30);
                     var googleLogger = loggerFactory.CreateLogger<GoogleMapsService>();
-                    return new GoogleMapsService(httpClient, googleLogger, googleMapsKey);
+                    return new GoogleMapsService(googleHttpClient, googleLogger, googleMapsKey);
 
                 default:
-                    throw new InvalidOperationException($"Unsupported mapping provider: {provider}");
+                    throw new InvalidOperationException($"Unsupported mapping provider: {provider}. Supported providers are: Mock, AzureMaps, GoogleMaps.");
             }
         }
     }

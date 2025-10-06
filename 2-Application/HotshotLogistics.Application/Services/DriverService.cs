@@ -47,5 +47,15 @@ namespace HotshotLogistics.Application.Services
             return this.driverRepository.GetDriversAsync();
 
         }
+
+        public Task<IDriver> UpdateDriverAsync(IDriver driver)
+        {
+            return this.driverRepository.UpdateDriverAsync(driver);
+        }
+
+        public Task<bool> DeleteDriverAsync(int id)
+        {
+            return this.driverRepository.DeleteDriverAsync(id);
+        }
     }
 }

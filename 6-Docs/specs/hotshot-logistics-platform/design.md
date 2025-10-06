@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Hotshot Logistics Platform is designed as a comprehensive, cloud-native solution built on Microsoft Azure infrastructure following Clean Architecture principles. The system consists of three main components: a React/Next.js admin dashboard, a React Native/Expo mobile application for drivers, and a .NET 8 backend API using Azure Functions. This design emphasizes scalability, maintainability, and real-time operations through modern architectural patterns and cloud services.
+The Hotshot Logistics Platform is designed as a comprehensive, cloud-native solution built on Microsoft Azure infrastructure following Clean Architecture principles. The system consists of three main components: a React/Next.js admin dashboard, a React Native/Expo mobile application for drivers, and a .NET 8 backend using ASP.NET Core Web API hosted on Azure Container Apps. This design emphasizes scalability, maintainability, and real-time operations through modern architectural patterns and cloud services.
 
 ### Design Principles
 
@@ -30,7 +30,7 @@ graph TB
     end
     
     subgraph "Application Layer"
-        AF[Azure Functions<br/>.NET 8]
+        API[ASP.NET Core Web API<br/>.NET 8]
         WS[WebSocket Service<br/>SignalR]
     end
     
@@ -60,14 +60,14 @@ graph TB
     AD --> AG
     MA --> AG
     CP --> AG
-    AG --> AF
+    AG --> API
     AG --> WS
-    AF --> JS
-    AF --> DS
-    AF --> BS
-    AF --> NS
-    AF --> TS
-    AF --> RS
+    API --> JS
+    API --> DS
+    API --> BS
+    API --> NS
+    API --> TS
+    API --> RS
     JS --> SQL
     DS --> SQL
     BS --> SQL
@@ -931,54 +931,70 @@ public class CachedJobService : IJobService {
 ### Query Optimization
 ```csharp
 public class JobRepository : IJobRepository {
-    public async Task<PagedResult<Job>> GetJobsAsync(JobFilter filter) {
-        // Using native ADO.NET (BaseRepository/Sql) pattern with parameterized SQL and SqlDataReader.
-        // Schema and migrations are managed by FluentMigrator (Entity Framework / EF Core is not used).
-        // Example: read jobs with joined customer/driver data using a single SQL query and SqlDataReader
-        var sql = @"
-            SELECT j.*, c.CompanyName AS CustomerName, d.FirstName AS DriverFirstName, d.LastName AS DriverLastName
+    public async Task<PagedResult<JobListDto>> GetJobsAsync(JobFilter filter) {
+        // Native ADO.NET with parameterized SQL and manual SqlDataReader mapping (no IQueryable/EF).
+        var page = Math.Max(filter.Page, 1);
+        var pageSize = Math.Min(Math.Max(filter.PageSize, 1), 200);
+
+        var sqlPage = @"
+            SELECT j.Id, j.Title, j.Status, j.Priority, j.ScheduledPickupTime,
+                   c.CompanyName AS CustomerName
             FROM Jobs j
             LEFT JOIN Customers c ON j.CustomerId = c.Id
-            LEFT JOIN Drivers d ON j.AssignedDriverId = d.Id
-            WHERE j.Status = @Status
-            ORDER BY j.Priority DESC, j.ScheduledPickupTime";
-        
-        // Example using BaseRepository.ExecuteQueryAsync
-        var jobs = await _jobRepository.ExecuteQueryAsync(sql, new SqlParameter[] { new SqlParameter("@Status", SqlDbType.Int) { Value = (int)filter.Status } });
-        
-        // Apply filters
-        if (filter.Status.HasValue) {
-            query = query.Where(j => j.Status == filter.Status.Value);
-        }
-        
-        if (filter.DateFrom.HasValue) {
-            query = query.Where(j => j.CreatedAt >= filter.DateFrom.Value);
-        }
-        
-        // Optimize with projection for list views
-        var projectedQuery = query.Select(j => new JobListDto {
-            Id = j.Id,
-            Title = j.Title,
-            CustomerName = j.Customer.CompanyName,
-            Status = j.Status,
-            Priority = j.Priority,
-            ScheduledPickupTime = j.ScheduledPickupTime
+            WHERE (@Status IS NULL OR j.Status = @Status)
+              AND (@DateFrom IS NULL OR j.CreatedAt >= @DateFrom)
+            ORDER BY j.Priority DESC, j.ScheduledPickupTime
+            OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;";
+
+        var sqlCount = @"
+            SELECT COUNT(1)
+            FROM Jobs j
+            WHERE (@Status IS NULL OR j.Status = @Status)
+              AND (@DateFrom IS NULL OR j.CreatedAt >= @DateFrom);";
+
+        var parameters = new[]
+        {
+            new SqlParameter("@Status", SqlDbType.Int) { Value = (object?)filter.Status ?? DBNull.Value },
+            new SqlParameter("@DateFrom", SqlDbType.DateTime2) { Value = (object?)filter.DateFrom ?? DBNull.Value },
+            new SqlParameter("@Offset", SqlDbType.Int) { Value = (page - 1) * pageSize },
+            new SqlParameter("@PageSize", SqlDbType.Int) { Value = pageSize }
+        };
+
+        var items = new List<JobListDto>();
+
+        // Execute page query and map rows
+        await _baseRepository.ExecuteQueryAsync(sqlPage, parameters, reader =>
+        {
+            while (reader.Read())
+            {
+                items.Add(new JobListDto
+                {
+                    Id = reader.GetString(reader.GetOrdinal("Id")),
+                    Title = reader.GetString(reader.GetOrdinal("Title")),
+                    CustomerName = reader.IsDBNull(reader.GetOrdinal("CustomerName")) ? null : reader.GetString(reader.GetOrdinal("CustomerName")),
+                    Status = (JobStatus)reader.GetInt32(reader.GetOrdinal("Status")),
+                    Priority = (JobPriority)reader.GetInt32(reader.GetOrdinal("Priority")),
+                    ScheduledPickupTime = reader.IsDBNull(reader.GetOrdinal("ScheduledPickupTime"))
+                        ? (DateTime?)null
+                        : reader.GetDateTime(reader.GetOrdinal("ScheduledPickupTime"))
+                });
+            }
         });
-        
-        // Pagination
-        var totalCount = await projectedQuery.CountAsync();
-        var items = await projectedQuery
-            .OrderByDescending(j => j.Priority)
-            .ThenBy(j => j.ScheduledPickupTime)
-            .Skip((filter.Page - 1) * filter.PageSize)
-            .Take(filter.PageSize)
-            .ToListAsync();
-        
-        return new PagedResult<Job> {
+
+        // Get total count
+        var countParams = new[]
+        {
+            new SqlParameter("@Status", SqlDbType.Int) { Value = (object?)filter.Status ?? DBNull.Value },
+            new SqlParameter("@DateFrom", SqlDbType.DateTime2) { Value = (object?)filter.DateFrom ?? DBNull.Value }
+        };
+        var totalCount = await _baseRepository.ExecuteScalarAsync<int>(sqlCount, countParams);
+
+        return new PagedResult<JobListDto>
+        {
             Items = items,
             TotalCount = totalCount,
-            Page = filter.Page,
-            PageSize = filter.PageSize
+            Page = page,
+            PageSize = pageSize
         };
     }
 }
@@ -1011,7 +1027,7 @@ graph TB
     
     subgraph "Primary Region"
         APIM1[API Management]
-        FUNC1[Function App]
+        ACA1[Container App]
         SQL1[(SQL Database<br/>Primary)]
         REDIS1[(Redis Cache)]
         BLOB1[Blob Storage]
@@ -1019,7 +1035,7 @@ graph TB
     
     subgraph "Secondary Region"
         APIM2[API Management]
-        FUNC2[Function App]
+        ACA2[Container App]
         SQL2[(SQL Database<br/>Read Replica)]
         REDIS2[(Redis Cache)]
         BLOB2[Blob Storage]
@@ -1034,16 +1050,16 @@ graph TB
     
     FD --> APIM1
     FD --> APIM2
-    APIM1 --> FUNC1
-    APIM2 --> FUNC2
-    FUNC1 --> SQL1
-    FUNC2 --> SQL2
+    APIM1 --> ACA1
+    APIM2 --> ACA2
+    ACA1 --> SQL1
+    ACA2 --> SQL2
     SQL1 -.->|Geo-Replication| SQL2
     BLOB1 -.->|Geo-Replication| BLOB2
-    FUNC1 --> KV
-    FUNC2 --> KV
-    FUNC1 --> AC
-    FUNC2 --> AC
+    ACA1 --> KV
+    ACA2 --> KV
+    ACA1 --> AC
+    ACA2 --> AC
 ```
 
 ### CI/CD Pipeline
@@ -1083,11 +1099,11 @@ stages:
           runOnce:
             deploy:
               steps:
-                - task: AzureFunctionApp@1
+                - task: AzureContainerApps@1
                   inputs:
                     azureSubscription: 'Azure-Dev'
-                    appType: 'functionApp'
-                    appName: 'hotshot-api-dev'
+                    appType: 'containerApp'
+                    containerAppName: 'hotshot-api-dev'
                     
   - stage: Deploy_Prod
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
@@ -1098,11 +1114,11 @@ stages:
           runOnce:
             deploy:
               steps:
-                - task: AzureFunctionApp@1
+                - task: AzureContainerApps@1
                   inputs:
                     azureSubscription: 'Azure-Prod'
-                    appType: 'functionApp'
-                    appName: 'hotshot-api-prod'
+                    appType: 'containerApp'
+                    containerAppName: 'hotshot-api-prod'
 ```
 
 ### Monitoring & Observability
@@ -1140,13 +1156,13 @@ services.AddHealthChecks()
 ## Scalability Considerations
 
 ### Horizontal Scaling
-- Azure Functions auto-scale based on load
+- Azure Container Apps auto-scale based on HTTP traffic, events, or other KEDA-supported scalers
 - SQL Database elastic pools for dynamic resource allocation
 - Redis cache clustering for session distribution
 - Service Bus partitioning for high-throughput messaging
 
 ### Vertical Scaling
-- Premium tier Azure Functions for enhanced performance
+- Azure Container Apps environments can be configured with workload profiles for performance tiers
 - SQL Database DTU/vCore scaling based on workload
 - Application Insights adaptive sampling for cost optimization
 

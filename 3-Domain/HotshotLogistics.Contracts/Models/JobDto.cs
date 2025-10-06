@@ -89,11 +89,21 @@ namespace HotshotLogistics.Contracts.Models
             {
                 if (DateTime.TryParse(this.EstimatedDeliveryTimeString, out var result))
                 {
+                    // Convert to UTC for consistent comparison
+                    if (result.Kind == DateTimeKind.Local)
+                    {
+                        result = result.ToUniversalTime();
+                    }
+                    else if (result.Kind == DateTimeKind.Unspecified)
+                    {
+                        result = DateTime.SpecifyKind(result, DateTimeKind.Utc);
+                    }
                     return result;
                 }
-                return DateTime.MinValue;
+                // Return a reasonable default instead of DateTime.MinValue
+                return this.ScheduledPickupTime.AddHours(4); // Default to 4 hours after pickup
             }
-            set => this.EstimatedDeliveryTimeString = value.ToString("O");
+            set => this.EstimatedDeliveryTimeString = value.ToUniversalTime().ToString("O");
         }
         public DateTime? ActualPickupTime { get; set; }
         public DateTime? ActualDeliveryTime { get; set; }

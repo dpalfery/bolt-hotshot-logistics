@@ -7,12 +7,12 @@ public class SeedInitialData : Migration
 {
     public override void Up()
     {
-        // Seed Customers (string PKs)
+        // Seed Customers (string PKs) with Email and Phone
         Execute.Sql(@"
-INSERT INTO Customers (Id, CompanyName, TaxId, BillingAddress, City, State, ZipCode, Country, Latitude, Longitude, CreditLimit, IsActive, CreatedAt)
+INSERT INTO Customers (Id, CompanyName, TaxId, Email, Phone, BillingAddress, City, State, ZipCode, Country, Latitude, Longitude, CreditLimit, PaymentTermsDays, CreditStatus, IsActive, CreatedAt)
 VALUES 
-('cust-1', 'Acme Logistics', 'TAX-001', '100 Logistics Way', 'Springfield', 'IL', '62701', 'USA', 39.7817, -89.6501, 10000.00, 1, GETUTCDATE()),
-('cust-2', 'QuickShip Co', 'TAX-002', '200 Express Blvd', 'Chicago', 'IL', '60601', 'USA', 41.8781, -87.6298, 5000.00, 1, GETUTCDATE());
+('cust-1', 'Acme Logistics', 'TAX-001', 'contact@acmelogistics.com', '555-0001', '100 Logistics Way', 'Springfield', 'IL', '62701', 'USA', 39.7817, -89.6501, 10000.00, 30, 1, 1, GETUTCDATE()),
+('cust-2', 'QuickShip Co', 'TAX-002', 'info@quickship.com', '555-0002', '200 Express Blvd', 'Chicago', 'IL', '60601', 'USA', 41.8781, -87.6298, 5000.00, 30, 1, 1, GETUTCDATE());
 ");
 
         // Seed Drivers (explicit identity insert so we control IDs for seeds)
@@ -27,12 +27,12 @@ VALUES
 SET IDENTITY_INSERT Drivers OFF;
 ");
 
-        // Seed Jobs (string PKs)
+        // Seed Jobs (string PKs) - need ScheduledPickupTime column
         Execute.Sql(@"
-INSERT INTO Jobs (Id, CustomerId, Title, PickupAddress, DeliveryAddress, Status, Priority, TotalAmount, EstimatedDeliveryTime, AssignedDriverId, CreatedAt)
+INSERT INTO Jobs (Id, CustomerId, Title, PickupAddress, DeliveryAddress, Status, Priority, TotalAmount, ScheduledPickupTime, EstimatedDeliveryTime, AssignedDriverId, CreatedAt)
 VALUES
-('job-1', 'cust-1', 'Deliver Package A', '100 Logistics Way', '400 Market St', 0, 1, 150.00, DATEADD(hour, 4, GETUTCDATE()), 1, GETUTCDATE()),
-('job-2', 'cust-2', 'Deliver Package B', '200 Express Blvd', '500 Lake Ave', 0, 2, 200.00, DATEADD(hour, 6, GETUTCDATE()), 2, GETUTCDATE());
+('job-1', 'cust-1', 'Deliver Package A', '100 Logistics Way', '400 Market St', 0, 1, 150.00, GETUTCDATE(), DATEADD(hour, 4, GETUTCDATE()), 1, GETUTCDATE()),
+('job-2', 'cust-2', 'Deliver Package B', '200 Express Blvd', '500 Lake Ave', 0, 2, 200.00, GETUTCDATE(), DATEADD(hour, 6, GETUTCDATE()), 2, GETUTCDATE());
 ");
 
         // Seed JobAssignments (string PKs)

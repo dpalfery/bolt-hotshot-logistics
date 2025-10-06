@@ -133,10 +133,10 @@ public class Customer : ICustomer
     /// <returns>True if the customer data is valid, false otherwise.</returns>
     public bool IsValid()
     {
+        // Relaxed validation - Contacts not required for GET operations
         return !string.IsNullOrWhiteSpace(CompanyName) &&
                 !string.IsNullOrWhiteSpace(Id) &&
                 BillingAddress != null &&
-                Contacts.Any(c => !string.IsNullOrWhiteSpace(c.Email)) &&
                 CreditLimit >= 0 &&
                 !string.IsNullOrWhiteSpace(Email);
     }

@@ -4,7 +4,7 @@
 - **.Net Dev
 - ** Next.js Developer
 ### Backend (.NET)
-- **Framework**: .NET 8, Azure Functions v4
+- **Framework**: .NET 8, ASP.NET Core Web API with RESTful APIs. Do not use Functions with HTTP Triggers for API endpoints, ok for a job process but confirm with user.
 - **Database**: SQL Server with native ADO.NET (Microsoft.Data.SqlClient) and FluentMigrator for schema management
 - **Authentication**: Microsoft.Identity.Web (Azure AD integration)
 - **Real-time**: ASP.NET Core SignalR for WebSocket communication
@@ -38,10 +38,10 @@
 - **Offline Support**: NetInfo and local SQLite database
 
 ### Infrastructure
-- **Cloud**: Azure (Functions, SQL Database, Blob Storage, Redis Cache)
-- **Containerization**: Docker, Docker Compose for local development
+- **Cloud**: Azure (Web Sites, SQL Database, Blob Storage, Redis Cache, Functions for Job or event processing)
+- **Containerization**: Docker, Docker Compose for local SQL server for local development
 - **CI/CD**: GitHub Actions with multi-stage pipelines
-- **Infrastructure as Code**: Terraform for resource provisioning
+- **Infrastructure as Code**: TerraPulumi for resource provisioning
 - **Message Queue**: Azure Service Bus for decoupled processing
 
 ### External Service Integrations
@@ -57,7 +57,8 @@
 #### Core Dependencies
 - **Microsoft.Data.SqlClient**: Native ADO.NET for high-performance database access
 - **FluentMigrator**: Database schema versioning and migrations
-- **Azure Functions**: Serverless compute for scalable API hosting
+- **ASP.NET Core Web API**: Scalable, full-featured framework for hosting RESTful APIs  
+- **Azure Functions**: Event-driven compute for processing messages, queues, or other asynchronous triggers
 - **SignalR**: Real-time bidirectional communication
 - **React**: Component-based UI development
 - **TypeScript**: Type-safe JavaScript development
@@ -87,6 +88,7 @@
 - **Azure CLI**: For cloud resource management
 - **Expo CLI**: For React Native development
 - **Visual Studio 2022** or **VS Code**: Primary development IDE
+- **Pulumi**: For IaC
 
 #### Local Development Workflow
 1. **Backend Setup**: Restore NuGet packages, run database migrations

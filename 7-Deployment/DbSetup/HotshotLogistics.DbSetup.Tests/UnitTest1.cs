@@ -320,8 +320,8 @@ public class DatabaseSetupIntegrationTests : IDisposable
         catch
         {
             // Fall back to environment variable or default
-            return Environment.GetEnvironmentVariable("TEST_SA_CONNECTION_STRING")
-                ?? "Server=localhost;Database=master;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;";
+            return Environment.GetEnvironmentVariable("TEST_SA_CONNECTION_STRING");
+               
         }
     }
 

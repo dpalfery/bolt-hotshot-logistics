@@ -141,8 +141,10 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
 
         var tableName = FormatIdentifier(GetTableName());
         var parameters = GetUpdateParameters(entity);
-        var setClause = string.Join(", ", parameters.Select(p => $"{FormatIdentifier(p.ParameterName.TrimStart('@'))} = {p.ParameterName}"));
         var primaryKeyColumn = FormatIdentifier(GetPrimaryKeyColumnName());
+        var setClause = string.Join(", ", parameters
+            .Where(p => !string.Equals(FormatIdentifier(p.ParameterName.TrimStart('@')), primaryKeyColumn, StringComparison.OrdinalIgnoreCase))
+            .Select(p => $"{FormatIdentifier(p.ParameterName.TrimStart('@'))} = {p.ParameterName}"));
 
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync();

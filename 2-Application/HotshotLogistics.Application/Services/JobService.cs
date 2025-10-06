@@ -209,7 +209,7 @@ namespace HotshotLogistics.Application.Services
                 throw new BusinessRuleException($"Job {jobId} not found");
             }
 
-            var driver = await driverRepository.GetByIdAsync(driverId);
+            var driver = await driverRepository.GetDriverByIdAsync(driverId);
             if (driver == null)
             {
                 throw new BusinessRuleException($"Driver {driverId} not found");
@@ -643,7 +643,7 @@ namespace HotshotLogistics.Application.Services
         /// <inheritdoc/>
         public async Task<bool> IsDriverAvailableAsync(int driverId, DateTime startTime, DateTime? endTime = null, CancellationToken cancellationToken = default)
         {
-            var driver = await driverRepository.GetByIdAsync(driverId);
+            var driver = await driverRepository.GetDriverByIdAsync(driverId);
             if (driver == null || !driver.IsActive)
             {
                 return false;

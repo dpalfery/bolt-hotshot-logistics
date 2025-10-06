@@ -4,6 +4,7 @@
 
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Data.Repositories;
+using HotshotLogistics.Domain.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HotshotLogistics.Data
@@ -24,6 +25,9 @@ namespace HotshotLogistics.Data
             services.AddScoped<IDriverRepository, DriverRepository>();
             services.AddScoped<IJobRepository, JobRepository>();
             services.AddScoped<IJobAssignmentRepository, JobAssignmentRepository>();
+            services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+            services.AddScoped<ILocationTrackingRepository, LocationTrackingRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
             return services;
         }
     }

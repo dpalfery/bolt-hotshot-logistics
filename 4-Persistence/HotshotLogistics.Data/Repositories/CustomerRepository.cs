@@ -207,6 +207,8 @@ internal class CustomerRepository : BaseRepository<ICustomer>, ICustomerReposito
             Id = reader.GetString(reader.GetOrdinal("Id")),
             CompanyName = reader.GetString(reader.GetOrdinal("CompanyName")),
             TaxId = reader.IsDBNull(reader.GetOrdinal("TaxId")) ? null : reader.GetString(reader.GetOrdinal("TaxId")),
+            Email = reader.IsDBNull(reader.GetOrdinal("Email")) ? null : reader.GetString(reader.GetOrdinal("Email")),
+            Phone = reader.IsDBNull(reader.GetOrdinal("Phone")) ? null : reader.GetString(reader.GetOrdinal("Phone")),
             BillingAddress = new Address
             {
                 Street = reader.GetString(reader.GetOrdinal("BillingAddress")),
@@ -214,14 +216,17 @@ internal class CustomerRepository : BaseRepository<ICustomer>, ICustomerReposito
                 State = reader.GetString(reader.GetOrdinal("State")),
                 ZipCode = reader.GetString(reader.GetOrdinal("ZipCode")),
                 Country = reader.GetString(reader.GetOrdinal("Country")),
-                Latitude = reader.GetDouble(reader.GetOrdinal("Latitude")),
-                Longitude = reader.GetDouble(reader.GetOrdinal("Longitude")),
+                Latitude = (double)reader.GetDecimal(reader.GetOrdinal("Latitude")),
+                Longitude = (double)reader.GetDecimal(reader.GetOrdinal("Longitude")),
             },
+            Contacts = new List<Contact>(), // Initialize empty list
             CreditTerms = new CreditTerms
             {
                 PaymentTermsDays = reader.GetInt32(reader.GetOrdinal("PaymentTermsDays")),
                 Status = (CreditStatus)reader.GetInt32(reader.GetOrdinal("CreditStatus")),
-                ApprovedDate = reader.IsDBNull(reader.GetOrdinal("CreditApprovedDate")) ? default : reader.GetDateTime(reader.GetOrdinal("CreditApprovedDate")),
+                ApprovedDate = reader.IsDBNull(reader.GetOrdinal("CreditApprovedDate")) 
+                    ? DateTime.UtcNow.AddDays(-30) // Default to 30 days ago instead of DateTime.MinValue
+                    : reader.GetDateTime(reader.GetOrdinal("CreditApprovedDate")),
                 ExpiryDate = reader.IsDBNull(reader.GetOrdinal("CreditExpiryDate")) ? null : reader.GetDateTime(reader.GetOrdinal("CreditExpiryDate")),
             },
             CreditLimit = reader.GetDecimal(reader.GetOrdinal("CreditLimit")),
@@ -239,6 +244,8 @@ internal class CustomerRepository : BaseRepository<ICustomer>, ICustomerReposito
             new SqlParameter("@Id", SqlDbType.NVarChar) { Value = entity.Id },
             new SqlParameter("@CompanyName", SqlDbType.NVarChar) { Value = entity.CompanyName },
             new SqlParameter("@TaxId", SqlDbType.NVarChar) { Value = (object?)entity.TaxId ?? DBNull.Value },
+            new SqlParameter("@Email", SqlDbType.NVarChar) { Value = (object?)entity.Email ?? DBNull.Value },
+            new SqlParameter("@Phone", SqlDbType.NVarChar) { Value = (object?)entity.Phone ?? DBNull.Value },
             new SqlParameter("@BillingAddress", SqlDbType.NVarChar) { Value = FormatAddress(entity.BillingAddress) },
             new SqlParameter("@City", SqlDbType.NVarChar) { Value = entity.BillingAddress.City },
             new SqlParameter("@State", SqlDbType.NVarChar) { Value = entity.BillingAddress.State },
@@ -263,6 +270,8 @@ internal class CustomerRepository : BaseRepository<ICustomer>, ICustomerReposito
             new SqlParameter("@Id", SqlDbType.NVarChar) { Value = entity.Id },
             new SqlParameter("@CompanyName", SqlDbType.NVarChar) { Value = entity.CompanyName },
             new SqlParameter("@TaxId", SqlDbType.NVarChar) { Value = (object?)entity.TaxId ?? DBNull.Value },
+            new SqlParameter("@Email", SqlDbType.NVarChar) { Value = (object?)entity.Email ?? DBNull.Value },
+            new SqlParameter("@Phone", SqlDbType.NVarChar) { Value = (object?)entity.Phone ?? DBNull.Value },
             new SqlParameter("@BillingAddress", SqlDbType.NVarChar) { Value = FormatAddress(entity.BillingAddress) },
             new SqlParameter("@City", SqlDbType.NVarChar) { Value = entity.BillingAddress.City },
             new SqlParameter("@State", SqlDbType.NVarChar) { Value = entity.BillingAddress.State },

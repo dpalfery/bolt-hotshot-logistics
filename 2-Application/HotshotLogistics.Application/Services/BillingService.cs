@@ -308,6 +308,13 @@ namespace HotshotLogistics.Application.Services
         }
 
         /// <inheritdoc/>
+        public async Task<IInvoice?> GetInvoiceByIdAsync(string invoiceId, CancellationToken cancellationToken = default)
+        {
+            logger.LogInformation("Retrieving invoice: {InvoiceId}", invoiceId);
+            return await invoiceRepository.GetByIdAsync(invoiceId, cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public Task<IEnumerable<IInvoice>> GetOverdueInvoicesAsync(CancellationToken cancellationToken = default)
         {
             return invoiceRepository.GetOverdueInvoicesAsync();
