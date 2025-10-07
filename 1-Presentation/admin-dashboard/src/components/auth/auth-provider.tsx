@@ -30,13 +30,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     checkAuth();
   }, [inProgress]);
 
-  // Check for test mode bypass or development mode
+  // Always allow access in development mode
+  const isDevelopment = process.env.NODE_ENV === 'development';
   const isTestMode = typeof window !== 'undefined' && 
     (window as any).__BYPASS_AUTH__ === true;
-  const isDevelopment = process.env.NODE_ENV === 'development';
 
   useEffect(() => {
-    if (isAuthChecked && !isAuthenticated && !isTestMode && !isDevelopment && pathname !== '/login') {
+    // Only check authentication in production
+    if (!isDevelopment && !isTestMode && isAuthChecked && !isAuthenticated && pathname !== '/login') {
       const redirectUri = pathname !== '/' ? `?redirect_uri=${encodeURIComponent(pathname)}` : '';
       router.push(`/login${redirectUri}`);
     }

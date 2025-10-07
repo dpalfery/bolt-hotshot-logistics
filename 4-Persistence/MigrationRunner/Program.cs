@@ -10,11 +10,13 @@ var configuration = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
-var connectionString = configuration.GetConnectionString("DefaultConnection");
+var connectionString = configuration.GetConnectionString("DefaultConnection") 
+    ?? Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")
+    ?? Environment.GetEnvironmentVariable("CONNECTIONSTRINGS__DEFAULTCONNECTION");
 
 if (string.IsNullOrWhiteSpace(connectionString))
 {
-    throw new InvalidOperationException("DefaultConnection is not set in appsettings.json or environment variables.");
+    throw new InvalidOperationException("Connection string is not set. Please set DefaultConnection in appsettings.json, or DB_CONNECTION_STRING/CONNECTIONSTRINGS__DEFAULTCONNECTION environment variable.");
 }
 
 var serviceProvider = new ServiceCollection()

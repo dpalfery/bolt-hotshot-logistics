@@ -62,6 +62,12 @@ class ApiService {
   }
 
   private async getAuthToken(): Promise<string | null> {
+    // Always use test authentication in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Development mode: using test authentication');
+      return 'test-token';
+    }
+
     // Check for test mode bypass
     if (typeof window !== 'undefined' && (window as any).__BYPASS_AUTH__ === true) {
       return 'test-token';
@@ -69,11 +75,6 @@ class ApiService {
 
     const account = msalInstance.getActiveAccount();
     if (!account) {
-      // In development, fall back to test authentication if no account is available
-      if (process.env.NODE_ENV === 'development') {
-        console.log('No active account found, using test authentication for development');
-        return 'test-token';
-      }
       return null;
     }
 
@@ -94,11 +95,6 @@ class ApiService {
         return response.accessToken;
       } catch (popupError) {
         console.error('Popup token acquisition failed:', popupError);
-        // In development, fall back to test authentication if all else fails
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Authentication failed, using test authentication for development');
-          return 'test-token';
-        }
         return null;
       }
     }

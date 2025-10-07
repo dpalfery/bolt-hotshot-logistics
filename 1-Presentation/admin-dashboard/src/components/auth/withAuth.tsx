@@ -9,20 +9,25 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
     const isAuthenticated = useIsAuthenticated();
     const router = useRouter();
 
-    // Check for test mode bypass or development mode
+    // Always allow access in development mode
+    const isDevelopment = process.env.NODE_ENV === 'development';
     const isTestMode = typeof window !== 'undefined' && 
       (window as any).__BYPASS_AUTH__ === true;
-    const isDevelopment = process.env.NODE_ENV === 'development';
 
     useEffect(() => {
-      if (!isAuthenticated && !isTestMode && !isDevelopment) {
+      // Only check authentication in production
+      if (!isDevelopment && !isTestMode && !isAuthenticated) {
         router.push('/login');
       }
     }, [isAuthenticated, isTestMode, isDevelopment, router]);
 
-    if (!isAuthenticated && !isTestMode && !isDevelopment) {
-      return null;
+    // Always render component in development mode
+    if (isDevelopment || isTestMode || isAuthenticated) {
+      return <WrappedComponent {...props} />;
     }
+
+    // Only block in production when not authenticated
+    return null;
 
     return <WrappedComponent {...props} />;
   };
