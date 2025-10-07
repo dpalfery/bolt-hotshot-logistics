@@ -37,8 +37,7 @@ public class SeedDashboardTestData : Migration
                     UPDATE TOP (33) Invoices 
                     SET DueDate = DATEADD(day, -60, GETDATE()),
                         Status = 5,  -- Overdue
-                        PaidAmount = 0,
-                        BalanceDue = TotalAmount
+                        PaidAmount = 0
                     WHERE Id LIKE 'inv-job-cust-%'";
                 updateInvoicesCmd.ExecuteNonQuery();
             }
@@ -66,7 +65,6 @@ public class SeedDashboardTestData : Migration
                 UPDATE Invoices 
                 SET DueDate = DATEADD(day, 30, InvoiceDate),
                     PaidAmount = 0,
-                    BalanceDue = TotalAmount,
                     Status = 0
                 WHERE Id LIKE 'inv-job-cust-%'";
             resetInvoicesCmd.ExecuteNonQuery();
