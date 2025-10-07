@@ -1,3 +1,5 @@
+import { msalInstance } from '@/lib/providers';
+import { loginRequest } from '@/config/auth';
 import { Job, Driver, Invoice, Customer, PagedResult, JobFilter, InvoiceFilter, PaginationParameters, InvoiceSummaryMetrics, InvoiceAgingBuckets } from '@/types';
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || '/api').trim();
@@ -12,6 +14,10 @@ class ApiService {
     const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     const url = `${baseUrl}${normalizedEndpoint}${query ? `?${query}` : ''}`;
 
+    console.log('=== API REQUEST DEBUG ===');
+    console.log('Making request to:', url);
+    console.log('Base URL from env:', API_BASE_URL);
+
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -21,27 +27,77 @@ class ApiService {
     };
 
     // Add authentication token if available
-    const token = this.getAuthToken();
+    const token = await this.getAuthToken();
+    console.log('Auth token obtained:', token ? 'Yes' : 'No');
     if (token) {
+      // Use Test scheme for test token, Bearer for real tokens
+      const scheme = token === 'test-token' ? 'Test' : 'Bearer';
+      console.log('Using auth scheme:', scheme);
       config.headers = {
         ...config.headers,
-        Authorization: `Bearer ${token}`,
+        Authorization: `${scheme} ${token}`,
       };
     }
 
-    const response = await fetch(url, config);
+    try {
+      const response = await fetch(url, config);
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`API Error: ${response.status} ${error}`);
+      if (!response.ok) {
+        const error = await response.text();
+        console.error('API Error response:', error);
+        throw new Error(`API Error: ${response.status} ${error}`);
+      }
+
+      const data = await response.json();
+      console.log('Response data length/type:', Array.isArray(data) ? data.length : typeof data);
+      console.log('=== END API REQUEST DEBUG ===');
+      return data;
+    } catch (error) {
+      console.error('Fetch error:', error);
+      console.log('=== END API REQUEST DEBUG (ERROR) ===');
+      throw error;
     }
-
-    return response.json();
   }
 
-  private getAuthToken(): string | null {
-    // This will be implemented when MSAL is set up
-    return null;
+  private async getAuthToken(): Promise<string | null> {
+    // Always use test authentication in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Development mode: using test authentication');
+      return 'test-token';
+    }
+
+    // Check for test mode bypass
+    if (typeof window !== 'undefined' && (window as any).__BYPASS_AUTH__ === true) {
+      return 'test-token';
+    }
+
+    const account = msalInstance.getActiveAccount();
+    if (!account) {
+      return null;
+    }
+
+    try {
+      const response = await msalInstance.acquireTokenSilent({
+        ...loginRequest,
+        account,
+      });
+      return response.accessToken;
+    } catch (error) {
+      console.error('Silent token acquisition failed:', error);
+      // Fallback to interactive method if silent acquisition fails
+      try {
+        const response = await msalInstance.acquireTokenPopup({
+          ...loginRequest,
+          account,
+        });
+        return response.accessToken;
+      } catch (popupError) {
+        console.error('Popup token acquisition failed:', popupError);
+        return null;
+      }
+    }
   }
 
   // Job API methods
@@ -112,59 +168,50 @@ class ApiService {
 
   // Driver API methods
   async getDrivers(): Promise<Driver[]> {
-    return this.request<Driver[]>('/driver');
+    return this.request<Driver[]>('/drivers');
   }
 
   async getDriverById(id: number): Promise<Driver> {
-    return this.request<Driver>(`/driver/${id}`);
+    return this.request<Driver>(`/drivers/${id}`);
   }
 
   async createDriver(driver: Partial<Driver>): Promise<Driver> {
-    return this.request<Driver>('/driver', {
+    return this.request<Driver>('/drivers', {
       method: 'POST',
       body: JSON.stringify(driver),
     });
   }
 
   async updateDriver(id: number, driver: Partial<Driver>): Promise<Driver> {
-    return this.request<Driver>(`/driver/${id}`, {
+    return this.request<Driver>(`/drivers/${id}`, {
       method: 'PUT',
       body: JSON.stringify(driver),
     });
   }
 
   async deleteDriver(id: number): Promise<void> {
-    await this.request(`/driver/${id}`, {
+    await this.request(`/drivers/${id}`, {
       method: 'DELETE',
     });
   }
 
-  // Invoice API methods
+  // Invoice API methods - Get overdue invoices for dashboard
   async getInvoices(
     filter?: InvoiceFilter,
     pagination?: PaginationParameters
   ): Promise<PagedResult<Invoice>> {
-    const params = new URLSearchParams();
-
-    if (filter) {
-      Object.entries(filter).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          params.append(key, value.toString());
-        }
-      });
-    }
-
-    if (pagination) {
-      params.append('pageNumber', pagination.pageNumber.toString());
-      params.append('pageSize', pagination.pageSize.toString());
-    }
-
-    const query = params.toString();
-    if (query) {
-      return this.request<PagedResult<Invoice>>('/billing/invoices', {}, query);
-    } else {
-      return this.request<PagedResult<Invoice>>('/billing/invoices');
-    }
+    // For the dashboard, we want overdue invoices
+    // The backend returns Invoice[] but we need to wrap it in PagedResult format
+    const overdueInvoices = await this.request<Invoice[]>('/billing/invoices/overdue');
+    
+    // Convert to PagedResult format to match the expected interface
+    return {
+      items: overdueInvoices,
+      totalCount: overdueInvoices.length,
+      pageNumber: 1,
+      pageSize: overdueInvoices.length,
+      totalPages: 1
+    };
   }
 
   async getInvoiceById(id: string): Promise<Invoice> {

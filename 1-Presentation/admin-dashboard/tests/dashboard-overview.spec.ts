@@ -2,22 +2,13 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Dashboard Overview', () => {
   test.beforeEach(async ({ page }) => {
-    // Mock dashboard statistics API
-    await page.route('**/api/dashboard/stats', async route => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          totalJobs: 156,
-          activeDrivers: 23,
-          revenue: 45678.90,
-          pendingJobs: 12
-        })
-      });
+    // Set test mode bypass flag to skip authentication
+    await page.addInitScript(() => {
+      (window as any).__BYPASS_AUTH__ = true;
     });
 
-    // Mock recent jobs API
-    await page.route('**/api/jobs*', async route => {
+    // Mock jobs API with realistic data - matches apiService.getJobs() endpoint
+    await page.route('https://localhost:5001/api/job', async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -25,24 +16,83 @@ test.describe('Dashboard Overview', () => {
           items: [
             {
               id: 'job-1',
-              title: 'Urgent Delivery',
               status: 'InProgress',
-              pickupAddress: '123 Main St',
-              dropoffAddress: '456 Oak Ave',
               assignedDriverId: 1,
               scheduledPickupTime: '2024-12-01T10:00:00Z'
             },
             {
               id: 'job-2',
-              title: 'Standard Delivery',
               status: 'Pending',
-              pickupAddress: '789 Pine St',
-              dropoffAddress: '321 Elm Ave',
               assignedDriverId: null,
               scheduledPickupTime: '2024-12-01T14:00:00Z'
+            },
+            {
+              id: 'job-3',
+              status: 'InProgress',
+              assignedDriverId: 2,
+              scheduledPickupTime: '2024-12-01T16:00:00Z'
             }
           ],
-          totalCount: 2
+          totalCount: 3
+        })
+      });
+    });
+
+    // Mock drivers API with active drivers - matches apiService.getDrivers() endpoint
+    await page.route('https://localhost:5001/api/driver', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: 1,
+            name: 'John Driver',
+            isActive: true,
+            licenseNumber: 'DL123456'
+          },
+          {
+            id: 2,
+            name: 'Jane Driver',
+            isActive: true,
+            licenseNumber: 'DL789012'
+          },
+          {
+            id: 3,
+            name: 'Bob Driver',
+            isActive: false,
+            licenseNumber: 'DL345678'
+          }
+        ])
+      });
+    });
+
+    // Mock invoices API with overdue invoices - matches apiService.getInvoices() endpoint
+    await page.route('https://localhost:5001/api/billing/invoices', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          items: [
+            {
+              id: 'inv-1',
+              dueDate: '2024-11-15T00:00:00Z', // Past date
+              balanceDue: 1500.00,
+              status: 'Overdue'
+            },
+            {
+              id: 'inv-2',
+              dueDate: '2024-12-15T00:00:00Z', // Future date
+              balanceDue: 2500.00,
+              status: 'Pending'
+            },
+            {
+              id: 'inv-3',
+              dueDate: '2024-11-01T00:00:00Z', // Past date
+              balanceDue: 800.00,
+              status: 'Overdue'
+            }
+          ],
+          totalCount: 3
         })
       });
     });
@@ -322,14 +372,186 @@ test.describe('Dashboard Overview', () => {
     });
   });
 
+  test.describe('Key Metrics Non-Zero Validation', () => {
+    test('should display non-zero values for key metrics', async ({ page }) => {
+      // Set longer timeout for this test since it needs to wait for Next.js to fully load
+      test.setTimeout(30000);
+      
+      // Log all network requests to debug the routing issue
+      page.on('request', request => {
+        if (request.url().includes('/api/')) {
+          console.log('API Request:', request.method(), request.url());
+        }
+      });
+      
+      page.on('response', response => {
+        if (response.url().includes('/api/')) {
+          console.log('API Response:', response.status(), response.url());
+        }
+      });
+      
+      // Mock jobs API with realistic data - matches apiService.getJobs() endpoint
+      await page.route('**/api/job**', async route => {
+        console.log('Intercepted jobs API call:', route.request().url());
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            items: [
+              {
+                id: 'job-1',
+                status: 'InProgress',
+                assignedDriverId: 1,
+                scheduledPickupTime: '2024-12-01T10:00:00Z'
+              },
+              {
+                id: 'job-2',
+                status: 'Pending',
+                assignedDriverId: null,
+                scheduledPickupTime: '2024-12-01T14:00:00Z'
+              },
+              {
+                id: 'job-3',
+                status: 'InProgress',
+                assignedDriverId: 2,
+                scheduledPickupTime: '2024-12-01T16:00:00Z'
+              }
+            ],
+            totalCount: 3
+          })
+        });
+      });
+
+      // Mock drivers API with active drivers - matches apiService.getDrivers() endpoint
+      await page.route('**/api/driver**', async route => {
+        console.log('Intercepted drivers API call:', route.request().url());
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([
+            {
+              id: 1,
+              name: 'John Driver',
+              isActive: true,
+              licenseNumber: 'DL123456'
+            },
+            {
+              id: 2,
+              name: 'Jane Driver',
+              isActive: true,
+              licenseNumber: 'DL789012'
+            },
+            {
+              id: 3,
+              name: 'Bob Driver',
+              isActive: false,
+              licenseNumber: 'DL345678'
+            }
+          ])
+        });
+      });
+
+      // Mock invoices API with overdue invoices - matches apiService.getInvoices() endpoint
+      await page.route('**/api/billing/invoices**', async route => {
+        console.log('Intercepted invoices API call:', route.request().url());
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            items: [
+              {
+                id: 'inv-1',
+                dueDate: '2024-11-15T00:00:00Z', // Past date
+                balanceDue: 1500.00,
+                status: 'Overdue'
+              },
+              {
+                id: 'inv-2',
+                dueDate: '2024-12-15T00:00:00Z', // Future date
+                balanceDue: 2500.00,
+                status: 'Pending'
+              },
+              {
+                id: 'inv-3',
+                dueDate: '2024-11-01T00:00:00Z', // Past date
+                balanceDue: 800.00,
+                status: 'Overdue'
+              }
+            ],
+            totalCount: 3
+          })
+        });
+      });
+
+      await page.goto('/');
+      await page.waitForLoadState('networkidle');
+  
+      // Wait for Next.js to fully load and render
+      await page.waitForSelector('h1:has-text("Dashboard Overview")', { timeout: 10000 });
+  
+      // Wait for metrics to be calculated and displayed
+      await page.waitForTimeout(2000);
+  
+      // Debug: Check if the page content is loaded
+      const pageTitle = await page.textContent('h1');
+      console.log('Page title found:', pageTitle);
+  
+      // Debug: Check if any metric cards are present
+      const metricCards = await page.locator('[data-testid^="metric-"]').count();
+      console.log('Number of metric cards found:', metricCards);
+
+      // Debug: Check if the page content is loaded first
+      console.log('Page title found:', pageTitle);
+
+      // Debug: Check if any metric cards are present
+      const metricCardsCount = await page.locator('[data-testid^="metric-"]').count();
+      console.log('Number of metric cards found:', metricCardsCount);
+
+      // If no metric cards are found, the page isn't rendering properly
+      if (metricCardsCount === 0) {
+        const bodyContent = await page.textContent('body');
+        console.log('Body content length:', bodyContent?.length || 0);
+        console.log('Body content preview:', bodyContent?.substring(0, 500) || 'No content');
+
+        // Check if we're being redirected to login
+        const currentUrl = page.url();
+        console.log('Current URL:', currentUrl);
+      }
+
+      // Extract and log the actual metric values for debugging
+      const totalJobsValue = await page.textContent('[data-testid="metric-total-jobs"] dd');
+      const activeJobsValue = await page.textContent('[data-testid="metric-active-jobs"] dd');
+      const activeDriversValue = await page.textContent('[data-testid="metric-active-drivers"] dd');
+      const overdueInvoicesValue = await page.textContent('[data-testid="metric-overdue-invoices"] dd');
+
+      console.log('Dashboard Metrics Debug Info:');
+      console.log('Total Jobs:', totalJobsValue);
+      console.log('Active Jobs:', activeJobsValue);
+      console.log('Active Drivers:', activeDriversValue);
+      console.log('Overdue Invoices:', overdueInvoicesValue);
+
+      // Assert that each metric displays a non-zero value
+      expect(parseInt(totalJobsValue || '0')).toBeGreaterThan(0);
+      expect(parseInt(activeJobsValue || '0')).toBeGreaterThan(0);
+      expect(parseInt(activeDriversValue || '0')).toBeGreaterThan(0);
+      expect(parseInt(overdueInvoicesValue || '0')).toBeGreaterThan(0);
+
+      // Additional assertions for expected values based on mock data
+      expect(parseInt(totalJobsValue || '0')).toBe(3); // 3 total jobs
+      expect(parseInt(activeJobsValue || '0')).toBe(2); // 2 jobs InProgress
+      expect(parseInt(activeDriversValue || '0')).toBe(2); // 2 active drivers
+      expect(parseInt(overdueInvoicesValue || '0')).toBe(2); // 2 overdue invoices
+    });
+  });
+
   test.describe('Performance and Loading', () => {
     test('should load dashboard within acceptable time', async ({ page }) => {
       const startTime = Date.now();
       await page.goto('/');
-      
+
       // Wait for main content to be visible
       await expect(page.getByText('Dashboard Overview')).toBeVisible();
-      
+
       const loadTime = Date.now() - startTime;
       expect(loadTime).toBeLessThan(3000); // Should load within 3 seconds
     });

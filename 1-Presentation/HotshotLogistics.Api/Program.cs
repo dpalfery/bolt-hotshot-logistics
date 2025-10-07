@@ -12,10 +12,14 @@ using System;
 using System.IO;
 using System.Text.Json;
 using Azure.Identity;
+using HotshotLogistics.Api;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Graph;
 using HotshotLogistics.Application.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,15 +68,27 @@ if (!string.IsNullOrEmpty(appConfigEndpoint))
 }
 
 // Add services to the container
+if (builder.Environment.IsDevelopment())
+{
+    // Use test authentication handler for local development
+    builder.Services.AddAuthentication("Test")
+        .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", options => { });
+}
+else
+{
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAdB2C"));
+}
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         // Ignore null values to reduce payload size
-        options.JsonSerializerOptions.DefaultIgnoreCondition = 
+        options.JsonSerializerOptions.DefaultIgnoreCondition =
             System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
-        
+
         // Handle circular references gracefully
-        options.JsonSerializerOptions.ReferenceHandler = 
+        options.JsonSerializerOptions.ReferenceHandler =
             System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 builder.Services.AddEndpointsApiExplorer();
@@ -124,8 +140,8 @@ builder.Services.AddAuthorization(options =>
         policy.RequireRole("Customer"));
 
     // Composite role policies
-    options.AddPolicy(AuthorizationPolicies.AdminOrManager, policy =>
-        policy.RequireRole("Admin", "Manager"));
+    options.AddPolicy(AuthorizationPolicies.ManagerOrAdmin, policy =>
+        policy.RequireRole("Manager", "Admin"));
     options.AddPolicy(AuthorizationPolicies.ManagerOrDriver, policy =>
         policy.RequireRole("Manager", "Driver"));
 

@@ -16,6 +16,8 @@ namespace HotshotLogistics.Api
     /// </summary>
     public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
+        private readonly string _defaultRole;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TestAuthHandler"/> class.
         /// </summary>
@@ -25,28 +27,42 @@ namespace HotshotLogistics.Api
         public TestAuthHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,
-            UrlEncoder encoder)
+            UrlEncoder encoder,
+            string defaultRole = "Admin")
             : base(options, logger, encoder)
         {
+            _defaultRole = defaultRole;
         }
 
         /// <inheritdoc/>
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            // Check if Authorization header exists
+            // Require Authorization header and the 'Test' scheme for dev/testing
             if (!Request.Headers.ContainsKey("Authorization"))
             {
                 return Task.FromResult(AuthenticateResult.Fail("Missing Authorization Header"));
             }
 
-            // Create test claims
+            var authHeader = Request.Headers["Authorization"].ToString();
+            if (!authHeader.StartsWith("Test", StringComparison.OrdinalIgnoreCase))
+            {
+                return Task.FromResult(AuthenticateResult.Fail("Invalid Authorization Scheme"));
+            }
+
+            // Allow dynamic role per request via X-Test-Role header; default to configured _defaultRole
+            var requestedRole = _defaultRole;
+            if (Request.Headers.TryGetValue("X-Test-Role", out var roleHeader) && !string.IsNullOrWhiteSpace(roleHeader.ToString()))
+            {
+                requestedRole = roleHeader.ToString().Trim();
+            }
+
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, "test-user-id"),
                 new Claim(ClaimTypes.Name, "Test User"),
                 new Claim(ClaimTypes.Email, "test@example.com"),
-                new Claim(ClaimTypes.Role, "Admin"), // Grant Admin role for tests
-                new Claim(ClaimTypes.Role, "Manager"),
+                new Claim(ClaimTypes.Role, requestedRole),
+                new Claim("roles", requestedRole),
             };
 
             var identity = new ClaimsIdentity(claims, "Test");

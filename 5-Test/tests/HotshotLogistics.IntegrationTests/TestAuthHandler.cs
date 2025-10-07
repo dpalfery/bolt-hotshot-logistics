@@ -26,7 +26,7 @@ namespace HotshotLogistics.IntegrationTests
         /// <inheritdoc/>
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            // Check if Authorization header exists and starts with "Test"
+            // Require Authorization header
             if (!Request.Headers.ContainsKey("Authorization"))
             {
                 return Task.FromResult(AuthenticateResult.Fail("Missing Authorization Header"));
@@ -38,14 +38,22 @@ namespace HotshotLogistics.IntegrationTests
                 return Task.FromResult(AuthenticateResult.Fail("Invalid Authorization Scheme"));
             }
 
-            // Create a test identity with default Admin role for integration tests
+            // Allow tests to set the user's role dynamically per request.
+            // Default to Admin if no role header is provided.
+            var requestedRole = "Admin";
+            if (Request.Headers.TryGetValue("X-Test-Role", out var roleHeader) && !string.IsNullOrWhiteSpace(roleHeader.ToString()))
+            {
+                requestedRole = roleHeader.ToString().Trim();
+            }
+
+            // Build a principal with the requested role
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, "test-user-id"),
                 new Claim(ClaimTypes.Name, "Test User"),
                 new Claim(ClaimTypes.Email, "test@example.com"),
-                new Claim(ClaimTypes.Role, "Admin"),
-                new Claim("roles", "Admin") // Azure AD B2C/Entra External ID uses "roles" claim
+                new Claim(ClaimTypes.Role, requestedRole),
+                new Claim("roles", requestedRole) // Mirror Entra ID "roles" claim for policy evaluation
             };
 
             var identity = new ClaimsIdentity(claims, "Test");

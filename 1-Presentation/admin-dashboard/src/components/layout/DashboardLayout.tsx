@@ -13,9 +13,10 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline';
 import { useState } from 'react';
-
-const navigation = [
-  { name: 'Dashboard', href: '/', icon: HomeIcon },
+import { UserProfile } from '../auth/UserProfile';
+ 
+ const navigation = [
+   { name: 'Dashboard', href: '/', icon: HomeIcon },
   { name: 'Jobs', href: '/jobs', icon: TruckIcon },
   { name: 'Drivers', href: '/drivers', icon: UserGroupIcon },
   { name: 'Billing', href: '/billing', icon: DocumentTextIcon },
@@ -29,9 +30,9 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
-
-  return (
-    <div className="min-h-screen bg-gray-50">
+ 
+   return (
+     <div className="min-h-screen bg-gray-50">
       {/* Mobile sidebar */}
       <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 bg-black bg-opacity-25" onClick={() => setSidebarOpen(false)} />
@@ -111,12 +112,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <h1 className="text-lg font-semibold text-gray-900">Hotshot Logistics</h1>
             </div>
             <div className="flex items-center space-x-4">
-              {/* User menu placeholder */}
-              <div className="text-sm text-gray-700">Admin User</div>
+              <UserProfile />
             </div>
           </div>
         </div>
-
+ 
         {/* Page content */}
         <main className="p-6">
           {children}
