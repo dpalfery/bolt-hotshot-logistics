@@ -5,6 +5,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests',
+  testMatch: /.*\.spec\.ts$/,
   /* Fail fast if a single test takes too long */
   timeout: 45_000,
   /* Global timeout for the full run */

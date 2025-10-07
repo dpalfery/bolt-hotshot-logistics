@@ -1,10 +1,15 @@
+"use client";
+
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { DashboardOverview } from '@/components/dashboard/DashboardOverview';
+import withAuth from '@/components/auth/withAuth';
 
-export default function Home() {
+function Home() {
   return (
     <DashboardLayout>
       <DashboardOverview />
     </DashboardLayout>
   );
 }
+
+export default withAuth(Home);

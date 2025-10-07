@@ -12,6 +12,8 @@ namespace HotshotLogistics.Api.Controllers
     using HotshotLogistics.Application.Services;
     using HotshotLogistics.Contracts.Models;
     using HotshotLogistics.Contracts.Services;
+    using Microsoft.AspNetCore.Authorization;
+    using HotshotLogistics.Application.Authorization;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
@@ -21,6 +23,7 @@ namespace HotshotLogistics.Api.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class BillingController : ControllerBase
     {
         private readonly IBillingService billingService;
@@ -50,6 +53,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The generated invoice.</returns>
         [HttpPost("invoices/generate/{jobId}")]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(IInvoice), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -87,6 +91,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The invoice if found; otherwise, 404 Not Found.</returns>
         [HttpGet("invoices/{id}")]
+        [Authorize(Policy = AuthorizationPolicies.OwnResource)]
         [ProducesResponseType(typeof(IInvoice), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IInvoice>> GetInvoice(string id, CancellationToken cancellationToken = default)
@@ -115,6 +120,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of invoices for the customer.</returns>
         [HttpGet("invoices/customer/{customerId}")]
+        [Authorize(Policy = AuthorizationPolicies.CustomerResource)]
         [ProducesResponseType(typeof(IEnumerable<IInvoice>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<IInvoice>>> GetCustomerInvoices(string customerId, CancellationToken cancellationToken = default)
         {
@@ -136,6 +142,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of overdue invoices.</returns>
         [HttpGet("invoices/overdue")]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(IEnumerable<IInvoice>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<IInvoice>>> GetOverdueInvoices(CancellationToken cancellationToken = default)
         {
@@ -159,6 +166,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>Success status of the payment processing.</returns>
         [HttpPost("invoices/{invoiceId}/payments")]
+        [Authorize(Policy = AuthorizationPolicies.CustomerResource)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -225,6 +233,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The calculated tax amount.</returns>
         [HttpPost("tax/calculate")]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(TaxCalculationResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<TaxCalculationResult>> CalculateTax(
@@ -279,6 +288,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>Accounts receivable summary.</returns>
         [HttpGet("reports/accounts-receivable")]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(AccountsReceivableReport), StatusCodes.Status200OK)]
         public async Task<ActionResult<AccountsReceivableReport>> GetAccountsReceivableReport(CancellationToken cancellationToken = default)
         {

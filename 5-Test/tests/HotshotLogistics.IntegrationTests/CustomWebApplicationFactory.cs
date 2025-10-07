@@ -22,16 +22,7 @@ namespace HotshotLogistics.IntegrationTests
         /// <inheritdoc/>
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            builder.ConfigureTestServices(services =>
-            {
-                // Add test authentication scheme
-                services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = "Test";
-                    options.DefaultChallengeScheme = "Test";
-                })
-                .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", options => { });
-            });
+            // Authentication scheme is configured in Program.cs for Development; avoid re-registering here to prevent "Scheme already exists: Test".
 
             // Enable detailed logging for debugging
             builder.ConfigureLogging(logging =>

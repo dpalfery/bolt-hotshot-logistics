@@ -45,7 +45,7 @@ namespace HotshotLogistics.Api.Controllers
         /// </summary>
         /// <returns>A list of drivers.</returns>
         [HttpGet]
-        [Authorize(Policy = AuthorizationPolicies.AdminOrManager)]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(IEnumerable<DriverDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<IEnumerable<DriverDto>>> GetDrivers()
@@ -81,6 +81,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="id">The driver ID.</param>
         /// <returns>The driver if found; otherwise, 404 Not Found.</returns>
         [HttpGet("{id}")]
+        [Authorize(Policy = AuthorizationPolicies.OwnResource)]
         [ProducesResponseType(typeof(DriverDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<DriverDto>> GetDriverById(int id)
@@ -120,7 +121,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="driver">The driver data.</param>
         /// <returns>The created driver.</returns>
         [HttpPost]
-        [Authorize(Policy = AuthorizationPolicies.AdminOrManager)]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(DriverDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -192,7 +193,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="driverDto">The updated driver data.</param>
         /// <returns>The updated driver.</returns>
         [HttpPut("{id}")]
-        [Authorize(Policy = AuthorizationPolicies.AdminOrManager)]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(DriverDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

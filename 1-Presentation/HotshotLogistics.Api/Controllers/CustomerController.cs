@@ -47,6 +47,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of customers.</returns>
         [HttpGet]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(IEnumerable<ICustomer>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ICustomer>>> GetCustomers(CancellationToken cancellationToken = default)
         {
@@ -69,6 +70,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The customer if found; otherwise, 404 Not Found.</returns>
         [HttpGet("{id}")]
+        [Authorize(Policy = AuthorizationPolicies.OwnResource)]
         [ProducesResponseType(typeof(ICustomer), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ICustomer>> GetCustomerById(string id, CancellationToken cancellationToken = default)
@@ -97,7 +99,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The created customer.</returns>
         [HttpPost]
-        [Authorize(Policy = AuthorizationPolicies.AdminOrManager)]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(ICustomer), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -138,7 +140,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The updated customer.</returns>
         [HttpPut("{id}")]
-        [Authorize(Policy = AuthorizationPolicies.AdminOrManager)]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(ICustomer), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -214,6 +216,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of active customers.</returns>
         [HttpGet("active")]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(IEnumerable<ICustomer>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ICustomer>>> GetActiveCustomers(CancellationToken cancellationToken = default)
         {
@@ -235,6 +238,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of customers with overdue invoices.</returns>
         [HttpGet("overdue")]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(IEnumerable<ICustomer>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ICustomer>>> GetOverdueCustomers(CancellationToken cancellationToken = default)
         {
@@ -257,6 +261,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of jobs for the customer.</returns>
         [HttpGet("{id}/jobs")]
+        [Authorize(Policy = AuthorizationPolicies.CustomerResource)]
         [ProducesResponseType(typeof(IEnumerable<IJob>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<IJob>>> GetCustomerJobs(string id, CancellationToken cancellationToken = default)
@@ -287,6 +292,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of invoices for the customer.</returns>
         [HttpGet("{id}/invoices")]
+        [Authorize(Policy = AuthorizationPolicies.CustomerResource)]
         [ProducesResponseType(typeof(IEnumerable<IInvoice>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<IInvoice>>> GetCustomerInvoices(string id, CancellationToken cancellationToken = default)
@@ -318,6 +324,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>No content if successful; otherwise, appropriate error response.</returns>
         [HttpPost("{id}/credit-limit")]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -361,6 +368,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>No content if successful; otherwise, appropriate error response.</returns>
         [HttpPut("{id}/credit-terms")]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

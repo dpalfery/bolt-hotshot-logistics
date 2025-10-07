@@ -32,7 +32,7 @@ namespace HotshotLogistics.Application.Authorization
         /// <summary>
         /// Policy name for Admin or Manager roles.
         /// </summary>
-        public const string AdminOrManager = "AdminOrManager";
+        public const string ManagerOrAdmin = "ManagerOrAdmin";
 
         /// <summary>
         /// Policy name for Manager or Driver roles.

@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiService } from '@/services/api';
-import { InvoiceStatus, InvoiceSummaryMetrics, InvoiceAgingBuckets, Invoice } from '@/types';
+import { InvoiceStatus, Invoice } from '@/types';
 
 export function BillingManagement() {
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'all'>('all');
@@ -19,12 +19,12 @@ export function BillingManagement() {
     queryFn: () => apiService.getInvoices(),
   });
 
-  const { data: summary, isLoading: summaryLoading } = useQuery({
+  const { data: summary } = useQuery({
     queryKey: ['invoice-summary'],
     queryFn: () => apiService.getInvoiceSummary(),
   });
 
-  const { data: aging, isLoading: agingLoading } = useQuery({
+  const { data: aging } = useQuery({
     queryKey: ['invoice-aging'],
     queryFn: () => apiService.getInvoiceAging(),
   });
@@ -58,7 +58,9 @@ export function BillingManagement() {
     return new Date(date).toLocaleDateString('en-US');
   };
 
-  const invoices = invoicesResult?.items || [];
+  const invoices = useMemo(() => {
+    return invoicesResult?.items || [];
+  }, [invoicesResult?.items]);
 
   const filteredInvoices = useMemo(() => {
     if (statusFilter === 'all') return invoices;

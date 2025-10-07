@@ -6,6 +6,8 @@ namespace HotshotLogistics.Api.Controllers
 {
     using HotshotLogistics.Contracts.Models;
     using HotshotLogistics.Contracts.Services;
+    using Microsoft.AspNetCore.Authorization;
+    using HotshotLogistics.Application.Authorization;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
@@ -18,9 +20,10 @@ namespace HotshotLogistics.Api.Controllers
 
     /// <summary>
     /// API controller for managing job assignments.
-    /// </summary>
-    [ApiController]
-    [Route("api/[controller]")]
+	/// </summary>
+ 	[Authorize]
+ 	[ApiController]
+ 	[Route("api/[controller]")]
     public class JobAssignmentsController : ControllerBase
     {
         private readonly IJobAssignmentService assignmentService;
@@ -46,6 +49,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The job assignment if found; otherwise, 404 Not Found.</returns>
         [HttpGet("{id}")]
+        [Authorize(Policy = AuthorizationPolicies.OwnResource)]
         [ProducesResponseType(typeof(JobAssignmentDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<JobAssignmentDto>> GetById(string id, CancellationToken cancellationToken = default)
@@ -67,6 +71,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of job assignments.</returns>
         [HttpGet]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(IEnumerable<JobAssignmentDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<JobAssignmentDto>>> GetAll(CancellationToken cancellationToken = default)
         {
@@ -81,6 +86,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of job assignments for the driver.</returns>
         [HttpGet("driver/{driverId}")]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrDriver)]
         [ProducesResponseType(typeof(IEnumerable<JobAssignmentDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<JobAssignmentDto>>> GetByDriverId(int driverId, CancellationToken cancellationToken = default)
         {
@@ -95,6 +101,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of job assignments for the job.</returns>
         [HttpGet("job/{jobId}")]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(IEnumerable<JobAssignmentDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<JobAssignmentDto>>> GetByJobId(string jobId, CancellationToken cancellationToken = default)
         {
@@ -108,6 +115,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of active job assignments.</returns>
         [HttpGet("active")]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(IEnumerable<JobAssignmentDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<JobAssignmentDto>>> GetActive(CancellationToken cancellationToken = default)
         {
@@ -123,6 +131,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The created job assignment.</returns>
         [HttpPost]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(JobAssignmentDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -169,6 +178,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The updated job assignment.</returns>
         [HttpPut("{id}/status")]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrDriver)]
         [ProducesResponseType(typeof(JobAssignmentDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -202,6 +212,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>No content if successful; otherwise, 404 Not Found.</returns>
         [HttpDelete("{id}")]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UnassignJob(string id, CancellationToken cancellationToken = default)
@@ -233,18 +244,3 @@ namespace HotshotLogistics.Api.Controllers
     }
 }
 
-/// <summary>
-/// Request model for assigning a job to a driver.
-/// </summary>
-public class AssignJobRequest
-{
-    /// <summary>
-    /// Gets or sets the job ID.
-    /// </summary>
-    public string JobId { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets the driver ID.
-    /// </summary>
-    public int DriverId { get; set; }
-}
