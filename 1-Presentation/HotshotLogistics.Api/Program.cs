@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models; // Add this at the top if not present
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Configure configuration
