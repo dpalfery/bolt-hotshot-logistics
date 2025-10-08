@@ -55,3 +55,7 @@ interface JobStatus {
 Import and render it inside the Admin Dashboard page.
 
 Prepare props for live updates from the backend once SignalR feed is added.
+
+Ensure feature works end to end by adding appropriate test data to the database seeding
+
+Ensure that all backend servers are updated to support new data types
