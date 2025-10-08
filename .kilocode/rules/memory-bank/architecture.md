@@ -7,7 +7,7 @@ The Hotshot Logistics project follows Clean Architecture principles with a numbe
 ### Key Technical Decisions
 
 1. **Native ADO.NET over ORM**: Direct SQL control for performance and flexibility in logistics operations
-2. **ASP.NET Core Web API**: Scalable, full-featured framework for hosting RESTful APIs  
+2. **ASP.NET Core Web API**: Scalable, full-featured framework for hosting RESTful APIs
 3. **Azure Functions**: Event-driven compute for processing messages, queues, or other asynchronous triggers
 4. **SignalR for Real-time**: WebSocket-based communication for live driver tracking and updates
 5. **FluentMigrator**: Database versioning without Entity Framework dependencies
@@ -15,25 +15,39 @@ The Hotshot Logistics project follows Clean Architecture principles with a numbe
 7. **CQRS Pattern**: Separation of read and write operations for complex job management
 8. **Azure Cloud Native**: Leveraging Azure services for scalability and reliability in logistics operations
 9. **Cross-platform Mobile**: React Native for iOS and Android driver app coverage
+10. **Backend for Frontend (BFF) Pattern**: Dedicated backend services for each frontend (Admin Dashboard, Mobile App) to optimize data transfer and tailor logic
+11. **Database Migrations**: All database schema changes must be implemented as a new migration in the `4-Persistence/HotshotLogistics.Data` project using FluentMigrator. After creating the migration, the database must be updated by running the `MigrationRunner` project.
 
 ### Component Architecture
 
-#### Backend API (.NET 8 ASP.NET Core Web API)
+#### Core Services API (.NET 8)
 - **HTTP APIs**: ASP.NET Core Web API RESTful endpoints for CRUD operations on jobs, drivers, customers
 - **Real-time Communication**: SignalR hubs for live GPS tracking and dispatch updates
 - **Background Processing**: Azure Functions for automated billing and notification scheduling
 - **External Integrations**: Payment gateways, mapping services, SMS/email for logistics operations
 
+#### Admin Dashboard BFF (.NET 8 ASP.NET Core Web API)
+- **Data Aggregation**: Aggregates and transforms data from Core Services API for dashboard-specific needs
+- **Optimized Endpoints**: Provides dashboard-optimized endpoints for job management, analytics, and reporting
+- **Real-time Communication**: Manages SignalR connections for live dashboard updates
+- **Authentication & Authorization**: Handles Azure AD authentication and role-based access for logistics managers
+
+#### Mobile App BFF (.NET 8 ASP.NET Core Web API)
+- **Mobile-Optimized APIs**: Tailors data and endpoints specifically for mobile app requirements
+- **Offline Support**: Manages data synchronization and offline capabilities for drivers
+- **Push Notifications**: Handles push notification delivery and management
+- **Location Services**: Processes GPS data and location-based operations for real-time tracking
+
 #### Admin Dashboard (Next.js/React)
 - **Component Architecture**: Atomic design with reusable UI components for logistics workflows
 - **State Management**: React Query for server state, Context API for local state
-- **Real-time Updates**: WebSocket integration for live job status and driver location
+- **API Communication**: Communicates with Admin Dashboard BFF for optimized data retrieval and real-time updates
 - **Authentication**: Azure AD integration with role-based access for logistics managers
 
 #### Mobile App (React Native/Expo)
 - **Cross-platform**: Single codebase for iOS and Android driver operations
 - **Offline Support**: Local data storage and sync for remote delivery areas
-- **Background Processing**: Location tracking and push notifications for job assignments
+- **API Communication**: Communicates with Mobile App BFF for tailored mobile-specific operations
 - **Native Integration**: Camera for proof of delivery, GPS for real-time tracking
 
 ### Data Architecture

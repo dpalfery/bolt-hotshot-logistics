@@ -47,7 +47,12 @@ rule: |
   - Clean up test resources in test teardown
 
   ## Integration Testing
-
+  ### humans testing
+  - humans will also be testing make sure test data persists so that can be supported
+  - Test data should be created to support full integration tests
+  - Do not ever hard code test data in the UI.
+  - Test data or test functions should never be in any code other than tests.
+  
   ### Testing Patterns
   - Test component interactions against real dependencies
   - Use transactions to ensure test isolation

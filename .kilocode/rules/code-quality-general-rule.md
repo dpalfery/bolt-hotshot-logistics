@@ -10,6 +10,7 @@ rule: |
 - Fix all build errors immediately. No exceptions.
 - Resolve all warnings before merging or deploying.
 - Treat warnings as errors in CI/CD to prevent technical debt.
+- Never Ever hard code mock testing data in production code.
 
 ### Configuration & Monitoring
 - Set warning and error policies in project configuration files.

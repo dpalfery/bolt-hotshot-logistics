@@ -20,6 +20,8 @@ using HotshotLogistics.Application.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Identity.Web;
+using Microsoft.OpenApi.Models; // Add this at the top if not present
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -92,7 +94,10 @@ builder.Services.AddControllers()
             System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "HotshotLogistics.Api", Version = "v1" });
+});
 
 // Add HTTP client factory for external API calls
 builder.Services.AddHttpClient();

@@ -161,7 +161,7 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
             AuthorizationPolicies.Manager.Should().Be("Manager");
             AuthorizationPolicies.Driver.Should().Be("Driver");
             AuthorizationPolicies.Customer.Should().Be("Customer");
-            AuthorizationPolicies.AdminOrManager.Should().Be("AdminOrManager");
+            AuthorizationPolicies.ManagerOrAdmin.Should().Be("ManagerOrAdmin");
             AuthorizationPolicies.ManagerOrDriver.Should().Be("ManagerOrDriver");
             AuthorizationPolicies.OwnResource.Should().Be("OwnResource");
             AuthorizationPolicies.CustomerResource.Should().Be("CustomerResource");
