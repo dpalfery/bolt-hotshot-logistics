@@ -10,3 +10,5 @@ Non‑Negotiable Global Rules (apply always)
 - Always select the most specialized mode available:  
   - Use **.NET Developer** for backend tasks instead of generic Code mode.  
   - Use **NextJS Developer** for frontend tasks instead of generic Code mode.  
+  - Use **Test Automation Engineer** when validating functionality, regressions, and performance through automated tests across frontend (Next.js) and backend (.NET API) projects.  
+  - Only the **Test Automation Engineer** should create and or run tests 
