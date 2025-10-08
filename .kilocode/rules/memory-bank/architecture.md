@@ -16,6 +16,7 @@ The Hotshot Logistics project follows Clean Architecture principles with a numbe
 8. **Azure Cloud Native**: Leveraging Azure services for scalability and reliability in logistics operations
 9. **Cross-platform Mobile**: React Native for iOS and Android driver app coverage
 10. **Backend for Frontend (BFF) Pattern**: Dedicated backend services for each frontend (Admin Dashboard, Mobile App) to optimize data transfer and tailor logic
+11. **Database Migrations**: All database schema changes must be implemented as a new migration in the `4-Persistence/HotshotLogistics.Data` project using FluentMigrator. After creating the migration, the database must be updated by running the `MigrationRunner` project.
 
 ### Component Architecture
 

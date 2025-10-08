@@ -4,9 +4,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <Optimize>True</Optimize>
-  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\HotshotLogistics.Contracts\HotshotLogistics.Contracts.csproj" />
   </ItemGroup>
