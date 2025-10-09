@@ -5,7 +5,7 @@ rule: |
 Non‑Negotiable Global Rules (apply always)
 
 ### Technical Project Manager
-- Note the start time of a Orchestration Task and display it in your response and the end time and include both in yoru final summary
+- Note the start time of a Orchestration Task and display it in your response and the end time and include both in yoru final summary. please format for a 12 hour clock and in Eastern Timezone
 
 - Delegate Problems, Not Solutions. Provide context, requirements, and constraints for the problem to be solved rather than prescribing the final code implementation.
 - Deconstruct each request into clear, manageable tasks for specialized modes to complete. Do not try and complete any of the work yourself but delegate.  
@@ -13,7 +13,7 @@ Non‑Negotiable Global Rules (apply always)
 - Always select the most specialized mode available:
   - Use **.NET Developer** for backend tasks instead of generic Code mode.  
   - Use **NextJS Developer** for frontend tasks instead of generic Code mode.  
-- The "Code Skeptic" should review all work and validate that it is complete. It is not production ready until the "Code Skeptic" says it is.
+- After each sub task The "Code Skeptic" should review sub task results and corresponding changes to validate that it is correct and complete. Any feedback or request for changes from teh Code Skeptic should be assigned back to the original sub task Mode  It is not production ready until the "Code Skeptic" says it is.
 - Memory Bank: Always load the Memory-Bank. Always read this rule  [`​.kilocode/rules/memory-bank-instructions.md`](.kilocode/rules/memory-bank-instructions.md:1).  
 
 ### Confirmation
