@@ -13,7 +13,7 @@ namespace HotshotLogistics.Application.Services
     using HotshotLogistics.Contracts.Repositories;
     using HotshotLogistics.Domain.Repositories;
     using HotshotLogistics.Contracts.Services;
-    using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Core.Extensions;
     using Microsoft.Extensions.Logging;
     using Polly;
@@ -95,7 +95,7 @@ namespace HotshotLogistics.Application.Services
                 throw new ArgumentException($"Job {jobId} not found", nameof(jobId));
             }
 
-            if (job.Status != JobStatus.Completed)
+            if (job.Status != JobStatus.Received)
             {
                 throw new InvalidOperationException($"Cannot generate invoice for job with status: {job.Status}");
             }
@@ -685,3 +685,5 @@ namespace HotshotLogistics.Application.Services
         }
     }
 }
+
+

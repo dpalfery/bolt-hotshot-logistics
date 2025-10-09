@@ -103,3 +103,7 @@ public interface ICustomerService
     /// <returns>True if the customer is valid; otherwise, false.</returns>
     Task<bool> ValidateCustomerAsync(ICustomer customer, CancellationToken cancellationToken = default);
 }
+
+
+
+

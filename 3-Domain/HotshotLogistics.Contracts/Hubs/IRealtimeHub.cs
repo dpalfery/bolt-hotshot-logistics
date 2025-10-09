@@ -42,3 +42,8 @@ public class NotificationMessage
     public string? UserId { get; set; }
     public Dictionary<string, object>? Data { get; set; }
 }
+
+
+
+
+

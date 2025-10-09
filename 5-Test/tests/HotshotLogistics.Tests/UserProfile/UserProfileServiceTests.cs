@@ -7,6 +7,7 @@ using Microsoft.Graph.Models;
 using HotshotLogistics.Application.Services;
 using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -229,3 +230,5 @@ public class UserProfileServiceTests
     }
 }
 #endif
+
+

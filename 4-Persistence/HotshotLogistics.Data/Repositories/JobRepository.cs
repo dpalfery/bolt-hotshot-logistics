@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using HotshotLogistics.Contracts.Models;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Core.Repositories;
-using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
@@ -223,8 +223,8 @@ namespace HotshotLogistics.Data.Repositories
 
             using var command = new SqlCommand(query, connection);
             command.Parameters.AddWithValue("@CurrentTime", DateTime.UtcNow);
-            command.Parameters.AddWithValue("@DeliveredStatus", (int)JobStatus.Completed);
-            command.Parameters.AddWithValue("@CancelledStatus", (int)JobStatus.Cancelled);
+            command.Parameters.AddWithValue("@DeliveredStatus", (int)JobStatus.Received);
+            command.Parameters.AddWithValue("@CancelledStatus", (int)JobStatus.Pending);
 
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
             while (await reader.ReadAsync(cancellationToken))
@@ -461,24 +461,21 @@ namespace HotshotLogistics.Data.Repositories
             {
                 if (filter.IsActive.Value)
                 {
-                    conditions.Add("Status NOT IN (@CancelledStatus, @CompletedStatus)");
-                    parameters.Add(new SqlParameter("@CancelledStatus", SqlDbType.Int) { Value = (int)JobStatus.Cancelled });
-                    parameters.Add(new SqlParameter("@CompletedStatus", SqlDbType.Int) { Value = (int)JobStatus.Completed });
+                    conditions.Add("Status NOT IN (@ReceivedStatus)");
+                    parameters.Add(new SqlParameter("@ReceivedStatus", SqlDbType.Int) { Value = (int)JobStatus.Received });
                 }
                 else
                 {
-                    conditions.Add("Status IN (@CancelledStatus, @CompletedStatus)");
-                    parameters.Add(new SqlParameter("@CancelledStatus", SqlDbType.Int) { Value = (int)JobStatus.Cancelled });
-                    parameters.Add(new SqlParameter("@CompletedStatus", SqlDbType.Int) { Value = (int)JobStatus.Completed });
+                    conditions.Add("Status IN (@ReceivedStatus)");
+                    parameters.Add(new SqlParameter("@ReceivedStatus", SqlDbType.Int) { Value = (int)JobStatus.Received });
                 }
             }
 
             if (filter.IsOverdue.HasValue && filter.IsOverdue.Value)
             {
-                conditions.Add("EstimatedDeliveryTime < @CurrentTime AND Status NOT IN (@DeliveredStatus, @CancelledStatus)");
+                conditions.Add("EstimatedDeliveryTime < @CurrentTime AND Status NOT IN (@DeliveredStatus)");
                 parameters.Add(new SqlParameter("@CurrentTime", SqlDbType.DateTime2) { Value = DateTime.UtcNow });
-                parameters.Add(new SqlParameter("@DeliveredStatus", SqlDbType.Int) { Value = (int)JobStatus.Completed });
-                parameters.Add(new SqlParameter("@CancelledStatus", SqlDbType.Int) { Value = (int)JobStatus.Cancelled });
+                parameters.Add(new SqlParameter("@DeliveredStatus", SqlDbType.Int) { Value = (int)JobStatus.Received });
             }
 
             var whereClause = conditions.Any() ? $" WHERE {string.Join(" AND ", conditions)}" : string.Empty;
@@ -566,3 +563,5 @@ namespace HotshotLogistics.Data.Repositories
         }
     }
 }
+
+

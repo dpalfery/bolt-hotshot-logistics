@@ -113,3 +113,7 @@ public interface IJobRepository
     /// <returns>A collection of jobs assigned to the driver.</returns>
     Task<IEnumerable<IJob>> GetByDriverIdAsync(int driverId, CancellationToken cancellationToken = default);
 }
+
+
+
+

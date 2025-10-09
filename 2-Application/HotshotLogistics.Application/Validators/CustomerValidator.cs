@@ -1,6 +1,6 @@
 using FluentValidation;
 using HotshotLogistics.Contracts.Models;
-using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
 
 namespace HotshotLogistics.Application.Validators;
 
@@ -177,3 +177,5 @@ public class CreditTermsValidator : AbstractValidator<CreditTerms>
             .GreaterThan(DateTime.UtcNow).When(x => x.ExpiryDate.HasValue).WithMessage("Expiry date must be in the future.");
     }
 }
+
+

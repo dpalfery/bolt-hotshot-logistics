@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
 using Xunit;
 using HotshotLogistics.Contracts.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -239,3 +239,5 @@ namespace HotshotLogistics.IntegrationTests
         }
     }
 }
+
+

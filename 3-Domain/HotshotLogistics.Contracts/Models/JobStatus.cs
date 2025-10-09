@@ -16,33 +16,15 @@ namespace HotshotLogistics.Contracts.Models
         Assigned,
 
         /// <summary>
-        /// Driver is en route to pickup location.
+        /// Driver is en route to pickup/delivery location.
         /// </summary>
         EnRoute,
 
         /// <summary>
-        /// Job is in progress (pickup completed, en route to delivery).
+        /// Job has been completed and cargo received by customer.
         /// </summary>
-        InProgress,
-
-        /// <summary>
-        /// Driver is en route to delivery location.
-        /// </summary>
-        InTransit,
-
-        /// <summary>
-        /// Job has been completed successfully.
-        /// </summary>
-        Completed,
-
-        /// <summary>
-        /// Job has been delivered successfully.
-        /// </summary>
-        Delivered,
-
-        /// <summary>
-        /// Job has been cancelled.
-        /// </summary>
-        Cancelled
+        Received
     }
 }
+
+

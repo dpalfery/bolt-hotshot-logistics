@@ -6,6 +6,7 @@ namespace HotshotLogistics.IntegrationTests
 {
     using System.Net;
     using System.Net.Http;
+    using System.Net.Http.Headers;
     using System.Threading.Tasks;
     using HotshotLogistics.Api;
     using Microsoft.AspNetCore.Mvc.Testing;
@@ -13,7 +14,7 @@ namespace HotshotLogistics.IntegrationTests
     using FluentAssertions;
     using HotshotLogistics.Contracts.Models;
     using System.Text.Json;
-    using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
 
     /// <summary>
     /// Integration tests for the BillingController.
@@ -28,6 +29,8 @@ namespace HotshotLogistics.IntegrationTests
         public BillingControllerIntegrationTests(CustomWebApplicationFactory<Program> factory)
             : base(factory)
         {
+            // Set up test authentication
+            Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Test");
         }
 
         /// <summary>
@@ -72,3 +75,5 @@ namespace HotshotLogistics.IntegrationTests
         }
     }
 }
+
+

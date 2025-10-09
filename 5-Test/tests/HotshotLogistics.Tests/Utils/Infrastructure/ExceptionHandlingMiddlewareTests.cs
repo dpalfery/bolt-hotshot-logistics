@@ -13,6 +13,7 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
     using FluentAssertions;
     using HotshotLogistics.Api.Middleware;
     using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Core.Exceptions;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -246,3 +247,5 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
         }
     }
 }
+
+

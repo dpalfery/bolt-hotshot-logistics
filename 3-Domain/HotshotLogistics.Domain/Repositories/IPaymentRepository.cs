@@ -1,6 +1,6 @@
 using HotshotLogistics.Contracts.Models;
 using HotshotLogistics.Contracts.Repositories;
-using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
 
 namespace HotshotLogistics.Domain.Repositories;
 
@@ -85,3 +85,5 @@ public interface IPaymentRepository
     /// <returns>True if the update was successful.</returns>
     Task<bool> UpdatePaymentStatusAsync(string paymentId, PaymentStatus status, string? processorResponse = null, CancellationToken cancellationToken = default);
 }
+
+

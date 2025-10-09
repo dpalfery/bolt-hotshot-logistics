@@ -10,6 +10,7 @@ namespace HotshotLogistics.Application.Services
     using System.Threading;
     using System.Threading.Tasks;
     using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Repositories;
     using HotshotLogistics.Contracts.Services;
     using HotshotLogistics.Core.Exceptions;
@@ -182,7 +183,7 @@ namespace HotshotLogistics.Application.Services
             }
 
             // Check if job can be deleted (only allow deletion of jobs that haven't started)
-            if (job.Status != JobStatus.Pending && job.Status != JobStatus.Cancelled)
+            if (job.Status != JobStatus.Pending)
             {
                 logger.LogWarning("Cannot delete job with status: {Status}", job.Status);
                 throw new BusinessRuleException($"Cannot delete job with status: {job.Status}");
@@ -270,19 +271,11 @@ namespace HotshotLogistics.Application.Services
             switch (status)
             {
                 case JobStatus.EnRoute:
-                    // Driver is en route to pickup
-                    job.Tracking.CurrentStatus = "En route to pickup";
+                    // Driver is en route to pickup or delivery
+                    job.Tracking.CurrentStatus = "En route";
                     break;
-                case JobStatus.InProgress:
-                    // Pickup completed, en route to delivery
-                    job.Tracking.CurrentStatus = "In progress - en route to delivery";
-                    break;
-                case JobStatus.Completed:
-                    job.Tracking.CurrentStatus = "Delivered";
-                    job.Tracking.IsActive = false;
-                    break;
-                case JobStatus.Cancelled:
-                    job.Tracking.CurrentStatus = "Cancelled";
+                case JobStatus.Received:
+                    job.Tracking.CurrentStatus = "Delivered and received";
                     job.Tracking.IsActive = false;
                     break;
             }
@@ -532,7 +525,7 @@ namespace HotshotLogistics.Application.Services
                 return null;
             }
 
-            if (job.Status == JobStatus.Completed || job.Status == JobStatus.Cancelled)
+            if (job.Status == JobStatus.Received)
             {
                 return null; // No ETA needed for completed/cancelled jobs
             }
@@ -653,7 +646,6 @@ namespace HotshotLogistics.Application.Services
             var driverJobs = await jobRepository.GetByDriverIdAsync(driverId, cancellationToken);
             var activeJobs = driverJobs.Where(j =>
                 j.Status == JobStatus.Assigned ||
-                j.Status == JobStatus.InProgress ||
                 j.Status == JobStatus.EnRoute);
 
             foreach (var activeJob in activeJobs)
@@ -683,10 +675,8 @@ namespace HotshotLogistics.Application.Services
             var statusMessage = job.Status switch
             {
                 JobStatus.Assigned => "Your job has been assigned to a driver",
-                JobStatus.EnRoute => "Driver is en route for pickup",
-                JobStatus.InProgress => "Your job is now in progress - driver is en route to delivery",
-                JobStatus.Completed => "Your job has been completed successfully",
-                JobStatus.Cancelled => "Your job has been cancelled",
+                JobStatus.EnRoute => "Driver is en route",
+                JobStatus.Received => "Your job has been completed and cargo received",
                 _ => $"Your job status has been updated to {job.Status}"
             };
 
@@ -703,10 +693,8 @@ namespace HotshotLogistics.Application.Services
             {
                 var driverMessage = job.Status switch
                 {
-                    JobStatus.EnRoute => "Please proceed to pickup location",
-                    JobStatus.InProgress => "Pickup completed - proceed to delivery location",
-                    JobStatus.Completed => "Job has been marked as completed",
-                    JobStatus.Cancelled => "Job has been cancelled",
+                    JobStatus.EnRoute => "Please proceed to pickup/delivery location",
+                    JobStatus.Received => "Job has been marked as completed and received",
                     _ => $"Job status updated to {job.Status}"
                 };
 
@@ -720,3 +708,5 @@ namespace HotshotLogistics.Application.Services
         }
     }
 }
+
+

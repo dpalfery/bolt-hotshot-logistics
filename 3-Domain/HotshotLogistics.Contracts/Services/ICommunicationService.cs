@@ -20,3 +20,7 @@ public interface ICommunicationService
     /// <returns>True if the message was sent successfully, false otherwise.</returns>
     Task<bool> SendAsync(CommunicationMessage message, CancellationToken cancellationToken = default);
 }
+
+
+
+

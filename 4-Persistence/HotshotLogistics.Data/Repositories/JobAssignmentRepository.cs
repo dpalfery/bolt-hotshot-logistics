@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using HotshotLogistics.Contracts.Models;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Core.Repositories;
-using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
@@ -218,3 +218,5 @@ internal class JobAssignmentRepository : BaseRepository<JobAssignmentDto>, IJobA
         };
     }
 }
+
+

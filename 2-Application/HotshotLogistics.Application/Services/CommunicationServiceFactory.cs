@@ -8,6 +8,7 @@ namespace HotshotLogistics.Application.Services
     using System.Collections.Generic;
     using System.Linq;
     using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Services;
     using Microsoft.Extensions.Logging;
 
@@ -53,3 +54,5 @@ namespace HotshotLogistics.Application.Services
         }
     }
 }
+
+

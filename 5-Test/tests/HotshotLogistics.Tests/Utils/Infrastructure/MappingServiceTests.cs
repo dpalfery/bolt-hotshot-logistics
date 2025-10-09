@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using HotshotLogistics.Application.Services;
 using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Data.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -815,3 +816,5 @@ public class MappingServiceTests
     #endregion
 }
 }
+
+

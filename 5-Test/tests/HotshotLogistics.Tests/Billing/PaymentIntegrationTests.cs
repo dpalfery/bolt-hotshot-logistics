@@ -14,7 +14,7 @@ using HotshotLogistics.Contracts.Models;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Domain.Repositories;
 using HotshotLogistics.Contracts.Services;
-using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -401,3 +401,5 @@ public class PaymentIntegrationTests
     }
 }
 }
+
+

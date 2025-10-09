@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Contracts.Hubs;
 using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
 
 namespace HotshotLogistics.Application.Services;
 
@@ -204,3 +205,5 @@ public class RealtimeService : IRealtimeService
         }
     }
 }
+
+

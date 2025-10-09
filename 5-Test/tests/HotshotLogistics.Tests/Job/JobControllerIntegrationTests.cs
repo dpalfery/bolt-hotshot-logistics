@@ -6,10 +6,11 @@ namespace HotshotLogistics.Tests.Job
 {
     using System.Net;
     using System.Net.Http;
+    using System.Net.Http.Headers;
     using System.Text.Json;
     using System.Threading.Tasks;
     using HotshotLogistics.Api;
-    using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Xunit;
     using FluentAssertions;
@@ -28,6 +29,8 @@ namespace HotshotLogistics.Tests.Job
         public JobControllerIntegrationTests(WebApplicationFactory<Program> factory)
             : base(factory)
         {
+            // Set up test authentication
+            Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Test");
         }
 
         /// <summary>
@@ -73,3 +76,4 @@ namespace HotshotLogistics.Tests.Job
         }
     }
 }
+

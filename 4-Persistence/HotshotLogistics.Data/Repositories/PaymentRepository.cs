@@ -9,7 +9,7 @@ using System.Data.Common;
 using HotshotLogistics.Contracts.Models;
 using HotshotLogistics.Domain.Repositories;
 using HotshotLogistics.Core.Repositories;
-using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -160,3 +160,5 @@ internal class PaymentRepository : BaseRepository<Payment>, IPaymentRepository, 
         };
     }
 }
+
+

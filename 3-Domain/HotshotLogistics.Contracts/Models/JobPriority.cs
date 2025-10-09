@@ -11,3 +11,5 @@ namespace HotshotLogistics.Contracts.Models
         High
     }
 }
+
+

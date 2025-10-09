@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using HotshotLogistics.Contracts.Hubs;
 using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Contracts.Services;
 using System.Text.Json;
 
@@ -171,3 +172,4 @@ public class RealtimeHub : Hub<IRealtimeHubClient>
         }
     }
 }
+

@@ -40,3 +40,5 @@ namespace HotshotLogistics.Contracts.Models
         public string ErrorMessage { get; set; } = string.Empty;
     }
 }
+
+

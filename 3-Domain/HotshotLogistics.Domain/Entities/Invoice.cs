@@ -2,12 +2,13 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace HotshotLogistics.Domain.Models
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using HotshotLogistics.Contracts.Models;
+
+namespace HotshotLogistics.Domain.Entities
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using HotshotLogistics.Contracts.Models;
 
     /// <summary>
     /// Represents an invoice in the system.
@@ -242,3 +243,5 @@ namespace HotshotLogistics.Domain.Models
         }
     }
 }
+
+

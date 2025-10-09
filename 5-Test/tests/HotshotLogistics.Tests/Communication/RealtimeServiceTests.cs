@@ -5,6 +5,7 @@ using FluentAssertions;
 using HotshotLogistics.Application.Services;
 using HotshotLogistics.Contracts.Hubs;
 using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
 namespace HotshotLogistics.Tests.Communication
 {
     /// <summary>
@@ -318,3 +319,5 @@ public class RealtimeServiceTests
     }
 }
 }
+
+

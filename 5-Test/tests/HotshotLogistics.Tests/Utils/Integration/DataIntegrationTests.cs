@@ -12,7 +12,7 @@ namespace HotshotLogistics.Tests.Utils.Integration
     using HotshotLogistics.Contracts.Models;
     using HotshotLogistics.Contracts.Repositories;
     using HotshotLogistics.Contracts.Services;
-    using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
     using Microsoft.Extensions.Logging;
     using Moq;
     using Xunit;
@@ -189,3 +189,5 @@ namespace HotshotLogistics.Tests.Utils.Integration
         }
     }
 }
+
+

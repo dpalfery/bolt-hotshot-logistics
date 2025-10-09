@@ -71,3 +71,8 @@ public interface IJobAssignmentService
     /// <returns>True if the assignment was deleted; otherwise, false.</returns>
     Task<bool> UnassignJobAsync(string id, CancellationToken cancellationToken = default);
 }
+
+
+
+
+

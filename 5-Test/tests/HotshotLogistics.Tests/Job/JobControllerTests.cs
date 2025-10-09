@@ -12,6 +12,7 @@ namespace HotshotLogistics.Tests.Job
     using FluentAssertions;
     using HotshotLogistics.Api.Controllers;
     using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Repositories;
     using HotshotLogistics.Contracts.Services;
     using FluentValidation;
@@ -570,3 +571,5 @@ namespace HotshotLogistics.Tests.Job
         }
     }
 }
+
+

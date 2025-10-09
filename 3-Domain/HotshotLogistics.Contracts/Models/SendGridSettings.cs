@@ -20,3 +20,5 @@ public class SendGridSettings
     /// </summary>
     public string FromName { get; set; } = string.Empty;
 }
+
+

@@ -20,3 +20,5 @@ public enum CommunicationType
     /// </summary>
     Push
 }
+
+

@@ -6,7 +6,7 @@ using System.Linq;
 using HotshotLogistics.Contracts.Models;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Core.Repositories;
-using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
@@ -298,3 +298,5 @@ internal class CustomerRepository : BaseRepository<ICustomer>, ICustomerReposito
         return $"{address.Street}, {address.City}, {address.State} {address.ZipCode}";
     }
 }
+
+

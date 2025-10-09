@@ -2,7 +2,7 @@ namespace HotshotLogistics.Tests.TestHelpers
 {
     using System;
     using System.Collections.Generic;
-    using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Models;
 
     /// <summary>
@@ -40,3 +40,4 @@ namespace HotshotLogistics.Tests.TestHelpers
         public Customer Build() => customer;
     }
 }
+

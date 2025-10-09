@@ -11,7 +11,7 @@ namespace HotshotLogistics.Api.Controllers
     using HotshotLogistics.Application.Authorization;
     using HotshotLogistics.Contracts.Models;
     using HotshotLogistics.Contracts.Services;
-    using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
@@ -416,3 +416,5 @@ namespace HotshotLogistics.Api.Controllers
         public decimal NewLimit { get; set; }
     }
 }
+
+

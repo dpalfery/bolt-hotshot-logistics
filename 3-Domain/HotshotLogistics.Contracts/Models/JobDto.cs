@@ -6,7 +6,7 @@ namespace HotshotLogistics.Contracts.Models
 {
     using System;
     using HotshotLogistics.Contracts.Models;
-
+    
     /// <summary>
     /// Data transfer object for job information.
     /// </summary>
@@ -111,3 +111,6 @@ namespace HotshotLogistics.Contracts.Models
         public TrackingInfo Tracking { get; set; } = new TrackingInfo();
     }
 }
+
+
+

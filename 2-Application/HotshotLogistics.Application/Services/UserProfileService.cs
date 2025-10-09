@@ -8,6 +8,7 @@ namespace HotshotLogistics.Application.Services
     using System.Threading;
     using System.Threading.Tasks;
     using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Services;
     using Microsoft.Extensions.Logging;
     using Microsoft.Graph;
@@ -141,3 +142,5 @@ namespace HotshotLogistics.Application.Services
         }
     }
 }
+
+

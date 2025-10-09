@@ -14,7 +14,7 @@ namespace HotshotLogistics.Tests.Customer
     using HotshotLogistics.Contracts.Models;
     using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Tests.TestHelpers;
-    using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
     using Moq;
@@ -562,3 +562,5 @@ using HotshotLogistics.Tests.TestHelpers;
         }
     }
 }
+
+

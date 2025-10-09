@@ -2,7 +2,7 @@ using HotshotLogistics.Application.Services;
 using HotshotLogistics.Contracts.Models;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Contracts.Services;
-using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -344,3 +344,5 @@ var job = new HotshotLogistics.Domain.Models.Job
     }
 }
 }
+
+

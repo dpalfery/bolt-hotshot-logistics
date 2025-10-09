@@ -161,3 +161,5 @@ namespace HotshotLogistics.Contracts.Models
         Other = 99
     }
 }
+
+

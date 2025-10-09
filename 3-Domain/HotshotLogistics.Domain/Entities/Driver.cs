@@ -1,9 +1,10 @@
-namespace HotshotLogistics.Domain.Models;
-
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using HotshotLogistics.Contracts.Models;
 
+namespace HotshotLogistics.Domain.Entities
+{
 /// <summary>
 /// Represents a driver in the system.
 /// </summary>
@@ -221,3 +222,6 @@ public class Driver : IDriver
                IsActive;
     }
 }
+}
+
+

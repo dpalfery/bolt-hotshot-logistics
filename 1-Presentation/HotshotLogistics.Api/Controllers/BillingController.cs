@@ -11,6 +11,7 @@ namespace HotshotLogistics.Api.Controllers
     using System.Threading.Tasks;
     using HotshotLogistics.Application.Services;
     using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Services;
     using Microsoft.AspNetCore.Authorization;
     using HotshotLogistics.Application.Authorization;
@@ -665,3 +666,5 @@ namespace HotshotLogistics.Api.Controllers
         public int DaysOverdue { get; set; }
     }
 }
+
+

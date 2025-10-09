@@ -37,3 +37,7 @@ namespace HotshotLogistics.Contracts.Services
         Task SyncUserProfileAsync(string userId, CancellationToken cancellationToken = default);
     }
 }
+
+
+
+

@@ -31,3 +31,7 @@ public interface IJobService
     Task<bool> ValidateJobAsync(IJob job, CancellationToken cancellationToken = default);
     Task<bool> IsDriverAvailableAsync(int driverId, DateTime startTime, DateTime? endTime = null, CancellationToken cancellationToken = default);
 }
+
+
+
+

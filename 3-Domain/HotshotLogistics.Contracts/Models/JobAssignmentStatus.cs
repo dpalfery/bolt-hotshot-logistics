@@ -8,3 +8,5 @@ public enum JobAssignmentStatus
     Active,
     Completed
 }
+
+

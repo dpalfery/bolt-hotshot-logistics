@@ -12,7 +12,7 @@ namespace HotshotLogistics.Application.Services
     using HotshotLogistics.Contracts.Models;
     using HotshotLogistics.Contracts.Repositories;
     using HotshotLogistics.Contracts.Services;
-    using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
     using Microsoft.Extensions.Caching.Distributed;
     using Microsoft.Extensions.Logging;
     using System.Text.Json;
@@ -386,22 +386,22 @@ namespace HotshotLogistics.Application.Services
 
             var statusChanged = false;
 
-            // Check if driver has arrived at pickup location
+            // Check if driver has arrived at pickup or delivery location
             if (job.Status == JobStatus.EnRoute &&
                 distanceToPickup.HasValue &&
                 distanceToPickup.Value <= proximityThresholdMiles)
             {
-                job.Status = JobStatus.InProgress;
                 job.Tracking.CurrentStatus = "Arrived at pickup location";
                 statusChanged = true;
             }
             // Check if driver has arrived at delivery location
-            else if (job.Status == JobStatus.InProgress &&
+            else if (job.Status == JobStatus.EnRoute &&
                      distanceToDelivery.HasValue &&
                      distanceToDelivery.Value <= proximityThresholdMiles)
             {
-                // Don't automatically mark as completed - wait for driver confirmation
+                // Don't automatically mark as received - wait for driver confirmation
                 job.Tracking.CurrentStatus = "Arrived at delivery location";
+                statusChanged = true;
             }
 
             // Send notifications if status changed
@@ -558,3 +558,5 @@ namespace HotshotLogistics.Application.Services
         }
     }
 }
+
+

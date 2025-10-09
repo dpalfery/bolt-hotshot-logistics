@@ -1,6 +1,6 @@
-namespace HotshotLogistics.Domain.Models;
-
 using HotshotLogistics.Contracts.Models;
+
+namespace HotshotLogistics.Domain.Entities;
 
 /// <summary>
 /// Represents a customer in the system.
@@ -141,3 +141,5 @@ public class Customer : ICustomer
                 !string.IsNullOrWhiteSpace(Email);
     }
 }
+
+

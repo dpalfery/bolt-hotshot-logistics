@@ -10,6 +10,7 @@ namespace HotshotLogistics.Api.Controllers
     using System.Threading.Tasks;
     using HotshotLogistics.Application.Authorization;
     using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Services;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;
@@ -134,7 +135,7 @@ namespace HotshotLogistics.Api.Controllers
                     return BadRequest("Driver data is required");
                 }
 
-                var driver = new HotshotLogistics.Domain.Models.Driver
+                var driver = new HotshotLogistics.Domain.Entities.Driver
                 {
                      PersonalInfo = new PersonalInfo
                      {
@@ -207,7 +208,7 @@ namespace HotshotLogistics.Api.Controllers
 
             try
             {
-                 var driver = new HotshotLogistics.Domain.Models.Driver
+                 var driver = new HotshotLogistics.Domain.Entities.Driver
                 {
                      Id = driverDto.Id,
                      PersonalInfo = new PersonalInfo
@@ -289,3 +290,4 @@ namespace HotshotLogistics.Api.Controllers
 
     }
 }
+

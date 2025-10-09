@@ -306,3 +306,7 @@ public class InvoiceSummary
     /// </summary>
     public double AverageDaysToPayment { get; set; }
 }
+
+
+
+

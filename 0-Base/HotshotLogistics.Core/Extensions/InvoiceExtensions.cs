@@ -6,6 +6,7 @@ namespace HotshotLogistics.Core.Extensions
 {
     using System;
     using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
 
     /// <summary>
     /// Extension methods for invoice operations.
@@ -93,3 +94,5 @@ namespace HotshotLogistics.Core.Extensions
         }
     }
 }
+
+

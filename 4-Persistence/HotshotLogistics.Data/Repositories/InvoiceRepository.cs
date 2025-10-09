@@ -6,7 +6,7 @@ using System.Text;
 using HotshotLogistics.Contracts.Models;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Core.Repositories;
-using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 
 /// <summary>
@@ -831,3 +831,5 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     }
 #pragma warning restore SA1202
 }
+
+

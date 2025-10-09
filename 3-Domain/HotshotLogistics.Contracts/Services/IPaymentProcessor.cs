@@ -186,3 +186,7 @@ public class PaymentStatusUpdate
     /// </summary>
     public decimal Amount { get; set; }
 }
+
+
+
+

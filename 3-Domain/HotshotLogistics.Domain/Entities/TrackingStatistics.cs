@@ -2,7 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace HotshotLogistics.Contracts.Models
+namespace HotshotLogistics.Domain.Entities
 {
     using System;
 
@@ -113,3 +113,4 @@ namespace HotshotLogistics.Contracts.Models
         }
     }
 }
+

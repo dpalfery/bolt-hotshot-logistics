@@ -15,3 +15,5 @@ public class NotificationHubSettings
     /// </summary>
     public string HubName { get; set; } = string.Empty;
 }
+
+

@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using HotshotLogistics.Contracts.Models;
-using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
 using Microsoft.AspNetCore.Mvc.Testing;
 using System.Collections.Generic;
 using System.Linq;
@@ -168,3 +168,5 @@ namespace HotshotLogistics.IntegrationTests
         }
     }
 }
+
+

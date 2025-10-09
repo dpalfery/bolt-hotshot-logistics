@@ -1,7 +1,6 @@
 using HotshotLogistics.Contracts.Models;
 
-namespace HotshotLogistics.Domain.Models;
-
+namespace HotshotLogistics.Domain.Entities;
 /// <summary>
 /// Represents a job assignment to a driver in the system.
 /// </summary>
@@ -48,3 +47,5 @@ public class JobAssignment : IJobAssignment
         }
     }
 }
+
+

@@ -2,11 +2,12 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace HotshotLogistics.Contracts.Models
+namespace HotshotLogistics.Domain.Entities
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+using HotshotLogistics.Contracts.Models;
 
     /// <summary>
     /// Represents an account statement for a customer.
@@ -153,3 +154,5 @@ namespace HotshotLogistics.Contracts.Models
         public decimal Total => Current + Days1To30 + Days31To60 + Days61To90 + Over90Days;
     }
 }
+
+

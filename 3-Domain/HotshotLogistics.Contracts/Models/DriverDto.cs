@@ -1,7 +1,6 @@
 namespace HotshotLogistics.Contracts.Models;
 
 using HotshotLogistics.Contracts.Models;
-
 /// <summary>
 /// Data Transfer Object for Driver information.
 /// </summary>
@@ -37,3 +36,6 @@ public class DriverDto
     /// <inheritdoc/>
     public DateTime? UpdatedAt { get; set; }
 }
+
+
+

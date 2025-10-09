@@ -39,14 +39,13 @@ public class UpdateJobStatusDistribution : Migration
                 }
             }
 
-            // Distribute statuses: 30% Pending, 25% Assigned, 20% EnRoute, 15% InProgress, 10% InTransit
+            // Distribute statuses: 40% Pending, 30% Assigned, 20% EnRoute, 10% Received
             var statusDistribution = new[]
             {
-                (Contracts.Models.JobStatus.Pending, 0.30),
-                (Contracts.Models.JobStatus.Assigned, 0.25),
+                (Contracts.Models.JobStatus.Pending, 0.40),
+                (Contracts.Models.JobStatus.Assigned, 0.30),
                 (Contracts.Models.JobStatus.EnRoute, 0.20),
-                (Contracts.Models.JobStatus.InProgress, 0.15),
-                (Contracts.Models.JobStatus.InTransit, 0.10)
+                (Contracts.Models.JobStatus.Received, 0.10)
             };
 
             foreach (var jobId in jobIds)

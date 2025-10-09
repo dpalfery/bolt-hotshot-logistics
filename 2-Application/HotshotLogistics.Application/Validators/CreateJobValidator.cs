@@ -1,5 +1,6 @@
 using FluentValidation;
 using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
 
 namespace HotshotLogistics.Application.Validators;
 
@@ -198,3 +199,5 @@ public class PricingDetailsValidator : AbstractValidator<PricingDetails?>
         });
     }
 }
+
+

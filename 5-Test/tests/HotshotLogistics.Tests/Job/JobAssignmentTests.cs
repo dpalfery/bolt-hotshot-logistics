@@ -7,7 +7,7 @@ namespace HotshotLogistics.Tests.Job
 
     using System;
     using HotshotLogistics.Contracts.Models;
-    using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
     using Xunit;
 
     /// <summary>
@@ -87,3 +87,5 @@ namespace HotshotLogistics.Tests.Job
         }
     }
 }
+
+

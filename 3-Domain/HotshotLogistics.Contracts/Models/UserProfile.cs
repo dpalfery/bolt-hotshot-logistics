@@ -80,3 +80,5 @@ namespace HotshotLogistics.Contracts.Models
         public List<string>? Roles { get; set; }
     }
 }
+
+

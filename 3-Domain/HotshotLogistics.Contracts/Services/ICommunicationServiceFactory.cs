@@ -14,3 +14,7 @@ public interface ICommunicationServiceFactory
     /// <returns>The communication service instance.</returns>
     ICommunicationService GetService(CommunicationType type);
 }
+
+
+
+

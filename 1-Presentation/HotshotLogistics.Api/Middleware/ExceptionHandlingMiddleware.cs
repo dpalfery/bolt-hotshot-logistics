@@ -9,6 +9,7 @@ namespace HotshotLogistics.Api.Middleware
     using System.Text.Json;
     using System.Threading.Tasks;
     using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Core.Exceptions;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Logging;
@@ -170,3 +171,5 @@ namespace HotshotLogistics.Api.Middleware
         }
     }
 }
+
+

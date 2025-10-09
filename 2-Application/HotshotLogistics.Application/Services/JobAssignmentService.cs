@@ -11,6 +11,7 @@ namespace HotshotLogistics.Application.Services
     using System.Threading;
     using System.Threading.Tasks;
     using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Repositories;
     using HotshotLogistics.Contracts.Services;
 
@@ -161,3 +162,5 @@ namespace HotshotLogistics.Application.Services
         }
     }
 }
+
+

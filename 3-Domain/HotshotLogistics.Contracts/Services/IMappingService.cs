@@ -66,3 +66,7 @@ namespace HotshotLogistics.Contracts.Services
         Task<DistanceResult> CalculateDistanceAsync(Location origin, Location destination, CancellationToken cancellationToken = default);
     }
 }
+
+
+
+

@@ -10,7 +10,7 @@ using FluentAssertions;
 using HotshotLogistics.Contracts.Models;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Data.Repositories;
-using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 
@@ -503,3 +503,5 @@ namespace HotshotLogistics.Tests.Tracking
         }
     }
 }
+
+

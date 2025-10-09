@@ -12,6 +12,7 @@ namespace HotshotLogistics.Api.Controllers
     using FluentValidation;
     using HotshotLogistics.Application.Validators;
     using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Repositories;
     using HotshotLogistics.Contracts.Services;
     using Microsoft.AspNetCore.Authorization;
@@ -533,3 +534,5 @@ using Microsoft.Extensions.Logging;
         public JobStatus Status { get; set; }
     }
 }
+
+

@@ -112,3 +112,7 @@ public class NotificationPreferences
     /// </summary>
     public List<NotificationType> EnabledNotificationTypes { get; set; } = new List<NotificationType>();
 }
+
+
+
+

@@ -1,6 +1,7 @@
 using FluentValidation.TestHelper;
 using HotshotLogistics.Application.Validators;
 using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
 
 namespace HotshotLogistics.Tests.Driver
 {
@@ -307,3 +308,5 @@ public class DriverUpdateValidatorTests
     }
 }
 }
+
+

@@ -27,3 +27,7 @@ public interface ISignalRClientWrapper
     /// </summary>
     Task SendToCallerAsync(string methodName, params object[] args);
 }
+
+
+
+

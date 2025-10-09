@@ -1,6 +1,6 @@
 using FluentValidation;
 using HotshotLogistics.Contracts.Models;
-using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
 
 namespace HotshotLogistics.Application.Validators;
 
@@ -129,3 +129,5 @@ public class RefundPaymentValidator : AbstractValidator<Payment>
                payment.PaymentDate > DateTime.UtcNow.AddDays(-30);
     }
 }
+
+

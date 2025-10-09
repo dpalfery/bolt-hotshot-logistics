@@ -1,6 +1,6 @@
 using HotshotLogistics.Application.Services;
 using HotshotLogistics.Data.Repositories;
-using HotshotLogistics.Domain.Models;
+using HotshotLogistics.Domain.Entities;
 using NetArchTest.Rules;
 namespace HotshotLogistics.Tests.Utils.Infrastructure
 {

@@ -162,3 +162,5 @@ namespace HotshotLogistics.Contracts.Models
         }
     }
 }
+
+

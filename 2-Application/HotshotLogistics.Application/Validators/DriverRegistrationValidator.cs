@@ -1,5 +1,6 @@
 using FluentValidation;
 using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
 
 namespace HotshotLogistics.Application.Validators;
 
@@ -117,3 +118,5 @@ public class DriverUpdateValidator : AbstractValidator<DriverDto>
             .LessThan(DateTime.UtcNow.AddYears(10)).When(x => x.LicenseExpiryDate != default).WithMessage("License expiry date cannot be more than 10 years in the future.");
     }
 }
+
+

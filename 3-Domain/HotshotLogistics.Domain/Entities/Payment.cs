@@ -1,8 +1,8 @@
-namespace HotshotLogistics.Domain.Models;
-
 using System;
 using HotshotLogistics.Contracts.Models;
 
+namespace HotshotLogistics.Domain.Entities
+{
 /// <summary>
 /// Represents a payment in the system.
 /// </summary>
@@ -187,3 +187,6 @@ public class Payment : IPayment
         };
     }
 }
+}
+
+

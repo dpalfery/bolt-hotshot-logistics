@@ -2,6 +2,7 @@ using FluentAssertions;
 using HotshotLogistics.Application.Hubs;
 using HotshotLogistics.Contracts.Hubs;
 using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Contracts.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
@@ -273,3 +274,5 @@ public class RealtimeHubTests
     }
 }
 }
+
+

@@ -117,3 +117,7 @@ public interface ICustomerRepository
     /// <returns>True if the update was successful, false otherwise.</returns>
     Task<bool> UpdateCreditTermsAsync(string customerId, CreditTerms creditTerms);
 }
+
+
+
+

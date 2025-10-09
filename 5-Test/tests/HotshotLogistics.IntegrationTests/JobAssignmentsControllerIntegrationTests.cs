@@ -13,6 +13,7 @@ namespace HotshotLogistics.IntegrationTests
     using Xunit;
     using FluentAssertions;
     using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
     using System.Text.Json;
 
     /// <summary>
@@ -74,3 +75,5 @@ namespace HotshotLogistics.IntegrationTests
         }
     }
 }
+
+

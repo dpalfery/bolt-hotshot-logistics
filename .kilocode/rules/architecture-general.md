@@ -33,7 +33,10 @@ Place files in appropriate numbered folder based on purpose and architectural la
 
 #### 3-Domain/
 **Domain models, contracts, and interfaces**
-- There are two projects in this folder Contracts and Domain. **ALL DTO Objects** go in Domain, **ALL Interfaces** go in Contracts. Interfaces or DTOs should not be defined anywhere else in the solution unless we are creating a single use project for deployment or utility and in that case you should confirm with the Human
+- There are two projects in this folder Contracts and Domain. **ALL DTO Objects** go in Domain, **ALL Interfaces** go in Contracts. 
+- Only Interfaces should be defined in the Contracts project, Interfaces should not be defined anywhere else in the solution.
+- Only DTOs and Models should be dinfined in domain   
+- If you feel you need to violate this you should confirm with the Human
 - Entity definitions, value objects, domain models
 - Repository interfaces, service contracts
 - Domain events, specifications

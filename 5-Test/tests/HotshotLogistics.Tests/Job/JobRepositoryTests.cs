@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Data.Repositories;
 using Microsoft.Extensions.Configuration;
@@ -433,3 +434,5 @@ namespace HotshotLogistics.Tests.Job
         }
     }
 }
+
+

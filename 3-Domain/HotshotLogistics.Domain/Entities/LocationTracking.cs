@@ -2,10 +2,11 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace HotshotLogistics.Domain.Models
+using System;
+using HotshotLogistics.Contracts.Models;
+
+namespace HotshotLogistics.Domain.Entities
 {
-    using System;
-    using HotshotLogistics.Contracts.Models;
 
     /// <summary>
     /// Represents a location tracking record in the system.
@@ -146,3 +147,5 @@ namespace HotshotLogistics.Domain.Models
         }
     }
 }
+
+

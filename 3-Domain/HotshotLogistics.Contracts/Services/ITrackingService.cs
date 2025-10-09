@@ -61,3 +61,7 @@ public interface ITrackingService
     /// <returns>True if the driver has deviated from the route.</returns>
     Task<bool> CheckRouteDeviationAsync(string jobId, LocationUpdate currentLocation, CancellationToken cancellationToken = default);
 }
+
+
+
+

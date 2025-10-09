@@ -13,6 +13,7 @@ namespace HotshotLogistics.Tests.Billing
     using HotshotLogistics.Api.Controllers;
     using HotshotLogistics.Application.Services;
     using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Services;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
@@ -380,3 +381,5 @@ namespace HotshotLogistics.Tests.Billing
         }
     }
 }
+
+

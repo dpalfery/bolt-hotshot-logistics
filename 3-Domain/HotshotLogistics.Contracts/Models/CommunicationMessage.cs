@@ -30,3 +30,5 @@ public class CommunicationMessage
     /// </summary>
     public Dictionary<string, string> TemplateData { get; set; } = new();
 }
+
+

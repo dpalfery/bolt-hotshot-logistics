@@ -11,3 +11,7 @@ namespace HotshotLogistics.Contracts.Repositories
         Task<IDriver> UpdateDriverAsync(IDriver driver, CancellationToken cancellationToken = default);
     }
 }
+
+
+
+

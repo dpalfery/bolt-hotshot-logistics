@@ -143,3 +143,7 @@ namespace HotshotLogistics.Contracts.Repositories
         Task<int> AddBatchAsync(IEnumerable<ILocationTracking> locationTrackingRecords);
     }
 }
+
+
+
+
