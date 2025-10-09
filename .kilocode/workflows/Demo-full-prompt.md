@@ -80,6 +80,6 @@ Update the **Hotshot Logistics Admin Dashboard UI** and backend to include **fou
 
 ### Testing & Validation
 
-* Add integration and Playwright UI tests for the new component.
+* Validate that the database values are making it all the way from teh data base to the display. Only do the resting required to support that 
 * Verify visual consistency, API connectivity, and responsive layout.
 * Ensure test data persists independently from production datasets.
