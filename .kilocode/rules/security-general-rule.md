@@ -12,7 +12,6 @@ This document is authoritative for security directives; other rule files must re
 - Appsettings files are not secure and secrets and passwords should never be stored there.
 - database connection strings are secrets and should never be stored in any file. Every for any reason.
 - It is better the app not work than for a secret to be exposed. Never under any circumstances are you to put a password, secret, token or any other secure value in a file on the users computer. I mean NEVER!!!!!!!!!
-- 
 
 #### **1. Secrets Management (Immediate Actions)**
 *   **NEVER** hardcode secrets. Reject any code containing strings like `password=`, `ConnectionString=`, `api_key=`, `token=`, or `secret=` in plain text.
@@ -35,10 +34,6 @@ This document is authoritative for security directives; other rule files must re
 *   **ENFORCE HTTPS:** Any code configuring a web server must:
     *   Redirect HTTP to HTTPS.
     *   Set HSTS headers.
-*   **VALIDATE PRODUCTION SETTINGS:** When you see configuration code, check for insecure defaults:
-    *   Debug mode must be disabled.
-    *   Detailed error messages must not be shown to users.
-    *   CORS policies must be restrictive, not permissive (`"*"`).
 
 #### **4. Authentication & Authorization (Access Controls)**
 *   **PRINCIPLE OF LEAST PRIVILEGE:** When defining roles or permissions, the default must be **no access**. Permissions are explicitly granted.
