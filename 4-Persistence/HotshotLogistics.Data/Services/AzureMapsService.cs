@@ -262,26 +262,6 @@ namespace HotshotLogistics.Data.Services
             };
         }
 
-        Task<ReverseGeocodingResult> IMappingService.ReverseGeocodeAsync(decimal latitude, decimal longitude, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<RouteResult> IMappingService.CalculateRouteAsync(Location origin, Location destination, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<OptimizedRouteResult> IMappingService.OptimizeRouteAsync(IList<Location> waypoints, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<DistanceResult> IMappingService.CalculateDistanceAsync(Location origin, Location destination, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
         // Internal classes for Azure Maps API responses
         private class AzureMapsGeocodeResponse
         {

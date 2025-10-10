@@ -25,18 +25,22 @@ namespace HotshotLogistics.IntegrationTests
         {
             // Authentication scheme is configured in Program.cs for Development; avoid re-registering here to prevent "Scheme already exists: Test".
 
-            // Configure test database connection string if not set
+            // Configure test database connection string
             builder.ConfigureAppConfiguration((context, config) =>
             {
-                if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")))
+                var dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+                if (string.IsNullOrEmpty(dbConnectionString))
                 {
-                    // Set default test connection string for local development using LocalDB
-                    // This is only used for tests and should be overridden by environment variables in CI/production
-                    config.AddInMemoryCollection(new Dictionary<string, string>
-                    {
-                        ["DB_CONNECTION_STRING"] = "Server=(localdb)\\mssqllocaldb;Database=HotshotLogisticsTest;Trusted_Connection=True;MultipleActiveResultSets=True;"
-                    });
+                    // Use default test connection string for local development using LocalDB
+                    dbConnectionString = "Server=(localdb)\\MSSQLLocalDB;Database=HotshotLogisticsTest;Trusted_Connection=true;MultipleActiveResultSets=true;TrustServerCertificate=true;";
                 }
+
+                // Add the connection string to the configuration so BaseRepository can find it
+                var memoryConfigSource = new Dictionary<string, string?>
+                {
+                    ["ConnectionStrings:DefaultConnection"] = dbConnectionString
+                };
+                config.AddInMemoryCollection(memoryConfigSource);
             });
 
             // Enable detailed logging for debugging

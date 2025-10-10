@@ -111,7 +111,18 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Configure CORS policy - must be after UseHttpsRedirection but before UseAuthentication
 app.UseHttpsRedirection();
+
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+
+app.UseCors(policy =>
+{
+    policy.WithOrigins(allowedOrigins)
+          .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Be specific
+          .WithHeaders("Content-Type", "Authorization", "X-Requested-With") // Be specific
+          .AllowCredentials();
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

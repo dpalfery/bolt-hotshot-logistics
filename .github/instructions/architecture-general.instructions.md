@@ -6,7 +6,7 @@
 - **2-Application**: Services, validators, authorization, CQRS handlers
 - **3-Domain**: Entities, value objects, domain services, contracts
 - **4-Persistence**: DbContext, configurations, repositories, migrations
-- **5-Infrastructure**: Cross-cutting concerns, external integrations
+- **5-Tests**: Unit and integration tests
 - **6-Docs**: Documentation, architectural decisions
 - **7-Deployment**: Infrastructure as code, deployment scripts
 

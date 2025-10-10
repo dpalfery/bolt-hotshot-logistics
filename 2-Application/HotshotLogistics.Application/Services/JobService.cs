@@ -304,78 +304,86 @@ namespace HotshotLogistics.Application.Services
         /// <inheritdoc/>
         public async Task<bool> ValidateJobAsync(Job job, CancellationToken cancellationToken = default)
         {
+            var errors = new Dictionary<string, List<string>>();
+
             if (job == null)
             {
                 logger.LogWarning("Job validation failed: job is null");
-                return false;
+                errors["Job"].Add("Job is null");
+                throw new ValidationException("Job validation failed", errors.ToDictionary(kv => kv.Key, kv => kv.Value.ToArray()));
             }
 
             if (string.IsNullOrWhiteSpace(job.CustomerId))
             {
                 logger.LogWarning("Job validation failed: customer ID is empty");
-                return false;
+                errors["CustomerId"].Add("Customer ID is required");
             }
 
             if (string.IsNullOrWhiteSpace(job.Title))
             {
                 logger.LogWarning("Job validation failed: job title is empty");
-                return false;
+                errors["Title"].Add("Job title is required");
             }
 
             // Validate pickup location
             if (job.PickupLocation == null || !job.PickupLocation.IsValid())
             {
                 logger.LogWarning("Job validation failed: pickup location is invalid");
-                return false;
+                errors["PickupLocation"].Add("Pickup location is invalid");
             }
 
             // Validate pickup location with geocoding
             if (!await ValidateLocationWithGeocodingAsync(job.PickupLocation, "pickup", cancellationToken))
             {
                 logger.LogWarning("Job validation failed: pickup location geocoding validation failed");
-                return false;
+                errors["PickupLocation"].Add("Pickup location geocoding validation failed");
             }
 
             // Validate delivery location
             if (job.DeliveryLocation == null || !job.DeliveryLocation.IsValid())
             {
                 logger.LogWarning("Job validation failed: delivery location is invalid");
-                return false;
+                errors["DeliveryLocation"].Add("Delivery location is invalid");
             }
 
             // Validate delivery location with geocoding
             if (!await ValidateLocationWithGeocodingAsync(job.DeliveryLocation, "delivery", cancellationToken))
             {
                 logger.LogWarning("Job validation failed: delivery location geocoding validation failed");
-                return false;
+                errors["DeliveryLocation"].Add("Delivery location geocoding validation failed");
             }
 
             // Validate cargo details
             if (job.Cargo == null || !job.Cargo.IsValid())
             {
                 logger.LogWarning("Job validation failed: cargo details are invalid");
-                return false;
+                errors["Cargo"].Add("Cargo details are invalid");
             }
 
             // Validate pricing details
             if (job.Pricing == null || !job.Pricing.IsValid())
             {
                 logger.LogWarning("Job validation failed: pricing details are invalid");
-                return false;
+                errors["Pricing"].Add("Pricing details are invalid");
             }
 
             // Validate scheduled pickup time
             if (job.ScheduledPickupTime <= DateTime.UtcNow)
             {
                 logger.LogWarning("Job validation failed: scheduled pickup time is in the past");
-                return false;
+                errors["ScheduledPickupTime"].Add("Scheduled pickup time must be in the future");
             }
 
             // Validate estimated delivery time
             if (job.EstimatedDeliveryTime <= job.ScheduledPickupTime)
             {
                 logger.LogWarning("Job validation failed: estimated delivery time must be after pickup time");
-                return false;
+                errors["EstimatedDeliveryTime"].Add("Estimated delivery time must be after pickup time");
+            }
+
+            if (errors.Any())
+            {
+                throw new ValidationException("Job validation failed", errors.ToDictionary(kv => kv.Key, kv => kv.Value.ToArray()));
             }
 
             return true;
@@ -707,55 +715,6 @@ namespace HotshotLogistics.Application.Services
                     cancellationToken);
             }
         }
-
-        Task<IEnumerable<Job>> IJobService.GetJobsAsync(CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<PagedResult<Job>> IJobService.GetJobsAsync(JobFilterDto? filter, PaginationParameters? pagination, SortParameters? sort, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<Job?> IJobService.GetJobByIdAsync(string id, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<Job> IJobService.CreateJobAsync(Job job, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<Job?> IJobService.UpdateJobAsync(string id, Job jobDetails, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<bool> IJobService.DeleteJobAsync(string id, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<Job> IJobService.AssignDriverAsync(string jobId, int driverId, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<Job> IJobService.UpdateJobStatusAsync(string jobId, JobStatus status, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<bool> IJobService.ValidateJobAsync(Job job, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<bool> IJobService.IsDriverAvailableAsync(int driverId, DateTime startTime, DateTime? endTime, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
+

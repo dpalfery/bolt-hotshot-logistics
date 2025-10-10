@@ -102,8 +102,8 @@ namespace HotshotLogistics.Api.Controllers
                 AssignedDriverId = assignedDriverId,
                 CreatedAfter = createdAfter,
                 CreatedBefore = createdBefore,
-                ScheduledAfter = scheduledAfter,
-                ScheduledBefore = scheduledBefore,
+                ScheduledPickupAfter = scheduledAfter,
+                ScheduledPickupBefore = scheduledBefore,
                 MinAmount = minAmount,
                 MaxAmount = maxAmount,
                 SearchTerm = searchTerm,
@@ -195,7 +195,7 @@ namespace HotshotLogistics.Api.Controllers
                 }
 
                 var createdJob = await jobService.CreateJobAsync(jobDto, cancellationToken);
-                return Ok(createdJob);
+                return CreatedAtAction(nameof(GetJobById), new { id = createdJob.Id }, createdJob);
             }
             catch (ArgumentException ex)
             {
@@ -206,6 +206,19 @@ namespace HotshotLogistics.Api.Controllers
             {
                 logger.LogWarning(ex, "Referenced entity not found: {Message}", ex.Message);
                 return NotFound(ex.Message);
+            }
+            catch (HotshotLogistics.Core.Exceptions.ValidationException ex)
+            {
+                logger.LogWarning(ex, "Job validation failed: {Message}", ex.Message);
+                return BadRequest(new
+                {
+                    Message = "Job validation failed",
+                    Errors = ex.Errors.SelectMany(kvp => kvp.Value.Select(error => new
+                    {
+                        Field = kvp.Key,
+                        Message = error
+                    }))
+                });
             }
             catch (Exception ex)
             {
@@ -230,7 +243,7 @@ namespace HotshotLogistics.Api.Controllers
             string id,
             [FromBody] Job jobDto,
             CancellationToken cancellationToken = default)
-        {
+        {   
             try
             {
                 if (jobDto == null)

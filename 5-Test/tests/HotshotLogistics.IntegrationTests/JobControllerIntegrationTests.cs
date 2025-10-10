@@ -117,11 +117,29 @@ namespace HotshotLogistics.IntegrationTests
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
+                var statusCode = response.StatusCode;
+                var reasonPhrase = response.ReasonPhrase;
+                
+                // Log detailed error information
+                Console.WriteLine($"Status Code: {statusCode}");
+                Console.WriteLine($"Reason Phrase: {reasonPhrase}");
+                Console.WriteLine($"Error Content: {errorContent}");
+                
+                // Try to get more details from headers
+                foreach (var header in response.Headers)
+                {
+                    Console.WriteLine($"Header {header.Key}: {string.Join(", ", header.Value)}");
+                }
+                foreach (var contentHeader in response.Content.Headers)
+                {
+                    Console.WriteLine($"Content Header {contentHeader.Key}: {string.Join(", ", contentHeader.Value)}");
+                }
+                
                 throw new Exception($"Job create failed with status {response.StatusCode}: {errorContent}");
             }
 
             // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode); // Changed from Created to OK
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode); // Should be Created for successful creation
             var createdJob = await response.Content.ReadFromJsonAsync<Job>();
             Assert.NotNull(createdJob);
             Assert.Equal(newJob.Title, createdJob.Title);

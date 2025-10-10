@@ -14,8 +14,8 @@ public class SeedJobsData : Migration
     /// </summary>
     public override void Up()
     {
-        // Seed 20 jobs with various statuses and priorities
-        for (int i = 1; i <= 20; i++)
+        // Seed 200 jobs with various statuses and priorities
+        for (int i = 1; i <= 200; i++)
         {
             var jobId = $"job-{i:D3}";
             var customerId = $"cust-{(i % 10 == 0 ? 10 : i % 10):D3}"; // Cycle through first 10 customers

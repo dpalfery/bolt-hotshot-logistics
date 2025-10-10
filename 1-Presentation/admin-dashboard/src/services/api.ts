@@ -208,7 +208,7 @@ class ApiService {
   ): Promise<PagedResult<Invoice>> {
     // For the dashboard, we want overdue invoices
     // The backend returns Invoice[] but we need to wrap it in PagedResult format
-    const overdueInvoices = await this.request<Invoice[]>('/api/billing/invoices/overdue');
+    const overdueInvoices = await this.request<Invoice[]>('/billing/invoices/overdue');
 
     // Convert to PagedResult format to match the expected interface
     return {
