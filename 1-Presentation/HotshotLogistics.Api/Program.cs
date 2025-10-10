@@ -15,9 +15,15 @@ using HotshotLogistics.Application.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Identity.Web;
-using Microsoft.OpenApi.Models; 
+using Microsoft.OpenApi.Models;
+using HotshotLogistics.Domain.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure settings
+builder.Services.Configure<GoogleMapsSettings>(builder.Configuration.GetSection("Mapping:GoogleMaps"));
+builder.Services.Configure<AzureMapsSettings>(builder.Configuration.GetSection("Mapping:AzureMaps"));
+builder.Services.Configure<SendGridSettings>(builder.Configuration.GetSection("Communication:SendGrid"));
 
 // Add services to the container.
 builder.Services.AddHotshotRepositories();
@@ -84,6 +90,13 @@ builder.Services.AddScoped(sp =>
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("Manager", policy => policy.RequireRole("Manager"));
+    options.AddPolicy("Driver", policy => policy.RequireRole("Driver"));
+    options.AddPolicy("Customer", policy => policy.RequireRole("Customer"));
+    options.AddPolicy("ManagerOrAdmin", policy => policy.RequireRole("Admin", "Manager"));
+    options.AddPolicy("ManagerOrDriver", policy => policy.RequireRole("Manager", "Driver"));
+    options.AddPolicy("OwnResource", policy => policy.RequireAuthenticatedUser()); // Placeholder for resource-based auth
+    options.AddPolicy("CustomerResource", policy => policy.RequireAuthenticatedUser()); // Placeholder for resource-based auth
 });
 
 // Configure SignalR

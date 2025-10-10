@@ -10,6 +10,7 @@ namespace HotshotLogistics.Application.Services
     using HotshotLogistics.Contracts.Factories;
     using HotshotLogistics.Contracts.Services;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
     /// <summary>
@@ -19,23 +20,22 @@ namespace HotshotLogistics.Application.Services
     {
         private readonly IConfiguration configuration;
         private readonly ILogger<MappingServiceFactory> logger;
-        private readonly IDictionary<string, IMappingService> mappingServices;
+        private readonly IServiceProvider serviceProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MappingServiceFactory"/> class.
         /// </summary>
         /// <param name="configuration">The application configuration.</param>
         /// <param name="logger">The logger for the factory.</param>
-        /// <param name="mappingServices">A collection of all registered IMappingService implementations.</param>
+        /// <param name="serviceProvider">The service provider to resolve mapping services.</param>
         public MappingServiceFactory(
             IConfiguration configuration,
             ILogger<MappingServiceFactory> logger,
-            IEnumerable<IMappingService> mappingServices)
+            IServiceProvider serviceProvider)
         {
             this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.mappingServices = mappingServices?.ToDictionary(s => s.GetType().Name.Replace("Service", string.Empty), StringComparer.OrdinalIgnoreCase)
-                                   ?? throw new ArgumentNullException(nameof(mappingServices));
+            this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
         /// <summary>
@@ -45,15 +45,17 @@ namespace HotshotLogistics.Application.Services
         public IMappingService CreateMappingService()
         {
             var providerName = configuration["Mapping:Provider"] ?? "Mock";
+            var mappingServices = serviceProvider.GetServices<IMappingService>();
+            var mappingServiceDict = mappingServices.ToDictionary(s => s.GetType().Name.Replace("Service", string.Empty), StringComparer.OrdinalIgnoreCase);
 
-            if (mappingServices.TryGetValue(providerName, out var service))
+            if (mappingServiceDict.TryGetValue(providerName, out var service))
             {
                 logger.LogInformation("Using mapping service: {ProviderName}", providerName);
                 return service;
             }
 
             logger.LogError("Unsupported mapping provider: {ProviderName}. Falling back to Mock.", providerName);
-            if (mappingServices.TryGetValue("Mock", out var mockService))
+            if (mappingServiceDict.TryGetValue("Mock", out var mockService))
             {
                 return mockService;
             }

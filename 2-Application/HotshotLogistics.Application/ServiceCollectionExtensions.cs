@@ -4,6 +4,7 @@ using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Contracts.Hubs;
 using Microsoft.Extensions.DependencyInjection;
 using FluentValidation;
+using HotshotLogistics.Contracts.Factories;
 
 namespace HotshotLogistics.Application;
 
@@ -21,16 +22,16 @@ public static class ServiceCollectionExtensions
     {
         // Register services
         services.AddScoped<IConnectionManagerService, ConnectionManagerService>();
-        services.AddScoped<DriverService, DriverService>();
-        services.AddScoped<JobService, JobService>();
-        services.AddScoped<JobAssignmentService, JobAssignmentService>();
+        services.AddScoped<IDriverService, DriverService>();
+        services.AddScoped<IJobService, JobService>();
+        services.AddScoped<IJobAssignmentService, JobAssignmentService>();
         services.AddScoped<IRealtimeService, RealtimeService>();
         services.AddScoped<ISignalRClientWrapper, SignalRClientWrapper>();
         services.AddScoped<UserProfileService, UserProfileService>();
 
         // Register billing and payment services
         services.AddScoped<IBillingService, BillingService>();
-        services.AddScoped<CustomerService, CustomerService>();
+        services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<ITrackingService, TrackingService>();
 
@@ -40,10 +41,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPaymentProcessorFactory, PaymentProcessorFactory>();
 
         // Register mapping services
-        services.AddSingleton<MappingServiceFactory>();
+        services.AddSingleton<IMappingServiceFactory, MappingServiceFactory>();
         services.AddScoped<IMappingService>(sp =>
         {
-            var factory = sp.GetRequiredService<MappingServiceFactory>();
+            var factory = sp.GetRequiredService<IMappingServiceFactory>();
             return factory.CreateMappingService();
         });
 

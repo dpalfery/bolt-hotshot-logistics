@@ -7,8 +7,11 @@ using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Data.Repositories;
 using HotshotLogistics.Data.Services;
 using HotshotLogistics.Application.Services;
+using HotshotLogistics.Domain.DTOs;
 using HotshotLogistics.Domain.Repositories;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace HotshotLogistics.Data
 {
@@ -38,8 +41,27 @@ namespace HotshotLogistics.Data
         {
             services.AddHttpClient("MappingService");
             services.AddTransient<IMappingService, MockMappingService>();
-            services.AddTransient<IMappingService, AzureMapsService>();
-            services.AddTransient<IMappingService, GoogleMapsService>();
+            
+            // Register AzureMapsService with proper HttpClient factory and settings
+            services.AddTransient<IMappingService>(provider =>
+            {
+                var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
+                var httpClient = httpClientFactory.CreateClient("MappingService");
+                var logger = provider.GetRequiredService<ILogger<AzureMapsService>>();
+                var settings = provider.GetRequiredService<IOptions<AzureMapsSettings>>();
+                return new AzureMapsService(httpClient, logger, settings);
+            });
+            
+            // Register GoogleMapsService with proper HttpClient factory
+            services.AddTransient<IMappingService>(provider =>
+            {
+                var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
+                var httpClient = httpClientFactory.CreateClient("MappingService");
+                var logger = provider.GetRequiredService<ILogger<GoogleMapsService>>();
+                var settings = provider.GetRequiredService<IOptions<GoogleMapsSettings>>();
+                return new GoogleMapsService(httpClient, logger, settings);
+            });
+            
             return services;
         }
 
