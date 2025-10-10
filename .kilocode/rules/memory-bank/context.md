@@ -10,6 +10,8 @@ The Hotshot Logistics platform is in active development with a focus on completi
 
 **Database Infrastructure**
 - Complete SQL Server schema with all core tables (Customers, Jobs, Drivers, Invoices, Payments, LocationTracking)
+- Database runs on docker.
+- DB_CONNECTION_STRING and CONNECTIONSTRINGS__DEFAULTCONNECTION environment variables are already set you do not need to do it. do not attempt to set them user will deny/reject
 - FluentMigrator migrations for schema versioning and deployment
 - Comprehensive indexing strategy for performance optimization
 

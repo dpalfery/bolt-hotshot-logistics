@@ -13,7 +13,7 @@ Non‑Negotiable Global Rules (apply always)
 - Always select the most specialized mode available:
   - Use **.NET Developer** for backend tasks instead of generic Code mode.  
   - Use **NextJS Developer** for frontend tasks instead of generic Code mode.  
-- After each sub task The "Code Skeptic" should review sub task results and corresponding changes to validate that it is correct and complete. Any feedback or request for changes from teh Code Skeptic should be assigned back to the original sub task Mode  It is not production ready until the "Code Skeptic" says it is.
+- After each sub task The "Code Skeptic" Must review sub task results and corresponding changes to validate that it is correct and complete. Any feedback or request for changes from teh Code Skeptic will be assigned back to the original sub task Mode  It is not production ready until the "Code Skeptic" says it is.
 - Memory Bank: Always load the Memory-Bank. Always read this rule  [`​.kilocode/rules/memory-bank-instructions.md`](.kilocode/rules/memory-bank-instructions.md:1).  
 
 ### Confirmation
