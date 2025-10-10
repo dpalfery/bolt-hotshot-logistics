@@ -67,8 +67,9 @@ export function DashboardOverview() {
 
   const stats = {
     totalJobs: finalJobs?.totalCount || 0,
-    activeJobs: finalJobs?.items.filter(job => job.status === JobStatus.InProgress).length || 0,
-    pendingJobs: finalJobs?.items.filter(job => job.status === JobStatus.Pending).length || 0,
+    // Active jobs are: Pending (0), Assigned (1), EnRoute (2) - but NOT Received (3)
+    activeJobs: finalJobs?.items.filter(job => job.status !== 3).length || 0,
+    pendingJobs: finalJobs?.items.filter(job => job.status === 0).length || 0,
     totalDrivers: finalDrivers?.length || 0,
     activeDrivers: finalDrivers?.filter(driver => driver.isActive).length || 0,
     totalInvoices: finalInvoices?.totalCount || 0,

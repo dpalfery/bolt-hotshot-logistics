@@ -98,6 +98,11 @@ internal class JobRepository : BaseRepository<Job>, IJobRepository
             var (whereClause, parameters) = BuildWhereClause(filter);
             var orderByClause = BuildOrderByClause(sort);
 
+            // Log the query details for debugging
+            Console.WriteLine($"[DEBUG] JobRepository.GetJobsAsync - Filter: {filter}, Pagination: {pagination}, Sort: {sort}");
+            Console.WriteLine($"[DEBUG] JobRepository.GetJobsAsync - WhereClause: {whereClause}");
+            Console.WriteLine($"[DEBUG] JobRepository.GetJobsAsync - OrderByClause: {orderByClause}");
+
             var countQuery = $"SELECT COUNT(*) FROM {GetTableName()}{whereClause}";
             var dataQuery = $@"
                 SELECT * FROM {GetTableName()}
@@ -133,13 +138,19 @@ internal class JobRepository : BaseRepository<Job>, IJobRepository
                 }
             }
 
-            return new PagedResult<Job>
+            var result = new PagedResult<Job>
             {
                 Items = jobs,
                 TotalCount = totalCount,
                 PageNumber = pagination.PageNumber,
                 PageSize = pagination.PageSize,
             };
+
+            // Log the results for debugging
+            Console.WriteLine($"[DEBUG] JobRepository.GetJobsAsync - TotalCount: {totalCount}, Items returned: {jobs.Count}");
+            Console.WriteLine($"[DEBUG] JobRepository.GetJobsAsync - PageNumber: {pagination.PageNumber}, PageSize: {pagination.PageSize}");
+
+            return result;
         }
 
         /// <inheritdoc/>

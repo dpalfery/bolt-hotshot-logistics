@@ -123,7 +123,14 @@ namespace HotshotLogistics.Api.Controllers
                 SortDirection = sortDirection
             };
 
+            logger.LogInformation("JobController.GetJobs called with filter: {@Filter}, pagination: {@Pagination}, sort: {@Sort}",
+                filter, pagination, sort);
+
             var result = await jobRepository.GetJobsAsync(filter, pagination, sort, cancellationToken);
+
+            logger.LogInformation("JobController.GetJobs returned {TotalCount} jobs out of {ItemCount} items",
+                result.TotalCount, result.Items?.Count() ?? 0);
+
             return Ok(result);
         }
 
