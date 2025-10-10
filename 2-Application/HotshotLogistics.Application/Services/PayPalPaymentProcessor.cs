@@ -5,7 +5,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using HotshotLogistics.Contracts.Services;
-using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Domain.Entities;
 
 namespace HotshotLogistics.Application.Services;
@@ -320,5 +320,3 @@ public class PayPalPaymentProcessor : IPaymentProcessor
         }
     }
 }
-
-

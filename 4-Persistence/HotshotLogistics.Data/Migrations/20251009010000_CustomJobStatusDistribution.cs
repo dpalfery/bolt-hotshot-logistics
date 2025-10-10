@@ -1,3 +1,5 @@
+#pragma warning disable SA1649
+using System.Collections.Generic;
 using FluentMigrator;
 
 namespace HotshotLogistics.Data.Migrations;
@@ -34,32 +36,32 @@ public class CustomJobStatusDistribution : Migration
             }
 
             // Set up the exact distribution: 5 Pending, 3 Assigned, 8 En Route, 3 Received
-            var statusAssignments = new List<(string jobId, int status)>();
-            
+            var statusAssignments = new List<(string JobId, int Status)>();
+
             // 5 Pending (Status = 0)
             for (int i = 0; i < 5; i++)
             {
                 statusAssignments.Add((jobIds[i], 0));
             }
-            
-            // 3 Assigned (Status = 1) 
+
+            // 3 Assigned (Status = 1)
             for (int i = 5; i < 8; i++)
             {
                 statusAssignments.Add((jobIds[i], 1));
             }
-            
+
             // 8 En Route (Status = 2)
             for (int i = 8; i < 16; i++)
             {
                 statusAssignments.Add((jobIds[i], 2));
             }
-            
+
             // 3 Received (Status = 3)
             for (int i = 16; i < 19; i++)
             {
                 statusAssignments.Add((jobIds[i], 3));
             }
-            
+
             // Set remaining jobs to legacy Completed status to keep them out of active counts
             for (int i = 19; i < jobIds.Count; i++)
             {

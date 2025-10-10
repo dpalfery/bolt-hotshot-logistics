@@ -1,4 +1,4 @@
-using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Core.Enums;  
 
 namespace HotshotLogistics.Contracts.Services;
 
@@ -112,7 +112,3 @@ public class NotificationPreferences
     /// </summary>
     public List<NotificationType> EnabledNotificationTypes { get; set; } = new List<NotificationType>();
 }
-
-
-
-

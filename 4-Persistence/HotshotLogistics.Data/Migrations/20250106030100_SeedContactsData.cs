@@ -1,3 +1,4 @@
+#pragma warning disable SA1649
 using FluentMigrator;
 
 namespace HotshotLogistics.Data.Migrations;
@@ -17,7 +18,7 @@ public class SeedContactsData : Migration
         for (int i = 1; i <= 10; i++)
         {
             var customerId = $"cust-{i:D3}";
-            
+
             Insert.IntoTable("Contacts")
                 .Row(new
                 {
@@ -27,9 +28,9 @@ public class SeedContactsData : Migration
                     Phone = $"555-30{i:D2}",
                     Title = "Operations Manager",
                     IsPrimary = true,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
                 });
-                
+
             // Add a secondary contact for every 3rd customer
             if (i % 3 == 0)
             {
@@ -42,7 +43,7 @@ public class SeedContactsData : Migration
                         Phone = $"555-31{i:D2}",
                         Title = "Account Manager",
                         IsPrimary = false,
-                        CreatedAt = DateTime.UtcNow
+                        CreatedAt = DateTime.UtcNow,
                     });
             }
         }

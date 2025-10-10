@@ -2,7 +2,6 @@ using HotshotLogistics.Application.Services;
 using HotshotLogistics.Application.Validators;
 using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Contracts.Hubs;
-using HotshotLogistics.Data.Services;
 using Microsoft.Extensions.DependencyInjection;
 using FluentValidation;
 
@@ -22,16 +21,16 @@ public static class ServiceCollectionExtensions
     {
         // Register services
         services.AddScoped<IConnectionManagerService, ConnectionManagerService>();
-        services.AddScoped<IDriverService, DriverService>();
-        services.AddScoped<IJobService, JobService>();
-        services.AddScoped<IJobAssignmentService, JobAssignmentService>();
+        services.AddScoped<DriverService, DriverService>();
+        services.AddScoped<JobService, JobService>();
+        services.AddScoped<JobAssignmentService, JobAssignmentService>();
         services.AddScoped<IRealtimeService, RealtimeService>();
         services.AddScoped<ISignalRClientWrapper, SignalRClientWrapper>();
-        services.AddScoped<IUserProfileService, UserProfileService>();
+        services.AddScoped<UserProfileService, UserProfileService>();
 
         // Register billing and payment services
         services.AddScoped<IBillingService, BillingService>();
-        services.AddScoped<ICustomerService, CustomerService>();
+        services.AddScoped<CustomerService, CustomerService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<ITrackingService, TrackingService>();
 
@@ -41,18 +40,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPaymentProcessorFactory, PaymentProcessorFactory>();
 
         // Register mapping services
-        services.AddScoped<MappingServiceFactory>();
+        services.AddSingleton<MappingServiceFactory>();
         services.AddScoped<IMappingService>(sp =>
         {
             var factory = sp.GetRequiredService<MappingServiceFactory>();
             return factory.CreateMappingService();
         });
-
-        // Register communication services
-        services.AddTransient<ICommunicationService, TwilioSmsService>();
-        services.AddTransient<ICommunicationService, SendGridEmailService>();
-        services.AddTransient<ICommunicationService, AzureNotificationHubService>();
-        services.AddTransient<ICommunicationServiceFactory, CommunicationServiceFactory>();
 
         // Register validators
         services.AddValidatorsFromAssemblyContaining<CreateJobValidator>();

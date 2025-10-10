@@ -2,25 +2,20 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace HotshotLogistics.Api.Controllers
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using FluentValidation;
-    using HotshotLogistics.Application.Validators;
-    using HotshotLogistics.Contracts.Models;
+using FluentValidation;
+using HotshotLogistics.Application.Validators;
 using HotshotLogistics.Domain.Entities;
-    using HotshotLogistics.Contracts.Repositories;
-    using HotshotLogistics.Contracts.Services;
-    using Microsoft.AspNetCore.Authorization;
+using HotshotLogistics.Contracts.Repositories;
+using HotshotLogistics.Contracts.Services;
+using HotshotLogistics.Domain.DTOs;
+using HotshotLogistics.Core.Enums;
+using Microsoft.AspNetCore.Authorization;
 using HotshotLogistics.Application.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-
+namespace HotshotLogistics.Api.Controllers
+{
  	/// <summary>
  	/// API controller for managing jobs with CRUD operations.
  	/// </summary>
@@ -32,7 +27,7 @@ using Microsoft.Extensions.Logging;
         private readonly IJobService jobService;
         private readonly IJobRepository jobRepository;
         private readonly ILogger<JobController> logger;
-        private readonly IValidator<JobDto> jobValidator;
+        private readonly IValidator<Job> jobValidator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JobController"/> class.
@@ -45,7 +40,7 @@ using Microsoft.Extensions.Logging;
             IJobService jobService,
             IJobRepository jobRepository,
             ILogger<JobController> logger,
-            IValidator<JobDto> jobValidator)
+            IValidator<Job> jobValidator)
         {
             this.jobService = jobService ?? throw new ArgumentNullException(nameof(jobService));
             this.jobRepository = jobRepository ?? throw new ArgumentNullException(nameof(jobRepository));
@@ -77,9 +72,9 @@ using Microsoft.Extensions.Logging;
         /// <returns>A paged result of jobs.</returns>
         [HttpGet]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
-        [ProducesResponseType(typeof(PagedResult<IJob>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PagedResult<Job>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<PagedResult<IJob>>> GetJobs(
+        public async Task<ActionResult<PagedResult<Job>>> GetJobs(
             [FromQuery] JobStatus? status = null,
             [FromQuery] JobPriority? priority = null,
             [FromQuery] string? customerId = null,
@@ -99,7 +94,7 @@ using Microsoft.Extensions.Logging;
             [FromQuery] SortDirection sortDirection = SortDirection.Descending,
             CancellationToken cancellationToken = default)
         {
-            var filter = new JobFilter
+            var filter = new JobFilterDto
             {
                 Status = status,
                 Priority = priority,
@@ -122,7 +117,7 @@ using Microsoft.Extensions.Logging;
                 PageSize = pageSize
             };
 
-            var sort = new SortParameters
+            var sort = new HotshotLogistics.Domain.ValueObjects.SortParameters
             {
                 SortBy = sortBy,
                 SortDirection = sortDirection
@@ -140,9 +135,9 @@ using Microsoft.Extensions.Logging;
         /// <returns>The job if found; otherwise, 404 Not Found.</returns>
         [HttpGet("{id}")]
         [Authorize(Policy = AuthorizationPolicies.OwnResource)]
-        [ProducesResponseType(typeof(IJob), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Job), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IJob>> GetJobById(string id, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<Job>> GetJobById(string id, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -169,11 +164,11 @@ using Microsoft.Extensions.Logging;
         /// <returns>The created job.</returns>
         [HttpPost]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
-        [ProducesResponseType(typeof(IJob), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(Job), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IJob>> CreateJob(
-            [FromBody] JobDto jobDto,
+        public async Task<ActionResult<Job>> CreateJob(
+            [FromBody] Job jobDto,
             CancellationToken cancellationToken = default)
         {
             try
@@ -228,12 +223,12 @@ using Microsoft.Extensions.Logging;
         /// <returns>The updated job.</returns>
         [HttpPut("{id}")]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
-        [ProducesResponseType(typeof(IJob), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Job), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IJob>> UpdateJob(
+        public async Task<ActionResult<Job>> UpdateJob(
             string id,
-            [FromBody] JobDto jobDto,
+            [FromBody] Job jobDto,
             CancellationToken cancellationToken = default)
         {
             try
@@ -339,11 +334,11 @@ using Microsoft.Extensions.Logging;
         /// <returns>The updated job with driver assignment.</returns>
         [HttpPost("{id}/assign-driver")]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
-        [ProducesResponseType(typeof(IJob), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Job), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<IJob>> AssignDriver(
+        public async Task<ActionResult<Job>> AssignDriver(
             string id,
             [FromBody] AssignDriverRequest request,
             CancellationToken cancellationToken = default)
@@ -384,10 +379,10 @@ using Microsoft.Extensions.Logging;
         /// <returns>The updated job.</returns>
         [HttpPut("{id}/status")]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrDriver)]
-        [ProducesResponseType(typeof(IJob), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Job), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IJob>> UpdateJobStatus(
+        public async Task<ActionResult<Job>> UpdateJobStatus(
             string id,
             [FromBody] UpdateJobStatusRequest request,
             CancellationToken cancellationToken = default)
@@ -422,8 +417,8 @@ using Microsoft.Extensions.Logging;
         /// <returns>A list of jobs with the specified status.</returns>
         [HttpGet("by-status/{status}")]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
-        [ProducesResponseType(typeof(IEnumerable<IJob>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<IJob>>> GetJobsByStatus(
+        [ProducesResponseType(typeof(IEnumerable<Job>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<Job>>> GetJobsByStatus(
             JobStatus status,
             CancellationToken cancellationToken = default)
         {
@@ -447,8 +442,8 @@ using Microsoft.Extensions.Logging;
         /// <returns>A list of jobs assigned to the driver.</returns>
         [HttpGet("by-driver/{driverId}")]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrDriver)]
-        [ProducesResponseType(typeof(IEnumerable<IJob>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<IJob>>> GetJobsByDriver(
+        [ProducesResponseType(typeof(IEnumerable<Job>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<Job>>> GetJobsByDriver(
             int driverId,
             CancellationToken cancellationToken = default)
         {
@@ -472,8 +467,8 @@ using Microsoft.Extensions.Logging;
         /// <returns>A list of jobs for the customer.</returns>
         [HttpGet("by-customer/{customerId}")]
         [Authorize(Policy = AuthorizationPolicies.CustomerResource)]
-        [ProducesResponseType(typeof(IEnumerable<IJob>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<IJob>>> GetJobsByCustomer(
+        [ProducesResponseType(typeof(IEnumerable<Job>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<Job>>> GetJobsByCustomer(
             string customerId,
             CancellationToken cancellationToken = default)
         {
@@ -496,8 +491,8 @@ using Microsoft.Extensions.Logging;
         /// <returns>A list of overdue jobs.</returns>
         [HttpGet("overdue")]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
-        [ProducesResponseType(typeof(IEnumerable<IJob>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<IJob>>> GetOverdueJobs(CancellationToken cancellationToken = default)
+        [ProducesResponseType(typeof(IEnumerable<Job>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<Job>>> GetOverdueJobs(CancellationToken cancellationToken = default)
         {
             try
             {
@@ -534,5 +529,3 @@ using Microsoft.Extensions.Logging;
         public JobStatus Status { get; set; }
     }
 }
-
-

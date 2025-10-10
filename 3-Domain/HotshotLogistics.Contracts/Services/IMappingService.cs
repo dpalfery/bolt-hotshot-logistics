@@ -2,12 +2,11 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using HotshotLogistics.Domain.DTOs;
+using HotshotLogistics.Domain.Entities;
+using HotshotLogistics.Domain.ValueObjects;
 namespace HotshotLogistics.Contracts.Services
 {
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using HotshotLogistics.Contracts.Models;
 
     /// <summary>
     /// Interface for mapping services providing geocoding, routing, and location validation.
@@ -66,7 +65,3 @@ namespace HotshotLogistics.Contracts.Services
         Task<DistanceResult> CalculateDistanceAsync(Location origin, Location destination, CancellationToken cancellationToken = default);
     }
 }
-
-
-
-

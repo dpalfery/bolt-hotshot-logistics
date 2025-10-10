@@ -1,11 +1,12 @@
-using HotshotLogistics.Contracts.Models;
+
+using HotshotLogistics.Domain.ValueObjects;
 
 namespace HotshotLogistics.Domain.Entities;
 
 /// <summary>
 /// Represents a customer in the system.
 /// </summary>
-public class Customer : ICustomer
+public class Customer 
 {
     /// <inheritdoc/>
     public string Id { get; set; } = string.Empty;
@@ -141,5 +142,3 @@ public class Customer : ICustomer
                 !string.IsNullOrWhiteSpace(Email);
     }
 }
-
-

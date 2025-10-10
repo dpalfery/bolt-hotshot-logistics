@@ -1,14 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.ValueObjects;
+using HotshotLogistics.Core.Enums;
 
 namespace HotshotLogistics.Domain.Entities
 {
 /// <summary>
 /// Represents a driver in the system.
 /// </summary>
-public class Driver : IDriver
+public class Driver 
 {
     /// <inheritdoc/>
     public int Id { get; set; }
@@ -223,5 +224,3 @@ public class Driver : IDriver
     }
 }
 }
-
-

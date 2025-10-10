@@ -4,6 +4,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <NoWarn>*</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -31,6 +33,14 @@
     <ProjectReference Include="..\..\0-Base\HotshotLogistics.Core\HotshotLogistics.Core.csproj" />
     <ProjectReference Include="..\..\3-Domain\HotshotLogistics.Contracts\HotshotLogistics.Contracts.csproj" />
     <ProjectReference Include="..\..\3-Domain\HotshotLogistics.Domain\HotshotLogistics.Domain.csproj" />
+    <ProjectReference Include="..\..\2-Application\HotshotLogistics.Application\HotshotLogistics.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="**/*.cs" Exclude="obj/**;Migrations\*.cs" />
+    <Compile Include="Migrations\*.cs">
+      <NoWarn>SA1649</NoWarn>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

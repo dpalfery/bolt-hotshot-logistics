@@ -1,6 +1,7 @@
 using FluentValidation;
-using HotshotLogistics.Contracts.Models;
 using HotshotLogistics.Domain.Entities;
+using HotshotLogistics.Domain.ValueObjects;
+
 
 namespace HotshotLogistics.Application.Validators;
 
@@ -149,5 +150,3 @@ public class PaymentTermsValidator : AbstractValidator<PaymentTerms?>
         });
     }
 }
-
-

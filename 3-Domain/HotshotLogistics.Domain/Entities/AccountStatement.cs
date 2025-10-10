@@ -7,7 +7,6 @@ namespace HotshotLogistics.Domain.Entities
     using System;
     using System.Collections.Generic;
     using System.Linq;
-using HotshotLogistics.Contracts.Models;
 
     /// <summary>
     /// Represents an account statement for a customer.
@@ -42,7 +41,7 @@ using HotshotLogistics.Contracts.Models;
         /// <summary>
         /// Gets or sets the list of invoices in this statement period.
         /// </summary>
-        public List<IInvoice> Invoices { get; set; } = new List<IInvoice>();
+        public List<Invoice> Invoices { get; set; } = new List<Invoice>();
 
         /// <summary>
         /// Gets or sets the total amount invoiced in this period.
@@ -154,5 +153,3 @@ using HotshotLogistics.Contracts.Models;
         public decimal Total => Current + Days1To30 + Days31To60 + Days61To90 + Over90Days;
     }
 }
-
-

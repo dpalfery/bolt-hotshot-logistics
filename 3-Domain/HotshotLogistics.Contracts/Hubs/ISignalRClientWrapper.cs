@@ -1,4 +1,4 @@
-using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
 
 namespace HotshotLogistics.Contracts.Hubs;
 
@@ -27,7 +27,3 @@ public interface ISignalRClientWrapper
     /// </summary>
     Task SendToCallerAsync(string methodName, params object[] args);
 }
-
-
-
-

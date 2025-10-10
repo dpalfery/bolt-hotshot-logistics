@@ -1,10 +1,10 @@
-using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Core.Enums;
 
 namespace HotshotLogistics.Domain.Entities;
 /// <summary>
 /// Represents a job assignment to a driver in the system.
 /// </summary>
-public class JobAssignment : IJobAssignment
+public class JobAssignment 
 {
     /// <inheritdoc/>
     public string Id { get; set; } = Guid.NewGuid().ToString();
@@ -47,5 +47,3 @@ public class JobAssignment : IJobAssignment
         }
     }
 }
-
-

@@ -4,8 +4,10 @@
 
 namespace HotshotLogistics.Api.Controllers
 {
-    using HotshotLogistics.Contracts.Models;
-using HotshotLogistics.Domain.Entities;
+    using HotshotLogistics.Domain.Entities;
+    using HotshotLogistics.Domain.ValueObjects;
+    using HotshotLogistics.Core.Enums;
+    using HotshotLogistics.Domain.DTOs;
     using HotshotLogistics.Contracts.Services;
     using Microsoft.AspNetCore.Authorization;
     using HotshotLogistics.Application.Authorization;
@@ -244,6 +246,3 @@ using HotshotLogistics.Domain.Entities;
         public int DriverId { get; set; }
     }
 }
-
-
-

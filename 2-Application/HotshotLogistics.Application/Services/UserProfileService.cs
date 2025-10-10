@@ -7,8 +7,8 @@ namespace HotshotLogistics.Application.Services
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using HotshotLogistics.Contracts.Models;
-using HotshotLogistics.Domain.Entities;
+    using HotshotLogistics.Domain.Entities;
+    using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Services;
     using Microsoft.Extensions.Logging;
     using Microsoft.Graph;
@@ -55,7 +55,7 @@ using HotshotLogistics.Domain.Entities;
                 // Get app role assignments for the current user
                 var roles = new List<string>(); // Simplified for build compatibility
 
-                return new UserProfile
+                return new HotshotLogistics.Domain.Entities.UserProfile
                 {
                     Id = user.Id,
                     DisplayName = user.DisplayName,
@@ -142,5 +142,3 @@ using HotshotLogistics.Domain.Entities;
         }
     }
 }
-
-

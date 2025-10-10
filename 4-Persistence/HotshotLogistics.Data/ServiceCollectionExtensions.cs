@@ -3,7 +3,10 @@
 // </copyright>
 
 using HotshotLogistics.Contracts.Repositories;
+using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Data.Repositories;
+using HotshotLogistics.Data.Services;
+using HotshotLogistics.Application.Services;
 using HotshotLogistics.Domain.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,6 +31,24 @@ namespace HotshotLogistics.Data
             services.AddScoped<IInvoiceRepository, InvoiceRepository>();
             services.AddScoped<ILocationTrackingRepository, LocationTrackingRepository>();
             services.AddScoped<IPaymentRepository, PaymentRepository>();
+            return services;
+        }
+
+        public static IServiceCollection AddMappingServices(this IServiceCollection services)
+        {
+            services.AddHttpClient("MappingService");
+            services.AddTransient<IMappingService, MockMappingService>();
+            services.AddTransient<IMappingService, AzureMapsService>();
+            services.AddTransient<IMappingService, GoogleMapsService>();
+            return services;
+        }
+
+        public static IServiceCollection AddCommunicationServices(this IServiceCollection services)
+        {
+            services.AddTransient<ICommunicationService, TwilioSmsService>();
+            services.AddTransient<ICommunicationService, SendGridEmailService>();
+            services.AddTransient<ICommunicationService, AzureNotificationHubService>();
+            services.AddTransient<ICommunicationServiceFactory, CommunicationServiceFactory>();
             return services;
         }
     }

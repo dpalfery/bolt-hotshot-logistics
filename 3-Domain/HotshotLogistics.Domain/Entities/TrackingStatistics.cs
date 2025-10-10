@@ -113,4 +113,3 @@ namespace HotshotLogistics.Domain.Entities
         }
     }
 }
-

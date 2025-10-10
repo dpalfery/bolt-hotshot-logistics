@@ -2,8 +2,6 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System;
-using HotshotLogistics.Contracts.Models;
 
 namespace HotshotLogistics.Domain.Entities
 {
@@ -11,7 +9,7 @@ namespace HotshotLogistics.Domain.Entities
     /// <summary>
     /// Represents a location tracking record in the system.
     /// </summary>
-    public class LocationTracking : ILocationTracking
+    public class LocationTracking 
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="LocationTracking"/> class.
@@ -147,5 +145,3 @@ namespace HotshotLogistics.Domain.Entities
         }
     }
 }
-
-

@@ -1,14 +1,13 @@
 using System.Net;
 using System.Net.Http.Json;
-using HotshotLogistics.Contracts.Models;
 using HotshotLogistics.Domain.Entities;
-using Microsoft.AspNetCore.Mvc.Testing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Xunit;
 using System.Net.Http.Headers;
 using FluentAssertions;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Xunit;
+using System;
+using HotshotLogistics.Domain.DTOs;
 
 namespace HotshotLogistics.IntegrationTests
 {
@@ -123,7 +122,7 @@ namespace HotshotLogistics.IntegrationTests
         // Assert
         response.EnsureSuccessStatusCode();
             var updatedDriver = await response.Content.ReadFromJsonAsync<DriverDto>();
-            
+
             updatedDriver.Should().NotBeNull();
             updatedDriver.FirstName.Should().Be("Updated");
             updatedDriver.IsActive.Should().BeFalse();
@@ -168,5 +167,3 @@ namespace HotshotLogistics.IntegrationTests
         }
     }
 }
-
-

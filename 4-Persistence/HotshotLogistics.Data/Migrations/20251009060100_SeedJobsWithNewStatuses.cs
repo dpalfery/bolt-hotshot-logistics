@@ -1,9 +1,11 @@
+#pragma warning disable SA1649
+using System.Collections.Generic;
 using FluentMigrator;
 
 namespace HotshotLogistics.Data.Migrations;
 
 /// <summary>
-/// Seeds the Jobs table with sample data ensuring at least 5 instances 
+/// Seeds the Jobs table with sample data ensuring at least 5 instances
 /// of each new JobStatus: Pending, Assigned, EnRoute, Received
 /// </summary>
 [Migration(20251009060100)]
@@ -20,8 +22,8 @@ public class SeedJobsWithNewStatuses : Migration
             using var checkCmd = connection.CreateCommand();
             checkCmd.Transaction = transaction;
             checkCmd.CommandText = @"
-                SELECT Status, COUNT(*) as Count 
-                FROM Jobs 
+                SELECT Status, COUNT(*) as Count
+                FROM Jobs
                 WHERE Status IN (0, 1, 2, 3)
                 GROUP BY Status";
 
@@ -55,19 +57,19 @@ public class SeedJobsWithNewStatuses : Migration
                 createCustomerCmd.CommandText = @"
                     INSERT INTO Customers (Id, Name, Address, City, State, ZipCode, CreatedAt)
                     VALUES ('cust-seed-001', 'Seed Customer', '123 Main St', 'Test City', 'TX', '12345', @CreatedAt)";
-                
+
                 var customerParam = createCustomerCmd.CreateParameter();
                 customerParam.ParameterName = "@CreatedAt";
                 customerParam.Value = DateTime.UtcNow;
                 createCustomerCmd.Parameters.Add(customerParam);
                 createCustomerCmd.ExecuteNonQuery();
-                
+
                 customerIds.Add("cust-seed-001");
             }
 
             // Create jobs to ensure we have at least 5 of each status
-            var jobsToCreate = new List<(string jobId, string customerId, string title, int status, string description)>();
-            
+            var jobsToCreate = new List<(string JobId, string CustomerId, string Title, int Status, string Description)>();
+
             // Pending jobs (Status = 0)
             var pendingCount = statusCounts.GetValueOrDefault(0, 0);
             for (int i = pendingCount; i < 5; i++)
@@ -139,7 +141,7 @@ public class SeedJobsWithNewStatuses : Migration
             foreach (var (jobId, customerId, title, status, description) in jobsToCreate)
             {
                 insertCmd.Parameters.Clear();
-                
+
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@Id", jobId));
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@CustomerId", customerId));
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@Title", title));
@@ -155,7 +157,7 @@ public class SeedJobsWithNewStatuses : Migration
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@SpecialInstructions", $"Special instructions for {title.ToLower()}"));
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@CreatedAt", DateTime.UtcNow));
                 insertCmd.Parameters.Add(CreateParam(insertCmd, "@UpdatedAt", DateTime.UtcNow));
-                
+
                 insertCmd.ExecuteNonQuery();
             }
         });
@@ -171,7 +173,7 @@ public class SeedJobsWithNewStatuses : Migration
             using var deleteCmd = connection.CreateCommand();
             deleteCmd.Transaction = transaction;
             deleteCmd.CommandText = @"
-                DELETE FROM Jobs 
+                DELETE FROM Jobs
                 WHERE Id LIKE 'job-%-seed-%'";
             deleteCmd.ExecuteNonQuery();
 
@@ -179,7 +181,7 @@ public class SeedJobsWithNewStatuses : Migration
             using var deleteCustomerCmd = connection.CreateCommand();
             deleteCustomerCmd.Transaction = transaction;
             deleteCustomerCmd.CommandText = @"
-                DELETE FROM Customers 
+                DELETE FROM Customers
                 WHERE Id = 'cust-seed-001'";
             deleteCustomerCmd.ExecuteNonQuery();
         });

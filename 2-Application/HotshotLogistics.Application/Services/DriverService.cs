@@ -1,15 +1,14 @@
 // <copyright file="DriverService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using HotshotLogistics.Domain.Entities;
+using HotshotLogistics.Contracts.Repositories;
+using HotshotLogistics.Contracts.Services;
 
 namespace HotshotLogistics.Application.Services
 {
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using HotshotLogistics.Contracts.Models;
-using HotshotLogistics.Domain.Entities;
-    using HotshotLogistics.Contracts.Repositories;
-    using HotshotLogistics.Contracts.Services;
 
     /// <summary>
     /// Service for managing drivers.
@@ -28,7 +27,7 @@ using HotshotLogistics.Domain.Entities;
         }
 
         /// <inheritdoc/>
-        public Task<IDriver> CreateDriverAsync(IDriver driver)
+        public Task<Driver> CreateDriverAsync(Driver driver)
         {
 
             return this.driverRepository.CreateDriverAsync(driver);
@@ -36,20 +35,20 @@ using HotshotLogistics.Domain.Entities;
         }
 
         /// <inheritdoc/>
-        public Task<IDriver?> GetDriverByIdAsync(int id)
+        public Task<Driver?> GetDriverByIdAsync(int id)
         {
             return this.driverRepository.GetDriverByIdAsync(id);
         }
 
         /// <inheritdoc/>
-        public Task<IEnumerable<IDriver>> GetDriversAsync()
+        public Task<IEnumerable<Driver>> GetDriversAsync()
         {
 
             return this.driverRepository.GetDriversAsync();
 
         }
 
-        public Task<IDriver> UpdateDriverAsync(IDriver driver)
+        public Task<Driver> UpdateDriverAsync(Driver driver)
         {
             return this.driverRepository.UpdateDriverAsync(driver);
         }
@@ -60,5 +59,3 @@ using HotshotLogistics.Domain.Entities;
         }
     }
 }
-
-

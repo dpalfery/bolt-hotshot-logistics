@@ -1,22 +1,23 @@
-    // <copyright file="JobService.cs" company="PlaceholderCompany">
+// <copyright file="JobService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using HotshotLogistics.Domain.Entities;
+using HotshotLogistics.Contracts.Repositories;
+using HotshotLogistics.Contracts.Services;
+using HotshotLogistics.Core.Exceptions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
+using HotshotLogistics.Domain.DTOs;
+using HotshotLogistics.Domain.ValueObjects;
+using HotshotLogistics.Core.Enums;
 
 namespace HotshotLogistics.Application.Services
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using HotshotLogistics.Contracts.Models;
-using HotshotLogistics.Domain.Entities;
-    using HotshotLogistics.Contracts.Repositories;
-    using HotshotLogistics.Contracts.Services;
-    using HotshotLogistics.Core.Exceptions;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Configuration;
-
     /// <summary>
     /// Service for managing jobs with lifecycle management.
     /// </summary>
@@ -55,7 +56,7 @@ using HotshotLogistics.Domain.Entities;
         }
 
         /// <inheritdoc/>
-        public async Task<IJob> CreateJobAsync(IJob job, CancellationToken cancellationToken = default)
+        public async Task<Job> CreateJobAsync(Job job, CancellationToken cancellationToken = default)
         {
             logger.LogInformation("Creating job with ID: {JobId}", job.Id);
 
@@ -121,20 +122,20 @@ using HotshotLogistics.Domain.Entities;
         }
 
         /// <inheritdoc/>
-        public Task<IJob?> GetJobByIdAsync(string id, CancellationToken cancellationToken = default)
+        public Task<Job?> GetJobByIdAsync(string id, CancellationToken cancellationToken = default)
         {
             return jobRepository.GetJobByIdAsync(id, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public Task<IEnumerable<IJob>> GetJobsAsync(CancellationToken cancellationToken = default)
+        public Task<IEnumerable<Job>> GetJobsAsync(CancellationToken cancellationToken = default)
         {
             return jobRepository.GetJobsAsync(cancellationToken);
         }
 
         /// <inheritdoc/>
-        public Task<PagedResult<IJob>> GetJobsAsync(
-            JobFilter? filter = null,
+        public Task<PagedResult<Job>> GetJobsAsync(
+            JobFilterDto? filter = null,
             PaginationParameters? pagination = null,
             SortParameters? sort = null,
             CancellationToken cancellationToken = default)
@@ -146,7 +147,7 @@ using HotshotLogistics.Domain.Entities;
         }
 
         /// <inheritdoc/>
-        public async Task<IJob?> UpdateJobAsync(string id, IJob jobDetails, CancellationToken cancellationToken = default)
+        public async Task<Job?> UpdateJobAsync(string id, Job jobDetails, CancellationToken cancellationToken = default)
         {
             logger.LogInformation("Updating job with ID: {JobId}", id);
 
@@ -200,7 +201,7 @@ using HotshotLogistics.Domain.Entities;
         }
 
         /// <inheritdoc/>
-        public async Task<IJob> AssignDriverAsync(string jobId, int driverId, CancellationToken cancellationToken = default)
+        public async Task<Job> AssignDriverAsync(string jobId, int driverId, CancellationToken cancellationToken = default)
         {
             logger.LogInformation("Assigning driver {DriverId} to job {JobId}", driverId, jobId);
 
@@ -253,7 +254,7 @@ using HotshotLogistics.Domain.Entities;
         }
 
         /// <inheritdoc/>
-        public async Task<IJob> UpdateJobStatusAsync(string jobId, JobStatus status, CancellationToken cancellationToken = default)
+        public async Task<Job> UpdateJobStatusAsync(string jobId, JobStatus status, CancellationToken cancellationToken = default)
         {
             logger.LogInformation("Updating job {JobId} status to {Status}", jobId, status);
 
@@ -301,7 +302,7 @@ using HotshotLogistics.Domain.Entities;
         }
 
         /// <inheritdoc/>
-        public async Task<bool> ValidateJobAsync(IJob job, CancellationToken cancellationToken = default)
+        public async Task<bool> ValidateJobAsync(Job job, CancellationToken cancellationToken = default)
         {
             if (job == null)
             {
@@ -444,7 +445,7 @@ using HotshotLogistics.Domain.Entities;
         /// <param name="job">The job to calculate delivery time for.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The estimated delivery time.</returns>
-        private async Task<DateTime> CalculateEstimatedDeliveryTimeAsync(IJob job, CancellationToken cancellationToken = default)
+        private async Task<DateTime> CalculateEstimatedDeliveryTimeAsync(Job job, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -670,7 +671,7 @@ using HotshotLogistics.Domain.Entities;
         /// <param name="previousStatus">The previous status.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        private async Task SendStatusChangeNotificationsAsync(IJob job, JobStatus previousStatus, CancellationToken cancellationToken)
+        private async Task SendStatusChangeNotificationsAsync(Job job, JobStatus previousStatus, CancellationToken cancellationToken)
         {
             var statusMessage = job.Status switch
             {
@@ -706,7 +707,55 @@ using HotshotLogistics.Domain.Entities;
                     cancellationToken);
             }
         }
+
+        Task<IEnumerable<Job>> IJobService.GetJobsAsync(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<PagedResult<Job>> IJobService.GetJobsAsync(JobFilterDto? filter, PaginationParameters? pagination, SortParameters? sort, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Job?> IJobService.GetJobByIdAsync(string id, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Job> IJobService.CreateJobAsync(Job job, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Job?> IJobService.UpdateJobAsync(string id, Job jobDetails, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<bool> IJobService.DeleteJobAsync(string id, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Job> IJobService.AssignDriverAsync(string jobId, int driverId, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Job> IJobService.UpdateJobStatusAsync(string jobId, JobStatus status, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<bool> IJobService.ValidateJobAsync(Job job, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<bool> IJobService.IsDriverAvailableAsync(int driverId, DateTime startTime, DateTime? endTime, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
-
-

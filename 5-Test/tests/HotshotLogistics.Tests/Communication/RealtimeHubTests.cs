@@ -1,7 +1,8 @@
 using FluentAssertions;
+using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Application.Hubs;
 using HotshotLogistics.Contracts.Hubs;
-using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Contracts.Services;
 using Microsoft.AspNetCore.SignalR;
@@ -33,7 +34,7 @@ public class RealtimeHubTests
     {
         // Arrange
         var jobId = "job-123";
-        var status = JobStatus.InProgress;
+        var status = JobStatus.EnRoute;
 
         // Act
         await _realtimeHub.JobStatusUpdated(jobId, status);
@@ -103,7 +104,7 @@ public class RealtimeHubTests
     public async Task NewJobAvailable_ShouldBroadcastToAvailableDrivers()
     {
         // Arrange
-        var job = new JobDto
+        var job = new Domain.Entities.JobDto
         {
             Id = "job-123",
             CustomerId = "customer-456",
@@ -135,7 +136,7 @@ public class RealtimeHubTests
     public async Task NotificationReceived_WithUserId_ShouldSendToSpecificUser()
     {
         // Arrange
-        var message = new NotificationMessage
+        var message = new NotificationMessageDto
         {
             Id = "notif-123",
             Title = "Test Notification",
@@ -166,7 +167,7 @@ public class RealtimeHubTests
     public async Task NotificationReceived_WithoutUserId_ShouldBroadcastToAll()
     {
         // Arrange
-        var message = new NotificationMessage
+        var message = new NotificationMessageDto
         {
             Id = "notif-123",
             Title = "System Alert",
@@ -188,7 +189,7 @@ public class RealtimeHubTests
     {
         // Arrange
         var jobId = "job-123";
-        var status = JobStatus.InProgress;
+        var status = JobStatus.EnRoute;
         var expectedException = new Exception("SignalR error");
 
         _mockSignalRClient.Setup(x => x.SendToGroupAsync($"job-{jobId}", "JobStatusUpdated", jobId, status))
@@ -241,9 +242,8 @@ public class RealtimeHubTests
     [Theory]
     [InlineData(JobStatus.Pending)]
     [InlineData(JobStatus.Assigned)]
-    [InlineData(JobStatus.InProgress)]
-    [InlineData(JobStatus.Completed)]
-    [InlineData(JobStatus.Cancelled)]
+    [InlineData(JobStatus.EnRoute)]
+    [InlineData(JobStatus.Received)]
     public async Task JobStatusUpdated_WithDifferentStatuses_ShouldBroadcastCorrectly(JobStatus status)
     {
         // Arrange
@@ -258,7 +258,7 @@ public class RealtimeHubTests
 
     [Theory]
     [InlineData(DriverStatus.Available)]
-    [InlineData(DriverStatus.Busy)]
+    [InlineData(DriverStatus.Delivering)]
     [InlineData(DriverStatus.Offline)]
     public async Task DriverStatusChanged_WithDifferentStatuses_ShouldBroadcastCorrectly(DriverStatus status)
     {
@@ -274,5 +274,3 @@ public class RealtimeHubTests
     }
 }
 }
-
-

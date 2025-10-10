@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using HotshotLogistics.DbSetup;
 
 var loggerFactory = LoggerFactory.Create(builder =>

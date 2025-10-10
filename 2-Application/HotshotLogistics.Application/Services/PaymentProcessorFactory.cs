@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using HotshotLogistics.Contracts.Services;
-using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Domain.Entities;
 
 namespace HotshotLogistics.Application.Services;
@@ -99,5 +99,3 @@ public class PaymentProcessorFactory : IPaymentProcessorFactory
         return new[] { "Stripe", "PayPal" };
     }
 }
-
-

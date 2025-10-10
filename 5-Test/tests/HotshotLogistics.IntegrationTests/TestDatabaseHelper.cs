@@ -34,10 +34,10 @@ namespace HotshotLogistics.IntegrationTests
                 }
 
                 // Read the connection string from environment to match application configuration
-                var conn = Environment.GetEnvironmentVariable("CONNECTIONSTRINGS__DEFAULTCONNECTION");
+                var conn = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
                 if (string.IsNullOrWhiteSpace(conn))
                 {
-                    throw new InvalidOperationException("Environment variable 'CONNECTIONSTRINGS__DEFAULTCONNECTION' is required for tests");
+                    throw new InvalidOperationException("Environment variable 'DB_CONNECTION_STRING' is required for tests");
                 }
 
                 cachedConnectionString = conn;

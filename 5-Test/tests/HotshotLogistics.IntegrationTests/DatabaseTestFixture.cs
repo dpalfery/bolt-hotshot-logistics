@@ -1,10 +1,13 @@
 using System.Diagnostics;
+using FluentMigrator.Runner;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace HotshotLogistics.IntegrationTests;
 
 /// <summary>
-/// Shared test fixture that provisions the SQL Server database using the DbSetup CLI before integration tests run.
+/// Shared test fixture that provisions the SQL Server database using FluentMigrator before integration tests run.
 /// </summary>
 public sealed class DatabaseTestFixture : IAsyncLifetime
 {
@@ -33,12 +36,36 @@ public sealed class DatabaseTestFixture : IAsyncLifetime
             // Verify the database is reachable
             await VerifyConnectionAsync(connectionString);
 
+            // Run database migrations to ensure schema is up to date
+            await RunMigrationsAsync(connectionString);
+
             _initialized = true;
         }
         finally
         {
             SetupSemaphore.Release();
         }
+    }
+
+    private static async Task RunMigrationsAsync(string connectionString)
+    {
+        var serviceProvider = new ServiceCollection()
+            .AddFluentMigratorCore()
+            .ConfigureRunner(rb => rb
+                .AddSqlServer()
+                .WithGlobalConnectionString(connectionString)
+                .ScanIn(typeof(HotshotLogistics.Data.Migrations.CreateCustomersTable).Assembly).For.Migrations())
+            .AddLogging(lb => lb.AddFluentMigratorConsole())
+            .BuildServiceProvider(false);
+
+        using var scope = serviceProvider.CreateScope();
+        var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+
+        // Skip the problematic SeedContactsData migration since cust-003 is missing
+        // SkipMigration.MarkAsCompleted(20250106030100, "SeedContactsData - Skipped due to missing cust-003");
+
+        // Run remaining migrations
+        runner.MigrateUp();
     }
 
     /// <inheritdoc />

@@ -1,24 +1,23 @@
 // <copyright file="BillingController.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using HotshotLogistics.Application.Services;
+using HotshotLogistics.Domain.Entities;
+using HotshotLogistics.Core.Enums;
+using HotshotLogistics.Contracts.Services;
+using Microsoft.AspNetCore.Authorization;
+using HotshotLogistics.Application.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace HotshotLogistics.Api.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using HotshotLogistics.Application.Services;
-    using HotshotLogistics.Contracts.Models;
-using HotshotLogistics.Domain.Entities;
-    using HotshotLogistics.Contracts.Services;
-    using Microsoft.AspNetCore.Authorization;
-    using HotshotLogistics.Application.Authorization;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Logging;
-
     /// <summary>
     /// API controller for billing and financial operations.
     /// </summary>
@@ -55,10 +54,10 @@ using HotshotLogistics.Domain.Entities;
         /// <returns>The generated invoice.</returns>
         [HttpPost("invoices/generate/{jobId}")]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
-        [ProducesResponseType(typeof(IInvoice), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(Invoice), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IInvoice>> GenerateInvoice(string jobId, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<Invoice>> GenerateInvoice(string jobId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -93,9 +92,9 @@ using HotshotLogistics.Domain.Entities;
         /// <returns>The invoice if found; otherwise, 404 Not Found.</returns>
         [HttpGet("invoices/{id}")]
         [Authorize(Policy = AuthorizationPolicies.OwnResource)]
-        [ProducesResponseType(typeof(IInvoice), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Invoice), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IInvoice>> GetInvoice(string id, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<Invoice>> GetInvoice(string id, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -122,8 +121,8 @@ using HotshotLogistics.Domain.Entities;
         /// <returns>A list of invoices for the customer.</returns>
         [HttpGet("invoices/customer/{customerId}")]
         [Authorize(Policy = AuthorizationPolicies.CustomerResource)]
-        [ProducesResponseType(typeof(IEnumerable<IInvoice>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<IInvoice>>> GetCustomerInvoices(string customerId, CancellationToken cancellationToken = default)
+        [ProducesResponseType(typeof(IEnumerable<Invoice>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<Invoice>>> GetCustomerInvoices(string customerId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -144,8 +143,8 @@ using HotshotLogistics.Domain.Entities;
         /// <returns>A list of overdue invoices.</returns>
         [HttpGet("invoices/overdue")]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
-        [ProducesResponseType(typeof(IEnumerable<IInvoice>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<IInvoice>>> GetOverdueInvoices(CancellationToken cancellationToken = default)
+        [ProducesResponseType(typeof(IEnumerable<Invoice>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<Invoice>>> GetOverdueInvoices(CancellationToken cancellationToken = default)
         {
             try
             {
@@ -666,5 +665,3 @@ using HotshotLogistics.Domain.Entities;
         public int DaysOverdue { get; set; }
     }
 }
-
-

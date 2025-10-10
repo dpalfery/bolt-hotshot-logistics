@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
-using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Data.Repositories;
 using HotshotLogistics.Domain.Entities;
@@ -22,7 +22,7 @@ namespace HotshotLogistics.Tests.Billing
     /// </summary>
     public class InvoiceRepositoryTests : IClassFixture<DatabaseTestFixture>, IDisposable
     {
-        private readonly IInvoiceRepository _invoiceRepository;
+        private readonly InvoiceRepository _invoiceRepository;
         private readonly IConfiguration _configuration;
         private readonly List<string> _createdInvoiceIds = new();
 
@@ -632,7 +632,7 @@ namespace HotshotLogistics.Tests.Billing
                 new SqlParameter("@CargoWeight", 1000.0),
                 new SqlParameter("@CargoValue", 5000.00m),
                 new SqlParameter("@CargoSpecial", "Handle with care"),
-                new SqlParameter("@Status", (int)JobStatus.Completed),
+                new SqlParameter("@Status", (int)JobStatus.Received),
                 new SqlParameter("@Priority", (int)JobPriority.Normal),
                 new SqlParameter("@BaseRate", 500.00m),
                 new SqlParameter("@MileageRate", 200.00m),
@@ -675,5 +675,3 @@ namespace HotshotLogistics.Tests.Billing
         }
     }
 }
-
-

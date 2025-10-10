@@ -4,81 +4,154 @@ when-to-apply:
 "Apply when creating, moving, adding, or searching files to maintain separation of concerns and dependency direction across all technology stacks."
 rule: |
 
-### File Placement Guidelines
+# Clean Architecture + DDD Folder Structure (C#)
 
-Place files in appropriate numbered folder based on purpose and architectural layer:
+## **1-Presentation Layer**
 
-#### 0-Base/
-**Shared foundational code and abstractions**
-- Base classes, interfaces, utilities, extensions
-- Cross-cutting concerns (logging, error handling, result types)
-- Shared constants, enums, extension methods
-- No dependencies on higher layers
+**Purpose:** Entry point for all user interactions (HTTP, gRPC, SignalR, etc.)
 
-#### 1-Presentation/
-**Presentation layer projects and components**
-- API controllers,ASP.NET Core Web API, functions, endpoints (Azure Functions)
-- Web dashboard components (Next.js/React)
-- Mobile app screens and navigation (Expo React Native)
-- HTTP request/response handling, routing, UI rendering
-- Depends only on Application layer
+**Projects:** `HotshotLogistics.Api`, `HotshotLogistics.UI`, or `HotshotLogistics.Web`
 
-#### 2-Application/
-**Core business logic and orchestration**
-- Use cases, application services, business workflows
-- Command/query handlers (CQRS)
-- Business rules, validation logic, policies
-- DTOs for layer communication
-- Depends only on Domain layer
+**Contents:**
 
-#### 3-Domain/
-**Domain models, contracts, and interfaces**
-- There are two projects in this folder Contracts and Domain. **ALL DTO Objects** go in Domain, **ALL Interfaces** go in Contracts. 
-- Only Interfaces should be defined in the Contracts project, Interfaces should not be defined anywhere else in the solution.
-- Only DTOs and Models should be dinfined in domain   
-- If you feel you need to violate this you should confirm with the Human
-- Entity definitions, value objects, domain models
-- Repository interfaces, service contracts
-- Domain events, specifications
-- No dependencies on other layers
+* **Controllers / Endpoints:** ASP.NET Core API controllers or minimal APIs
+  *Folder:* `Controllers`
+* **Hubs:** SignalR hubs for real-time updates
+  *Folder:* `Hubs`
+* **Filters / Middleware:** Exception handling, logging, request validation
+  *Folder:* `Middleware`
+* **ViewModels / DTOs:** Request/response payloads specific to presentation
+  *Folder:* `DTOs`
+* **Static Content / Pages:** Razor pages or SPA static assets
+  *Folder:* `wwwroot` or `Pages`
+* **Program.cs / Startup.cs:** Composition root, DI setup, and pipeline config
 
-#### 4-Persistence/
-**Data access implementations**
-- Native ADO.NET implementations with schema and migrations managed by FluentMigrator
-- Repository implementations using ADO.NET (parameterized SQL, async operations, proper disposal)
-- Database seeding, external API integrations
-- Implements Domain contracts
+> This layer calls into `2-Application` only. It does not directly reference persistence or domain implementations.
 
-#### 5-Test/
-**Testing infrastructure and test files**
-- Unit tests, integration tests, architecture tests
-- Test utilities, fixtures, mock data
-- Test configurations and helpers
-- Uses xUnit, FluentAssertions
+---
 
-#### 6-Docs/
-**Documentation and specifications**
-- README files, API documentation, guides
-- Technical specifications, architecture docs
-- Development workflows, contributing guidelines
+## **2-Application Layer**
 
-#### 7-Deployment/
-**Infrastructure and deployment assets**
-- CI/CD pipelines, Docker configurations
-- Infrastructure as Code (Terraform, Bicep, Ansible)
-- Deployment scripts, environment configurations
+**Purpose:** Orchestrates use cases and enforces application logic, coordinating between domain and infrastructure.
 
-### Search Guidelines
+**Project:** `HotshotLogistics.Application`
 
-When searching files:
-1. Search within most relevant architectural layer based on query context
-2. If not found, expand to related layers following dependency direction
-3. Use folder prefixes (e.g., "2-Application/") to narrow searches
-4. For cross-cutting concerns, check 0-Base/ first
+**Contents:**
 
-### Enforcement
-- Place new files in correct folder immediately upon creation
-- File moves must maintain architectural integrity
-- Regular audits verify adherence to this structure
-- Exceptions require explicit architectural review and documentation
+* **Services / Use Cases:** Application service classes implementing workflows
+  *Folder:* `Services`
+* **Commands / Queries / Handlers:** CQRS pattern logic, mediator handlers
+  *Folder:* `Features` or `Handlers`
+* **Validators:** Input validation (FluentValidation, custom logic)
+  *Folder:* `Validators`
+* **Authorization:** Policy providers, role/claim checks
+  *Folder:* `Authorization`
+* **DTOs:** Input/output models for use cases
+  *Folder:* `DTOs`
+* **Events / Notifications:** Application-level events or mediators
+  *Folder:* `Events`
+* **Dependency Injection Extensions:**
+  *File:* `ServiceCollectionExtensions.cs`
+
+> This layer depends only on `3-Domain` and `4-Contracts`.
+> Contains no UI or infrastructure logic.
+
+---
+
+## **3-Domain Layer**
+
+**Purpose:** Pure business logic, rules, and core models.
+
+**Projects:**
+
+* `HotshotLogistics.Domain` → concrete domain models and logic
+* `HotshotLogistics.Contracts` → shared interfaces and abstractions
+
+**Contents:**
+
+* **Entities:** Aggregate roots and domain entities
+  *Folder:* `Entities`
+  *Example:* `Order.cs`, `Job.cs`
+* **ValueObjects:** Immutable types without identity
+  *Folder:* `ValueObjects`
+* **Domain Services:** Business rules not tied to entities
+  *Folder:* `Services`
+* **Factories:** Construction logic enforcing invariants
+  *Folder:* `Factories` (in `Contracts` if shared)
+* **Repositories / Interfaces:** Domain contracts for persistence and messaging
+  *Folder:* `Repositories`, `Hubs`, etc. (in `Contracts`)
+* **Domain Events:** Core events representing state changes
+  *Folder:* `Events`
+* **DTOs (Domain-Scoped):** Internal payloads used inside domain boundaries
+  *Folder:* `DTOs`
+* **Dependencies:** Shared abstractions for dependency registration
+* **README.md:** Explain model boundaries and design rules
+
+> The domain is completely persistence-agnostic and unaware of infrastructure.
+
+---
+
+## **4-Persistence Layer**
+
+**Purpose:** Implements data storage and retrieval using EF Core, Dapper, or external stores.
+
+**Project:** `HotshotLogistics.Persistence`
+
+**Contents:**
+
+* **DbContext:** EF Core database context
+  *Folder:* `Contexts`
+* **Entity Configurations:** Mapping, relationships, and constraints
+  *Folder:* `Configurations`
+* **Repositories:** Implementation of domain repository interfaces
+  *Folder:* `Repositories`
+* **Migrations / Seed Data:** Database migrations and seeders
+  *Folder:* `Migrations`, `Seed`
+* **ReadModels / Projections:** Optimized models for queries
+  *Folder:* `ReadModels`
+* **README.md:** Connection strings, migration usage, conventions
+
+> References `3-Domain` and `4-Contracts`, but never `1-Presentation`.
+
+---
+
+## **5-Infrastructure / Shared Layer (optional)**
+
+**Purpose:** Cross-cutting or shared concerns.
+
+**Contents:**
+
+* **Dependency Injection / Config Extensions**
+* **Logging, Email, Caching Adapters**
+* **External API Integrations**
+* **Constants / Enums / Utilities**
+* **Factories / Contracts Shared Across Layers**
+
+---
+
+## **6-Docs**
+
+**Purpose:** Internal documentation, architectural decisions, and tasks.
+
+* `architecture-general.md`
+* `interface-cleanup-tasks.md`
+* Diagrams, design notes, checklists
+
+---
+
+### ✅ Summary Table
+
+| Layer                | Project                                 | Key Folders                                               | Responsibilities           |
+| -------------------- | --------------------------------------- | --------------------------------------------------------- | -------------------------- |
+| **1-Presentation**   | `HotshotLogistics.Api` / `.Web`         | Controllers, DTOs, Middleware, Hubs                       | API/UI entry point         |
+| **2-Application**    | `HotshotLogistics.Application`          | Services, Validators, Authorization, DTOs                 | Use cases and coordination |
+| **3-Domain**         | `HotshotLogistics.Domain`, `.Contracts` | Entities, ValueObjects, Services, Repositories, Factories | Core business logic        |
+| **4-Persistence**    | `HotshotLogistics.Persistence`          | DbContext, Configurations, Repositories, ReadModels       | Data access implementation |
+| **5-Infrastructure** | `HotshotLogistics.Infrastructure`       | Adapters, Integrations, Utilities                         | Cross-cutting concerns     |
+| **6-Docs**           | `6-docs`                                | Architecture docs, tasks                                  | Internal documentation     |
+
+---
+
+Would you like me to include an **example folder tree** (`/src` layout with .csproj names and namespace conventions) to complement this?
+
 

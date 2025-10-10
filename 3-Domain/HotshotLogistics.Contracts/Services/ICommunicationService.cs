@@ -1,4 +1,4 @@
-using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.ValueObjects;
 
 namespace HotshotLogistics.Contracts.Services;
 
@@ -10,7 +10,7 @@ public interface ICommunicationService
     /// <summary>
     /// Gets the type of communication this service handles.
     /// </summary>
-    CommunicationType Type { get; }
+    string Type { get; }
 
     /// <summary>
     /// Sends a communication message asynchronously.
@@ -20,7 +20,3 @@ public interface ICommunicationService
     /// <returns>True if the message was sent successfully, false otherwise.</returns>
     Task<bool> SendAsync(CommunicationMessage message, CancellationToken cancellationToken = default);
 }
-
-
-
-

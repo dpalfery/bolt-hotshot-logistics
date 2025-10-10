@@ -11,6 +11,7 @@ rule: |
 - Resolve all warnings before merging or deploying.
 - Treat warnings as errors in CI/CD to prevent technical debt.
 - Never Ever hard code mock testing data in production code.
+- Only one object, class, interface, enum per file. never add two objects to a file, yuck!
 
 ### Configuration & Monitoring
 - Set warning and error policies in project configuration files.

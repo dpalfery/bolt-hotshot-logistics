@@ -1,4 +1,4 @@
-using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Core.Enums;
 
 namespace HotshotLogistics.Contracts.Services;
 
@@ -186,7 +186,3 @@ public class PaymentStatusUpdate
     /// </summary>
     public decimal Amount { get; set; }
 }
-
-
-
-

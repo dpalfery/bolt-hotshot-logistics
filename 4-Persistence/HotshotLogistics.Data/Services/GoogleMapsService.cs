@@ -10,9 +10,10 @@ namespace HotshotLogistics.Data.Services
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
-    using HotshotLogistics.Contracts.Models;
-using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Services;
+    using HotshotLogistics.Domain.DTOs;
+    using HotshotLogistics.Domain.Entities;
+    using HotshotLogistics.Domain.ValueObjects;
     using Microsoft.Extensions.Logging;
 
     /// <summary>
@@ -341,5 +342,3 @@ using HotshotLogistics.Domain.Entities;
         }
     }
 }
-
-

@@ -9,10 +9,10 @@ namespace HotshotLogistics.Application.Services
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using HotshotLogistics.Contracts.Models;
+    using HotshotLogistics.Core.Enums;
+    using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Repositories;
     using HotshotLogistics.Contracts.Services;
-using HotshotLogistics.Domain.Entities;
     using Microsoft.Extensions.Caching.Distributed;
     using Microsoft.Extensions.Logging;
     using System.Text.Json;
@@ -105,7 +105,7 @@ using HotshotLogistics.Domain.Entities;
         }
 
         /// <inheritdoc/>
-        public async Task<ILocationTracking> UpdateLocationAsync(string jobId, int driverId, LocationUpdate locationUpdate, CancellationToken cancellationToken = default)
+        public async Task<LocationTracking> UpdateLocationAsync(string jobId, int driverId, LocationUpdate locationUpdate, CancellationToken cancellationToken = default)
         {
             logger.LogDebug("Updating location for job {JobId} with driver {DriverId}", jobId, driverId);
 
@@ -181,7 +181,7 @@ using HotshotLogistics.Domain.Entities;
         }
 
         /// <inheritdoc/>
-        public async Task<ILocationTracking?> GetCurrentLocationAsync(string jobId, CancellationToken cancellationToken = default)
+        public async Task<LocationTracking?> GetCurrentLocationAsync(string jobId, CancellationToken cancellationToken = default)
         {
             // Try to get from cache first
             var cacheKey = $"location:current:{jobId}";
@@ -213,7 +213,7 @@ using HotshotLogistics.Domain.Entities;
         }
 
         /// <inheritdoc/>
-        public Task<IEnumerable<ILocationTracking>> GetLocationHistoryAsync(string jobId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken = default)
+        public Task<IEnumerable<LocationTracking>> GetLocationHistoryAsync(string jobId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken = default)
         {
             return locationTrackingRepository.GetByJobIdAndTimeRangeAsync(jobId, startTime, endTime);
         }
@@ -377,7 +377,7 @@ using HotshotLogistics.Domain.Entities;
         /// <param name="currentLocation">The current location.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        private async Task UpdateJobStatusBasedOnLocationAsync(IJob job, LocationUpdate currentLocation, CancellationToken cancellationToken)
+        private async Task UpdateJobStatusBasedOnLocationAsync(Job job, LocationUpdate currentLocation, CancellationToken cancellationToken)
         {
             const double proximityThresholdMiles = 0.5; // Within 0.5 miles
 
@@ -470,7 +470,7 @@ using HotshotLogistics.Domain.Entities;
         /// </summary>
         /// <param name="locations">The location tracking records.</param>
         /// <returns>The total distance in miles.</returns>
-        private static decimal CalculateTotalDistance(List<ILocationTracking> locations)
+        private static decimal CalculateTotalDistance(List<LocationTracking> locations)
         {
             if (locations.Count < 2)
                 return 0;
@@ -497,7 +497,7 @@ using HotshotLogistics.Domain.Entities;
         /// </summary>
         /// <param name="locations">The location tracking records.</param>
         /// <returns>The average speed in mph.</returns>
-        private static decimal? CalculateAverageSpeed(List<ILocationTracking> locations)
+        private static decimal? CalculateAverageSpeed(List<LocationTracking> locations)
         {
             var locationsWithSpeed = locations.Where(l => l.Speed.HasValue).ToList();
 
@@ -558,5 +558,3 @@ using HotshotLogistics.Domain.Entities;
         }
     }
 }
-
-

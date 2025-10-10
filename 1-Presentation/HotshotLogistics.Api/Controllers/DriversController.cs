@@ -1,22 +1,15 @@
 // <copyright file="DriversController.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+using HotshotLogistics.Application.Authorization;
+using HotshotLogistics.Domain.ValueObjects;
+using HotshotLogistics.Domain.DTOs;
+using HotshotLogistics.Contracts.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HotshotLogistics.Api.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using HotshotLogistics.Application.Authorization;
-    using HotshotLogistics.Contracts.Models;
-using HotshotLogistics.Domain.Entities;
-    using HotshotLogistics.Contracts.Services;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Logging;
-
     /// <summary>
     /// API controller for driver management operations.
     /// </summary>
@@ -137,19 +130,19 @@ using HotshotLogistics.Domain.Entities;
 
                 var driver = new HotshotLogistics.Domain.Entities.Driver
                 {
-                     PersonalInfo = new PersonalInfo
-                     {
-                         FirstName = driverDto.FirstName,
-                         LastName = driverDto.LastName,
-                         Email = driverDto.Email,
-                         PhoneNumber = driverDto.PhoneNumber
-                     },
-                     License = new LicenseInfo
-                     {
-                         LicenseNumber = driverDto.LicenseNumber,
-                         LicenseExpiryDate = driverDto.LicenseExpiryDate
-                     },
-                     IsActive = driverDto.IsActive
+                    PersonalInfo = new PersonalInfo
+                    {
+                        FirstName = driverDto.FirstName,
+                        LastName = driverDto.LastName,
+                        Email = driverDto.Email,
+                        PhoneNumber = driverDto.PhoneNumber
+                    },
+                    License = new LicenseInfo
+                    {
+                        LicenseNumber = driverDto.LicenseNumber,
+                        LicenseExpiryDate = driverDto.LicenseExpiryDate
+                    },
+                    IsActive = driverDto.IsActive
                 };
 
 
@@ -208,22 +201,22 @@ using HotshotLogistics.Domain.Entities;
 
             try
             {
-                 var driver = new HotshotLogistics.Domain.Entities.Driver
+                var driver = new HotshotLogistics.Domain.Entities.Driver
                 {
-                     Id = driverDto.Id,
-                     PersonalInfo = new PersonalInfo
-                     {
-                         FirstName = driverDto.FirstName,
-                         LastName = driverDto.LastName,
-                         Email = driverDto.Email,
-                         PhoneNumber = driverDto.PhoneNumber
-                     },
-                     License = new LicenseInfo
-                     {
-                         LicenseNumber = driverDto.LicenseNumber,
-                         LicenseExpiryDate = driverDto.LicenseExpiryDate
-                     },
-                     IsActive = driverDto.IsActive
+                    Id = driverDto.Id,
+                    PersonalInfo = new PersonalInfo
+                    {
+                        FirstName = driverDto.FirstName,
+                        LastName = driverDto.LastName,
+                        Email = driverDto.Email,
+                        PhoneNumber = driverDto.PhoneNumber
+                    },
+                    License = new LicenseInfo
+                    {
+                        LicenseNumber = driverDto.LicenseNumber,
+                        LicenseExpiryDate = driverDto.LicenseExpiryDate
+                    },
+                    IsActive = driverDto.IsActive
                 };
 
                 var updatedDriver = await driverService.UpdateDriverAsync(driver);
@@ -231,7 +224,7 @@ using HotshotLogistics.Domain.Entities;
                 {
                     return NotFound();
                 }
-                
+
                 var updatedDriverDto = new DriverDto
                 {
                     Id = updatedDriver.Id,
@@ -290,4 +283,3 @@ using HotshotLogistics.Domain.Entities;
 
     }
 }
-

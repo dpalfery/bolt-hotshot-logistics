@@ -1,4 +1,5 @@
-using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.DTOs;
+using HotshotLogistics.Core.Enums;
 
 namespace HotshotLogistics.Contracts.Services;
 
@@ -71,8 +72,3 @@ public interface IJobAssignmentService
     /// <returns>True if the assignment was deleted; otherwise, false.</returns>
     Task<bool> UnassignJobAsync(string id, CancellationToken cancellationToken = default);
 }
-
-
-
-
-

@@ -1,36 +1,36 @@
 // <copyright file="JobControllerTests.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using FluentAssertions;
+using HotshotLogistics.Core.Enums;
+using HotshotLogistics.Api.Controllers;
+using HotshotLogistics.Domain.Entities;
+using HotshotLogistics.Domain.ValueObjects;
+using HotshotLogistics.Contracts.Repositories;
+using HotshotLogistics.Contracts.Services;
+using FluentValidation;
+using FluentValidation.Results;
+using HotshotLogistics.Core.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Xunit;
+using HotshotLogistics.Domain.DTOs;
 namespace HotshotLogistics.Tests.Job
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using FluentAssertions;
-    using HotshotLogistics.Api.Controllers;
-    using HotshotLogistics.Contracts.Models;
-using HotshotLogistics.Domain.Entities;
-    using HotshotLogistics.Contracts.Repositories;
-    using HotshotLogistics.Contracts.Services;
-    using FluentValidation;
-    using FluentValidation.Results;
-    using HotshotLogistics.Core.Exceptions;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Logging;
-    using Moq;
-    using Xunit;
-
-    /// <summary>
+        /// <summary>
     /// Integration tests for the JobController.
     /// </summary>
     public class JobControllerTests
     {
         private readonly Mock<IJobService> mockJobService;
         private readonly Mock<IJobRepository> mockJobRepository;
-        private readonly Mock<IValidator<JobDto>> mockJobValidator;
+        private readonly Mock<IValidator<Domain.Entities.Job>> mockJobValidator;
         private readonly Mock<ILogger<JobController>> mockLogger;
         private readonly JobController controller;
 
@@ -41,7 +41,7 @@ using HotshotLogistics.Domain.Entities;
         {
             mockJobService = new Mock<IJobService>();
             mockJobRepository = new Mock<IJobRepository>();
-            mockJobValidator = new Mock<IValidator<JobDto>>();
+            mockJobValidator = new Mock<IValidator<Domain.Entities.Job>>();
             mockLogger = new Mock<ILogger<JobController>>();
             controller = new JobController(mockJobService.Object, mockJobRepository.Object, mockLogger.Object, mockJobValidator.Object);
         }
@@ -54,13 +54,13 @@ using HotshotLogistics.Domain.Entities;
         public async Task GetJobs_WithFiltering_ReturnsPagedResults()
         {
             // Arrange
-            var expectedJobs = new List<IJob>
+            var expectedJobs = new List<Domain.Entities.Job>
             {
                 CreateTestJob("job1", JobStatus.Pending),
                 CreateTestJob("job2", JobStatus.Assigned)
             };
 
-            var pagedResult = new PagedResult<IJob>
+            var pagedResult = new PagedResult<Domain.Entities.Job>
             {
                 Items = expectedJobs,
                 TotalCount = 2,
@@ -69,7 +69,7 @@ using HotshotLogistics.Domain.Entities;
             };
 
             mockJobRepository.Setup(r => r.GetJobsAsync(
-                It.IsAny<JobFilter>(),
+                It.IsAny<JobFilterDto>(),
                 It.IsAny<PaginationParameters>(),
                 It.IsAny<SortParameters>(),
                 It.IsAny<CancellationToken>()))
@@ -84,7 +84,7 @@ using HotshotLogistics.Domain.Entities;
             // Assert
             result.Should().NotBeNull();
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedResult = okResult.Value.Should().BeOfType<PagedResult<IJob>>().Subject;
+            var returnedResult = okResult.Value.Should().BeOfType<PagedResult<Domain.Entities.Job>>().Subject;
             returnedResult.Items.Should().HaveCount(2);
             returnedResult.TotalCount.Should().Be(2);
         }
@@ -109,7 +109,7 @@ using HotshotLogistics.Domain.Entities;
             // Assert
             result.Should().NotBeNull();
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedJob = okResult.Value.Should().BeAssignableTo<IJob>().Subject;
+            var returnedJob = okResult.Value.Should().BeAssignableTo<Domain.Entities.Job>().Subject;
             returnedJob.Id.Should().Be(jobId);
         }
 
@@ -124,7 +124,7 @@ using HotshotLogistics.Domain.Entities;
             var jobId = "non-existent-job";
 
             mockJobService.Setup(s => s.GetJobByIdAsync(jobId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync((IJob?)null);
+                .ReturnsAsync((Domain.Entities.Job?)null);
 
             // Act
             var result = await controller.GetJobById(jobId);
@@ -142,7 +142,7 @@ using HotshotLogistics.Domain.Entities;
         public async Task CreateJob_WithValidData_CreatesAndReturnsJob()
         {
             // Arrange
-            var jobDto = new JobDto
+            var jobDto = new Domain.Entities.Job
             {
                 Id = "new-job-id",
                 Title = "Test Job",
@@ -151,7 +151,7 @@ using HotshotLogistics.Domain.Entities;
                 Priority = JobPriority.Medium,
                 Amount = 100.00m,
                 ScheduledPickupTime = DateTime.UtcNow.AddHours(2),
-                EstimatedDeliveryTimeString = DateTime.UtcNow.AddHours(8).ToString("O")
+                EstimatedDeliveryTime = DateTime.UtcNow.AddHours(8) // <-- FIXED HERE
             };
 
             var createdJob = CreateTestJob(jobDto.Id, jobDto.Status);
@@ -200,7 +200,7 @@ using HotshotLogistics.Domain.Entities;
         public async Task CreateJob_WithInvalidData_ReturnsBadRequest()
         {
             // Arrange
-            var jobDto = new JobDto
+            var jobDto = new Domain.Entities.Job
             {
                 Id = "invalid-job",
                 Title = "", // Invalid: empty title
@@ -240,7 +240,7 @@ using HotshotLogistics.Domain.Entities;
         {
             // Arrange
             var jobId = "existing-job-id";
-            var jobDto = new JobDto
+            var jobDto = new Domain.Entities.Job
             {
                 Id = jobId,
                 Title = "Updated Job Title",
@@ -252,7 +252,7 @@ using HotshotLogistics.Domain.Entities;
 
             var updatedJob = CreateTestJob(jobId, JobStatus.Assigned);
 
-            mockJobService.Setup(s => s.UpdateJobAsync(jobId, It.IsAny<IJob>(), It.IsAny<CancellationToken>()))
+            mockJobService.Setup(s => s.UpdateJobAsync(jobId, It.IsAny<Domain.Entities.Job>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(updatedJob);
 
             // Act
@@ -274,10 +274,10 @@ using HotshotLogistics.Domain.Entities;
         {
             // Arrange
             var jobId = "non-existent-job";
-            var jobDto = new JobDto { Id = jobId, Title = "Test" };
+            var jobDto = new Domain.Entities.Job { Id = jobId, Title = "Test" };
 
-            mockJobService.Setup(s => s.UpdateJobAsync(jobId, It.IsAny<IJob>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((IJob?)null);
+            mockJobService.Setup(s => s.UpdateJobAsync(jobId, It.IsAny<Domain.Entities.Job>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((Domain.Entities.Job?)null);
 
             // Act
             var result = await controller.UpdateJob(jobId, jobDto);
@@ -372,7 +372,7 @@ using HotshotLogistics.Domain.Entities;
             // Assert
             result.Should().NotBeNull();
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedJob = okResult.Value.Should().BeAssignableTo<IJob>().Subject;
+            var returnedJob = okResult.Value.Should().BeAssignableTo<Domain.Entities.Job>().Subject;
             returnedJob.AssignedDriverId.Should().Be(driverId);
         }
 
@@ -408,7 +408,7 @@ using HotshotLogistics.Domain.Entities;
         {
             // Arrange
             var jobId = "job-to-update";
-            var newStatus = JobStatus.InProgress;
+            var newStatus = JobStatus.EnRoute;
             var request = new UpdateJobStatusRequest { Status = newStatus };
             var updatedJob = CreateTestJob(jobId, newStatus);
 
@@ -421,7 +421,7 @@ using HotshotLogistics.Domain.Entities;
             // Assert
             result.Should().NotBeNull();
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedJob = okResult.Value.Should().BeAssignableTo<IJob>().Subject;
+            var returnedJob = okResult.Value.Should().BeAssignableTo<Domain.Entities.Job>().Subject;
             returnedJob.Status.Should().Be(newStatus);
         }
 
@@ -434,7 +434,7 @@ using HotshotLogistics.Domain.Entities;
         {
             // Arrange
             var status = JobStatus.Pending;
-            var expectedJobs = new List<IJob>
+            var expectedJobs = new List<Domain.Entities.Job>
             {
                 CreateTestJob("job1", status),
                 CreateTestJob("job2", status)
@@ -449,7 +449,7 @@ using HotshotLogistics.Domain.Entities;
             // Assert
             result.Should().NotBeNull();
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedJobs = okResult.Value.Should().BeAssignableTo<IEnumerable<IJob>>().Subject;
+            var returnedJobs = okResult.Value.Should().BeAssignableTo<IEnumerable<Domain.Entities.Job>>().Subject;
             returnedJobs.Should().HaveCount(2);
             returnedJobs.All(j => j.Status == status).Should().BeTrue();
         }
@@ -463,10 +463,10 @@ using HotshotLogistics.Domain.Entities;
         {
             // Arrange
             var driverId = 123;
-            var expectedJobs = new List<IJob>
+            var expectedJobs = new List<Domain.Entities.Job>
             {
                 CreateTestJob("job1", JobStatus.Assigned, driverId),
-                CreateTestJob("job2", JobStatus.InProgress, driverId)
+                CreateTestJob("job2", JobStatus.EnRoute, driverId)
             };
 
             mockJobRepository.Setup(r => r.GetJobsByDriverAsync(driverId, It.IsAny<CancellationToken>()))
@@ -478,7 +478,7 @@ using HotshotLogistics.Domain.Entities;
             // Assert
             result.Should().NotBeNull();
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedJobs = okResult.Value.Should().BeAssignableTo<IEnumerable<IJob>>().Subject;
+            var returnedJobs = okResult.Value.Should().BeAssignableTo<IEnumerable<Domain.Entities.Job>>().Subject;
             returnedJobs.Should().HaveCount(2);
             returnedJobs.All(j => j.AssignedDriverId == driverId).Should().BeTrue();
         }
@@ -492,10 +492,10 @@ using HotshotLogistics.Domain.Entities;
         {
             // Arrange
             var customerId = "customer123";
-            var expectedJobs = new List<IJob>
+            var expectedJobs = new List<Domain.Entities.Job>
             {
                 CreateTestJob("job1", JobStatus.Pending, customerId: customerId),
-                CreateTestJob("job2", JobStatus.Completed, customerId: customerId)
+                CreateTestJob("job2", JobStatus.Received, customerId: customerId)
             };
 
             mockJobRepository.Setup(r => r.GetJobsByCustomerAsync(customerId, It.IsAny<CancellationToken>()))
@@ -507,7 +507,7 @@ using HotshotLogistics.Domain.Entities;
             // Assert
             result.Should().NotBeNull();
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedJobs = okResult.Value.Should().BeAssignableTo<IEnumerable<IJob>>().Subject;
+            var returnedJobs = okResult.Value.Should().BeAssignableTo<IEnumerable<Domain.Entities.Job>>().Subject;
             returnedJobs.Should().HaveCount(2);
             returnedJobs.All(j => j.CustomerId == customerId).Should().BeTrue();
         }
@@ -520,9 +520,9 @@ using HotshotLogistics.Domain.Entities;
         public async Task GetOverdueJobs_ReturnsOverdueJobs()
         {
             // Arrange
-            var overdueJobs = new List<IJob>
+            var overdueJobs = new List<Domain.Entities.Job>
             {
-                CreateTestJob("overdue1", JobStatus.InProgress),
+                CreateTestJob("overdue1", JobStatus.EnRoute),
                 CreateTestJob("overdue2", JobStatus.Assigned)
             };
 
@@ -535,9 +535,9 @@ using HotshotLogistics.Domain.Entities;
             // Assert
             result.Should().NotBeNull();
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedJobs = okResult.Value.Should().BeAssignableTo<IEnumerable<IJob>>().Subject;
+            var returnedJobs = okResult.Value.Should().BeAssignableTo<IEnumerable<Domain.Entities.Job>>().Subject;
             returnedJobs.Should().HaveCount(2);
-        }
+        }   
 
         /// <summary>
         /// Creates a test job for testing purposes.
@@ -547,9 +547,9 @@ using HotshotLogistics.Domain.Entities;
         /// <param name="driverId">The optional driver ID.</param>
         /// <param name="customerId">The optional customer ID.</param>
         /// <returns>A test job instance.</returns>
-        private static IJob CreateTestJob(string id, JobStatus status, int? driverId = null, string? customerId = null)
+        private static Domain.Entities.Job CreateTestJob(string id, JobStatus status, int? driverId = null, string? customerId = null)
         {
-            return new JobDto
+            return new Domain.Entities.Job
             {
                 Id = id,
                 Title = $"Test Job {id}",
@@ -560,7 +560,7 @@ using HotshotLogistics.Domain.Entities;
                 AssignedDriverId = driverId,
                 CreatedAt = DateTime.UtcNow,
                 ScheduledPickupTime = DateTime.UtcNow.AddHours(2),
-                EstimatedDeliveryTimeString = DateTime.UtcNow.AddHours(8).ToString("O"),
+                EstimatedDeliveryTime = DateTime.UtcNow.AddHours(8), // <-- FIXED HERE
                 PickupLocation = new Location { Address = "123 Pickup St", Latitude = 40.7128m, Longitude = -74.0060m },
                 DeliveryLocation = new Location { Address = "456 Delivery Ave", Latitude = 40.7589m, Longitude = -73.9851m },
                 Cargo = new CargoDetails { Description = "Test cargo", Weight = 100, Value = 1000 },
@@ -571,5 +571,3 @@ using HotshotLogistics.Domain.Entities;
         }
     }
 }
-
-

@@ -1,13 +1,14 @@
 using FluentValidation;
-using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.DTOs;
 using HotshotLogistics.Domain.Entities;
+using HotshotLogistics.Domain.ValueObjects;
 
 namespace HotshotLogistics.Application.Validators;
 
 /// <summary>
 /// Validator for job creation requests.
 /// </summary>
-public class CreateJobValidator : AbstractValidator<JobDto>
+public class CreateJobValidator : AbstractValidator<ContractsJobDto>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="CreateJobValidator"/> class.
@@ -30,36 +31,41 @@ public class CreateJobValidator : AbstractValidator<JobDto>
             .GreaterThan(0).WithMessage("Job amount must be greater than zero.")
             .LessThanOrEqualTo(100000).WithMessage("Job amount cannot exceed $100,000.");
 
-        RuleFor(x => x.ScheduledPickupTime)
-            .GreaterThan(DateTime.UtcNow).WithMessage("Scheduled pickup time must be in the future.")
-            .LessThan(DateTime.UtcNow.AddDays(365)).WithMessage("Scheduled pickup time cannot be more than 365 days in the future.");
+        RuleFor(x => (DateTime?)x.ScheduledPickupTime)
+            .NotNull().WithMessage("Scheduled pickup time is required.")
+            .Must(dt => dt > DateTime.UtcNow).WithMessage("Scheduled pickup time must be in the future.")
+            .Must(dt => dt < DateTime.UtcNow.AddDays(365)).WithMessage("Scheduled pickup time cannot be more than 365 days in the future.");
 
-        RuleFor(x => x.EstimatedDeliveryTime)
-            .GreaterThan(x => x.ScheduledPickupTime).WithMessage("Estimated delivery time must be after scheduled pickup time.")
-            .LessThan(x => x.ScheduledPickupTime.AddDays(30)).WithMessage("Estimated delivery time cannot be more than 30 days after pickup.")
-            .When(x => !string.IsNullOrEmpty(x.EstimatedDeliveryTimeString));
+        RuleFor(x => (DateTime?)x.EstimatedDeliveryTime)
+            .NotNull().WithMessage("Estimated delivery time is required.")
+            .Must((dto, etd) => etd > (DateTime?)dto.ScheduledPickupTime)
+                .WithMessage("Estimated delivery time must be after scheduled pickup time.")
+            .Must((dto, etd) => etd < ((DateTime?)dto.ScheduledPickupTime)?.AddDays(30))
+                .WithMessage("Estimated delivery time cannot be more than 30 days after pickup.")
+            .When(x => x.EstimatedDeliveryTime != null);
 
         RuleFor(x => x.CustomerId)
             .NotEmpty().WithMessage("Customer ID is required.");
 
         RuleFor(x => x.PickupLocation)
             .NotNull().WithMessage("Pickup location is required.")
-            .SetValidator(new LocationValidator());
+            .SetValidator(new LocationValidator()!);
 
         RuleFor(x => x.DeliveryLocation)
             .NotNull().WithMessage("Delivery location is required.")
-            .SetValidator(new LocationValidator());
+            .SetValidator(new LocationValidator()!);
 
         RuleFor(x => x.Cargo)
             .NotNull().WithMessage("Cargo details are required.")
-            .SetValidator(new CargoDetailsValidator());
+            .SetValidator(new CargoDetailsValidator()!);
 
         RuleFor(x => x.Pricing)
             .NotNull().WithMessage("Pricing details are required.")
-            .SetValidator(new PricingDetailsValidator());
+            .SetValidator(new PricingDetailsValidator()!);
 
         RuleFor(x => x.SpecialInstructions)
-            .MaximumLength(1000).WithMessage("Special instructions cannot exceed 1000 characters.");
+            .MaximumLength(1000).WithMessage("Special instructions cannot exceed 1000 characters.")
+            .When(x => x.SpecialInstructions != null);
     }
 }
 
@@ -199,5 +205,3 @@ public class PricingDetailsValidator : AbstractValidator<PricingDetails?>
         });
     }
 }
-
-

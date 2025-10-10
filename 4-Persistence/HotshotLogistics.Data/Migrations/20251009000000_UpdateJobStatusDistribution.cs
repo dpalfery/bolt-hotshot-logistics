@@ -1,5 +1,7 @@
+#pragma warning disable SA1649
+using System.Collections.Generic;
 using FluentMigrator;
-
+using HotshotLogistics.Core.Enums;
 namespace HotshotLogistics.Data.Migrations;
 
 /// <summary>
@@ -42,17 +44,17 @@ public class UpdateJobStatusDistribution : Migration
             // Distribute statuses: 40% Pending, 30% Assigned, 20% EnRoute, 10% Received
             var statusDistribution = new[]
             {
-                (Contracts.Models.JobStatus.Pending, 0.40),
-                (Contracts.Models.JobStatus.Assigned, 0.30),
-                (Contracts.Models.JobStatus.EnRoute, 0.20),
-                (Contracts.Models.JobStatus.Received, 0.10)
+                (JobStatus.Pending, 0.40),
+                (JobStatus.Assigned, 0.30),
+                (JobStatus.EnRoute, 0.20),
+                (JobStatus.Received, 0.10),
             };
 
             foreach (var jobId in jobIds)
             {
                 var randomValue = rnd.NextDouble();
                 var cumulativeProbability = 0.0;
-                Contracts.Models.JobStatus selectedStatus = Contracts.Models.JobStatus.Pending;
+                JobStatus selectedStatus = JobStatus.Pending;
 
                 foreach (var (status, probability) in statusDistribution)
                 {

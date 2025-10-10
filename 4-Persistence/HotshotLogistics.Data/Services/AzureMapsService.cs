@@ -10,10 +10,12 @@ namespace HotshotLogistics.Data.Services
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
-    using HotshotLogistics.Contracts.Models;
-using HotshotLogistics.Domain.Entities;
+
     using HotshotLogistics.Contracts.Services;
+    using HotshotLogistics.Domain.ValueObjects;
+    using HotshotLogistics.Domain.Entities;
     using Microsoft.Extensions.Logging;
+    using HotshotLogistics.Domain.DTOs;
 
     /// <summary>
     /// Azure Maps implementation of the mapping service.
@@ -258,6 +260,26 @@ using HotshotLogistics.Domain.Entities;
             };
         }
 
+        Task<ReverseGeocodingResult> IMappingService.ReverseGeocodeAsync(decimal latitude, decimal longitude, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<RouteResult> IMappingService.CalculateRouteAsync(Location origin, Location destination, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<OptimizedRouteResult> IMappingService.OptimizeRouteAsync(IList<Location> waypoints, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<DistanceResult> IMappingService.CalculateDistanceAsync(Location origin, Location destination, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
         // Internal classes for Azure Maps API responses
         private class AzureMapsGeocodeResponse
         {
@@ -319,5 +341,3 @@ using HotshotLogistics.Domain.Entities;
         }
     }
 }
-
-

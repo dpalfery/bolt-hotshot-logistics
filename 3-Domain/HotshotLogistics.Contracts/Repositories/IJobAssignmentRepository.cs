@@ -1,4 +1,4 @@
-using HotshotLogistics.Contracts.Models;
+using HotshotLogistics.Domain.DTOs;
 
 namespace HotshotLogistics.Contracts.Repositories;
 
@@ -69,8 +69,3 @@ public interface IJobAssignmentRepository
     /// <returns>True if the assignment was deleted; otherwise, false.</returns>
     Task<bool> DeleteAsync(string id, CancellationToken cancellationToken = default);
 }
-
-
-
-
-

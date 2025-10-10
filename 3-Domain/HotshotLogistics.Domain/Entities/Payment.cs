@@ -1,12 +1,12 @@
-using System;
-using HotshotLogistics.Contracts.Models;
+
+using HotshotLogistics.Core.Enums;
 
 namespace HotshotLogistics.Domain.Entities
 {
 /// <summary>
 /// Represents a payment in the system.
 /// </summary>
-public class Payment : IPayment
+public class Payment
 {
     /// <inheritdoc/>
     public string Id { get; set; } = string.Empty;
@@ -188,5 +188,3 @@ public class Payment : IPayment
     }
 }
 }
-
-

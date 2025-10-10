@@ -2,10 +2,9 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using HotshotLogistics.Contracts.Models;
+
+using HotshotLogistics.Core.Enums;
+using HotshotLogistics.Domain.ValueObjects;
 
 namespace HotshotLogistics.Domain.Entities
 {
@@ -13,7 +12,7 @@ namespace HotshotLogistics.Domain.Entities
     /// <summary>
     /// Represents a job in the logistics system.
     /// </summary>
-    public class Job : IJob
+    public class Job 
     {
         /// <summary>
         /// Gets or sets the unique identifier for the job.
@@ -61,12 +60,17 @@ namespace HotshotLogistics.Domain.Entities
         public PricingDetails Pricing { get; set; } = new PricingDetails();
 
         /// <summary>
+        /// Gets or sets the total amount for the job.
+        /// </summary>
+        public decimal Amount { get; set; }
+
+        /// <summary>
         /// Gets or sets the scheduled pickup time for the job.
         /// </summary>
         public DateTime ScheduledPickupTime { get; set; }
 
         /// <summary>
-        /// Gets or sets the estimated delivery time for the job.
+        /// Gets or sets the estimated delivery time for the job.   
         /// </summary>
         public DateTime EstimatedDeliveryTime { get; set; }
 
@@ -226,5 +230,3 @@ namespace HotshotLogistics.Domain.Entities
         }
     }
 }
-
-

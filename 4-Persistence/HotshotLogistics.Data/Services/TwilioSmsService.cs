@@ -5,11 +5,14 @@
 namespace HotshotLogistics.Data.Services
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using HotshotLogistics.Contracts.Models;
-using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Services;
+    using HotshotLogistics.Domain.DTOs;
+    using HotshotLogistics.Domain.Entities;
+    using HotshotLogistics.Domain.ValueObjects;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Twilio;
@@ -38,7 +41,7 @@ using HotshotLogistics.Domain.Entities;
         }
 
         /// <inheritdoc/>
-        public CommunicationType Type => CommunicationType.Sms;
+        public string Type => "Sms";
 
         /// <inheritdoc/>
         public async Task<bool> SendAsync(CommunicationMessage message, CancellationToken cancellationToken = default)
@@ -110,5 +113,3 @@ using HotshotLogistics.Domain.Entities;
         }
     }
 }
-
-
