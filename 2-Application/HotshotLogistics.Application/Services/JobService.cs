@@ -9,12 +9,14 @@ using System.Threading.Tasks;
 using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Contracts.Services;
+using HotshotLogistics.Application.Services;
 using HotshotLogistics.Core.Exceptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using HotshotLogistics.Domain.DTOs;
 using HotshotLogistics.Domain.ValueObjects;
 using HotshotLogistics.Core.Enums;
+using HotshotLogistics.Domain.DTOs;
 
 namespace HotshotLogistics.Application.Services
 {
@@ -714,6 +716,36 @@ namespace HotshotLogistics.Application.Services
                     driverMessage,
                     cancellationToken);
             }
+        }
+
+        /// <inheritdoc/>
+        public async Task<JobStatusSummaryDto> GetJobStatusSummaryAsync(CancellationToken cancellationToken = default)
+        {
+            logger.LogInformation("Getting job status summary");
+
+            var statusCounts = await jobRepository.GetJobStatusSummaryAsync(cancellationToken);
+
+            var summary = new JobStatusSummaryDto();
+            foreach (var (status, count) in statusCounts)
+            {
+                switch (status)
+                {
+                    case JobStatus.Pending:
+                        summary.PendingCount = count;
+                        break;
+                    case JobStatus.Assigned:
+                        summary.AssignedCount = count;
+                        break;
+                    case JobStatus.EnRoute:
+                        summary.EnRouteCount = count;
+                        break;
+                    case JobStatus.Received:
+                        summary.ReceivedCount = count;
+                        break;
+                }
+            }
+
+            return summary;
         }
     }
 }

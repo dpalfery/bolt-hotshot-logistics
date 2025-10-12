@@ -1,6 +1,6 @@
 import { msalInstance } from '@/lib/providers';
 import { loginRequest } from '@/config/auth';
-import { Job, Driver, Invoice, Customer, PagedResult, JobFilter, InvoiceFilter, PaginationParameters, InvoiceSummaryMetrics, InvoiceAgingBuckets } from '@/types';
+import { Job, Driver, Invoice, Customer, PagedResult, JobFilter, InvoiceFilter, PaginationParameters, InvoiceSummaryMetrics, InvoiceAgingBuckets, JobStatusSummaryDto } from '@/types';
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || '/api').trim();
 
@@ -170,6 +170,10 @@ class ApiService {
       method: 'PUT',
       body: JSON.stringify({ status }),
     });
+  }
+  // Job status summary API method
+  async getJobStatusSummary(): Promise<JobStatusSummaryDto> {
+    return this.request<JobStatusSummaryDto>('/jobs/status-summary');
   }
 
   // Driver API methods

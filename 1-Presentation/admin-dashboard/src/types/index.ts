@@ -156,6 +156,14 @@ export interface InvoiceAgingBuckets {
   total: number;
 }
 
+// Job Status Summary type
+export interface JobStatusSummaryDto {
+  pendingCount: number;
+  assignedCount: number;
+  enRouteCount: number;
+  receivedCount: number;
+}
+
 // Customer types
 export interface Customer {
   id: string;

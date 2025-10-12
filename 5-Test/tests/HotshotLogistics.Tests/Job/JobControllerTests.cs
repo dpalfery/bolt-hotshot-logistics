@@ -12,7 +12,7 @@ using HotshotLogistics.Api.Controllers;
 using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Domain.ValueObjects;
 using HotshotLogistics.Contracts.Repositories;
-using HotshotLogistics.Contracts.Services;
+using HotshotLogistics.Application.Services;
 using FluentValidation;
 using FluentValidation.Results;
 using HotshotLogistics.Core.Exceptions;

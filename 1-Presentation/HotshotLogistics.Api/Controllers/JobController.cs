@@ -6,6 +6,7 @@ using FluentValidation;
 using HotshotLogistics.Application.Validators;
 using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Contracts.Repositories;
+using HotshotLogistics.Application.Services;
 using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Domain.DTOs;
 using HotshotLogistics.Core.Enums;
