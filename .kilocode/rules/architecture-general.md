@@ -137,21 +137,5 @@ rule: |
 * `interface-cleanup-tasks.md`
 * Diagrams, design notes, checklists
 
----
-
-### ✅ Summary Table
-
-| Layer                | Project                                 | Key Folders                                               | Responsibilities           |
-| -------------------- | --------------------------------------- | --------------------------------------------------------- | -------------------------- |
-| **1-Presentation**   | `HotshotLogistics.Api` / `.Web`         | Controllers, DTOs, Middleware, Hubs                       | API/UI entry point         |
-| **2-Application**    | `HotshotLogistics.Application`          | Services, Validators, Authorization, DTOs                 | Use cases and coordination |
-| **3-Domain**         | `HotshotLogistics.Domain`, `.Contracts` | Entities, ValueObjects, Services, Repositories, Factories | Core business logic        |
-| **4-Persistence**    | `HotshotLogistics.Persistence`          | DbContext, Configurations, Repositories, ReadModels       | Data access implementation |
-| **5-Infrastructure** | `HotshotLogistics.Infrastructure`       | Adapters, Integrations, Utilities                         | Cross-cutting concerns     |
-| **6-Docs**           | `6-docs`                                | Architecture docs, tasks                                  | Internal documentation     |
-
----
-
-Would you like me to include an **example folder tree** (`/src` layout with .csproj names and namespace conventions) to complement this?
 
 
