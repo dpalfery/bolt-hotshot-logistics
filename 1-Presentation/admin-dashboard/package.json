@@ -15,7 +15,7 @@
     "test:ui": "playwright test --ui"
   },
   "dependencies": {
-    "@azure/msal-browser": "^4.24.0",
+    "@azure/msal-browser": "^4.24.1",
     "@azure/msal-react": "^3.0.20",
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
