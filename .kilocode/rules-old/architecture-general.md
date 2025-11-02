@@ -137,5 +137,11 @@ rule: |
 * `interface-cleanup-tasks.md`
 * Diagrams, design notes, checklists
 
+---
 
+## **7-Deployment**
 
+**Purpose:** CI-CD scripts, Docker Files, anything that helps with the deployment of the solution either locally or in production.
+
+* `Docker files`
+* `scripts`

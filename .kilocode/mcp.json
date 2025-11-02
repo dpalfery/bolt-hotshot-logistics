@@ -4,15 +4,34 @@
       "type": "streamable-http",
       "url": "https://learn.microsoft.com/api/mcp"
     },
-    "memory": {
+      "context-iso": {
       "command": "npx",
       "args": [
-        "-y",
-        "@modelcontextprotocol/server-memory"
+        "--yes",
+        "tsx",
+        "c:/git/contextiso/src/index.ts"
       ],
+      "env": {
+        "NEO4J_URI": "${env:NEO4J_URI}",
+        "NEO4J_USERNAME": "${env:NEO4J_USERNAME}",
+        "NEO4J_PASSWORD": "${env:NEO4J_PASSWORD}",
+        "NEO4J_DATABASE": "neo4j",
+        "WORKSPACE": "hotshot-logistics",
+        "QUERY_MAX_ITEMS": "30",
+        "QUERY_TOKEN_BUDGET": "10000",
+        "QUERY_INCLUDE_METADATA": "false",
+        "ALLOWED_MODES": "Code, Debug, Orchestrator, Next.js Developer, ,Net Dev, Code Skeptic",
+        "LLM_PROVIDER": "local",
+        "LLM_ENDPOINT": "http://localhost:11434",
+        "LLM_MODEL": "deepseek-coder-v2"
+      },
+      "disabled": false,
       "alwaysAllow": [
-        "create_entities",
-        "read_graph"
+        "memory.rules.query_directives",
+        "memory.rules.upsert_markdown",
+        "memory.rules.detect_context",
+        "memory.read_graph",
+        "memory.search_nodes"
       ]
     }
   }
