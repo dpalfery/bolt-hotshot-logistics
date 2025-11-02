@@ -4,12 +4,12 @@
       "type": "streamable-http",
       "url": "https://learn.microsoft.com/api/mcp"
     },
-      "context-iso": {
+    "context-iso": {
       "command": "npx",
       "args": [
         "--yes",
         "tsx",
-        "c:/git/contextiso/src/index.ts"
+        "c:/git/contextiso/1-PResentation/src/index.ts"
       ],
       "env": {
         "NEO4J_URI": "${env:NEO4J_URI}",
@@ -20,7 +20,8 @@
         "QUERY_MAX_ITEMS": "30",
         "QUERY_TOKEN_BUDGET": "10000",
         "QUERY_INCLUDE_METADATA": "false",
-        "ALLOWED_MODES": "Code, Debug, Orchestrator, Next.js Developer, ,Net Dev, Code Skeptic",
+        "ENABLE_DIRECTIVE_GENERATION": "true",
+        "ALLOWED_MODES": "Code, Debug, Orchestrator, Next.js Developer,Net Dev, Code Skeptic",
         "LLM_PROVIDER": "local",
         "LLM_ENDPOINT": "http://localhost:11434",
         "LLM_MODEL": "deepseek-coder-v2"
@@ -31,8 +32,10 @@
         "memory.rules.upsert_markdown",
         "memory.rules.detect_context",
         "memory.read_graph",
-        "memory.search_nodes"
-      ]
+        "memory.search_nodes",
+        "memory.rules.index_rules"
+      ],
+      "timeout": 1800
     }
   }
 }
