@@ -4,7 +4,7 @@ using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Domain.ValueObjects;
 
-namespace HotshotLogistics.Tests.Job
+namespace HotshotLogistics.Tests.Jobs
 {
     /// <summary>
 /// Unit tests for CreateJobValidator.
@@ -28,13 +28,14 @@ public class CreateJobValidatorTests
     public void Validate_ValidJobDto_ShouldPass()
     {
         // Arrange
-        var jobDto = new Domain.Entities.JobDto
+        var jobDto = new ContractsJobDto
         {
             Title = "Test Job",
             PickupAddress = "123 Main St, City, ST 12345",
             DropoffAddress = "456 Oak Ave, City, ST 12345",
             Amount = 500.00m,
             ScheduledPickupTime = DateTime.UtcNow.AddHours(2),
+            EstimatedDeliveryTime = DateTime.UtcNow.AddHours(8),
             CustomerId = "customer-123",
             PickupLocation = new Location
             {
@@ -85,7 +86,7 @@ public class CreateJobValidatorTests
     public void Validate_EmptyTitle_ShouldFail()
     {
         // Arrange
-        var jobDto = new Domain.Entities.JobDto { Title = string.Empty };
+        var jobDto = new ContractsJobDto { Title = string.Empty };
 
         // Act
         var result = this.validator.TestValidate(jobDto);
@@ -102,7 +103,7 @@ public class CreateJobValidatorTests
     public void Validate_TitleTooLong_ShouldFail()
     {
         // Arrange
-        var jobDto = new Domain.Entities.JobDto { Title = new string('A', 201) };
+        var jobDto = new ContractsJobDto { Title = new string('A', 201) };
 
         // Act
         var result = this.validator.TestValidate(jobDto);
@@ -119,7 +120,7 @@ public class CreateJobValidatorTests
     public void Validate_EmptyPickupAddress_ShouldFail()
     {
         // Arrange
-        var jobDto = new Domain.Entities.JobDto { PickupAddress = string.Empty };
+        var jobDto = new ContractsJobDto { PickupAddress = string.Empty };
 
         // Act
         var result = this.validator.TestValidate(jobDto);
@@ -136,7 +137,7 @@ public class CreateJobValidatorTests
     public void Validate_ZeroAmount_ShouldFail()
     {
         // Arrange
-        var jobDto = new Domain.Entities.JobDto { Amount = 0 };
+        var jobDto = new ContractsJobDto { Amount = 0 };
 
         // Act
         var result = this.validator.TestValidate(jobDto);
@@ -153,7 +154,7 @@ public class CreateJobValidatorTests
     public void Validate_AmountTooHigh_ShouldFail()
     {
         // Arrange
-        var jobDto = new Domain.Entities.JobDto { Amount = 150000.00m };
+        var jobDto = new ContractsJobDto { Amount = 150000.00m };
 
         // Act
         var result = this.validator.TestValidate(jobDto);
@@ -170,7 +171,7 @@ public class CreateJobValidatorTests
     public void Validate_PastPickupTime_ShouldFail()
     {
         // Arrange
-        var jobDto = new Domain.Entities.JobDto { ScheduledPickupTime = DateTime.UtcNow.AddHours(-1) };
+        var jobDto = new ContractsJobDto { ScheduledPickupTime = DateTime.UtcNow.AddHours(-1) };
 
         // Act
         var result = this.validator.TestValidate(jobDto);
@@ -188,7 +189,7 @@ public class CreateJobValidatorTests
     {
         // Arrange
         var pickupTime = DateTime.UtcNow.AddHours(2);
-        var jobDto = new Domain.Entities.JobDto
+        var jobDto = new ContractsJobDto
         {
             ScheduledPickupTime = pickupTime,
             EstimatedDeliveryTime = pickupTime.AddHours(-1)
@@ -209,7 +210,7 @@ public class CreateJobValidatorTests
     public void Validate_EmptyCustomerId_ShouldFail()
     {
         // Arrange
-        var jobDto = new Domain.Entities.JobDto { CustomerId = string.Empty };
+        var jobDto = new ContractsJobDto { CustomerId = string.Empty };
 
         // Act
         var result = this.validator.TestValidate(jobDto);
@@ -226,7 +227,7 @@ public class CreateJobValidatorTests
     public void Validate_NullPickupLocation_ShouldFail()
     {
         // Arrange
-        var jobDto = new Domain.Entities.JobDto { PickupLocation = null! };
+        var jobDto = new ContractsJobDto { PickupLocation = null! };
 
         // Act
         var result = this.validator.TestValidate(jobDto);
@@ -243,7 +244,7 @@ public class CreateJobValidatorTests
     public void Validate_NullCargo_ShouldFail()
     {
         // Arrange
-        var jobDto = new Domain.Entities.JobDto { Cargo = null! };
+        var jobDto = new ContractsJobDto { Cargo = null! };
 
         // Act
         var result = this.validator.TestValidate(jobDto);
@@ -260,7 +261,7 @@ public class CreateJobValidatorTests
     public void Validate_NullPricing_ShouldFail()
     {
         // Arrange
-        var jobDto = new Domain.Entities.JobDto { Pricing = null! };
+        var jobDto = new ContractsJobDto { Pricing = null! };
 
         // Act
         var result = this.validator.TestValidate(jobDto);

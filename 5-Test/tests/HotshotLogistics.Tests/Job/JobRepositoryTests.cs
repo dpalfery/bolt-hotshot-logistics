@@ -16,7 +16,7 @@ using HotshotLogistics.Data.Repositories;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 
-namespace HotshotLogistics.Tests.Job
+namespace HotshotLogistics.Tests.Jobs
 {
     /// <summary>
     /// Integration tests for JobRepository.

@@ -2,7 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace HotshotLogistics.Tests.Job
+namespace HotshotLogistics.Tests.Jobs
 {
 
     using System;

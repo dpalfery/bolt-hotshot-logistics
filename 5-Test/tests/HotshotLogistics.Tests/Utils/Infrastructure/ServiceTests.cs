@@ -18,7 +18,7 @@ public class DriverServiceTests
     public async Task GetDriversAsync_ReturnsDriversFromRepository()
     {
 var expected = new List<Driver> { new HotshotLogistics.Domain.Entities.Driver { Id = 1 }, new HotshotLogistics.Domain.Entities.Driver { Id = 2 } };
-        var repoMock = new Mock<DriverRepository>();
+        var repoMock = new Mock<IDriverRepository>();
         repoMock.Setup(r => r.GetDriversAsync(It.IsAny<CancellationToken>())).ReturnsAsync(expected);
         var service = new DriverService(repoMock.Object);
         var result = await service.GetDriversAsync();
@@ -30,7 +30,7 @@ var expected = new List<Driver> { new HotshotLogistics.Domain.Entities.Driver { 
     public async Task GetDriverByIdAsync_UsesRepository()
     {
 var driver = new HotshotLogistics.Domain.Entities.Driver { Id = 1 };
-        var repoMock = new Mock<DriverRepository>();
+        var repoMock = new Mock<IDriverRepository>();
         repoMock.Setup(r => r.GetDriverByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(driver);
         var service = new DriverService(repoMock.Object);
 
@@ -44,7 +44,7 @@ var driver = new HotshotLogistics.Domain.Entities.Driver { Id = 1 };
     public async Task CreateDriverAsync_CallsRepository()
     {
 var newDriver = new HotshotLogistics.Domain.Entities.Driver { Id = 1 };
-        var repoMock = new Mock<DriverRepository>();
+        var repoMock = new Mock<IDriverRepository>();
         repoMock.Setup(r => r.CreateDriverAsync(newDriver, It.IsAny<CancellationToken>())).ReturnsAsync(newDriver);
         var service = new DriverService(repoMock.Object);
         var result = await service.CreateDriverAsync(newDriver);
@@ -147,9 +147,9 @@ public class JobServiceTests
     public async Task GetJobsAsync_ReturnsJobsFromRepository()
     {
 var expected = new List<Job> { new HotshotLogistics.Domain.Entities.Job { Id = "1" }, new HotshotLogistics.Domain.Entities.Job { Id = "2" } };
-        var repoMock = new Mock<JobRepository>();
-        var customerRepoMock = new Mock<CustomerRepository>();
-        var driverRepoMock = new Mock<DriverRepository>();
+        var repoMock = new Mock<IJobRepository>();
+        var customerRepoMock = new Mock<ICustomerRepository>();
+        var driverRepoMock = new Mock<IDriverRepository>();
         var notificationServiceMock = new Mock<INotificationService>();
         var mappingServiceMock = new Mock<IMappingService>();
         var loggerMock = new Mock<ILogger<JobService>>();
@@ -168,9 +168,9 @@ var expected = new List<Job> { new HotshotLogistics.Domain.Entities.Job { Id = "
     public async Task GetJobByIdAsync_UsesRepository()
     {
 var job = new HotshotLogistics.Domain.Entities.Job { Id = "1" };
-        var repoMock = new Mock<JobRepository>();
-        var customerRepoMock = new Mock<CustomerRepository>();
-        var driverRepoMock = new Mock<DriverRepository>();
+        var repoMock = new Mock<IJobRepository>();
+        var customerRepoMock = new Mock<ICustomerRepository>();
+        var driverRepoMock = new Mock<IDriverRepository>();
         var notificationServiceMock = new Mock<INotificationService>();
         var mappingServiceMock = new Mock<IMappingService>();
         var loggerMock = new Mock<ILogger<JobService>>();
@@ -234,9 +234,9 @@ var job = new HotshotLogistics.Domain.Entities.Job
 
         var customer = new HotshotLogistics.Domain.Entities.Customer { Id = "CUST001", IsActive = true };
 
-        var repoMock = new Mock<JobRepository>();
-        var customerRepoMock = new Mock<CustomerRepository>();
-        var driverRepoMock = new Mock<DriverRepository>();
+        var repoMock = new Mock<IJobRepository>();
+        var customerRepoMock = new Mock<ICustomerRepository>();
+        var driverRepoMock = new Mock<IDriverRepository>();
         var notificationServiceMock = new Mock<INotificationService>();
         var mappingServiceMock = new Mock<IMappingService>();
         var loggerMock = new Mock<ILogger<JobService>>();
@@ -306,9 +306,9 @@ var job = new HotshotLogistics.Domain.Entities.Job
             ScheduledPickupTime = DateTime.UtcNow.AddHours(2),
             EstimatedDeliveryTime = DateTime.UtcNow.AddHours(8)
         };
-        var repoMock = new Mock<JobRepository>();
-        var customerRepoMock = new Mock<CustomerRepository>();
-        var driverRepoMock = new Mock<DriverRepository>();
+        var repoMock = new Mock<IJobRepository>();
+        var customerRepoMock = new Mock<ICustomerRepository>();
+        var driverRepoMock = new Mock<IDriverRepository>();
         var notificationServiceMock = new Mock<INotificationService>();
         var mappingServiceMock = new Mock<IMappingService>();
         var loggerMock = new Mock<ILogger<JobService>>();
@@ -327,9 +327,9 @@ var job = new HotshotLogistics.Domain.Entities.Job
     public async Task DeleteJobAsync_CallsRepository()
     {
         var job = new HotshotLogistics.Domain.Entities.Job { Id = "1", Status = JobStatus.Pending };
-        var repoMock = new Mock<JobRepository>();
-        var customerRepoMock = new Mock<CustomerRepository>();
-        var driverRepoMock = new Mock<DriverRepository>();
+        var repoMock = new Mock<IJobRepository>();
+        var customerRepoMock = new Mock<ICustomerRepository>();
+        var driverRepoMock = new Mock<IDriverRepository>();
         var notificationServiceMock = new Mock<INotificationService>();
         var mappingServiceMock = new Mock<IMappingService>();
         var loggerMock = new Mock<ILogger<JobService>>();

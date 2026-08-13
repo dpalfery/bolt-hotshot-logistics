@@ -44,7 +44,7 @@ namespace HotshotLogistics.Application.Services
         /// <returns>The mapping service instance.</returns>
         public IMappingService CreateMappingService()
         {
-            var providerName = configuration["Mapping:Provider"] ?? "Mock";
+            var providerName = NormalizeProviderName(configuration["Mapping:Provider"] ?? "Mock");
             var mappingServices = serviceProvider.GetServices<IMappingService>();
             var mappingServiceDict = mappingServices.ToDictionary(s => s.GetType().Name.Replace("Service", string.Empty), StringComparer.OrdinalIgnoreCase);
 
@@ -55,12 +55,19 @@ namespace HotshotLogistics.Application.Services
             }
 
             logger.LogError("Unsupported mapping provider: {ProviderName}. Falling back to Mock.", providerName);
-            if (mappingServiceDict.TryGetValue("Mock", out var mockService))
+            if (mappingServiceDict.TryGetValue("MockMapping", out var mockService) || mappingServiceDict.TryGetValue("Mock", out mockService))
             {
                 return mockService;
             }
 
             throw new InvalidOperationException($"Unsupported mapping provider: {providerName} and no Mock service found.");
+        }
+
+        private static string NormalizeProviderName(string providerName)
+        {
+            return string.Equals(providerName, "Mock", StringComparison.OrdinalIgnoreCase)
+                ? "MockMapping"
+                : providerName;
         }
     }
 }

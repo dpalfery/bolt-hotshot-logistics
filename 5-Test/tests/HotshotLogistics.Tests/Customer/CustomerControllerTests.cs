@@ -535,13 +535,14 @@ using HotshotLogistics.Domain.ValueObjects;
         /// <returns>A test job instance.</returns>
         private static Job CreateTestJob(string id, string customerId)
         {
-            var mockJob = new Mock<Job>();
-            mockJob.Setup(j => j.Id).Returns(id);
-            mockJob.Setup(j => j.CustomerId).Returns(customerId);
-            mockJob.Setup(j => j.Title).Returns($"Test Job {id}");
-            mockJob.Setup(j => j.Status).Returns(JobStatus.Pending);
-            mockJob.Setup(j => j.CreatedAt).Returns(DateTime.UtcNow);
-            return mockJob.Object;
+            return new Job
+            {
+                Id = id,
+                CustomerId = customerId,
+                Title = $"Test Job {id}",
+                Status = JobStatus.Pending,
+                CreatedAt = DateTime.UtcNow
+            };
         }
 
         /// <summary>
@@ -552,14 +553,15 @@ using HotshotLogistics.Domain.ValueObjects;
         /// <returns>A test invoice instance.</returns>
         private static Invoice CreateTestInvoice(string id, string customerId)
         {
-            var mockInvoice = new Mock<Invoice>();
-            mockInvoice.Setup(i => i.Id).Returns(id);
-            mockInvoice.Setup(i => i.CustomerId).Returns(customerId);
-            mockInvoice.Setup(i => i.InvoiceNumber).Returns($"INV-{id}");
-            mockInvoice.Setup(i => i.TotalAmount).Returns(1000m);
-            mockInvoice.Setup(i => i.Status).Returns(InvoiceStatus.Sent);
-            mockInvoice.Setup(i => i.CreatedAt).Returns(DateTime.UtcNow);
-            return mockInvoice.Object;
+            return new Invoice
+            {
+                Id = id,
+                CustomerId = customerId,
+                InvoiceNumber = $"INV-{id}",
+                TotalAmount = 1000m,
+                Status = InvoiceStatus.Sent,
+                CreatedAt = DateTime.UtcNow
+            };
         }
     }
 }

@@ -362,14 +362,14 @@ using Xunit;
     /// <returns>A test invoice.</returns>
     private static Invoice CreateTestInvoice(string id, string customerId, decimal totalAmount, decimal paidAmount)
     {
-        var mockInvoice = new Mock<Invoice>();
-        mockInvoice.Setup(i => i.Id).Returns(id);
-        mockInvoice.Setup(i => i.CustomerId).Returns(customerId);
-        mockInvoice.Setup(i => i.TotalAmount).Returns(totalAmount);
-        mockInvoice.Setup(i => i.PaidAmount).Returns(paidAmount);
-        mockInvoice.Setup(i => i.BalanceDue).Returns(totalAmount - paidAmount);
-        mockInvoice.Setup(i => i.InvoiceNumber).Returns($"INV-{id}");
-        return mockInvoice.Object;
+        return new Invoice
+        {
+            Id = id,
+            CustomerId = customerId,
+            TotalAmount = totalAmount,
+            PaidAmount = paidAmount,
+            InvoiceNumber = $"INV-{id}"
+        };
     }
 
     /// <summary>
@@ -379,10 +379,11 @@ using Xunit;
     /// <returns>A test customer.</returns>
     private static Customer CreateTestCustomer(string id)
     {
-        var mockCustomer = new Mock<Customer>();
-        mockCustomer.Setup(c => c.Id).Returns(id);
-        mockCustomer.Setup(c => c.CompanyName).Returns($"Company {id}");
-        return mockCustomer.Object;
+        return new Customer
+        {
+            Id = id,
+            CompanyName = $"Company {id}"
+        };
     }
 
     /// <summary>

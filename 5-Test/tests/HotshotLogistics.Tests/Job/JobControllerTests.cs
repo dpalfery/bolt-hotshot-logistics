@@ -21,7 +21,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 using HotshotLogistics.Domain.DTOs;
-namespace HotshotLogistics.Tests.Job
+namespace HotshotLogistics.Tests.Jobs
 {
         /// <summary>
     /// Integration tests for the JobController.
@@ -167,11 +167,9 @@ namespace HotshotLogistics.Tests.Job
 
             // Assert
             result.Should().NotBeNull();
-            var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            // The controller returns the job object directly
-            okResult.Value.Should().NotBeNull();
-            // Check that the response contains the job ID
-            var responseData = okResult.Value;
+            var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
+            createdResult.Value.Should().NotBeNull();
+            var responseData = createdResult.Value;
             var idProperty = responseData.GetType().GetProperty("Id");
             idProperty.Should().NotBeNull();
             idProperty.GetValue(responseData).Should().Be(jobDto.Id);
