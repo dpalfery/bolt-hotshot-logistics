@@ -2,7 +2,7 @@
 id: documentation-ontology
 title: The documentation ontology
 doc-type: reference
-status: draft
+status: current
 owner: 'unassigned'
 last-reviewed: 2026-08-14
 ---

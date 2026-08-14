@@ -2,7 +2,7 @@
 id: architecture-layout
 title: Clean Architecture folder layout
 doc-type: reference
-status: draft
+status: current
 owner: unassigned
 last-reviewed: 2026-08-14
 ---

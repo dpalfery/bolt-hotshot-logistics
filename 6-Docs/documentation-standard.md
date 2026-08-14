@@ -2,7 +2,7 @@
 id: documentation-standard
 title: Hotshot Logistics Documentation Standard
 doc-type: governance
-status: draft
+status: current
 owner: unassigned
 last-reviewed: 2026-08-14
 ---

@@ -2,7 +2,7 @@
 id: documentation-index
 title: Documentation index
 doc-type: index
-status: draft
+status: current
 owner: unassigned
 last-reviewed: 2026-08-14
 ---

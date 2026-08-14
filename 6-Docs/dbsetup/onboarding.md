@@ -2,7 +2,7 @@
 id: dbsetup/onboarding
 title: DbSetup onboarding
 doc-type: onboarding
-status: draft
+status: current
 component: DbSetup
 source-root: 7-Deployment/DbSetup
 owner: unassigned

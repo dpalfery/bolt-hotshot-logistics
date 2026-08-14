@@ -2,7 +2,7 @@
 id: dbsetup/architecture
 title: DbSetup architecture
 doc-type: architecture
-status: draft
+status: current
 component: DbSetup
 source-root: 7-Deployment/DbSetup
 owner: unassigned

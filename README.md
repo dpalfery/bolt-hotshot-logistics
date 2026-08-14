@@ -2,7 +2,7 @@
 
 Cloud-native platform for hotshot delivery operations: job assignment, driver and customer management, tracking, and billing. It replaces paper-based dispatch with a web admin surface and an ASP.NET Core API on Azure.
 
-This repository is in **active development**. Cataloged runnables are documentation status `draft`. There is no driver mobile app in the tree; do not treat one as current.
+This repository is in **active development**. Cataloged runnables are documentation status `current`. There is no driver mobile app in the tree; do not treat one as current.
 
 ## Maintained runnables
 

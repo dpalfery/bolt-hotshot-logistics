@@ -2,7 +2,7 @@
 id: security-guidelines
 title: Security guidelines
 doc-type: reference
-status: draft
+status: current
 owner: unassigned
 last-reviewed: 2026-08-14
 ---

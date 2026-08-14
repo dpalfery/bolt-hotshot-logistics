@@ -2,7 +2,7 @@
 id: technology-stack
 title: Technology stack
 doc-type: reference
-status: draft
+status: current
 owner: unassigned
 last-reviewed: 2026-08-14
 ---
@@ -54,5 +54,5 @@ last-reviewed: 2026-08-14
 ## Current Status
 
 - Active development
-- Cataloged runnables are documentation status `draft`
+- Cataloged runnables are documentation status `current`
 - ADO.NET migration from Entity Framework is complete

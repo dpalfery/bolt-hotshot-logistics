@@ -2,7 +2,7 @@
 id: demo/prompt-only
 title: Demo prompt only
 doc-type: reference
-status: draft
+status: current
 owner: unassigned
 last-reviewed: 2026-08-14
 ---

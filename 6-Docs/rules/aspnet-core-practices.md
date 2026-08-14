@@ -2,7 +2,7 @@
 id: rules/aspnet-core-practices
 title: ASP.NET Core Practices Rule
 doc-type: rule
-status: draft
+status: current
 owner: unassigned
 last-reviewed: 2026-08-14
 ---

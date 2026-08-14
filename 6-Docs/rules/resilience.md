@@ -2,7 +2,7 @@
 id: rules/resilience
 title: Resilience Rule
 doc-type: rule
-status: draft
+status: current
 owner: unassigned
 last-reviewed: 2026-08-14
 ---

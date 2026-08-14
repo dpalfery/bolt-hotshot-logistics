@@ -2,7 +2,7 @@
 id: admin-dashboard/architecture
 title: Admin dashboard architecture
 doc-type: architecture
-status: draft
+status: current
 component: admin-dashboard
 source-root: 1-Presentation/admin-dashboard
 owner: unassigned

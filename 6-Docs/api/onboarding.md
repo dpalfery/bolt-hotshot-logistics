@@ -2,7 +2,7 @@
 id: api/onboarding
 title: API onboarding
 doc-type: onboarding
-status: draft
+status: current
 component: Api
 source-root: 1-Presentation/HotshotLogistics.Api
 owner: unassigned

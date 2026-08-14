@@ -2,7 +2,7 @@
 id: project-overview
 title: Hotshot Logistics project overview
 doc-type: reference
-status: draft
+status: current
 owner: unassigned
 last-reviewed: 2026-08-14
 ---

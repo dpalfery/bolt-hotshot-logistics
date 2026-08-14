@@ -2,7 +2,7 @@
 id: admin-dashboard/onboarding
 title: Admin dashboard onboarding
 doc-type: onboarding
-status: draft
+status: current
 component: admin-dashboard
 source-root: 1-Presentation/admin-dashboard
 owner: unassigned

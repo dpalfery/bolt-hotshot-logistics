@@ -2,7 +2,7 @@
 id: api/architecture
 title: API architecture
 doc-type: architecture
-status: draft
+status: current
 component: Api
 source-root: 1-Presentation/HotshotLogistics.Api
 owner: unassigned

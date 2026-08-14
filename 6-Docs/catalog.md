@@ -2,7 +2,7 @@
 id: catalog
 title: Component and owner catalog
 doc-type: reference
-status: draft
+status: current
 owner: unassigned
 last-reviewed: 2026-08-14
 ---
@@ -19,9 +19,9 @@ rows. Do not add a product that is not in the tree.
 
 | Component | Type | Source root | Overview | Detailed documentation | Owner | Last reviewed | Status |
 |---|---|---|---|---|---|---|---|
-| Api | Service | `1-Presentation/HotshotLogistics.Api` | ASP.NET Core Web API | `6-Docs/api/` | unassigned | 2026-08-14 | draft |
-| admin-dashboard | Application | `1-Presentation/admin-dashboard` | Next.js admin dashboard | `6-Docs/admin-dashboard/` | unassigned | 2026-08-14 | draft |
-| DbSetup | Tool | `7-Deployment/DbSetup` | Database setup CLI | `6-Docs/dbsetup/` | unassigned | 2026-08-14 | draft |
+| Api | Service | `1-Presentation/HotshotLogistics.Api` | ASP.NET Core Web API | `6-Docs/api/` | unassigned | 2026-08-14 | current |
+| admin-dashboard | Application | `1-Presentation/admin-dashboard` | Next.js admin dashboard | `6-Docs/admin-dashboard/` | unassigned | 2026-08-14 | current |
+| DbSetup | Tool | `7-Deployment/DbSetup` | Database setup CLI | `6-Docs/dbsetup/` | unassigned | 2026-08-14 | current |
 
 ## How the columns are read
 
