@@ -320,7 +320,8 @@ public class DatabaseSetupIntegrationTests : IDisposable
         catch
         {
             // Fall back to environment variable or default
-            return Environment.GetEnvironmentVariable("TEST_SA_CONNECTION_STRING");
+            return Environment.GetEnvironmentVariable("TEST_SA_CONNECTION_STRING")
+                ?? throw new InvalidOperationException("TEST_SA_CONNECTION_STRING is not set and LocalDB is unavailable.");
 
         }
     }

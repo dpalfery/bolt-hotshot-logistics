@@ -6,18 +6,13 @@ using HotshotLogistics.Application;
 using HotshotLogistics.Core.Extensions;
 using HotshotLogistics.Data;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using System.IO;
-using System.Text.Json;
 using Azure.Identity;
 using HotshotLogistics.Api;
 using Microsoft.Graph;
 using HotshotLogistics.Application.Hubs;
-using HotshotLogistics.Application.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Identity.Web;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using HotshotLogistics.Domain.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,7 +37,7 @@ if (builder.Environment.IsDevelopment())
 {
     // Use test authentication handler for local development
     builder.Services.AddAuthentication("Test")
-        .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", options => { });
+        .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", _ => { });
 }
 else
 {
@@ -76,11 +71,10 @@ if (azureAppConfigurationEnabled)
 }
 
 // Register GraphServiceClient
-builder.Services.AddScoped(sp =>
+builder.Services.AddScoped(_ =>
 {
     var options = new DefaultAzureCredentialOptions
     {
-        ExcludeSharedTokenCacheCredential = true,
         ExcludeAzureCliCredential = true,
         ExcludeEnvironmentCredential = true,
         ExcludeManagedIdentityCredential = false,
@@ -124,7 +118,7 @@ if (app.Environment.IsDevelopment())
 // Configure CORS policy - must be after UseHttpsRedirection but before UseAuthentication
 app.UseHttpsRedirection();
 
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 
 app.UseCors(policy =>
 {
@@ -142,4 +136,3 @@ app.MapHub<RealtimeHub>("/realtime");
 
 app.Run();
 
-public partial class Program { }

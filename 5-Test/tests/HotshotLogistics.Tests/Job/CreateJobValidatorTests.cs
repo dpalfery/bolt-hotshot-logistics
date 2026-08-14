@@ -1,7 +1,6 @@
 using FluentValidation.TestHelper;
 using HotshotLogistics.Application.Validators;
 using HotshotLogistics.Domain.Entities;
-using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Domain.ValueObjects;
 
 namespace HotshotLogistics.Tests.Jobs

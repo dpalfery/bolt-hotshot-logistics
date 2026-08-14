@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Data.SqlClient;
 
-class SkipMigration
+internal class SkipMigration
 {
     public static void MarkAsCompleted(long migrationVersion, string description)
     {

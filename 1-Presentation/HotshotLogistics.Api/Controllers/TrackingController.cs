@@ -9,7 +9,6 @@ namespace HotshotLogistics.Api.Controllers
     using System.Threading;
     using System.Threading.Tasks;
     using HotshotLogistics.Domain.Entities;
-using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Services;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;

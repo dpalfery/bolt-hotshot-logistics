@@ -3,7 +3,6 @@ using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Application.Hubs;
 using HotshotLogistics.Contracts.Hubs;
 using HotshotLogistics.Domain.Entities;
-using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Contracts.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;

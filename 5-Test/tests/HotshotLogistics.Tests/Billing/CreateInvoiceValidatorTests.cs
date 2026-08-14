@@ -1,8 +1,6 @@
 using FluentValidation.TestHelper;
 using HotshotLogistics.Application.Validators;
 using HotshotLogistics.Domain.Entities;
-using HotshotLogistics.Domain.Entities;
-
 namespace HotshotLogistics.Tests.Billing
 {
     /// <summary>

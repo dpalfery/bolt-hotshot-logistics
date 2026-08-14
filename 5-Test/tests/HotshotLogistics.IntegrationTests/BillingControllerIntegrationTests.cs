@@ -14,8 +14,6 @@ namespace HotshotLogistics.IntegrationTests
     using FluentAssertions;
     using HotshotLogistics.Domain.Entities;
     using System.Text.Json;
-using HotshotLogistics.Domain.Entities;
-
     /// <summary>
     /// Integration tests for the BillingController.
     /// </summary>

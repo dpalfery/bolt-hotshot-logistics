@@ -6,7 +6,7 @@
 ## Mandatory rules adhearents 
 
 **CRITICAL**: Before any task execution, ALL agents MUST:
-All agents must follow the comprehensive rule system located in `.kilocode/rules/`:
+All agents must follow the comprehensive rule system located in `6-Docs/rules/`:
 
-### Entry point into the kilocode rules is Core Base Rules (Non-Negotiable)
-Reference: `.kilocode/rules/base-rule.md`
+### Entry point into the rules is Core Base Rules (Non-Negotiable)
+Reference: `6-Docs/rules/base-rule.md`

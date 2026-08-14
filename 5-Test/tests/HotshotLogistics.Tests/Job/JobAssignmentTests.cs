@@ -7,7 +7,6 @@ namespace HotshotLogistics.Tests.Jobs
 
     using System;
     using HotshotLogistics.Domain.Entities;
-using HotshotLogistics.Domain.Entities;
     using Xunit;
 
     /// <summary>

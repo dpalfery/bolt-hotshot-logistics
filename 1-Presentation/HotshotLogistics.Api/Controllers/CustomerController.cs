@@ -11,7 +11,6 @@ namespace HotshotLogistics.Api.Controllers
     using HotshotLogistics.Application.Authorization;
     using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Services;
-    using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Domain.ValueObjects;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;

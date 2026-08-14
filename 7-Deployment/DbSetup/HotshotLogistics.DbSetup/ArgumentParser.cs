@@ -15,97 +15,77 @@ public class ArgumentParser
 
     public ArgumentParser(string[] args)
     {
-        // Check for help before setting up commands
         if (args.Contains("--help") || args.Contains("-h") || args.Contains("-?"))
         {
             ShowHelp();
             Environment.Exit(0);
         }
 
-        var serverOption = new Option<string>(
-            name: "--server",
-            description: "SQL Server instance (e.g., localhost\\SQLEXPRESS)")
+        var serverOption = new Option<string>("--server")
         {
-            IsRequired = false
+            Description = "SQL Server instance (e.g., localhost\\SQLEXPRESS)",
         };
 
-        var saConnectionStringOption = new Option<string>(
-            name: "--sa-connection-string",
-            description: "SA or privileged connection string for non-interactive mode")
+        var saConnectionStringOption = new Option<string>("--sa-connection-string")
         {
-            IsRequired = false
+            Description = "SA or privileged connection string for non-interactive mode",
         };
 
-        var databaseNameOption = new Option<string>(
-            name: "--db-name",
-            description: "Target database name",
-            getDefaultValue: () => "hotshot_logistics")
+        var databaseNameOption = new Option<string>("--db-name")
         {
-            IsRequired = false
+            Description = "Target database name",
+            DefaultValueFactory = _ => "hotshot_logistics",
         };
 
-        var appUserOption = new Option<string>(
-            name: "--app-user",
-            description: "Application database user/login name",
-            getDefaultValue: () => "hotshot_app")
+        var appUserOption = new Option<string>("--app-user")
         {
-            IsRequired = false
+            Description = "Application database user/login name",
+            DefaultValueFactory = _ => "hotshot_app",
         };
 
-        var passwordOption = new Option<string>(
-            name: "--password",
-            description: "Application user password (not recommended for CI; prefer env var)")
+        var passwordOption = new Option<string>("--password")
         {
-            IsRequired = false
+            Description = "Application user password (not recommended for CI; prefer env var)",
         };
 
-        var nonInteractiveOption = new Option<bool>(
-            name: "--non-interactive",
-            description: "Run without interactive prompts for CI")
+        var nonInteractiveOption = new Option<bool>("--non-interactive")
         {
-            IsRequired = false
+            Description = "Run without interactive prompts for CI",
         };
 
-        var forceOption = new Option<bool>(
-            name: "--force",
-            description: "Allow destructive operations")
+        var forceOption = new Option<bool>("--force")
         {
-            IsRequired = false
+            Description = "Allow destructive operations",
         };
 
-        var persistEnvironmentOption = new Option<bool>(
-            name: "--persist-env",
-            description: "Persist password to system environment variable (requires explicit consent)")
+        var persistEnvironmentOption = new Option<bool>("--persist-env")
         {
-            IsRequired = false
+            Description = "Persist password to system environment variable (requires explicit consent)",
         };
 
         var rootCommand = new RootCommand("Hotshot Logistics Database Setup CLI");
+        rootCommand.Options.Add(serverOption);
+        rootCommand.Options.Add(saConnectionStringOption);
+        rootCommand.Options.Add(databaseNameOption);
+        rootCommand.Options.Add(appUserOption);
+        rootCommand.Options.Add(passwordOption);
+        rootCommand.Options.Add(nonInteractiveOption);
+        rootCommand.Options.Add(forceOption);
+        rootCommand.Options.Add(persistEnvironmentOption);
 
-        rootCommand.AddOption(serverOption);
-        rootCommand.AddOption(saConnectionStringOption);
-        rootCommand.AddOption(databaseNameOption);
-        rootCommand.AddOption(appUserOption);
-        rootCommand.AddOption(passwordOption);
-        rootCommand.AddOption(nonInteractiveOption);
-        rootCommand.AddOption(forceOption);
-        rootCommand.AddOption(persistEnvironmentOption);
-
-        rootCommand.SetHandler((server, saConnectionString, dbName, appUser, password, nonInteractive, force, persistEnv) =>
+        rootCommand.SetAction(parseResult =>
         {
-            Server = server;
-            SaConnectionString = saConnectionString;
-            DatabaseName = dbName;
-            AppUser = appUser;
-            Password = password;
-            NonInteractive = nonInteractive;
-            Force = force;
-            PersistEnvironment = persistEnv;
-        },
-        serverOption, saConnectionStringOption, databaseNameOption, appUserOption,
-        passwordOption, nonInteractiveOption, forceOption, persistEnvironmentOption);
+            Server = parseResult.GetValue(serverOption);
+            SaConnectionString = parseResult.GetValue(saConnectionStringOption);
+            DatabaseName = parseResult.GetValue(databaseNameOption);
+            AppUser = parseResult.GetValue(appUserOption);
+            Password = parseResult.GetValue(passwordOption);
+            NonInteractive = parseResult.GetValue(nonInteractiveOption);
+            Force = parseResult.GetValue(forceOption);
+            PersistEnvironment = parseResult.GetValue(persistEnvironmentOption);
+        });
 
-        rootCommand.Invoke(args);
+        rootCommand.Parse(args).Invoke();
     }
 
     private static void ShowHelp()

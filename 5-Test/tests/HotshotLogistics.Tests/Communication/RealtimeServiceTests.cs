@@ -5,7 +5,6 @@ using FluentAssertions;
 using HotshotLogistics.Application.Services;
 using HotshotLogistics.Contracts.Hubs;
 using HotshotLogistics.Domain.Entities;
-using HotshotLogistics.Domain.Entities;
 namespace HotshotLogistics.Tests.Communication
 {
     /// <summary>

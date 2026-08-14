@@ -14,7 +14,6 @@ namespace HotshotLogistics.Tests.Customer
     using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Tests.TestHelpers;
-using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Domain.ValueObjects;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;

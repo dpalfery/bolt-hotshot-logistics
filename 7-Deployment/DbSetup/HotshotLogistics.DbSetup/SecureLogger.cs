@@ -147,7 +147,7 @@ public class SecureLogger
     {
         if (arg == null)
         {
-            return arg;
+            return string.Empty;
         }
 
         var stringArg = arg.ToString();

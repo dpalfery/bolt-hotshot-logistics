@@ -7,16 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="12.0.0" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.0" />
-    <PackageReference Include="Microsoft.Azure.SignalR.Management" Version="1.32.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0-rc.1.25451.107" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0-rc.1.25451.107" />
-    <PackageReference Include="Microsoft.Graph" Version="5.93.0" />
-    <PackageReference Include="Microsoft.Identity.Web.MicrosoftGraph" Version="3.14.1" />
-    <PackageReference Include="Polly" Version="8.6.4" />
-    <PackageReference Include="Polly.Extensions" Version="8.6.4" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.12" />
+    <PackageReference Include="Microsoft.Azure.SignalR.Management" Version="1.33.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Graph" Version="5.105.0" />
+    <PackageReference Include="Microsoft.Identity.Web.GraphServiceClient" Version="4.14.2" />
+    <PackageReference Include="Polly" Version="8.7.0" />
+    <PackageReference Include="Polly.Extensions" Version="8.7.0" />
   </ItemGroup>
 
   <ItemGroup>

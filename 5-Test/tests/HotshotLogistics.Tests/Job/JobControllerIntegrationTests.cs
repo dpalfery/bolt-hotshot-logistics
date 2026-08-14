@@ -14,8 +14,6 @@ using HotshotLogistics.Domain.Entities;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Xunit;
     using FluentAssertions;
-    using HotshotLogistics.Domain.Entities;
-
     /// <summary>
     /// Integration tests for the JobController.
     /// </summary>

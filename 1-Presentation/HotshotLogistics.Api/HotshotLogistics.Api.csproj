@@ -9,14 +9,14 @@
     <InternalsVisibleTo Include="HotshotLogistics.Tests" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.20" />
-    <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.4.0" />
-    <PackageReference Include="Microsoft.Graph" Version="5.94.0" />
-    <PackageReference Include="Microsoft.Identity.Web" Version="3.14.1" />
-    <PackageReference Include="Microsoft.Identity.Web.MicrosoftGraph" Version="3.14.1" />
-    <PackageReference Include="Microsoft.Azure.SignalR" Version="1.32.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.30" />
+    <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.6.0" />
+    <PackageReference Include="Microsoft.Graph" Version="5.105.0" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="4.14.2" />
+    <PackageReference Include="Microsoft.Identity.Web.GraphServiceClient" Version="4.14.2" />
+    <PackageReference Include="Microsoft.Azure.SignalR" Version="1.33.1" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.12" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\2-Application\HotshotLogistics.Application\HotshotLogistics.Application.csproj" />
