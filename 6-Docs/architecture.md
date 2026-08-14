@@ -29,10 +29,10 @@ When creating, moving, or adding files, place them in the appropriate numbered f
 Foundational code and abstractions shared across layers. No dependencies on higher layers.
 
 ### 1-Presentation/
-API (`HotshotLogistics.Api`) and admin dashboard (`admin-dashboard`). Depends only on Application. There is no mobile project in this tree.
+API (`HotshotLogistics.Api`) and admin dashboard (`admin-dashboard`). Presentation features depend on Application; the API composition root may also reference persistence, domain contracts, and base abstractions for startup and dependency-injection wiring. There is no mobile project in this tree.
 
 ### 2-Application/
-Use cases, application services, CQRS handlers. Depends only on Domain.
+Use cases, application services, CQRS handlers. Depends on Domain and inward-facing shared contracts and base abstractions.
 
 ### 3-Domain/
 Entities, value objects, contracts, repository interfaces. No dependencies on other layers.

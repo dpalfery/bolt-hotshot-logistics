@@ -27,7 +27,7 @@ When creating, moving, or adding files, place them in the appropriate numbered f
 - API controllers and endpoints (ASP.NET Core Web API on Azure Container Apps)
 - Web dashboard components (Next.js)
 - HTTP request and response handling, routing, UI rendering
-- Depends only on Application layer
+- Presentation features depend on Application. The API composition root may reference Persistence, Domain contracts, and Core for dependency-injection registration and other focused startup purposes.
 - There is no mobile project in this tree
 
 ### 2-Application/
@@ -36,7 +36,7 @@ When creating, moving, or adding files, place them in the appropriate numbered f
 - Command/query handlers (CQRS)
 - Business rules, validation logic, policies
 - DTOs for layer communication
-- Depends only on Domain layer
+- Depends on Domain plus inward-facing shared Contracts and Core abstractions.
 
 ### 3-Domain/
 **Domain models, contracts, and interfaces**
@@ -58,3 +58,12 @@ When creating, moving, or adding files, place them in the appropriate numbered f
 - Test utilities, fixtures, mock data
 - Test configurations and helpers
 - Uses xUnit, FluentAssertions
+
+### 6-Docs/
+**Canonical documentation and governed engineering guidance**
+- Documentation, rules, references, specifications, plans, and approved TODOs
+- Do not store scratch output, vendored packages, or ignored working files here
+
+### 7-Deployment/
+**Deployment and environment tooling**
+- Terraform, Docker Compose, database setup tools, deployment scripts, and related configuration

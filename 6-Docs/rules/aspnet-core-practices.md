@@ -21,10 +21,7 @@ Apply these practices whenever developing or modifying ASP.NET Core APIs, contro
 - Never hardcode configuration values.
 
 ## Logging
-- Use `ILogger<T>` for structured logging with semantic values.
-- Include correlation IDs for request tracing.
-- Configure logging providers per environment (console, file, Application Insights, etc.).
-- Log at appropriate levels: Debug, Information, Warning, Error, Critical.
+See the [observability rule](observability.md) for structured logging, correlation IDs, logging providers, and log-level guidance.
 
 ## API Documentation
 - Generate OpenAPI specifications using `Microsoft.AspNetCore.OpenApi`.
@@ -36,17 +33,14 @@ Apply these practices whenever developing or modifying ASP.NET Core APIs, contro
 Configure middleware in the correct order for security and functionality:
 1. `UseHttpsRedirection` - Redirect HTTP to HTTPS
 2. `UseCors` - Enable Cross-Origin Resource Sharing
-3. `UseRateLimiter` - Apply rate limiting
-4. `UseAuthentication` - Authenticate requests
-5. `UseAuthorization` - Authorize requests
-6. `UseOutputCaching` or `UseResponseCaching` - Cache responses where safe
-7. Endpoint routing
+3. `UseAuthentication` - Authenticate requests
+4. `UseAuthorization` - Authorize requests
+5. Endpoint routing
 
 ## Performance Practices
 - Use async/await for all I/O operations.
 - Reuse HttpClient instances via `IHttpClientFactory`.
-- Implement output/response caching for cacheable GET endpoints.
-- Use rate limiting to prevent abuse.
+- See the [optional features rule](optional-features.md) for rate limiting and output/response caching guidance.
 - Measure performance with diagnostics and Application Insights.
 
 ## Health Checks

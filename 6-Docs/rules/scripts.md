@@ -35,15 +35,11 @@ Use these commands whenever working with the .NET project for development tasks,
 
 ## Database Commands (FluentMigrator)
 
-### Migration Commands
-- `fluentmigrator migrate` - Apply all pending migrations to the database
-- `fluentmigrator migrate -t 20250101000000` - Migrate to specific version
-- `fluentmigrator rollback` - Rollback the last migration
-- `fluentmigrator rollback -t 20250101000000` - Rollback to specific version
+Run the supported DbSetup CLI; it applies FluentMigrator migrations in-process when possible and otherwise invokes MigrationRunner. See the [DbSetup onboarding guide](../dbsetup/onboarding.md) for required options and secret-handling rules.
 
-### Migration Management
-- `fluentmigrator list` - List all available migrations
-- `fluentmigrator validate` - Validate the current database schema against migrations
+```bash
+dotnet run --project 7-Deployment/DbSetup/HotshotLogistics.DbSetup/HotshotLogistics.DbSetup.csproj -- --server "<sql-server-instance>" --db-name "hotshot_logistics"
+```
 
 ## Package Management
 - `dotnet add package PackageName` - Add a NuGet package to the project

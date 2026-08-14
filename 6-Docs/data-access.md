@@ -23,8 +23,8 @@ This project enforces native ADO.NET for all data access. Entity Framework is pr
 - **Native ADO.NET only**: Use `System.Data.SqlClient` or `Microsoft.Data.SqlClient` for SQL Server operations
 - **Connection management**: Implement proper connection pooling and disposal patterns using `await using` statements
 - **Parameterized queries**: All SQL queries must use parameterized commands to prevent SQL injection
-- **Async operations**: All database operations must be asynchronous using `SqlConnection.OpenAsync()`, `SqlCommand.ExecuteReaderAsync()`, etc.
-- **Repository pattern**: Encapsulate all data access logic in repository classes that implement interfaces defined in the Domain layer
+- **Async operations**: Application and repository database operations must be asynchronous using `SqlConnection.OpenAsync()`, `SqlCommand.ExecuteReaderAsync()`, etc. FluentMigrator migration callbacks and database provisioning APIs are exempt where their framework exposes synchronous methods.
+- **Repository pattern**: Encapsulate application data access in repository classes that implement interfaces defined in the Domain layer. FluentMigrator migrations and database provisioning/setup tools are infrastructure exceptions.
 
 ## Implementation Guidelines
 

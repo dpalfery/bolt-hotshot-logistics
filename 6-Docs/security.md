@@ -9,7 +9,7 @@ last-reviewed: 2026-08-14
 
 # Security Guidelines
 
-Never check secrets of any kind into source control. Never store secrets in plain text anywhere. The agent-facing rule is [security handling](rules/security-handling.md). GitHub's policy file is [SECURITY.md](../SECURITY.md).
+Never check secrets of any kind into source control. Never store secrets in plain text anywhere. GitHub's policy file is [SECURITY.md](../SECURITY.md).
 
 ## Secure Values
 
@@ -33,6 +33,11 @@ Values that must never be stored in plain text include:
 6. Keep dependencies updated
 7. Validate JWT tokens on protected endpoints
 8. Store production secrets in Azure Key Vault; local API configuration uses .NET user secrets; dashboard public Azure AD ids come from the process environment. Do not write secrets into the repository tree, including `.env` files.
+9. Enforce HTTP Strict Transport Security (HSTS) for communications.
+10. Implement authentication and authorization controls.
+11. Protect against Cross-Site Request Forgery (CSRF) attacks where relevant.
+12. Persist and regularly rotate Data Protection API keys used for encryption.
+13. Use layered security controls appropriate to the service, including rate limiting where required; see the [optional features rule](rules/optional-features.md) for implementation guidance.
 
 ## Secret Management
 

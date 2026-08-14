@@ -16,7 +16,7 @@ Apply these practices whenever implementing external API calls, database operati
 
 ## Polly Usage
 - Use Polly for implementing resilience patterns (retry, circuit breaker, timeout).
-- Configure policies for database connections and external API calls.
+- Configure policies for external HTTP/API calls. Database retries require separate review of transaction boundaries and operation idempotency.
 - Define appropriate retry counts and backoff strategies.
 - Implement circuit breakers to prevent cascading failures.
 

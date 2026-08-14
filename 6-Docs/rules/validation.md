@@ -35,5 +35,4 @@ Apply these practices whenever implementing input validation in ASP.NET Core API
 ## Security Considerations
 - Prevent injection attacks through proper validation.
 - Validate file uploads and size limits.
-- Implement rate limiting to prevent abuse.
 - Log validation failures for monitoring.
