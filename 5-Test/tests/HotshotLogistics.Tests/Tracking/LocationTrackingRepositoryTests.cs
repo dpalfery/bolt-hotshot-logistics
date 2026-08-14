@@ -31,6 +31,13 @@ namespace HotshotLogistics.Tests.Tracking
         public LocationTrackingRepositoryTests(DatabaseTestFixture fixture)
         {
             ArgumentNullException.ThrowIfNull(fixture);
+            if (!TestDatabaseHelper.IsConfigured)
+            {
+                _configuration = new ConfigurationBuilder().Build();
+                _locationTrackingRepository = null!;
+                return;
+            }
+
             var configBuilder = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
@@ -45,7 +52,7 @@ namespace HotshotLogistics.Tests.Tracking
         /// Tests that AddAsync creates a new location tracking record successfully.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task AddAsync_CreatesLocationTrackingRecordSuccessfully()
         {
             // Arrange
@@ -69,7 +76,7 @@ namespace HotshotLogistics.Tests.Tracking
         /// Tests that GetByIdAsync retrieves a location tracking record successfully.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetByIdAsync_RetrievesLocationTrackingRecordSuccessfully()
         {
             // Arrange
@@ -91,7 +98,7 @@ namespace HotshotLogistics.Tests.Tracking
         /// Tests that GetByJobIdAsync returns location tracking records for the correct job.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetByJobIdAsync_ReturnsLocationTrackingRecordsForCorrectJob()
         {
             // Arrange
@@ -112,7 +119,7 @@ namespace HotshotLogistics.Tests.Tracking
         /// Tests that GetByDriverIdAsync returns location tracking records for the correct driver.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetByDriverIdAsync_ReturnsLocationTrackingRecordsForCorrectDriver()
         {
             // Arrange
@@ -133,7 +140,7 @@ namespace HotshotLogistics.Tests.Tracking
         /// Tests that GetByJobIdAndTimeRangeAsync returns location tracking records within the time range.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetByJobIdAndTimeRangeAsync_ReturnsLocationTrackingRecordsWithinTimeRange()
         {
             // Arrange
@@ -158,7 +165,7 @@ namespace HotshotLogistics.Tests.Tracking
         /// Tests that GetByDriverIdAndTimeRangeAsync returns location tracking records within the time range.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetByDriverIdAndTimeRangeAsync_ReturnsLocationTrackingRecordsWithinTimeRange()
         {
             // Arrange
@@ -183,7 +190,7 @@ namespace HotshotLogistics.Tests.Tracking
         /// Tests that GetLatestByJobIdAsync returns the latest location tracking record for a job.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetLatestByJobIdAsync_ReturnsLatestLocationTrackingRecordForJob()
         {
             // Arrange
@@ -202,7 +209,7 @@ namespace HotshotLogistics.Tests.Tracking
         /// Tests that GetLatestByDriverIdAsync returns the latest location tracking record for a driver.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetLatestByDriverIdAsync_ReturnsLatestLocationTrackingRecordForDriver()
         {
             // Arrange
@@ -221,7 +228,7 @@ namespace HotshotLogistics.Tests.Tracking
         /// Tests that GetLatestByJobIdAsync with count returns the specified number of latest records.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetLatestByJobIdAsync_WithCount_ReturnsSpecifiedNumberOfLatestRecords()
         {
             // Arrange
@@ -244,7 +251,7 @@ namespace HotshotLogistics.Tests.Tracking
         /// Tests that GetByGeographicAreaAsync returns location tracking records within the geographic area.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetByGeographicAreaAsync_ReturnsLocationTrackingRecordsWithinGeographicArea()
         {
             // Arrange
@@ -266,7 +273,7 @@ namespace HotshotLogistics.Tests.Tracking
         /// Tests that DeleteOlderThanAsync deletes location tracking records older than the cutoff date.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task DeleteOlderThanAsync_DeletesLocationTrackingRecordsOlderThanCutoffDate()
         {
             // Arrange
@@ -284,7 +291,7 @@ namespace HotshotLogistics.Tests.Tracking
         /// Tests that GetTotalDistanceByJobIdAsync returns the total distance for a job.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetTotalDistanceByJobIdAsync_ReturnsTotalDistanceForJob()
         {
             // Arrange
@@ -302,7 +309,7 @@ namespace HotshotLogistics.Tests.Tracking
         /// Tests that GetTotalDistanceByDriverIdAsync returns the total distance for a driver within a time range.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetTotalDistanceByDriverIdAsync_ReturnsTotalDistanceForDriverWithinTimeRange()
         {
             // Arrange
@@ -322,7 +329,7 @@ namespace HotshotLogistics.Tests.Tracking
         /// Tests that ExistsAsync returns true for existing location tracking records.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task ExistsAsync_ReturnsTrueForExistingLocationTrackingRecord()
         {
             // Arrange
@@ -339,7 +346,7 @@ namespace HotshotLogistics.Tests.Tracking
         /// Tests that ExistsAsync returns false for non-existing location tracking records.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task ExistsAsync_ReturnsFalseForNonExistingLocationTrackingRecord()
         {
             // Arrange
@@ -356,7 +363,7 @@ namespace HotshotLogistics.Tests.Tracking
         /// Tests that GetCountByJobIdAsync returns the correct count of location tracking records for a job.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetCountByJobIdAsync_ReturnsCorrectCountOfLocationTrackingRecordsForJob()
         {
             // Arrange
@@ -374,7 +381,7 @@ namespace HotshotLogistics.Tests.Tracking
         /// Tests that AddBatchAsync adds multiple location tracking records successfully.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task AddBatchAsync_AddsMultipleLocationTrackingRecordsSuccessfully()
         {
             // Arrange

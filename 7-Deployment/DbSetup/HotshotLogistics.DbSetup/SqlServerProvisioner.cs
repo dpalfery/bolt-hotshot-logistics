@@ -150,10 +150,11 @@ EXEC sp_executesql @sql, N'@dbName NVARCHAR(128)', @dbName;
         await using var connection = new SqlConnection(connectionString);
         await connection.OpenAsync(cancellationToken);
 
-        // Use dynamic SQL with QUOTENAME for login name and parameterized password
+        // CREATE LOGIN does not accept a parameterized password; quote it with QUOTENAME.
         const string query = @"
-DECLARE @sql NVARCHAR(MAX) = 'CREATE LOGIN ' + QUOTENAME(@loginName) + ' WITH PASSWORD = @password';
-EXEC sp_executesql @sql, N'@loginName NVARCHAR(128), @password NVARCHAR(128)', @loginName, @password;
+DECLARE @sql NVARCHAR(MAX) = N'CREATE LOGIN ' + QUOTENAME(@loginName)
+    + N' WITH PASSWORD = ' + QUOTENAME(@password, '''');
+EXEC sp_executesql @sql;
 ";
         await using var command = new SqlCommand(query, connection);
         command.Parameters.AddWithValue("@loginName", loginName);

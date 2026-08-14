@@ -37,7 +37,7 @@ using HotshotLogistics.Domain.Entities;
         /// Tests that GetJobById returns a specific job when it exists.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetJobById_WhenJobExists_ReturnsOkWithJob()
         {
             // Arrange
@@ -62,7 +62,7 @@ using HotshotLogistics.Domain.Entities;
         /// Tests that GetJobById returns NotFound for a non-existent job.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetJobById_WhenJobDoesNotExist_ReturnsNotFound()
         {
             // Arrange

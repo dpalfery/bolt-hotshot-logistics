@@ -1,13 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using HotshotLogistics.Api;
+using HotshotLogistics.Core.Extensions;
 
 namespace HotshotLogistics.IntegrationTests
 {
     /// <summary>
-    /// Helper class for building test database connection strings from environment variables.
+    /// Resolves the test database connection string from Azure App Configuration when configured,
+    /// otherwise from .NET user secrets and environment variables.
     /// </summary>
     public static class TestDatabaseHelper
     {
@@ -15,11 +14,29 @@ namespace HotshotLogistics.IntegrationTests
         private static string? cachedConnectionString;
 
         /// <summary>
-        /// Gets the SQL Server connection string from the environment variable used by the app repos.
+        /// Gets a value indicating whether a test database connection is configured.
+        /// </summary>
+        public static bool IsConfigured => !string.IsNullOrWhiteSpace(TryGetConnectionString());
+
+        /// <summary>
+        /// Gets the SQL Server connection string from user secrets or environment variables.
         /// </summary>
         /// <returns>A valid SQL Server connection string.</returns>
-        /// <exception cref="InvalidOperationException">Thrown when the required environment variable is not set.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when no connection string is configured.</exception>
         public static string GetConnectionString()
+        {
+            var connectionString = TryGetConnectionString();
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                throw new InvalidOperationException(
+                    "A database connection string is required for tests. Set user secret 'ConnectionStrings:DefaultConnection' " +
+                    "or CONNECTIONSTRINGS__DEFAULTCONNECTION / DB_CONNECTION_STRING.");
+            }
+
+            return connectionString;
+        }
+
+        private static string? TryGetConnectionString()
         {
             if (cachedConnectionString is not null)
             {
@@ -33,87 +50,22 @@ namespace HotshotLogistics.IntegrationTests
                     return cachedConnectionString;
                 }
 
-                // Read the connection string from environment to match application configuration
-                var conn = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
-                if (string.IsNullOrWhiteSpace(conn))
+                var configBuilder = new ConfigurationBuilder()
+                    .AddUserSecrets(typeof(Program).Assembly, optional: true)
+                    .AddEnvironmentVariables();
+                configBuilder.AddAzureAppConfigurationIfConfigured(useDefaultAzureCredential: false);
+                var config = configBuilder.Build();
+
+                var connectionString = config.GetConnectionString("DefaultConnection")
+                    ?? config["DB_CONNECTION_STRING"];
+
+                if (!string.IsNullOrWhiteSpace(connectionString))
                 {
-                    // if the env var is not set raise an error and stop. never put connection strings in code
-                    //throw error here
-                    throw new InvalidOperationException("DB_CONNECTION_STRING environment variable is required for tests");
+                    cachedConnectionString = connectionString;
                 }
 
-                cachedConnectionString = conn;
                 return cachedConnectionString;
             }
-        }
-
-        
-        private static IEnumerable<string> BuildCandidateDatabases(string? baseDatabaseName)
-        {
-            var candidates = new List<string>();
-
-            if (!string.IsNullOrWhiteSpace(baseDatabaseName))
-            {
-                candidates.Add(baseDatabaseName);
-
-                if (!baseDatabaseName.EndsWith("Test", StringComparison.OrdinalIgnoreCase))
-                {
-                    candidates.Add($"{baseDatabaseName}Test");
-                    candidates.Add($"{baseDatabaseName}_Test");
-                }
-            }
-
-            candidates.Add("HotshotLogistics");
-            candidates.Add("HotshotLogisticsTest");
-            candidates.Add("hotshot_logistics");
-            candidates.Add("hotshot_logistics_test");
-
-            return candidates
-                .Where(name => !string.IsNullOrWhiteSpace(name))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
-        }
-
-        private static bool TryOpenConnection(string connectionString)
-        {
-            try
-            {
-                using var connection = new SqlConnection(connectionString);
-                connection.Open();
-                return true;
-            }
-            catch (SqlException ex) when (IsAuthenticationOrDatabaseError(ex))
-            {
-                return false;
-            }
-            catch (InvalidOperationException)
-            {
-                return false;
-            }
-        }
-
-        private static bool IsAuthenticationOrDatabaseError(SqlException exception)
-        {
-            foreach (SqlError error in exception.Errors)
-            {
-                if (error.Number == 18456 || error.Number == 4060)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private static string GetRequiredEnvironmentVariable(string name)
-        {
-            var value = Environment.GetEnvironmentVariable(name);
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                throw new InvalidOperationException($"{name} environment variable is required for tests");
-            }
-
-            return value;
         }
     }
 }

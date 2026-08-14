@@ -27,6 +27,11 @@ public sealed class DatabaseTestFixture : IAsyncLifetime
                 return;
             }
 
+            if (!TestDatabaseHelper.IsConfigured)
+            {
+                return;
+            }
+
             // Use the pre-configured connection string from environment to match application behavior
             var connectionString = TestDatabaseHelper.GetConnectionString();
 

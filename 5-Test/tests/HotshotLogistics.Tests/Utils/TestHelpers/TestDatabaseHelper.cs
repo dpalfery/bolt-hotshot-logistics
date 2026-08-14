@@ -1,25 +1,46 @@
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using HotshotLogistics.Api;
+using HotshotLogistics.Core.Extensions;
 
 namespace HotshotLogistics.Tests
 {
     /// <summary>
-    /// Helper class for building test database connection strings from environment variables.
+    /// Resolves the test database connection string from Azure App Configuration when configured,
+    /// otherwise from .NET user secrets and environment variables.
+    /// Secrets are stored outside the repository via <c>dotnet user-secrets</c>.
     /// </summary>
     public static class TestDatabaseHelper
     {
         private static readonly object SyncLock = new();
+        private static IConfiguration? configuration;
         private static string? cachedConnectionString;
 
         /// <summary>
-        /// Gets the SQL Server connection string from the environment variable used by the app repos.
+        /// Gets a value indicating whether a test database connection is configured.
+        /// </summary>
+        public static bool IsConfigured => !string.IsNullOrWhiteSpace(TryGetConnectionString());
+
+        /// <summary>
+        /// Gets the SQL Server connection string from user secrets or environment variables.
         /// </summary>
         /// <returns>A valid SQL Server connection string.</returns>
-        /// <exception cref="InvalidOperationException">Thrown when the required environment variable is not set.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when no connection string is configured.</exception>
         public static string GetConnectionString()
+        {
+            var connectionString = TryGetConnectionString();
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                throw new InvalidOperationException(
+                    "A database connection string is required for tests. Set user secret 'ConnectionStrings:DefaultConnection' " +
+                    "(dotnet user-secrets set --project 1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj " +
+                    "\"ConnectionStrings:DefaultConnection\" \"<connection-string>\"), " +
+                    "or set CONNECTIONSTRINGS__DEFAULTCONNECTION.");
+            }
+
+            return connectionString;
+        }
+
+        private static string? TryGetConnectionString()
         {
             if (cachedConnectionString is not null)
             {
@@ -33,131 +54,64 @@ namespace HotshotLogistics.Tests
                     return cachedConnectionString;
                 }
 
-                // Read the connection string from environment to match application configuration
-                var conn = Environment.GetEnvironmentVariable("CONNECTIONSTRINGS__DEFAULTCONNECTION");
-                if (string.IsNullOrWhiteSpace(conn))
+                var config = GetConfiguration();
+                var connectionString = config.GetConnectionString("DefaultConnection");
+                if (string.IsNullOrWhiteSpace(connectionString))
                 {
-                    throw new InvalidOperationException("Environment variable 'CONNECTIONSTRINGS__DEFAULTCONNECTION' is required for tests");
+                    connectionString = BuildConnectionStringFromParts(config);
                 }
 
-                cachedConnectionString = conn;
+                if (!string.IsNullOrWhiteSpace(connectionString))
+                {
+                    cachedConnectionString = connectionString;
+                }
+
                 return cachedConnectionString;
             }
         }
 
-        private static IEnumerable<SqlConnectionStringBuilder> BuildCredentialBuilders(string server)
+        private static IConfiguration GetConfiguration()
         {
-            var builders = new List<SqlConnectionStringBuilder>();
-
-            var saPassword = Environment.GetEnvironmentVariable("SQL_SA_PASSWORD");
-            if (!string.IsNullOrWhiteSpace(saPassword))
+            if (configuration is not null)
             {
-                builders.Add(new SqlConnectionStringBuilder
-                {
-                    DataSource = server,
-                    UserID = "sa",
-                    Password = saPassword,
-                    TrustServerCertificate = true,
-                    MultipleActiveResultSets = true
-                });
+                return configuration;
             }
 
-            var saConnectionString = Environment.GetEnvironmentVariable("CI_SA_CONNECTION_STRING");
-            if (!string.IsNullOrWhiteSpace(saConnectionString))
-            {
-                var builder = new SqlConnectionStringBuilder(saConnectionString)
-                {
-                    DataSource = server,
-                    TrustServerCertificate = true,
-                    MultipleActiveResultSets = true
-                };
+            var configBuilder = new ConfigurationBuilder()
+                .AddUserSecrets(typeof(Program).Assembly, optional: true)
+                .AddEnvironmentVariables();
+            configBuilder.AddAzureAppConfigurationIfConfigured(useDefaultAzureCredential: false);
+            configuration = configBuilder.Build();
 
-                builders.Add(builder);
-            }
-
-            var appUser = Environment.GetEnvironmentVariable("HOTSHOT_DB_APP_USER");
-            var appPassword = Environment.GetEnvironmentVariable("HOTSHOT_DB_PASSWORD");
-            if (!string.IsNullOrWhiteSpace(appUser) && !string.IsNullOrWhiteSpace(appPassword))
-            {
-                builders.Add(new SqlConnectionStringBuilder
-                {
-                    DataSource = server,
-                    UserID = appUser,
-                    Password = appPassword,
-                    TrustServerCertificate = true,
-                    MultipleActiveResultSets = true
-                });
-            }
-
-            return builders;
+            return configuration;
         }
 
-        private static IEnumerable<string> BuildCandidateDatabases(string? baseDatabaseName)
+        private static string? BuildConnectionStringFromParts(IConfiguration config)
         {
-            var candidates = new List<string>();
+            var server = config["HOTSHOT_DB_SERVER"];
+            var database = config["HOTSHOT_DB_NAME"];
+            var user = config["HOTSHOT_DB_APP_USER"];
+            var password = config["HOTSHOT_DB_PASSWORD"];
 
-            if (!string.IsNullOrWhiteSpace(baseDatabaseName))
+            if (string.IsNullOrWhiteSpace(server)
+                || string.IsNullOrWhiteSpace(database)
+                || string.IsNullOrWhiteSpace(user)
+                || string.IsNullOrWhiteSpace(password))
             {
-                candidates.Add(baseDatabaseName);
-
-                if (!baseDatabaseName.EndsWith("Test", StringComparison.OrdinalIgnoreCase))
-                {
-                    candidates.Add($"{baseDatabaseName}Test");
-                    candidates.Add($"{baseDatabaseName}_Test");
-                }
+                return null;
             }
 
-            candidates.Add("HotshotLogistics");
-            candidates.Add("HotshotLogisticsTest");
-            candidates.Add("hotshot_logistics");
-            candidates.Add("hotshot_logistics_test");
-
-            return candidates
-                .Where(name => !string.IsNullOrWhiteSpace(name))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
-        }
-
-        private static bool TryOpenConnection(string connectionString)
-        {
-            try
+            var builder = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder
             {
-                using var connection = new SqlConnection(connectionString);
-                connection.Open();
-                return true;
-            }
-            catch (SqlException ex) when (IsAuthenticationOrDatabaseError(ex))
-            {
-                return false;
-            }
-            catch (InvalidOperationException)
-            {
-                return false;
-            }
-        }
+                DataSource = server,
+                InitialCatalog = database,
+                UserID = user,
+                Password = password,
+                TrustServerCertificate = true,
+                MultipleActiveResultSets = true
+            };
 
-        private static bool IsAuthenticationOrDatabaseError(SqlException exception)
-        {
-            foreach (SqlError error in exception.Errors)
-            {
-                if (error.Number == 18456 || error.Number == 4060)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private static string GetRequiredEnvironmentVariable(string name)
-        {
-            var value = Environment.GetEnvironmentVariable(name);
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                throw new InvalidOperationException($"{name} environment variable is required for tests");
-            }
-
-            return value;
+            return builder.ConnectionString;
         }
     }
 }

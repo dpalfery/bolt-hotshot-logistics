@@ -33,6 +33,13 @@ namespace HotshotLogistics.Tests.Jobs
         public JobRepositoryTests(DatabaseTestFixture fixture)
         {
             ArgumentNullException.ThrowIfNull(fixture);
+            if (!TestDatabaseHelper.IsConfigured)
+            {
+                _configuration = new ConfigurationBuilder().Build();
+                _jobRepository = null!;
+                return;
+            }
+
             var configBuilder = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
@@ -47,7 +54,7 @@ namespace HotshotLogistics.Tests.Jobs
         /// Tests that GetJobsAsync with filtering returns correct results.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetJobsAsync_WithFiltering_ReturnsCorrectResults()
         {
             // Arrange
@@ -75,7 +82,7 @@ namespace HotshotLogistics.Tests.Jobs
         /// Tests that GetJobsAsync with pagination returns correct page.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetJobsAsync_WithPagination_ReturnsCorrectPage()
         {
             // Arrange
@@ -98,7 +105,7 @@ namespace HotshotLogistics.Tests.Jobs
         /// Tests that GetJobsAsync with sorting returns correctly ordered results.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetJobsAsync_WithSorting_ReturnsOrderedResults()
         {
             // Arrange
@@ -121,7 +128,7 @@ namespace HotshotLogistics.Tests.Jobs
         /// Tests that GetJobsAsync with search term returns matching results.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetJobsAsync_WithSearchTerm_ReturnsMatchingResults()
         {
             // Arrange
@@ -146,7 +153,7 @@ namespace HotshotLogistics.Tests.Jobs
         /// Tests that GetJobsAsync with date range filter returns correct results.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetJobsAsync_WithDateRangeFilter_ReturnsCorrectResults()
         {
             // Arrange
@@ -173,7 +180,7 @@ namespace HotshotLogistics.Tests.Jobs
         /// Tests that GetJobsByStatusAsync returns jobs with correct status.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetJobsByStatusAsync_ReturnsJobsWithCorrectStatus()
         {
             // Arrange
@@ -192,7 +199,7 @@ namespace HotshotLogistics.Tests.Jobs
         /// Tests that GetJobsByDriverAsync returns jobs for correct driver.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetJobsByDriverAsync_ReturnsJobsForCorrectDriver()
         {
             // Arrange
@@ -211,7 +218,7 @@ namespace HotshotLogistics.Tests.Jobs
         /// Tests that GetJobsByCustomerAsync returns jobs for correct customer.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetJobsByCustomerAsync_ReturnsJobsForCorrectCustomer()
         {
             // Arrange
@@ -230,7 +237,7 @@ namespace HotshotLogistics.Tests.Jobs
         /// Tests that GetOverdueJobsAsync returns only overdue jobs.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetOverdueJobsAsync_ReturnsOnlyOverdueJobs()
         {
             // Arrange
@@ -251,7 +258,7 @@ namespace HotshotLogistics.Tests.Jobs
         /// Tests that GetJobCountAsync returns correct count.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetJobCountAsync_ReturnsCorrectCount()
         {
             // Arrange
@@ -269,7 +276,7 @@ namespace HotshotLogistics.Tests.Jobs
         /// Tests that filtering by multiple statuses works correctly.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetJobsAsync_WithMultipleStatuses_ReturnsCorrectResults()
         {
             // Arrange
@@ -294,7 +301,7 @@ namespace HotshotLogistics.Tests.Jobs
         /// Tests that filtering by amount range works correctly.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetJobsAsync_WithAmountRange_ReturnsCorrectResults()
         {
             // Arrange

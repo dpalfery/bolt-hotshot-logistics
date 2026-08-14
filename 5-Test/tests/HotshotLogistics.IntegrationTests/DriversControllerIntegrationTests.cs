@@ -51,26 +51,30 @@ namespace HotshotLogistics.IntegrationTests
         [Fact]
         public async Task GetDriver_WithValidId_ReturnsDriver()
         {
-            // Arrange
-            // The seed data is deterministic, so we can rely on the first driver's ID.
-            var driverId = 1010; // Updated to match actual seed data starting ID
+            // Arrange — seed IDs are identity-generated, so look up a known seeded driver first.
+            const string seededEmail = "seed.driver001@local.test";
+            var listResponse = await Client.GetAsync("/api/Drivers");
+            listResponse.EnsureSuccessStatusCode();
+            var drivers = await listResponse.Content.ReadFromJsonAsync<List<DriverDto>>();
+            drivers.Should().NotBeNull();
+            var expected = drivers.Should().ContainSingle(d => d.Email == seededEmail).Subject;
 
             // Act
-            var response = await Client.GetAsync($"/api/Drivers/{driverId}");
+            var response = await Client.GetAsync($"/api/Drivers/{expected.Id}");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
             var driver = await response.Content.ReadFromJsonAsync<DriverDto>();
             driver.Should().NotBeNull();
-            driver.Id.Should().Be(driverId);
-            driver.Email.Should().Be("seed.driver001@local.test");
+            driver.Id.Should().Be(expected.Id);
+            driver.Email.Should().Be(seededEmail);
         }
 
         [Fact]
         public async Task GetDriver_WithInvalidId_ReturnsNotFound()
         {
             // Arrange
-            var invalidDriverId = 9999;
+            var invalidDriverId = int.MaxValue;
 
             // Act
             var response = await Client.GetAsync($"/api/Drivers/{invalidDriverId}");
@@ -110,32 +114,51 @@ namespace HotshotLogistics.IntegrationTests
             var createdDriver = await response.Content.ReadFromJsonAsync<DriverDto>();
             createdDriver.Should().NotBeNull();
             createdDriver.Email.Should().Be(uniqueEmail);
-            createdDriver.Id.Should().BeGreaterThan(1210); // Should be after the seeded drivers (1010-1210)
+            createdDriver.Id.Should().BeGreaterThan(0);
         }
 
         [Fact]
         public async Task UpdateDriver_WithValidData_ReturnsOk()
         {
-            // Arrange
-            var driverIdToUpdate = 1011; // from seed data - second driver
+            // Arrange — create a driver to update so the test does not depend on seed identity values.
+            var uniqueCreateEmail = $"update.create.{Guid.NewGuid():N}@test.com";
+            var createResponse = await Client.PostAsJsonAsync("/api/Drivers", new DriverDto
+            {
+                FirstName = "Update",
+                LastName = "Target",
+                Email = uniqueCreateEmail,
+                PhoneNumber = "(555) 123-4568",
+                LicenseNumber = $"DRV-{Guid.NewGuid():N}"[..12].ToUpperInvariant(),
+                LicenseExpiryDate = DateTime.UtcNow.AddYears(3),
+                IsActive = true,
+            });
+            createResponse.EnsureSuccessStatusCode();
+            var createdDriver = await createResponse.Content.ReadFromJsonAsync<DriverDto>();
+            createdDriver.Should().NotBeNull();
+
             var uniqueUpdateEmail = $"updated.driver.{Guid.NewGuid():N}@test.com";
             var driverToUpdate = new DriverDto
             {
-                Id = driverIdToUpdate,
+                Id = createdDriver.Id,
                 FirstName = "Updated",
                 LastName = "DriverTwo",
                 Email = uniqueUpdateEmail,
-                PhoneNumber = "(*************", // Valid US phone format
-                LicenseNumber = "DRV654321", // Valid format: uppercase letters, numbers, hyphens
-                LicenseExpiryDate = System.DateTime.UtcNow.AddYears(3), // Must meet validation requirements
+                PhoneNumber = "(555) 987-6543",
+                LicenseNumber = "DRV654321",
+                LicenseExpiryDate = DateTime.UtcNow.AddYears(3),
                 IsActive = false,
             };
 
-        // Act
-        var response = await Client.PutAsJsonAsync($"/api/Drivers/{driverIdToUpdate}", driverToUpdate);
+            // Act
+            var response = await Client.PutAsJsonAsync($"/api/Drivers/{createdDriver.Id}", driverToUpdate);
 
-        // Assert
-        response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Driver update failed with status {response.StatusCode}: {errorContent}");
+            }
+
+            // Assert
             var updatedDriver = await response.Content.ReadFromJsonAsync<DriverDto>();
 
             updatedDriver.Should().NotBeNull();

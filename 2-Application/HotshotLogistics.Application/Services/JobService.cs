@@ -304,81 +304,82 @@ namespace HotshotLogistics.Application.Services
         /// <inheritdoc/>
         public async Task<bool> ValidateJobAsync(Job job, CancellationToken cancellationToken = default)
         {
-            var errors = new Dictionary<string, List<string>>();
+            var errors = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+
+            void AddError(string key, string message)
+            {
+                if (!errors.TryGetValue(key, out var list))
+                {
+                    list = new List<string>();
+                    errors[key] = list;
+                }
+
+                list.Add(message);
+            }
 
             if (job == null)
             {
                 logger.LogWarning("Job validation failed: job is null");
-                errors["Job"].Add("Job is null");
+                AddError("Job", "Job is null");
                 throw new ValidationException("Job validation failed", errors.ToDictionary(kv => kv.Key, kv => kv.Value.ToArray()));
             }
 
             if (string.IsNullOrWhiteSpace(job.CustomerId))
             {
                 logger.LogWarning("Job validation failed: customer ID is empty");
-                errors["CustomerId"].Add("Customer ID is required");
+                AddError("CustomerId", "Customer ID is required");
             }
 
             if (string.IsNullOrWhiteSpace(job.Title))
             {
                 logger.LogWarning("Job validation failed: job title is empty");
-                errors["Title"].Add("Job title is required");
+                AddError("Title", "Job title is required");
             }
 
-            // Validate pickup location
             if (job.PickupLocation == null || !job.PickupLocation.IsValid())
             {
                 logger.LogWarning("Job validation failed: pickup location is invalid");
-                errors["PickupLocation"].Add("Pickup location is invalid");
+                AddError("PickupLocation", "Pickup location is invalid");
             }
-
-            // Validate pickup location with geocoding
-            if (!await ValidateLocationWithGeocodingAsync(job.PickupLocation, "pickup", cancellationToken))
+            else if (!await ValidateLocationWithGeocodingAsync(job.PickupLocation, "pickup", cancellationToken))
             {
                 logger.LogWarning("Job validation failed: pickup location geocoding validation failed");
-                errors["PickupLocation"].Add("Pickup location geocoding validation failed");
+                AddError("PickupLocation", "Pickup location geocoding validation failed");
             }
 
-            // Validate delivery location
             if (job.DeliveryLocation == null || !job.DeliveryLocation.IsValid())
             {
                 logger.LogWarning("Job validation failed: delivery location is invalid");
-                errors["DeliveryLocation"].Add("Delivery location is invalid");
+                AddError("DeliveryLocation", "Delivery location is invalid");
             }
-
-            // Validate delivery location with geocoding
-            if (!await ValidateLocationWithGeocodingAsync(job.DeliveryLocation, "delivery", cancellationToken))
+            else if (!await ValidateLocationWithGeocodingAsync(job.DeliveryLocation, "delivery", cancellationToken))
             {
                 logger.LogWarning("Job validation failed: delivery location geocoding validation failed");
-                errors["DeliveryLocation"].Add("Delivery location geocoding validation failed");
+                AddError("DeliveryLocation", "Delivery location geocoding validation failed");
             }
 
-            // Validate cargo details
             if (job.Cargo == null || !job.Cargo.IsValid())
             {
                 logger.LogWarning("Job validation failed: cargo details are invalid");
-                errors["Cargo"].Add("Cargo details are invalid");
+                AddError("Cargo", "Cargo details are invalid");
             }
 
-            // Validate pricing details
             if (job.Pricing == null || !job.Pricing.IsValid())
             {
                 logger.LogWarning("Job validation failed: pricing details are invalid");
-                errors["Pricing"].Add("Pricing details are invalid");
+                AddError("Pricing", "Pricing details are invalid");
             }
 
-            // Validate scheduled pickup time
             if (job.ScheduledPickupTime <= DateTime.UtcNow)
             {
                 logger.LogWarning("Job validation failed: scheduled pickup time is in the past");
-                errors["ScheduledPickupTime"].Add("Scheduled pickup time must be in the future");
+                AddError("ScheduledPickupTime", "Scheduled pickup time must be in the future");
             }
 
-            // Validate estimated delivery time
             if (job.EstimatedDeliveryTime <= job.ScheduledPickupTime)
             {
                 logger.LogWarning("Job validation failed: estimated delivery time must be after pickup time");
-                errors["EstimatedDeliveryTime"].Add("Estimated delivery time must be after pickup time");
+                AddError("EstimatedDeliveryTime", "Estimated delivery time must be after pickup time");
             }
 
             if (errors.Any())

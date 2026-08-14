@@ -15,14 +15,18 @@ xUnit, Moq and NetArchTest.
 dotnet test
 ```
 
-## Environment Variables for Integration Tests
+SQL-backed repository tests skip unless a connection string is configured.
 
-Integration tests require the following environment variables to be set for database connectivity:
+## Database connection (user secrets)
 
-- `HOTSHOT_DB_SERVER`: SQL Server instance (e.g., `localhost,1433`)
-- `HOTSHOT_DB_NAME`: Database name (e.g., `HotshotLogisticsTest`)
-- `HOTSHOT_DB_APP_USER`: Application user username
-- `HOTSHOT_DB_PASSWORD`: Application user password
+Store the connection string outside the repo with the API user secrets (same ID the tests use):
 
-These variables are provisioned by the DbSetup CLI tool. Ensure the database is set up and running before executing integration tests.
+```bash
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "<connection-string>" --project 1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj
+```
 
+Alternatively, set `CONNECTIONSTRINGS__DEFAULTCONNECTION` in the process environment (CI). Environment variables override user secrets.
+
+If user secrets (or the environment) include `ConnectionStrings:AppConfig`, tests load Azure App Configuration next. They do not use `DefaultAzureCredential`, so an endpoint-only setup is ignored and user secrets remain the source.
+
+Do not put connection strings in `.env` files or source under this repository.

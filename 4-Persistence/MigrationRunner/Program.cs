@@ -1,4 +1,5 @@
 using FluentMigrator.Runner;
+using HotshotLogistics.Core.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,18 +20,22 @@ if (showHelp)
     return;
 }
 
-var configuration = new ConfigurationBuilder()
+var configurationBuilder = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
     .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
-    .AddEnvironmentVariables()
-    .Build();
+    .AddUserSecrets(typeof(Program).Assembly, optional: true)
+    .AddEnvironmentVariables();
+configurationBuilder.AddAzureAppConfigurationIfConfigured();
+var configuration = configurationBuilder.Build();
 
-var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+var connectionString = configuration.GetConnectionString("DefaultConnection")
+    ?? configuration["DB_CONNECTION_STRING"];
 
 if (string.IsNullOrWhiteSpace(connectionString))
 {
-    throw new InvalidOperationException("Connection string is not set. Please set DB_CONNECTION_STRING environment variable.");
+    throw new InvalidOperationException(
+        "Connection string is not set. Set user secret ConnectionStrings:DefaultConnection or DB_CONNECTION_STRING.");
 }
 
 var serviceProvider = new ServiceCollection()

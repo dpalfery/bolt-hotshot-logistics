@@ -1,10 +1,12 @@
 using HotshotLogistics.Application.Services;
 using HotshotLogistics.Application.Validators;
-using HotshotLogistics.Contracts.Services;
-using HotshotLogistics.Contracts.Hubs;
-using Microsoft.Extensions.DependencyInjection;
-using FluentValidation;
 using HotshotLogistics.Contracts.Factories;
+using HotshotLogistics.Contracts.Hubs;
+using HotshotLogistics.Contracts.Repositories;
+using HotshotLogistics.Contracts.Services;
+using FluentValidation;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace HotshotLogistics.Application;
 
@@ -23,7 +25,13 @@ public static class ServiceCollectionExtensions
         // Register services
         services.AddScoped<IConnectionManagerService, ConnectionManagerService>();
         services.AddScoped<IDriverService, DriverService>();
-        services.AddScoped<IJobService, JobService>();
+        services.AddScoped<IJobService>(sp => new JobService(
+            sp.GetRequiredService<IJobRepository>(),
+            sp.GetRequiredService<ICustomerRepository>(),
+            sp.GetRequiredService<IDriverRepository>(),
+            sp.GetRequiredService<INotificationService>(),
+            sp.GetRequiredService<IMappingServiceFactory>().CreateMappingService(),
+            sp.GetRequiredService<ILogger<JobService>>()));
         services.AddScoped<IJobAssignmentService, JobAssignmentService>();
         services.AddScoped<IRealtimeService, RealtimeService>();
         services.AddScoped<ISignalRClientWrapper, SignalRClientWrapper>();
@@ -40,13 +48,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<PayPalPaymentProcessor>();
         services.AddScoped<IPaymentProcessorFactory, PaymentProcessorFactory>();
 
-        // Register mapping services
+        // Do not also register IMappingService as a factory callback. MappingServiceFactory
+        // enumerates GetServices<IMappingService>(), and a callback here would recurse.
         services.AddSingleton<IMappingServiceFactory, MappingServiceFactory>();
-        services.AddScoped<IMappingService>(sp =>
-        {
-            var factory = sp.GetRequiredService<IMappingServiceFactory>();
-            return factory.CreateMappingService();
-        });
 
         // Register validators
         services.AddValidatorsFromAssemblyContaining<CreateJobValidator>();

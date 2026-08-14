@@ -3,6 +3,7 @@
 // </copyright>
 
 using HotshotLogistics.Application;
+using HotshotLogistics.Core.Extensions;
 using HotshotLogistics.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -19,6 +20,10 @@ using Microsoft.OpenApi.Models;
 using HotshotLogistics.Domain.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// User secrets (Development, or optional elsewhere) supply App Config connection details locally.
+builder.Configuration.AddUserSecrets(typeof(Program).Assembly, optional: true);
+var azureAppConfigurationEnabled = builder.Configuration.AddAzureAppConfigurationIfConfigured();
 
 // Configure settings
 builder.Services.Configure<GoogleMapsSettings>(builder.Configuration.GetSection("Mapping:GoogleMaps"));
@@ -45,15 +50,12 @@ else
 }
 
 builder.Services.AddControllers()
-    .AddJsonOptions(options =>
+    .AddNewtonsoftJson(options =>
     {
-        // Ignore null values to reduce payload size
-        options.JsonSerializerOptions.DefaultIgnoreCondition =
-            System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
-
-        // Handle circular references gracefully
-        options.JsonSerializerOptions.ReferenceHandler =
-            System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        // System.Text.Json 9+/10 requires PipeWriter.UnflushedBytes, which the ASP.NET Core 8
+        // test host does not implement when tests roll forward to .NET 10.
+        options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
     });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -67,8 +69,10 @@ builder.Services.AddHttpClient();
 // Add distributed cache (using in-memory for development)
 builder.Services.AddDistributedMemoryCache();
 
-// Register Azure App Configuration refresh service
-builder.Services.AddAzureAppConfiguration();
+if (azureAppConfigurationEnabled)
+{
+    builder.Services.AddAzureAppConfiguration();
+}
 
 // Register GraphServiceClient
 builder.Services.AddScoped(sp =>
@@ -103,6 +107,11 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddSignalR();
 
 var app = builder.Build();
+
+if (azureAppConfigurationEnabled)
+{
+    app.UseAzureAppConfiguration();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -301,10 +301,13 @@ internal class InvoiceRepository : BaseRepository<Invoice>, IInvoiceRepository
     /// <inheritdoc/>
     public async Task<string> GetNextInvoiceNumberAsync()
     {
+        // Only sequential INV000001-style numbers. Seeded values such as INV-12345 and INV{ticks}
+        // must not participate, or MAX()+D6 produces the wrong length and can overflow.
         const string sql = @"
-            SELECT ISNULL(MAX(CAST(SUBSTRING(InvoiceNumber, 4, LEN(InvoiceNumber) - 3) AS INT)), 0) + 1
+            SELECT ISNULL(MAX(CAST(SUBSTRING(InvoiceNumber, 4, 6) AS INT)), 0) + 1
             FROM Invoices
-            WHERE InvoiceNumber LIKE 'INV%' AND ISNUMERIC(SUBSTRING(InvoiceNumber, 4, LEN(InvoiceNumber) - 3)) = 1";
+            WHERE LEN(InvoiceNumber) = 9
+              AND InvoiceNumber LIKE 'INV[0-9][0-9][0-9][0-9][0-9][0-9]'";
 
         var nextNumber = await ExecuteScalarAsync<int>(sql);
         return $"INV{nextNumber:D6}";

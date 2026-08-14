@@ -38,15 +38,16 @@ namespace HotshotLogistics.Application.Services
             this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
-        /// <summary>
-        /// Creates a mapping service instance based on the configured provider.
-        /// </summary>
-        /// <returns>The mapping service instance.</returns>
+        /// <inheritdoc/>
         public IMappingService CreateMappingService()
         {
             var providerName = NormalizeProviderName(configuration["Mapping:Provider"] ?? "Mock");
-            var mappingServices = serviceProvider.GetServices<IMappingService>();
-            var mappingServiceDict = mappingServices.ToDictionary(s => s.GetType().Name.Replace("Service", string.Empty), StringComparer.OrdinalIgnoreCase);
+            var mappingServiceDict = serviceProvider.GetServices<IMappingService>()
+                .GroupBy(s => s.GetType())
+                .Select(g => g.First())
+                .ToDictionary(
+                    s => s.GetType().Name.Replace("Service", string.Empty, StringComparison.Ordinal),
+                    StringComparer.OrdinalIgnoreCase);
 
             if (mappingServiceDict.TryGetValue(providerName, out var service))
             {

@@ -5,6 +5,7 @@
 namespace HotshotLogistics.IntegrationTests
 {
     using HotshotLogistics.Api;
+    using HotshotLogistics.Core.Extensions;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc.Testing;
@@ -25,22 +26,15 @@ namespace HotshotLogistics.IntegrationTests
         {
             // Authentication scheme is configured in Program.cs for Development; avoid re-registering here to prevent "Scheme already exists: Test".
 
-            // Configure test database connection string
-            builder.ConfigureAppConfiguration((context, config) =>
+            builder.ConfigureAppConfiguration((_, config) =>
             {
-                var dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
-                if (string.IsNullOrEmpty(dbConnectionString))
+                config.AddUserSecrets(typeof(Program).Assembly, optional: true);
+                config.AddEnvironmentVariables();
+                config.AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    // Use default test connection string for local development using LocalDB
-                    dbConnectionString = "Server=(localdb)\\MSSQLLocalDB;Database=HotshotLogisticsTest;Trusted_Connection=true;MultipleActiveResultSets=true;TrustServerCertificate=true;";
-                }
-
-                // Add the connection string to the configuration so BaseRepository can find it
-                var memoryConfigSource = new Dictionary<string, string?>
-                {
-                    ["ConnectionStrings:DefaultConnection"] = dbConnectionString
-                };
-                config.AddInMemoryCollection(memoryConfigSource);
+                    ["Mapping:Provider"] = "Mock",
+                });
+                config.AddAzureAppConfigurationIfConfigured(useDefaultAzureCredential: false);
             });
 
             // Enable detailed logging for debugging

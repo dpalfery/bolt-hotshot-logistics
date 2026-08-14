@@ -32,6 +32,13 @@ namespace HotshotLogistics.Tests.Billing
         public InvoiceRepositoryTests(DatabaseTestFixture fixture)
         {
             ArgumentNullException.ThrowIfNull(fixture);
+            if (!TestDatabaseHelper.IsConfigured)
+            {
+                _configuration = new ConfigurationBuilder().Build();
+                _invoiceRepository = null!;
+                return;
+            }
+
             var configBuilder = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
@@ -46,7 +53,7 @@ namespace HotshotLogistics.Tests.Billing
         /// Tests that AddAsync creates a new invoice successfully.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task AddAsync_CreatesInvoiceSuccessfully()
         {
             // Arrange
@@ -69,7 +76,7 @@ namespace HotshotLogistics.Tests.Billing
         /// Tests that GetByIdAsync retrieves an invoice successfully.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetByIdAsync_RetrievesInvoiceSuccessfully()
         {
             // Arrange
@@ -90,7 +97,7 @@ namespace HotshotLogistics.Tests.Billing
         /// Tests that UpdateAsync updates an invoice successfully.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task UpdateAsync_UpdatesInvoiceSuccessfully()
         {
             // Arrange
@@ -112,7 +119,7 @@ namespace HotshotLogistics.Tests.Billing
         /// Tests that GetByCustomerIdAsync returns invoices for the correct customer.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetByCustomerIdAsync_ReturnsInvoicesForCorrectCustomer()
         {
             // Arrange
@@ -132,7 +139,7 @@ namespace HotshotLogistics.Tests.Billing
         /// Tests that GetByJobIdAsync returns invoices for the correct job.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetByJobIdAsync_ReturnsInvoicesForCorrectJob()
         {
             // Arrange
@@ -152,7 +159,7 @@ namespace HotshotLogistics.Tests.Billing
         /// Tests that GetByStatusAsync returns invoices with the correct status.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetByStatusAsync_ReturnsInvoicesWithCorrectStatus()
         {
             // Arrange
@@ -171,7 +178,7 @@ namespace HotshotLogistics.Tests.Billing
         /// Tests that GetOverdueInvoicesAsync returns only overdue invoices.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetOverdueInvoicesAsync_ReturnsOnlyOverdueInvoices()
         {
             // Arrange
@@ -192,7 +199,7 @@ namespace HotshotLogistics.Tests.Billing
         /// Tests that GetInvoicesDueWithinDaysAsync returns invoices due within specified days.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetInvoicesDueWithinDaysAsync_ReturnsInvoicesDueWithinDays()
         {
             // Arrange
@@ -216,7 +223,7 @@ namespace HotshotLogistics.Tests.Billing
         /// Tests that GetByDateRangeAsync returns invoices within the specified date range.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetByDateRangeAsync_ReturnsInvoicesWithinDateRange()
         {
             // Arrange
@@ -238,7 +245,7 @@ namespace HotshotLogistics.Tests.Billing
         /// Tests that GetPagedAsync returns paginated results with filtering.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetPagedAsync_ReturnsPaginatedResultsWithFiltering()
         {
             // Arrange
@@ -269,7 +276,7 @@ namespace HotshotLogistics.Tests.Billing
         /// Tests that GetNextInvoiceNumberAsync returns the next available invoice number.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetNextInvoiceNumberAsync_ReturnsNextAvailableInvoiceNumber()
         {
             // Act
@@ -277,15 +284,14 @@ namespace HotshotLogistics.Tests.Billing
 
             // Assert
             result.Should().NotBeNullOrEmpty();
-            result.Should().StartWith("INV");
-            result.Length.Should().Be(9); // INV + 6 digits
+            result.Should().MatchRegex(@"^INV\d{6}$");
         }
 
         /// <summary>
         /// Tests that GetOutstandingBalanceAsync returns correct outstanding balance for customer.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetOutstandingBalanceAsync_ReturnsCorrectOutstandingBalance()
         {
             // Arrange
@@ -303,7 +309,7 @@ namespace HotshotLogistics.Tests.Billing
         /// Tests that GetInvoiceSummaryAsync returns correct summary statistics.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetInvoiceSummaryAsync_ReturnsCorrectSummaryStatistics()
         {
             // Arrange
@@ -323,7 +329,7 @@ namespace HotshotLogistics.Tests.Billing
         /// Tests that SearchByInvoiceNumberAsync returns matching invoices.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task SearchByInvoiceNumberAsync_ReturnsMatchingInvoices()
         {
             // Arrange
@@ -342,7 +348,7 @@ namespace HotshotLogistics.Tests.Billing
         /// Tests that UpdatePaidAmountAsync updates the paid amount successfully.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task UpdatePaidAmountAsync_UpdatesPaidAmountSuccessfully()
         {
             // Arrange
@@ -364,7 +370,7 @@ namespace HotshotLogistics.Tests.Billing
         /// Tests that UpdateStatusAsync updates the status successfully.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task UpdateStatusAsync_UpdatesStatusSuccessfully()
         {
             // Arrange
@@ -386,7 +392,7 @@ namespace HotshotLogistics.Tests.Billing
         /// Tests that GetAgingReportAsync returns aging report data.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GetAgingReportAsync_ReturnsAgingReportData()
         {
             // Arrange
@@ -405,7 +411,7 @@ namespace HotshotLogistics.Tests.Billing
         /// Tests that GenerateInvoiceAsync creates an invoice from job data.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GenerateInvoiceAsync_CreatesInvoiceFromJobData()
         {
             // Arrange
@@ -429,7 +435,7 @@ namespace HotshotLogistics.Tests.Billing
         /// Tests that GenerateInvoiceAsync throws exception for non-existent job.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        [Fact]
+        [DatabaseFact]
         public async Task GenerateInvoiceAsync_ThrowsExceptionForNonExistentJob()
         {
             // Arrange

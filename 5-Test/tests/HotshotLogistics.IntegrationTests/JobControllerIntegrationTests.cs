@@ -98,8 +98,8 @@ namespace HotshotLogistics.IntegrationTests
                 Id = uniqueId,
                 CustomerId = "cust-001", // Seeded customer
                 Title = "Urgent Tech Parts Delivery",
-                PickupLocation = new Location { Address = "100 Tech Park", City = "Innovate", State = "CA", PostalCode = "94043", Country = "USA" },
-                DeliveryLocation = new Location { Address = "200 Consumer Ave", City = "Market", State = "CA", PostalCode = "94041", Country = "USA" },
+                PickupLocation = new Location { Address = "100 Tech Park", City = "Innovate", State = "CA", PostalCode = "94043", Country = "USA", Latitude = 37.4220m, Longitude = -122.0841m },
+                DeliveryLocation = new Location { Address = "200 Consumer Ave", City = "Market", State = "CA", PostalCode = "94041", Country = "USA", Latitude = 37.3861m, Longitude = -122.0839m },
                 Amount = 300m, // Required field
                 Cargo = new CargoDetails { Description = "Sensitive electronics", Weight = 50, IsHazardous = false, Quantity = 1, Value = 1000 },
                 Status = JobStatus.Pending,
@@ -161,8 +161,8 @@ namespace HotshotLogistics.IntegrationTests
                 Id = jobToUpdate.Id,
                 CustomerId = jobToUpdate.CustomerId,
                 Title = "Updated Super Urgent Delivery", // Updated title
-                PickupLocation = new Location { Address = "Updated 100 Tech Park", City = "Innovate", State = "CA", PostalCode = "94043", Country = "USA" },
-                DeliveryLocation = new Location { Address = "Updated 200 Consumer Ave", City = "Market", State = "CA", PostalCode = "94041", Country = "USA" },
+                PickupLocation = new Location { Address = "Updated 100 Tech Park", City = "Innovate", State = "CA", PostalCode = "94043", Country = "USA", Latitude = 37.4220m, Longitude = -122.0841m },
+                DeliveryLocation = new Location { Address = "Updated 200 Consumer Ave", City = "Market", State = "CA", PostalCode = "94041", Country = "USA", Latitude = 37.3861m, Longitude = -122.0839m },
                 Amount = 350m, // Updated amount
                 Status = JobStatus.Assigned, // Updated status
                 Priority = JobPriority.High,
@@ -208,8 +208,8 @@ namespace HotshotLogistics.IntegrationTests
                 Id = uniqueId,
                 CustomerId = "cust-001", // Seeded customer
                 Title = "Job To Delete",
-                PickupLocation = new Location { Address = "123 Delete St", City = "DeleteCity", State = "DL", PostalCode = "12345", Country = "USA" },
-                DeliveryLocation = new Location { Address = "456 Destination Ave", City = "DestCity", State = "DS", PostalCode = "54321", Country = "USA" },
+                PickupLocation = new Location { Address = "123 Delete St", City = "DeleteCity", State = "DL", PostalCode = "12345", Country = "USA", Latitude = 37.4220m, Longitude = -122.0841m },
+                DeliveryLocation = new Location { Address = "456 Destination Ave", City = "DestCity", State = "DS", PostalCode = "54321", Country = "USA", Latitude = 37.3861m, Longitude = -122.0839m },
                 Amount = 150m, // Required field
                 Cargo = new CargoDetails { Description = "Test cargo for deletion", Weight = 25, IsHazardous = false, Quantity = 1, Value = 100 },
                 Status = JobStatus.Pending,
