@@ -1,3 +1,12 @@
+---
+id: demo/full-prompt
+title: Demo full-stack prompt
+doc-type: reference
+status: draft
+owner: unassigned
+last-reviewed: 2026-08-14
+---
+
 # Demo-full-prompt.md
 
 **Unified Prompt — Full-Stack Update for Hotshot Logistics Admin Dashboard**

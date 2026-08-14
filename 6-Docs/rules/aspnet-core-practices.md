@@ -1,7 +1,10 @@
 ---
-description: ASP.NET Core Practices Rule - Enforces best practices for ASP.NET Core applications
-globs: ["**/*.cs"]
-alwaysApply: false
+id: rules/aspnet-core-practices
+title: ASP.NET Core Practices Rule
+doc-type: rule
+status: draft
+owner: unassigned
+last-reviewed: 2026-08-14
 ---
 
 # ASP.NET Core Practices Rule

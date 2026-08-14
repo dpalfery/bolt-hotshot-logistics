@@ -1,7 +1,10 @@
 ---
-description: Observability Rule - Enforces observability practices for ASP.NET Core applications
-globs: ["**/*.cs"]
-alwaysApply: false
+id: rules/observability
+title: Observability Rule
+doc-type: rule
+status: draft
+owner: unassigned
+last-reviewed: 2026-08-14
 ---
 
 # Observability Rule

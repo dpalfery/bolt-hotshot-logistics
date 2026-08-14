@@ -1,7 +1,10 @@
 ---
-description: ADO.NET Data Access Rule - Enforces exclusive use of native ADO.NET for all data access operations
-globs: ["**/*.cs"]
-alwaysApply: false
+id: rules/ado-net
+title: ADO.NET Data Access Rule
+doc-type: rule
+status: draft
+owner: unassigned
+last-reviewed: 2026-08-14
 ---
 
 # ADO.NET Data Access Rule

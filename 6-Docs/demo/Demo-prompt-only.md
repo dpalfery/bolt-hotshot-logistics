@@ -1,3 +1,12 @@
+---
+id: demo/prompt-only
+title: Demo prompt only
+doc-type: reference
+status: draft
+owner: unassigned
+last-reviewed: 2026-08-14
+---
+
 # Demo-prompt-only.md
 
 oneshot prompt no context

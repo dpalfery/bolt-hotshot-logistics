@@ -1,3 +1,12 @@
+---
+id: demo/complete-tasks
+title: Complete tasks workflow
+doc-type: reference
+status: draft
+owner: unassigned
+last-reviewed: 2026-08-14
+---
+
 # Complete Tasks Workflow
 
 This workflow enables autonomous task completion across various software projects. The AI agent will work independently to identify, analyze, and complete tasks while maintaining project-specific architectural principles and coding standards.

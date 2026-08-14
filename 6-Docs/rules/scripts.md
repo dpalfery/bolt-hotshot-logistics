@@ -1,7 +1,10 @@
 ---
-description: Scripts Rule - Common command-line scripts and commands for .NET development
-globs: ["**/*.cs", "**/*.ps1", "**/*.sh"]
-alwaysApply: false
+id: rules/scripts
+title: Scripts Rule
+doc-type: rule
+status: draft
+owner: unassigned
+last-reviewed: 2026-08-14
 ---
 
 # Scripts Rule

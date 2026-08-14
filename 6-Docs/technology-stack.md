@@ -1,50 +1,58 @@
+---
+id: technology-stack
+title: Technology stack
+doc-type: reference
+status: draft
+owner: unassigned
+last-reviewed: 2026-08-14
+---
+
 # Technology Stack
 
 ## Backend (.NET)
-- **Framework**: .NET 8, Azure Functions v4
-- **Database**: SQL Server with native ADO.NET (NO Entity Framework)
+
+- **Framework**: .NET 8 ASP.NET Core Web API (Azure Container Apps)
+- **Database**: SQL Server with native ADO.NET (Entity Framework is prohibited)
 - **Testing**: xUnit, FluentAssertions
-- **Configuration**: Azure App Configuration, Key Vault
+- **Configuration**: Azure App Configuration, Key Vault; local API uses .NET user secrets
 - **Build Tools**: dotnet CLI
 - **Migrations**: FluentMigrator (required for all schema changes)
 
 ## Frontend (Admin Dashboard)
-- **Framework**: Next.js (React 18)
-- **Styling**: TailwindCSS
-- **Charts**: Recharts
-- **Tables**: React Table
-- **State Management**: React Query
-- **Validation**: Zod
-- **UI Components**: Headless UI, Heroicons
-- **Development**: ESLint, Prettier, TypeScript
 
-## Mobile (Driver App)
-- **Framework**: Expo React Native (0.79+)
-- **Icons**: Lucide React Native
-- **Navigation**: Expo Router
-- **Fonts**: Google Fonts
-- **Maps**: React Native Maps
+- **Framework**: Next.js 15, React 19
+- **Styling**: Tailwind CSS
+- **Charts**: Recharts
+- **Tables**: TanStack Table
+- **State**: TanStack Query
+- **Validation**: Zod
+- **UI**: Headless UI, Heroicons, Radix
+- **Auth**: MSAL
+- **Realtime**: SignalR client
+- **Tests**: Playwright
 
 ## Infrastructure
-- **Cloud**: Azure (Functions, SQL Server, App Configuration, Key Vault)
-- **Containerization**: Docker, Docker Compose
+
+- **Cloud**: Azure (Container Apps, SQL Server, App Configuration, Key Vault)
+- **Containerization**: Docker Compose under `7-Deployment/`
 - **CI/CD**: GitHub Actions
-- **Deployment**: Terraform, Bicep, Ansible
+- **Deployment**: Terraform (`7-Deployment/Azure-deploy/`)
 
 ## Development Tools
+
 - **Version Control**: Git
 - **Code Quality**: StyleCop, EditorConfig
-- **Package Management**: NuGet (backend), npm (frontend/mobile)
+- **Package Management**: NuGet (backend), npm (dashboard)
 
-## Key Dependencies
-- Native ADO.NET for all data access (Entity Framework is prohibited)
-- Azure Functions for serverless API
-- SQL Server for relational data
-- React ecosystem for frontend/mobile
-- Azure services for cloud integration
+## Key constraints
+
+- Native ADO.NET for all data access
+- No Entity Framework
+- No Pulumi, Bicep, or Ansible
+- No driver mobile app in this tree
 
 ## Current Status
-- Active development with .NET 8 upgrade completed
-- Testing infrastructure in place
-- Cloud deployment configured
-- ADO.NET migration from Entity Framework completed
+
+- Active development
+- Cataloged runnables are documentation status `draft`
+- ADO.NET migration from Entity Framework is complete

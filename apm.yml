@@ -1,0 +1,12 @@
+name: hotshot-logistics-demo
+version: 1.0.0
+description: APM project for hotshot-logistics-demo
+author: dpalfery
+targets:
+- agent-skills
+dependencies:
+  apm:
+  - dpalfery/kyber-weave
+  mcp: []
+includes: auto
+scripts: {}

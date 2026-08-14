@@ -1,6 +1,15 @@
+---
+id: data-access
+title: Data access standards
+doc-type: reference
+status: draft
+owner: unassigned
+last-reviewed: 2026-08-14
+---
+
 # Data Access Standards
 
-This project enforces the exclusive use of native ADO.NET for all data access operations, prohibiting Entity Framework usage to maintain fine-grained control over SQL execution, performance optimization, and database operations.
+This project enforces native ADO.NET for all data access. Entity Framework is prohibited. The agent-facing rule is [ADO.NET](rules/ado-net.md); this document is the human overview.
 
 ## Core Requirements
 

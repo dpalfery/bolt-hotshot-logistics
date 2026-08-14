@@ -328,3 +328,7 @@ hotshot-db/
 codeql/
 codeql*/
 *.sarif
+
+
+# APM dependencies
+apm_modules/

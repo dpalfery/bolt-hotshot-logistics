@@ -1,7 +1,10 @@
 ---
-description: Optional Features Rule - Guidance on implementing optional features in ASP.NET Core
-globs: ["**/*.cs"]
-alwaysApply: false
+id: rules/optional-features
+title: Optional Features Rule
+doc-type: rule
+status: draft
+owner: unassigned
+last-reviewed: 2026-08-14
 ---
 
 # Optional Features Rule

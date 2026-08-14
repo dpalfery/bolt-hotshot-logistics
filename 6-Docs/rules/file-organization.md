@@ -1,7 +1,10 @@
 ---
-description: File Organization Rule - Enforces Clean Architecture numbered folder structure
-globs: ["**/*"]
-alwaysApply: true
+id: rules/file-organization
+title: File Organization Rule
+doc-type: rule
+status: draft
+owner: unassigned
+last-reviewed: 2026-08-14
 ---
 
 # File Organization Rule
@@ -21,11 +24,11 @@ When creating, moving, or adding files, place them in the appropriate numbered f
 
 ### 1-Presentation/
 **Presentation layer projects and components**
-- API controllers, functions, endpoints (Azure Functions)
-- Web dashboard components (Next.js/React)
-- Mobile app screens and navigation (Expo React Native)
-- HTTP request/response handling, routing, UI rendering
+- API controllers and endpoints (ASP.NET Core Web API on Azure Container Apps)
+- Web dashboard components (Next.js)
+- HTTP request and response handling, routing, UI rendering
 - Depends only on Application layer
+- There is no mobile project in this tree
 
 ### 2-Application/
 **Core business logic and orchestration**

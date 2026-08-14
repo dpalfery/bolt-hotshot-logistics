@@ -1,7 +1,10 @@
 ---
-description: Security and Secrets Rule - Enforces secure handling of sensitive information
-globs: ["**/*.cs", "**/*.json", "**/*.yml", "**/*.yaml", "**/*.config"]
-alwaysApply: false
+id: rules/security-handling
+title: Security and Secrets Rule
+doc-type: rule
+status: draft
+owner: unassigned
+last-reviewed: 2026-08-14
 ---
 
 # Security and Secrets Rule

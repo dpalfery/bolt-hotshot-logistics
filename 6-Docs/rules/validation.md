@@ -1,7 +1,10 @@
 ---
-description: Validation Rule - Enforces input validation practices for ASP.NET Core applications
-globs: ["**/*.cs"]
-alwaysApply: false
+id: rules/validation
+title: Validation Rule
+doc-type: rule
+status: draft
+owner: unassigned
+last-reviewed: 2026-08-14
 ---
 
 # Validation Rule
