@@ -1,3 +1,4 @@
+using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Domain.Entities;
 
 namespace HotshotLogistics.Contracts.Services;
@@ -56,4 +57,14 @@ public interface IBillingService
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The overdue invoices.</returns>
     Task<IEnumerable<Invoice>> GetOverdueInvoicesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets invoice summary statistics for the dashboard.
+    /// </summary>
+    Task<InvoiceSummary> GetInvoiceSummaryAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets accounts-receivable aging entries.
+    /// </summary>
+    Task<IEnumerable<AgingReportEntry>> GetAgingReportAsync(CancellationToken cancellationToken = default);
 }

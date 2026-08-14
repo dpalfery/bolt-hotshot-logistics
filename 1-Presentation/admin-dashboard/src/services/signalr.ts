@@ -1,7 +1,16 @@
 import { HubConnectionBuilder, HubConnection, LogLevel } from '@microsoft/signalr';
 import { LocationUpdate, NotificationMessage } from '@/types';
 
-const SIGNALR_URL = process.env.NEXT_PUBLIC_SIGNALR_URL || 'http://localhost:7071/realtime';
+const SIGNALR_URL = resolveSignalRUrl();
+
+function resolveSignalRUrl(): string {
+  const configured = (process.env.NEXT_PUBLIC_SIGNALR_URL || 'https://localhost:5001/realtime').trim();
+  if (configured.endsWith('/realtime')) {
+    return configured;
+  }
+
+  return `${configured.replace(/\/$/, '')}/realtime`;
+}
 
 class SignalRService {
   private connection: HubConnection | null = null;

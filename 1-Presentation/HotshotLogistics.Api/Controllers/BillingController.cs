@@ -7,6 +7,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using HotshotLogistics.Application.Services;
+using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Contracts.Services;
@@ -132,6 +133,60 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occurred while retrieving invoices for customer");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
+        }
+
+        /// <summary>
+        /// Gets invoice summary metrics for the dashboard.
+        /// </summary>
+        [HttpGet("/api/invoices/summary")]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
+        [ProducesResponseType(typeof(InvoiceSummaryMetricsResponse), StatusCodes.Status200OK)]
+        public async Task<ActionResult<InvoiceSummaryMetricsResponse>> GetInvoiceSummary(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var summary = await billingService.GetInvoiceSummaryAsync(cancellationToken);
+                return Ok(new InvoiceSummaryMetricsResponse
+                {
+                    TotalInvoiced = summary.TotalAmount,
+                    TotalPaid = summary.TotalPaid,
+                    TotalOutstanding = summary.TotalOutstanding,
+                    OverdueAmount = summary.OverdueAmount,
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while retrieving invoice summary");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
+        }
+
+        /// <summary>
+        /// Gets invoice aging buckets for the dashboard.
+        /// </summary>
+        [HttpGet("/api/invoices/aging")]
+        [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
+        [ProducesResponseType(typeof(InvoiceAgingBucketsResponse), StatusCodes.Status200OK)]
+        public async Task<ActionResult<InvoiceAgingBucketsResponse>> GetInvoiceAging(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var entries = await billingService.GetAgingReportAsync(cancellationToken);
+                return Ok(new InvoiceAgingBucketsResponse
+                {
+                    Current = entries.Sum(e => e.Current),
+                    Days30 = entries.Sum(e => e.Days31To60),
+                    Days60 = 0,
+                    Days90 = entries.Sum(e => e.Days61To90),
+                    Over90 = entries.Sum(e => e.Over90Days),
+                    Total = entries.Sum(e => e.TotalBalance),
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while retrieving invoice aging");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -596,6 +651,38 @@ namespace HotshotLogistics.Api.Controllers
         /// Gets or sets the tax rate applied.
         /// </summary>
         public decimal TaxRate { get; set; }
+    }
+
+    /// <summary>
+    /// Dashboard invoice summary metrics.
+    /// </summary>
+    public class InvoiceSummaryMetricsResponse
+    {
+        public decimal TotalInvoiced { get; set; }
+
+        public decimal TotalPaid { get; set; }
+
+        public decimal TotalOutstanding { get; set; }
+
+        public decimal OverdueAmount { get; set; }
+    }
+
+    /// <summary>
+    /// Dashboard invoice aging buckets.
+    /// </summary>
+    public class InvoiceAgingBucketsResponse
+    {
+        public decimal Current { get; set; }
+
+        public decimal Days30 { get; set; }
+
+        public decimal Days60 { get; set; }
+
+        public decimal Days90 { get; set; }
+
+        public decimal Over90 { get; set; }
+
+        public decimal Total { get; set; }
     }
 
     /// <summary>

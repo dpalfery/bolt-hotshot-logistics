@@ -318,6 +318,18 @@ namespace HotshotLogistics.Application.Services
             return invoiceRepository.GetOverdueInvoicesAsync();
         }
 
+        /// <inheritdoc/>
+        public Task<InvoiceSummary> GetInvoiceSummaryAsync(CancellationToken cancellationToken = default)
+        {
+            return invoiceRepository.GetInvoiceSummaryAsync();
+        }
+
+        /// <inheritdoc/>
+        public Task<IEnumerable<AgingReportEntry>> GetAgingReportAsync(CancellationToken cancellationToken = default)
+        {
+            return invoiceRepository.GetAgingReportAsync();
+        }
+
         /// <summary>
         /// Creates a custom invoice not tied to a specific job.
         /// </summary>

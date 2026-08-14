@@ -12,6 +12,7 @@ using System.Text.Json;
 using Azure.Identity;
 using HotshotLogistics.Api;
 using Microsoft.Graph;
+using HotshotLogistics.Application.Hubs;
 using HotshotLogistics.Application.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
@@ -128,8 +129,8 @@ var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get
 app.UseCors(policy =>
 {
     policy.WithOrigins(allowedOrigins)
-          .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Be specific
-          .WithHeaders("Content-Type", "Authorization", "X-Requested-With") // Be specific
+          .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+          .WithHeaders("Content-Type", "Authorization", "X-Requested-With", "x-signalr-user-agent")
           .AllowCredentials();
 });
 
@@ -137,6 +138,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<RealtimeHub>("/realtime");
 
 app.Run();
 

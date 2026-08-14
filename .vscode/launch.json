@@ -1,7 +1,76 @@
 {
     "version": "0.2.0",
+    "compounds": [
+        {
+            "name": "API + Web UI",
+            "configurations": [
+                "Launch API",
+                "Launch Web UI"
+            ],
+            "stopAll": true,
+            "presentation": {
+                "group": "local",
+                "order": 1
+            }
+        }
+    ],
     "configurations": [
-        
+        {
+            "name": "Launch API",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-api",
+            "program": "${workspaceFolder}/1-Presentation/HotshotLogistics.Api/bin/Debug/net8.0/HotshotLogistics.Api.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/1-Presentation/HotshotLogistics.Api",
+            "stopAtEntry": false,
+            "console": "integratedTerminal",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "https://localhost:5001;http://localhost:5000",
+                "DOTNET_ROLL_FORWARD": "LatestMajor"
+            },
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https://\\S+)",
+                "uriFormat": "%s/swagger"
+            },
+            "presentation": {
+                "group": "local",
+                "order": 2
+            }
+        },
+        {
+            "name": "Launch Web UI",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "npx",
+            "runtimeArgs": [
+                "next",
+                "dev",
+                "--port",
+                "3000"
+            ],
+            "cwd": "${workspaceFolder}/1-Presentation/admin-dashboard",
+            "console": "integratedTerminal",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+                "NODE_ENV": "development",
+                "NEXT_PUBLIC_API_BASE_URL": "https://localhost:5001/api",
+                "NEXT_PUBLIC_SIGNALR_URL": "https://localhost:5001/realtime"
+            },
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "- Local:\\s+(https?://\\S+)",
+                "uriFormat": "%s"
+            },
+            "presentation": {
+                "group": "local",
+                "order": 3
+            }
+        },
         {
             "name": "Attach to .NET Functions",
             "type": "coreclr",

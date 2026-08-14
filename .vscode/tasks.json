@@ -2,6 +2,19 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "build-api",
+			"command": "dotnet",
+			"type": "process",
+			"args": [
+				"build",
+				"${workspaceFolder}/1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj",
+				"/property:GenerateFullPaths=true",
+				"/consoleloggerparameters:NoSummary;ForceNoAlign"
+			],
+			"group": "build",
+			"problemMatcher": "$msCompile"
+		},
+		{
 			"label": "clean (functions)",
 			"command": "dotnet",
 			"args": [
