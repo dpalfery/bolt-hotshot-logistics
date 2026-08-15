@@ -13,13 +13,13 @@ Use this skill for documentation changes that affect an application, runnable se
 
 ## Required workflow
 
-1. Read `6-Docs/documentation-standard.md` in full.
-2. Read `6-Docs/catalog.md` and identify the owning component and canonical documents.
+1. Read `<docs-root>/documentation-standard.md` in full.
+2. Read `<docs-root>/catalog.md` and identify the owning component and canonical documents.
 3. Inspect the source-root README and detailed documentation before drafting changes. Ground claims in the current implementation.
 4. Apply the required documentation shape from the standard:
    - source-root README for the concise overview;
    - `onboarding.md` and `architecture.md` for cataloged runnables (Api, admin-dashboard, DbSetup);
-   - feature requirements in `6-Docs/specs/` when that flow is used — not per-component `requirements.md`;
+   - feature requirements in `<docs-root>/specs/` when that flow is used — not per-component `requirements.md`;
    - catalog update for a new, moved, renamed, or materially changed cataloged runnable.
 5. Keep one canonical source per topic. Link to existing system, deployment, operations, or reference material instead of copying it.
 6. Validate Markdown style, internal links, catalog coverage, and the absence of secrets before delivery.
