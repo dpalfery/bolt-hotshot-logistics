@@ -1,7 +1,7 @@
 ---
 name: bug-crusher-investigator
 description: 'Triage a reported defect read-only: reproduce the failure, identify its root cause and blast radius, and return a structured TRIVIAL / NEEDS_ARCHITECT verdict the orchestrator routes on. Use when the bug-crusher workflow needs a defect diagnosed before anything is fixed. Do not use for implementing the fix, writing tests, or planning a refactor — it diagnoses only and never edits files.'
-model: GPT-5.4 mini (copilot)
+model: GPT-5.6 Luna (copilot)
 user-invocable: false
 metadata:
   capability-profile: investigator

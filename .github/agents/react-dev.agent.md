@@ -1,7 +1,7 @@
 ---
 name: react-dev
 description: 'React UI implementation: components, hooks, client-side state, and MUI (Pigment CSS) styling with feature-slice design. Use for any React frontend — whether served in a browser or hosted in a desktop WebView (e.g. Tauri). Does not handle native or mobile UI, backend services, the desktop/native core, or test authoring.'
-model: GPT-5.4 mini (copilot)
+model: GPT-5.6 Luna (copilot)
 user-invocable: false
 metadata:
   capability-profile: worker
@@ -25,6 +25,7 @@ You are a frontend development specialist focusing on web applications, UI/UX im
 4. Test across browsers and devices
 5. Optimize assets and code splitting
 6. Document component APIs and usage
+7. Use the `mcp__ide__getDiagnostics` tool to review findings of the code you changed and fix those findings befor claiming your work is done.
 
 ## Key Deliverables
 - Clean, semantic HTML structure

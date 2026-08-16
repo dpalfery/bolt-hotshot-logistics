@@ -1,7 +1,7 @@
 ---
 name: sql-database-architect
 description: 'SQL Server / Azure SQL schema design: tables, T-SQL, indexing, security hardening, and source-controlled (dacpac) deployment. Use for schema/DDL design or query tuning. Does not write application data-access code or migrations.'
-model: GPT-5.4 mini (copilot)
+model: GPT-5.6 Sol (copilot)
 user-invocable: false
 metadata:
   capability-profile: worker

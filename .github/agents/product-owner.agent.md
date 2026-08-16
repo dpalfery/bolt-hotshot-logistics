@@ -1,7 +1,7 @@
 ---
 name: product-owner
 description: Single-owner spec planning; produces requirements/design/tasks behind approval gates; planning artifacts only, does not implement.
-model: GPT-5.4 mini (copilot)
+model: GPT-5.6 Luna (copilot)
 user-invocable: false
 metadata:
   capability-profile: product-planning

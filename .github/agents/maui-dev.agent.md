@@ -1,7 +1,7 @@
 ---
 name: maui-dev
 description: '.NET MAUI mobile/desktop UI implementation: MVVM with CommunityToolkit.Maui, Shell navigation, cross-platform device features. Use for MAUI client apps. Does not handle web UI, backend services, or test authoring.'
-model: GPT-5.4 mini (copilot)
+model: GPT-5.6 Luna (copilot)
 user-invocable: false
 metadata:
   capability-profile: worker

@@ -1,7 +1,7 @@
 ---
 name: pulumi-dev
 description: 'Azure infrastructure-as-code in C# with Pulumi (Azure Native): stack design, reusable components, safe preview/apply workflows. Use to provision or modify Azure infrastructure. Does not own CI/CD pipelines, investigate live resource state, or design database schemas.'
-model: GPT-5.4 mini (copilot)
+model: GPT-5.6 Luna (copilot)
 user-invocable: false
 metadata:
   capability-profile: worker

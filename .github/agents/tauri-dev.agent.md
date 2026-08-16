@@ -1,7 +1,7 @@
 ---
 name: tauri-dev
 description: 'Rust/Tauri v2 desktop core implementation: commands, the IPC contract, state, async, sidecar integration, and the capabilities/security model. Use for Tauri backend (Rust) work. Does not build the web/WebView UI — defines the IPC contract for the frontend to consume.'
-model: GPT-5.4 mini (copilot)
+model: GPT-5.6 Luna (copilot)
 user-invocable: false
 metadata:
   capability-profile: worker

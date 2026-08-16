@@ -1,7 +1,7 @@
 ---
 name: dal-dev
 description: 'Data-access layer implementation with Dapper and FluentMigrator: repository classes, IRepository<T>, and database migrations from an approved schema. Use for data-access code and migrations. Does not design database schemas or write application/domain logic.'
-model: GPT-5.4 mini (copilot)
+model: GPT-5.6 Luna (copilot)
 user-invocable: false
 metadata:
   capability-profile: worker

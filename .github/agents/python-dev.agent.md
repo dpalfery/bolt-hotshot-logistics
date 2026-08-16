@@ -1,7 +1,7 @@
 ---
 name: python-dev
 description: 'Python implementation: modules, typing, packaging, and Docker/deployment configuration following PEP 8 and clean-architecture practices. Use for Python code. Does not author test suites or own CI/CD pipeline configuration.'
-model: GPT-5.4 mini (copilot)
+model: Grok 4.5 (copilot)
 user-invocable: false
 metadata:
   capability-profile: worker

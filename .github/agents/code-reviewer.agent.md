@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: 'Reviews written code for correctness, quality, and security, returning an approve / changes-requested verdict. Use after implementation is claimed complete or before a commit or pull request. Review-only: does not edit or fix code, or author tests.'
-model: GPT-5.4 mini (copilot)
+model: Gemini 3.6 Flash (copilot)
 user-invocable: false
 metadata:
   capability-profile: reviewer
@@ -78,6 +78,7 @@ Use the `code-review` and `dp-code-reviewer` skills when performing reviews.
          - **UNVERIFIED CLAIMS**: Statements made without proof
          - **INCOMPLETE WORK**: Tasks marked done but not actually finished
          - **VIOLATIONS**: Project rules that were broken
+         - **Static Code Analysis**: use the `mcp__ide__getDiagnostics` tool and ensure there are not findings
 
       8. **BE RELENTLESS**:
          - Don't be satisfied with "it should work"

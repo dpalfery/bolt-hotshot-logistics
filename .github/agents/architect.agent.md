@@ -1,7 +1,7 @@
 ---
 name: architect
 description: 'Produces an implementation plan before coding: decomposes the task, resolves design decisions, negotiates scope. Use when a non-trivial change needs planning before implementation. Plans only — does not write source code, run mutating commands, or author formal spec documents.'
-model: GPT-5.4 mini (copilot)
+model: GPT-5.6 Sol (copilot)
 user-invocable: false
 metadata:
   capability-profile: architect
