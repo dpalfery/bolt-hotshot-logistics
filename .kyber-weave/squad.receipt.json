@@ -1,0 +1,368 @@
+{
+  "schema": "kyber-squad.receipt/v1",
+  "scope": "project",
+  "targetRoot": ".",
+  "installedAtUtc": "2026-08-16T15:12:05.5833290Z",
+  "degradations": [
+    {
+      "target": "copilot",
+      "subject": "architect",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "architect-v3",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "azure-reader",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "bug-crusher-investigator",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "code-reviewer",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "conductor",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "conductor-v3",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "dal-dev",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "docs-dev",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "dotnet-dev",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "github-devops",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "maui-dev",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "product-owner",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "pulumi-dev",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "python-dev",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "react-dev",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "research-agent",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "sql-database-architect",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "tauri-dev",
+      "code": "permission-not-expressible"
+    },
+    {
+      "target": "copilot",
+      "subject": "test-dev",
+      "code": "permission-not-expressible"
+    }
+  ],
+  "files": [
+    {
+      "relativePath": ".github/agents/architect.agent.md",
+      "sha256": "63bc427f29dc427b6a460aee9fbfcaed3a14c93b8d84f86eb80f492bd5f2081d",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/architect-v3.agent.md",
+      "sha256": "68d82e2e4745620772677fb38bf734fffc5257a44efd1b8004cc17e0b9a134b2",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/azure-reader.agent.md",
+      "sha256": "1bf073e5ac5a6140c1da2730b4c3ab49331fa7ba97f4a8467d8c43d5e34f0387",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/bug-crusher-investigator.agent.md",
+      "sha256": "c61a66cbed5e5e21a5786f02efc2e18a3cc264bde25f01f73da59b90507db589",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/code-reviewer.agent.md",
+      "sha256": "86a7cea6c744f183f41a18304b6688c22c0ee9f548c63a83ddb0938d46f740e7",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/conductor.agent.md",
+      "sha256": "3bc36aba64e3e1e395d0579c10c43f152748766a33a9e904c95442197df12e46",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/conductor-v3.agent.md",
+      "sha256": "25e854aeb2bee287abea3991ff47d89e581ad2171860e2ecb320880c9d94eced",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/dal-dev.agent.md",
+      "sha256": "ea90eacf576a55a6a0410978a47a63f59f2a14ad4a8d7f3bcfb485c7bf2dec90",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/docs-dev.agent.md",
+      "sha256": "b0f0744c9560078b7cc720387250b982c8e9f774d224632e26a0cefab3c37b76",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/dotnet-dev.agent.md",
+      "sha256": "7c087ffa0be2deb9ad7af7eabfa7751c07a82cf3c55559ef8b08ff091f6a3d45",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/github-devops.agent.md",
+      "sha256": "f4ca798a8ef6127969071094396f10cb6d057f5f7a333478dc0e3bac86a4de8c",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/maui-dev.agent.md",
+      "sha256": "08a6a17df0c370abaea8874a2d29b2f1a886209ffd860499074a0b5b05173153",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/product-owner.agent.md",
+      "sha256": "24ff0a1166586e112fa096f062014d82e9e813fcf921a41f0e579a12995bc53b",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/pulumi-dev.agent.md",
+      "sha256": "621989e10159a0c921bc5a28be1aff1e44320e5f137af81a5dd5c27099684fd2",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/python-dev.agent.md",
+      "sha256": "5150c7bccb2bd386fa16dedc3961323e1919d7b72eba2322419d9ec9a8978a0b",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/react-dev.agent.md",
+      "sha256": "293f2f4c15dbda5a915cf34c15988ed8c2195e506481d9019a7b8be9af890e38",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/research-agent.agent.md",
+      "sha256": "23705bbe49be09ae67a09edf63e474173c3b98fe003064183a1ad4d26c72cca5",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/sql-database-architect.agent.md",
+      "sha256": "724c3691b34d1bf11fb85c3d36bc537175e1a63da97785a4a90e6dcdbe6eda58",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/tauri-dev.agent.md",
+      "sha256": "f3e6b53246cdb2bcc80c49d46d3022393b07965f1a08292da41f2bfc9af80512",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/agents/test-dev.agent.md",
+      "sha256": "175ea85ab56c4660a4a0596553181df065e8a0941d0844b2a92a2d4f0b45ee74",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/app-docs-standard/SKILL.md",
+      "sha256": "46644b015da550584f8388c4c450d7a7d8df9ea64a3508abb1d389ab8d44316c",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/architecture-decision-record/SKILL.md",
+      "sha256": "6fb1abd28401615d44e760700ea0382b08cf6881bf9773aff650684ef9f07310",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/azure-cli/SKILL.md",
+      "sha256": "ce5c823e733d81da51dc48e665e447defc570908708fc48f997ae653aac0f115",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/azure-naming/SKILL.md",
+      "sha256": "df13f0ac027bab01024c709638168da26276d5e8737270592355a86d309efb51",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/bug-crusher/SKILL.md",
+      "sha256": "a5dee0dfa3762af551cbe27b127b8c6764b50b43028a77ea8c6074c95c8351af",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/code-review/SKILL.md",
+      "sha256": "53c285d23731cf24bacd2efdd77b5ec85f55e5341fa2d7ae59443b54e74a4f6a",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/create-pull-request/SKILL.md",
+      "sha256": "c2025c6c98344d8bacfb1c71cbeca9d66f33a1f0fb676dce88860ad34ad89a0a",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/create-pull-request-github/SKILL.md",
+      "sha256": "82a23b03e606903df330bb379288bc91c34daa6902ef7051d5050db657dd2db7",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/csp-security/SKILL.md",
+      "sha256": "52d45c3fc6361ba67028c3838aa958bdab4588d0804da2720f363fd0e0705782",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/dal-dev/SKILL.md",
+      "sha256": "219cbcc18ea9d06bbff2e045e8648da763aeddf87e91c621f7f907128e14b3a2",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/dotnet-dev/SKILL.md",
+      "sha256": "ef52da907fc6f5b18db55ba9784c9b33266d2c7f03235803015320e2ed7c5cc7",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/dp-code-reviewer/SKILL.md",
+      "sha256": "ead8cf78b4c2355077035bf86772aea262f3917c0bdc6ac8f96ad910b99acc1f",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/github-cli/SKILL.md",
+      "sha256": "2de5215841103be8ebb7ce0d372da69e2fe644a6ef3479df98e0001fced9e2e1",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/github-devops/SKILL.md",
+      "sha256": "5e0c8bea69ec555e77a12459ed833144e76e9f8d0cdb908640e933ab0c44c998",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/lm-studio-cli/SKILL.md",
+      "sha256": "469c0915b7c48cc5edd9b27bf4aa40d049b122e5a2c83f99a5eca0be85bde07e",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/maui-dev/SKILL.md",
+      "sha256": "5c8f37264580c49996a68b5bc1f8dda354362391ebc8a7f3c7596cb60992457b",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/pr-review-fix-comments/SKILL.md",
+      "sha256": "c9deed7dbc6e9e85d2c6097602e3956c0b107fcd8c3f5175e887141533a3c94a",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/product-owner/SKILL.md",
+      "sha256": "0226bbde6bb2461e85ee843e3ea3cbf26d5c34c199915a480baf6c838a7abcb7",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/python-dev/SKILL.md",
+      "sha256": "f99534df851b6334bb7e85c1cd51b5d16ebd2f9310475b4edca2f19338f4f3bf",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/second-brain/SKILL.md",
+      "sha256": "7ed8fa9aef8cc03e7ac5a857175c3e7be78585fb35945ff458a05bd71a2247fc",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/security-review/SKILL.md",
+      "sha256": "23e7e70a8163019bad2a933ae1d129a8a571d570b4dbe87ed2c0640ad6ab4c5d",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/setup-dev-environment/SKILL.md",
+      "sha256": "f3f8d10b8c53e1f7f4832ac9af0acff3e707a1bc717c486fefe1895ed8d15615",
+      "target": "copilot",
+      "adopted": false
+    },
+    {
+      "relativePath": ".github/skills/test-dev/SKILL.md",
+      "sha256": "621b0a49755bdee11c6f49682764ba8f7a546ca31b78d531958f26ce9384269c",
+      "target": "copilot",
+      "adopted": false
+    }
+  ]
+}
