@@ -10,9 +10,18 @@ const fs = require('fs');
 const path = require('path');
 
 function generateEnvFile() {
-  // Read required environment variables
-  const azureClientId = process.env.NEXT_PUBLIC_AZURE_CLIENT_ID;
-  const azureTenantId = process.env.NEXT_PUBLIC_AZURE_TENANT_ID;
+  const envFilePath = path.join(process.cwd(), '.env.local');
+  let azureClientId = process.env.NEXT_PUBLIC_AZURE_CLIENT_ID;
+  let azureTenantId = process.env.NEXT_PUBLIC_AZURE_TENANT_ID;
+
+  // If environment variables are missing but .env.local exists, keep existing file
+  if ((!azureClientId || !azureTenantId) && fs.existsSync(envFilePath)) {
+    const existing = fs.readFileSync(envFilePath, 'utf8');
+    if (existing.includes('NEXT_PUBLIC_AZURE_CLIENT_ID=') && existing.includes('NEXT_PUBLIC_AZURE_TENANT_ID=')) {
+      console.log('✓ Using existing .env.local configuration.');
+      return;
+    }
+  }
 
   // Validate required environment variables
   if (!azureClientId || !azureTenantId) {

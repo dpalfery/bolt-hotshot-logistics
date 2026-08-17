@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --experimental-https",
+    "dev": "next dev --experimental-https --experimental-https-key certificates/localhost-key.pem --experimental-https-cert certificates/localhost.pem",
     "predev": "node scripts/generate-env.js",
     "prebuild": "node scripts/generate-env.js",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "pretest": "playwright install --with-deps",
+    "test:install": "playwright install",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui"
