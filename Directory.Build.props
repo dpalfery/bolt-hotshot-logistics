@@ -1,0 +1,31 @@
+<Project>
+  <!--
+    Shared MSBuild defaults for every .csproj under this repository.
+    Code-style IDE rules (e.g. IDE0005 unused usings) only execute on build when
+    EnforceCodeStyleInBuild is true AND the rule severity in .editorconfig is
+    warning or error (suggestion/silent rules stay IDE-only).
+  -->
+  <PropertyGroup>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisMode>Default</AnalysisMode>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!--
+      IDE0005 (Remove unnecessary usings) only runs during build when XML doc
+      generation is enabled: https://github.com/dotnet/roslyn/issues/41640
+    -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!--
+      Fail the build on unused/unnecessary using directives once they surface.
+      Other IDE style rules remain suggestion-level in .editorconfig so this is
+      not a full style-as-error rollout.
+    -->
+    <WarningsAsErrors>$(WarningsAsErrors);IDE0005</WarningsAsErrors>
+    <!--
+      XML docs are required only so IDE0005 can fire on build. Missing comments
+      (CS1591) stay suppressed until a full documentation pass is intentional.
+    -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+</Project>

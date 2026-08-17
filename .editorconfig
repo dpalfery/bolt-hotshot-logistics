@@ -90,6 +90,11 @@ dotnet_diagnostic.SA1300.severity = none
 dotnet_diagnostic.SA1515.severity = none
 dotnet_diagnostic.SA1513.severity = none
 
+# Unnecessary using directive — must be warning/error to run under EnforceCodeStyleInBuild.
+# Directory.Build.props elevates IDE0005 to build error via WarningsAsErrors.
+dotnet_diagnostic.IDE0005.severity = warning
+dotnet_remove_unnecessary_imports_on_save = true
+
 dotnet_style_operator_placement_when_wrapping = beginning_of_line
 tab_width = 4
 dotnet_style_coalesce_expression = true:suggestion

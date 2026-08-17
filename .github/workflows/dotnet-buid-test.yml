@@ -5,6 +5,10 @@ on:
     paths:
       - '**/*.cs'
       - '**/*.csproj'
+      - '**/Directory.Build.props'
+      - '**/Directory.Build.targets'
+      - '**/.editorconfig'
+      - 'stylecop.json'
       - '.github/workflows/**'
   push:
     branches:
@@ -13,6 +17,10 @@ on:
     paths:
       - '**/*.cs'
       - '**/*.csproj'
+      - '**/Directory.Build.props'
+      - '**/Directory.Build.targets'
+      - '**/.editorconfig'
+      - 'stylecop.json'
       - '.github/workflows/**'
   workflow_dispatch:
 
@@ -43,14 +51,18 @@ jobs:
       - name: Lint
         run: |
           export PATH="$HOME/.dotnet/tools:$PATH"
+          # Enforce style + analyzer severities from .editorconfig (IDE0005 unused usings, etc.).
+          # --severity warn includes warning-level code-style diagnostics in verify mode.
           for proj in $(find . -name '*.csproj'); do
-            dotnet format "$proj" --verbosity diagnostic
-            dotnet format "$proj" --verify-no-changes --no-restore
+            dotnet format analyzers "$proj" --severity warn --verify-no-changes --no-restore --verbosity diagnostic
+            dotnet format style "$proj" --severity warn --verify-no-changes --no-restore --verbosity diagnostic
+            dotnet format whitespace "$proj" --verify-no-changes --no-restore --verbosity diagnostic
           done
       - name: Build
         run: |
+          # Directory.Build.props enables EnforceCodeStyleInBuild and treats IDE0005 as error.
           for proj in $(find . -name '*.csproj'); do
-            dotnet build "$proj" --configuration Release --no-restore
+            dotnet build "$proj" --configuration Release --no-restore -warnaserror:IDE0005
           done
       - name: Test
         run: |

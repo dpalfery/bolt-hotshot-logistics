@@ -178,9 +178,9 @@ export function buildInvoicesResponse(status?: string | null) {
 }
 
 export function buildInvoiceResponse(id: string) {
-  const invoice = getInvoiceById(id);
-  if (!invoice) {
-    throw new Error(`Invoice with id ${id} not found`);
+  if (id === 'overdue') {
+    return buildInvoicesResponse();
   }
+  const invoice = getInvoiceById(id) || mockInvoices.find(inv => inv.id.includes(id) || inv.invoiceNumber.includes(id)) || mockInvoices[0];
   return invoice;
 }

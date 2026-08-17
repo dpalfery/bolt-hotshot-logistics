@@ -35,18 +35,19 @@ test.describe('Billing Management', () => {
 
     test('should display invoice information correctly', async ({ page }) => {
       // Mock invoices data before navigation
-      await page.route('**/api/billing/invoices**', async route => {
+      await page.route(/\/billing\/invoices/, async route => {
         const url = new URL(route.request().url());
         const status = url.searchParams.get('status');
+        const responseData = buildInvoicesResponse(status);
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify(buildInvoicesResponse(status))
+          body: JSON.stringify(responseData)
         });
       });
 
-      // Reload to apply mocks (wait for invoices response deterministically)
-      await testHelpers.reloadAndWaitForInvoices();
+      // Reload to apply mocks
+      await page.reload();
 
       // Wait for invoice rows to render
       await page.waitForSelector('table tbody tr', { timeout: 5000 });
@@ -84,7 +85,7 @@ test.describe('Billing Management', () => {
 
     test('should display invoice status with appropriate styling', async ({ page }) => {
       // Mock invoices with different statuses using fixture
-      await page.route('**/api/billing/invoices**', async route => {
+      await page.route(/\/billing\/invoices/, async route => {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
@@ -92,7 +93,7 @@ test.describe('Billing Management', () => {
         });
       });
     
-      await testHelpers.reloadAndWaitForInvoices();
+      await page.reload();
     
       // Check status styling for each status type from fixture - target the status badge element we added a test id to
       const table = page.locator('table');
@@ -133,9 +134,6 @@ test.describe('Billing Management', () => {
   
       // Check loading state (use explicit test id to avoid ambiguous matches)
       await expect(page.locator('[data-testid="loading-invoices"]')).toBeVisible();
-  
-      // Now wait for the invoices response to complete and the loading indicator to disappear.
-      await testHelpers.waitForInvoicesResponse();
       await expect(page.locator('[data-testid="loading-invoices"]')).not.toBeVisible({ timeout: 10000 });
     });
 
@@ -152,7 +150,7 @@ test.describe('Billing Management', () => {
         });
       });
 
-      await testHelpers.reloadAndWaitForInvoices();
+      await page.reload();
 
       // Verify table structure is still present but no invoice rows - use thead th:has-text for unambiguous checks
       await page.waitForSelector('table thead th', { timeout: 5000 });
@@ -194,7 +192,7 @@ test.describe('Billing Management', () => {
         });
       });
 
-      await testHelpers.reloadAndWaitForInvoices();
+      await page.reload();
 
       // Check if there's a payment recording button or interface
       const paymentButton = page.getByRole('button', { name: /record.*payment|add.*payment/i });
@@ -246,7 +244,7 @@ test.describe('Billing Management', () => {
 
     test('should filter invoices by status if filtering is available', async ({ page }) => {
       // Mock invoices with filtering support using fixture
-      await page.route('**/api/billing/invoices**', async route => {
+      await page.route(/\/billing\/invoices/, async route => {
         const url = new URL(route.request().url());
         const status = url.searchParams.get('status');
         await route.fulfill({
@@ -255,10 +253,10 @@ test.describe('Billing Management', () => {
           body: JSON.stringify(buildInvoicesResponse(status))
         });
       });
-await testHelpers.reloadAndWaitForInvoices(200, 10000);
+      await page.reload();
 
-// Wait for invoice rows to render
-await page.waitForSelector('table tbody tr', { timeout: 5000 });
+      // Wait for invoice rows to render
+      await page.waitForSelector('table tbody tr', { timeout: 5000 });
 
       // Verify initial state shows invoices from fixture - assert deterministic count instead of brittle individual lookups
       const table = page.locator('table');
@@ -285,26 +283,25 @@ await page.waitForSelector('table tbody tr', { timeout: 5000 });
 
     test('should handle invoice actions if available', async ({ page }) => {
       // Mock invoice list data
-      await page.route('**/api/billing/invoices**', async route => {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(buildInvoicesResponse())
-        });
-      });
-
-      // Mock individual invoice details
-      await page.route('**/api/billing/invoices/*', async route => {
+      await page.route(/\/billing\/invoices/, async route => {
         const url = new URL(route.request().url());
         const id = url.pathname.split('/').pop();
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(buildInvoiceResponse(id!))
-        });
+        if (id && id !== 'overdue' && id !== 'invoices') {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(buildInvoiceResponse(id))
+          });
+        } else {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(buildInvoicesResponse())
+          });
+        }
       });
 
-      await testHelpers.reloadAndWaitForInvoices(200, 10000);
+      await page.reload();
 
       // Check for action buttons (view, edit, send, etc.)
       const viewButton = page.getByRole('button', { name: /view/i });
@@ -335,8 +332,8 @@ await page.waitForSelector('table tbody tr', { timeout: 5000 });
         });
       });
 
-      // This test mocks a 500 response; accept any invoices response status when waiting.
-      await testHelpers.reloadAndWaitForInvoices('any', 10000);
+      // This test mocks a 500 response
+      await page.reload();
 
       // Check that error is handled gracefully
       await expect(page.getByText('Billing & Invoicing')).toBeVisible();

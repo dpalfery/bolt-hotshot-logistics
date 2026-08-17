@@ -1,20 +1,34 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { PublicClientApplication, EventType, EventMessage, AuthenticationResult } from '@azure/msal-browser';
 import { MsalProvider } from '@azure/msal-react';
 import { msalConfig } from '@/config/auth';
 import { AuthProvider } from '@/components/auth/auth-provider';
 
-const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            staleTime: 1000 * 60 * 5, // 5 minutes
-            retry: 1,
+function makeQueryClient() {
+    return new QueryClient({
+        defaultOptions: {
+            queries: {
+                staleTime: 0,
+                refetchOnMount: true,
+                retry: false,
+            },
         },
-    },
-});
+    });
+}
+
+let browserQueryClient: QueryClient | undefined = undefined;
+
+function getQueryClient() {
+    if (typeof window === 'undefined') {
+        return makeQueryClient();
+    } else {
+        if (!browserQueryClient) browserQueryClient = makeQueryClient();
+        return browserQueryClient;
+    }
+}
 
 export const msalInstance = new PublicClientApplication(msalConfig);
 
@@ -36,6 +50,8 @@ interface ProvidersProps {
 }
 
 export function Providers({ children }: ProvidersProps) {
+    const [queryClient] = useState(() => makeQueryClient());
+
     return (
         <MsalProvider instance={msalInstance}>
             <QueryClientProvider client={queryClient}>

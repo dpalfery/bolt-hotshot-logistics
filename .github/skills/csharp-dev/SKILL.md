@@ -24,3 +24,12 @@ Identify your sub-task and read ONLY the relevant reference before proceeding.
 | Incremental Build | Fix targets that always rebuild; `Inputs`/`Outputs` attributes; `FileWrites` registration; volatile output paths | Refer to the path defined by the **Incremental Build** property in the root `AGENTS.md`. |
 
 **Rule:** Read only the reference(s) relevant to your current task. Do not pre-load all references.
+
+## Completion gate (mandatory)
+
+Before claiming a task complete or returning `READY_FOR_REVIEW`:
+
+1. Run the IDE problems tool (`get_errors`) on every file you edited or created.
+2. Fix any diagnostics you introduced (compiler, analyzer, IDE).
+3. Re-run `get_errors` until the change set is clean, or explicitly list only pre-existing unrelated diagnostics you did not introduce.
+4. A successful `dotnet build` / test run does **not** replace this gate — both executable validation and `get_errors` are required when available.

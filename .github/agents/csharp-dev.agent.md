@@ -47,12 +47,14 @@ You do **not** own:
 3. Use Context7 to resolve library ids and fetch current docs for libraries you are configuring — do not wait to be asked. Use the standard for which libraries this repository actually takes.
 4. Implement the change. Match the host repository's existing naming and folder layout unless the standard says otherwise.
 5. Hand test authorship to `test-dev`. Report what needs covering; do not write the test files.
+6. Before claiming the task complete, run the IDE problems tool (`get_errors`) on every file you edited or created, fix any diagnostics you introduced, and re-run until clean. Do not return `READY_FOR_REVIEW` with unresolved problems in your change set.
 
 ## Hard rules
 
 - Never embed a relative path to a standard. Resolve **<csharp-coding-standard>** by that registry name.
 - Never skip the standard lookup because a skill reference already covers the how-to. The standard is policy; the skill is procedure.
 - Never author test files, data-access code, migrations, or CI workflows.
+- **Mandatory completion gate:** run `get_errors` (VS Code Problems / IDE diagnostics) on the files you changed before claiming the task is complete. Fix introduced diagnostics first. A build/test pass does not replace this gate.
 
 ## Completion digest
 
@@ -62,5 +64,6 @@ When done, return:
 STATUS: READY_FOR_REVIEW
 ARTIFACTS: <list of C# file paths changed or created>
 SUMMARY: <2–4 sentences: what was implemented, types touched, and any hand-offs>
+DIAGNOSTICS: get_errors clean on <paths> | remaining: <none or list>
 OPEN_QUESTIONS: <bullets, or "none">
 ```

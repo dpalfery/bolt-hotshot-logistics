@@ -206,16 +206,19 @@ class ApiService {
     _filter?: InvoiceFilter,
     _pagination?: PaginationParameters
   ): Promise<PagedResult<Invoice>> {
-    // For the dashboard, we want overdue invoices
-    // The backend returns Invoice[] but we need to wrap it in PagedResult format
-    const overdueInvoices = await this.request<Invoice[]>('/billing/invoices/overdue');
+    const response = await this.request<any>('/billing/invoices/overdue');
+    const items = Array.isArray(response)
+      ? response
+      : (Array.isArray(response?.items) ? response.items : []);
+    const totalCount = Array.isArray(response)
+      ? response.length
+      : (response?.totalCount ?? items.length);
 
-    // Convert to PagedResult format to match the expected interface
     return {
-      items: overdueInvoices,
-      totalCount: overdueInvoices.length,
+      items,
+      totalCount,
       pageNumber: 1,
-      pageSize: overdueInvoices.length,
+      pageSize: items.length || 10,
       totalPages: 1
     };
   }
