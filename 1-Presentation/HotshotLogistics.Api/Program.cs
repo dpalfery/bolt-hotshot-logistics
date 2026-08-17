@@ -2,18 +2,18 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using HotshotLogistics.Application;
-using HotshotLogistics.Core.Extensions;
-using HotshotLogistics.Data;
-using Microsoft.AspNetCore.Authentication;
 using Azure.Identity;
 using HotshotLogistics.Api;
-using Microsoft.Graph;
+using HotshotLogistics.Application;
 using HotshotLogistics.Application.Hubs;
+using HotshotLogistics.Core.Extensions;
+using HotshotLogistics.Data;
+using HotshotLogistics.Domain.DTOs;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Graph;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi;
-using HotshotLogistics.Domain.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
 

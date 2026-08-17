@@ -13,11 +13,6 @@ last-reviewed: 2026-08-17
 How C# is written in this repository. Agents and skills resolve this document as
 `<csharp-coding-standard>`, so it outranks the defaults a portable agent shipped with.
 
-> Template. Set `owner` to a row in `catalog.md`, replace `<Solution>` with the host's
-> root namespace, review the decisions below, and promote `status` to `current`. Do not
-> copy Kyber-Weave's own `docs/standards/csharp/` — that file records one repository's
-> decisions, including ones a host may reasonably reverse.
-
 ## Stack
 
 - **Target:** ASP.NET Core on .NET 10, C# 13.
@@ -51,6 +46,59 @@ repositories disagree:
 - **File-scoped namespaces.**
 - **Predefined type keywords** — `string`, `int`, `bool`, never `String` or `Int32`.
 - **Allman braces**, and a new line before `else`, `catch` and `finally`.
+
+## Naming
+
+C# follows the official **.NET Framework Design Guidelines**. Casing communicates
+scope, accessibility, and kind of identifier at a glance. Encode mechanical naming
+rules in `.editorconfig` where an analyzer exists; the table below is the policy
+agents and reviewers apply when the analyzer is silent.
+
+| Identifier type | Casing | Prefix / suffix | Example |
+|---|---|---|---|
+| Local variables | `camelCase` | None | `userCount`, `isValid` |
+| Method parameters | `camelCase` | None | `userId`, `cancellationToken` |
+| Private fields (instance) | `_camelCase` | `_` prefix | `_retryCount`, `_logger` |
+| Private fields (static) | `_camelCase` (or `s_camelCase`) | `_` or `s_` prefix | `_defaultTimeout`, `s_instance` |
+| Public / protected fields | `PascalCase` | None | `MaxValue`, `DefaultPort` |
+| Constants (`const`) | `PascalCase` | None | `MaxRetries`, `ConnectionTimeout` |
+| Properties | `PascalCase` | None | `FirstName`, `IsActive` |
+| Interfaces | `PascalCase` | `I` prefix | `IRepository`, `IDisposable` |
+| Generic type parameters | `PascalCase` | `T` prefix | `T`, `TKey`, `TEntity` |
+
+### Core variable and field rules
+
+- **Local variables and parameters:** always `camelCase`. Avoid abbreviations unless
+  they are standard domain acronyms (for example `id`, `xml`, `api`).
+- **Private instance fields:** `_camelCase` with a leading underscore so fields are
+  distinct from locals without requiring `this.`.
+- **Constants and static readonly values:** `PascalCase` for `const` and
+  `static readonly`. Do **not** use uppercase `SNAKE_CASE` (use `MaxBufferSize`, not
+  `MAX_BUFFER_SIZE`).
+- **Boolean identifiers:** affirmative verb prefix that states a true/false condition:
+  `hasErrors`, `canExecute`, `isVisible`, `shouldRetry`.
+
+### Naming conventions and suffixes
+
+- **Async methods:** suffix methods that return `Task` or `Task<T>` with `Async`
+  (for example `FetchDataAsync`).
+- **Events and delegates:** verbs or verb phrases in `PascalCase` (for example
+  `Closing`, `DataReceived`). Suffix custom event-argument classes with `EventArgs`
+  (for example `OrderPlacedEventArgs`).
+- **Exceptions:** suffix custom exception classes with `Exception` (for example
+  `NotFoundException`).
+- **Attributes:** suffix custom attribute classes with `Attribute` (for example
+  `JsonSerializableAttribute`).
+
+### Anti-patterns
+
+- **Hungarian notation:** never encode the data type in the name (use `count`, not
+  `iCount`; `customers`, not `arrCustomers`; `name`, not `strName`).
+- **Single-letter names:** avoid except for standard loop counters (`i`, `j`),
+  coordinate axes (`x`, `y`), or lambdas where type and intent are obvious
+  (`x => x.Id`).
+- **Screaming snake case:** never use `ALL_CAPS_WITH_UNDERSCORES` for constants or
+  enum members in modern C#.
 
 ## Types
 

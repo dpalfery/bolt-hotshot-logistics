@@ -7,15 +7,15 @@ namespace HotshotLogistics.Application.Services
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
-    using HotshotLogistics.Domain.Entities;
-    using HotshotLogistics.Domain.ValueObjects;
     using HotshotLogistics.Contracts.Services;
     using HotshotLogistics.Core.Enums;
-    using Microsoft.Extensions.Logging;
+    using HotshotLogistics.Domain.Entities;
+    using HotshotLogistics.Domain.ValueObjects;
     using Microsoft.Extensions.Caching.Distributed;
-    using System.Text.Json;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// Service for notification operations with multi-channel support.

@@ -7,15 +7,15 @@ namespace HotshotLogistics.Application.Services
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
-    using HotshotLogistics.Core.Enums;
-    using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Repositories;
     using HotshotLogistics.Contracts.Services;
+    using HotshotLogistics.Core.Enums;
+    using HotshotLogistics.Domain.Entities;
     using Microsoft.Extensions.Caching.Distributed;
     using Microsoft.Extensions.Logging;
-    using System.Text.Json;
 
     /// <summary>
     /// Service for location tracking operations.

@@ -1,19 +1,14 @@
 // <copyright file="MockMappingService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+using HotshotLogistics.Contracts.Services;
+using HotshotLogistics.Domain.DTOs;
+using HotshotLogistics.Domain.Entities;
+using HotshotLogistics.Domain.ValueObjects;
+using Microsoft.Extensions.Logging;
 
 namespace HotshotLogistics.Data.Services
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using HotshotLogistics.Contracts.Services;
-    using HotshotLogistics.Domain.DTOs;
-    using HotshotLogistics.Domain.Entities;
-    using HotshotLogistics.Domain.ValueObjects;
-    using Microsoft.Extensions.Logging;
-
     /// <summary>
     /// Mock implementation of the mapping service for development and testing.
     /// This service provides simulated geocoding and routing without requiring real API keys.

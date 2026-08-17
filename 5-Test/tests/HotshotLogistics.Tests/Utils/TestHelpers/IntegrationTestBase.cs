@@ -2,14 +2,10 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using Microsoft.AspNetCore.Mvc.Testing;
+
 namespace HotshotLogistics.Tests
 {
-    using System;
-    using System.Net.Http;
-    using HotshotLogistics.Api;
-    using Microsoft.AspNetCore.Mvc.Testing;
-    using Microsoft.Data.SqlClient;
-    using Xunit;
 
     /// <summary>
     /// Base class for integration tests that sets up the web application factory and provides a test client.

@@ -7,12 +7,11 @@ namespace HotshotLogistics.Application.Services
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Services;
+    using HotshotLogistics.Domain.Entities;
     using Microsoft.Extensions.Logging;
     using Microsoft.Graph;
     using Microsoft.Graph.Models;
-    using Microsoft.Identity.Web;
 
     /// <summary>
     /// Service for managing user profiles using Microsoft Graph API.

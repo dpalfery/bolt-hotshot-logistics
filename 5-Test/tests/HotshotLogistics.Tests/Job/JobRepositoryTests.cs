@@ -2,19 +2,9 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using FluentAssertions;
 using HotshotLogistics.Domain.Entities;
-using HotshotLogistics.Core.Enums;
-using HotshotLogistics.Domain.ValueObjects;
-using HotshotLogistics.Domain.DTOs;
-using HotshotLogistics.Contracts.Repositories;
-using HotshotLogistics.Data.Repositories;
 using Microsoft.Extensions.Configuration;
-using Xunit;
 
 namespace HotshotLogistics.Tests.Jobs
 {

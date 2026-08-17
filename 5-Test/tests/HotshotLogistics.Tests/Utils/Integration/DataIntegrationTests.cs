@@ -2,21 +2,13 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using HotshotLogistics.Application.Services;
+using HotshotLogistics.Domain.Entities;
+using Microsoft.Extensions.Logging;
+using Moq;
+
 namespace HotshotLogistics.Tests.Utils.Integration
 {
-    using HotshotLogistics.Domain.Entities;
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using HotshotLogistics.Application.Services;
-    using HotshotLogistics.Domain.ValueObjects;
-    using HotshotLogistics.Contracts.Repositories;
-    using HotshotLogistics.Contracts.Services;
-    using Microsoft.Extensions.Logging;
-    using Moq;
-    using Xunit;
-
     /// <summary>
     /// Unit/integration-style tests adapted to use repository interfaces and mocks (no EF).
     /// These tests validate service behaviour and repository interactions without relying on Entity Framework.

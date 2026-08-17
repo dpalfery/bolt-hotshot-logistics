@@ -1,11 +1,9 @@
 #pragma warning disable SA1649
-using FluentMigrator;
-
 namespace HotshotLogistics.Data.Migrations;
 
 /// <summary>
 /// Updates existing job statuses to align with the new simplified JobStatus enum:
-/// Pending, Assigned, EnRoute, Received
+/// Pending, Assigned, EnRoute, Received.
 /// </summary>
 [Migration(20251009060000)]
 public class UpdateJobStatusesToNewEnum : Migration
@@ -13,14 +11,14 @@ public class UpdateJobStatusesToNewEnum : Migration
     /// <summary>
     /// Applies the migration to update job statuses to new enum values.
     /// Maps old statuses to new ones:
-    /// - Pending (0) -> Pending (0)
-    /// - Assigned (1) -> Assigned (1)
-    /// - EnRoute (2) -> EnRoute (2)
-    /// - InProgress (3) -> EnRoute (2)
-    /// - InTransit (4) -> EnRoute (2)
-    /// - Completed (5) -> Received (3)
-    /// - Delivered (6) -> Received (3)
-    /// - Cancelled (7) -> Pending (0) [reset cancelled jobs to pending]
+    /// - Pending (0) -> Pending (0).
+    /// - Assigned (1) -> Assigned (1).
+    /// - EnRoute (2) -> EnRoute (2).
+    /// - InProgress (3) -> EnRoute (2).
+    /// - InTransit (4) -> EnRoute (2).
+    /// - Completed (5) -> Received (3).
+    /// - Delivered (6) -> Received (3).
+    /// - Cancelled (7) -> Pending (0) [reset cancelled jobs to pending].
     /// </summary>
     public override void Up()
     {

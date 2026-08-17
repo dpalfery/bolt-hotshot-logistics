@@ -2,9 +2,9 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 using HotshotLogistics.Application.Authorization;
-using HotshotLogistics.Domain.ValueObjects;
-using HotshotLogistics.Domain.DTOs;
 using HotshotLogistics.Contracts.Services;
+using HotshotLogistics.Domain.DTOs;
+using HotshotLogistics.Domain.ValueObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -112,7 +112,7 @@ namespace HotshotLogistics.Api.Controllers
         /// <summary>
         /// Creates a new driver.
         /// </summary>
-        /// <param name="driver">The driver data.</param>
+        /// <param name="driverDto">The driver data.</param>
         /// <returns>The created driver.</returns>
         [HttpPost]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]

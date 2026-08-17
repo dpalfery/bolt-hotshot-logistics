@@ -2,13 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Core.Repositories;
@@ -24,7 +18,7 @@ namespace HotshotLogistics.Data.Repositories
     /// <summary>
     /// Repository for managing Job entities using native ADO.NET.
     /// </summary>
-internal class JobRepository : BaseRepository<Job>, IJobRepository
+    internal class JobRepository : BaseRepository<Job>, IJobRepository
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="JobRepository"/> class.

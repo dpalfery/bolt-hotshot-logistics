@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using HotshotLogistics.Core.Enums;
 
 namespace HotshotLogistics.Contracts.Services

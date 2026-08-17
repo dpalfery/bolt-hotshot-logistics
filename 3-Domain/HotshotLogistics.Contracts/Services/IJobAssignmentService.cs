@@ -1,5 +1,5 @@
-using HotshotLogistics.Domain.DTOs;
 using HotshotLogistics.Core.Enums;
+using HotshotLogistics.Domain.DTOs;
 
 namespace HotshotLogistics.Contracts.Services;
 

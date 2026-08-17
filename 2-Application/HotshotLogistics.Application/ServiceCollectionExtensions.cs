@@ -1,10 +1,10 @@
+using FluentValidation;
 using HotshotLogistics.Application.Services;
 using HotshotLogistics.Application.Validators;
 using HotshotLogistics.Contracts.Factories;
 using HotshotLogistics.Contracts.Hubs;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Contracts.Services;
-using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

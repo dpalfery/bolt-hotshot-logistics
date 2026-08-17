@@ -2,19 +2,12 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Net;
+using System.Net.Http.Headers;
+using FluentAssertions;
+
 namespace HotshotLogistics.IntegrationTests
 {
-    using System.Net;
-    using System.Net.Http;
-    using System.Net.Http.Headers;
-    using System.Threading.Tasks;
-    using HotshotLogistics.Api;
-    using Microsoft.AspNetCore.Mvc.Testing;
-    using Xunit;
-    using FluentAssertions;
-    using HotshotLogistics.Domain.Entities;
-    using System.Text.Json;
-
     /// <summary>
     /// Integration tests for the TrackingController.
     /// </summary>

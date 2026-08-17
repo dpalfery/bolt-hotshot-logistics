@@ -1,21 +1,12 @@
 // <copyright file="BillingController.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using HotshotLogistics.Application.Services;
-using HotshotLogistics.Contracts.Repositories;
-using HotshotLogistics.Domain.Entities;
-using HotshotLogistics.Core.Enums;
-using HotshotLogistics.Contracts.Services;
-using Microsoft.AspNetCore.Authorization;
 using HotshotLogistics.Application.Authorization;
-using Microsoft.AspNetCore.Http;
+using HotshotLogistics.Contracts.Services;
+using HotshotLogistics.Core.Enums;
+using HotshotLogistics.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace HotshotLogistics.Api.Controllers
 {

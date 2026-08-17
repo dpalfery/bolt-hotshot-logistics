@@ -1,21 +1,16 @@
 namespace HotshotLogistics.Tests.TestHelpers
 {
-    using System;
-    using System.Collections.Generic;
-    using HotshotLogistics.Domain.Entities;
-    using HotshotLogistics.Domain.ValueObjects;
-
     /// <summary>
     /// Test builder to create concrete Customer instances for unit tests.
     /// Centralizes defaults so tests only change fields they care about.
     /// </summary>
     public class CustomerBuilder
     {
-        private readonly Customer customer;
+        private readonly HotshotLogistics.Domain.Entities.Customer customer;
 
         private CustomerBuilder()
         {
-            customer = new Customer
+            customer = new HotshotLogistics.Domain.Entities.Customer
             {
                 Id = Guid.NewGuid().ToString(),
                 CompanyName = "Test Company",
@@ -37,6 +32,6 @@ namespace HotshotLogistics.Tests.TestHelpers
         public CustomerBuilder WithContacts(IEnumerable<Contact> contacts) { customer.Contacts = new List<Contact>(contacts); return this; }
         public CustomerBuilder WithBillingAddress(Address address) { customer.BillingAddress = address; return this; }
 
-        public Customer Build() => customer;
+        public HotshotLogistics.Domain.Entities.Customer Build() => customer;
     }
 }

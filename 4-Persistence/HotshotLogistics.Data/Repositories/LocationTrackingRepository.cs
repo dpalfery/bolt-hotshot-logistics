@@ -2,11 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Core.Repositories;
 using HotshotLogistics.Domain.Entities;
@@ -19,7 +15,7 @@ namespace HotshotLogistics.Data.Repositories
     /// <summary>
     /// Repository implementation for location tracking operations using native ADO.NET.
     /// </summary>
-internal class LocationTrackingRepository : BaseRepository<LocationTracking>, ILocationTrackingRepository
+    internal class LocationTrackingRepository : BaseRepository<LocationTracking>, ILocationTrackingRepository
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="LocationTrackingRepository"/> class.

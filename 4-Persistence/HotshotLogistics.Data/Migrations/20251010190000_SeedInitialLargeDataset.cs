@@ -1,10 +1,7 @@
+#pragma warning disable SA1602
 #pragma warning disable SA1649
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using Bogus;
-using FluentMigrator;
 
 namespace HotshotLogistics.Data.Migrations;
 

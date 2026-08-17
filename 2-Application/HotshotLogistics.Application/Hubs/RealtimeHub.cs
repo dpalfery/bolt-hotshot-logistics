@@ -1,10 +1,10 @@
+using HotshotLogistics.Contracts.Hubs;
+using HotshotLogistics.Contracts.Services;
+using HotshotLogistics.Core.Enums;
+using HotshotLogistics.Domain.DTOs;
+using HotshotLogistics.Domain.Entities;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using HotshotLogistics.Contracts.Hubs;
-using HotshotLogistics.Domain.Entities;
-using HotshotLogistics.Core.Enums;
-using HotshotLogistics.Contracts.Services;
-using HotshotLogistics.Domain.DTOs;
 
 
 namespace HotshotLogistics.Application.Hubs;

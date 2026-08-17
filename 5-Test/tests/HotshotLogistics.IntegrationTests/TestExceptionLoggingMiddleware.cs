@@ -2,15 +2,12 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Text;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+
 namespace HotshotLogistics.IntegrationTests
 {
-    using System;
-    using System.IO;
-    using System.Text;
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.Logging;
-
     /// <summary>
     /// Middleware for capturing and logging detailed exception information during integration tests.
     /// </summary>

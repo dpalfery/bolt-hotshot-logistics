@@ -2,13 +2,10 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using HotshotLogistics.Domain.Entities;
+
 namespace HotshotLogistics.Tests.Jobs
 {
-
-    using System;
-    using HotshotLogistics.Domain.Entities;
-    using Xunit;
-
     /// <summary>
     /// Tests for the JobAssignment class.
     /// </summary>

@@ -2,18 +2,14 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using HotshotLogistics.Core.Extensions;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+
 namespace HotshotLogistics.IntegrationTests
 {
-    using HotshotLogistics.Api;
-    using HotshotLogistics.Core.Extensions;
-    using Microsoft.AspNetCore.Authentication;
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Mvc.Testing;
-    using Microsoft.AspNetCore.TestHost;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Logging;
-
     /// <summary>
     /// Custom web application factory for integration tests that configures test authentication.
     /// </summary>

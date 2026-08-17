@@ -1,14 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
-using HotshotLogistics.Domain.Entities;
 using System.Net.Http.Headers;
 using FluentAssertions;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Xunit;
-using System;
 using HotshotLogistics.Domain.DTOs;
-using HotshotLogistics.Api;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace HotshotLogistics.IntegrationTests

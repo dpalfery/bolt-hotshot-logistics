@@ -4,15 +4,14 @@
 
 namespace HotshotLogistics.Domain.ValueObjects
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
-   
+
 
     /// <summary>
     /// Represents details about cargo being transported.
     /// </summary>
-    public class CargoDetails 
+    public class CargoDetails
     {
         /// <summary>
         /// Gets or sets the description of the cargo.

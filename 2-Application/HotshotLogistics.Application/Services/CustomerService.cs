@@ -6,10 +6,10 @@ namespace HotshotLogistics.Application.Services
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Contracts.Repositories;
-    using HotshotLogistics.Domain.ValueObjects;
     using HotshotLogistics.Contracts.Services;
+    using HotshotLogistics.Domain.Entities;
+    using HotshotLogistics.Domain.ValueObjects;
 
     /// <summary>
     /// Service for managing customers.

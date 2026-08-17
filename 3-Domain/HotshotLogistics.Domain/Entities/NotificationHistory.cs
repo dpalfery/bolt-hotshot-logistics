@@ -1,4 +1,3 @@
-using System;
 using HotshotLogistics.Core.Enums;
 
 namespace HotshotLogistics.Domain.Entities;

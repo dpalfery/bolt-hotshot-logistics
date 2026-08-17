@@ -1,7 +1,4 @@
 #pragma warning disable SA1649
-using System.Collections.Generic;
-using FluentMigrator;
-using HotshotLogistics.Core.Enums;
 namespace HotshotLogistics.Data.Migrations;
 
 /// <summary>

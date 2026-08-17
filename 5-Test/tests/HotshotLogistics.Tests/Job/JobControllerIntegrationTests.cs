@@ -2,18 +2,14 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Net;
+using System.Net.Http.Headers;
+using System.Text.Json;
+using FluentAssertions;
+using Microsoft.AspNetCore.Mvc.Testing;
+
 namespace HotshotLogistics.Tests.Jobs
 {
-    using System.Net;
-    using System.Net.Http;
-    using System.Net.Http.Headers;
-    using System.Text.Json;
-    using System.Threading.Tasks;
-    using HotshotLogistics.Api;
-using HotshotLogistics.Domain.Entities;
-    using Microsoft.AspNetCore.Mvc.Testing;
-    using Xunit;
-    using FluentAssertions;
     /// <summary>
     /// Integration tests for the JobController.
     /// </summary>

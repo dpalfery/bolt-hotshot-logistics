@@ -2,16 +2,10 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Core.Repositories;
-using HotshotLogistics.Domain.DTOs;
 using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Domain.ValueObjects;
 using Microsoft.Data.SqlClient;
@@ -22,7 +16,7 @@ namespace HotshotLogistics.Data.Repositories
     /// <summary>
     /// Repository for managing Driver entities using native ADO.NET.
     /// </summary>
-internal class DriverRepository : BaseRepository<Driver>, IDriverRepository
+    internal class DriverRepository : BaseRepository<Driver>, IDriverRepository
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DriverRepository"/> class.

@@ -1,22 +1,16 @@
 // <copyright file="GoogleMapsService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+using System.Text.Json;
+using HotshotLogistics.Contracts.Services;
+using HotshotLogistics.Domain.DTOs;
+using HotshotLogistics.Domain.Entities;
+using HotshotLogistics.Domain.ValueObjects;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace HotshotLogistics.Data.Services
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Net.Http;
-    using System.Text.Json;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using HotshotLogistics.Contracts.Services;
-    using HotshotLogistics.Domain.DTOs;
-    using HotshotLogistics.Domain.Entities;
-    using HotshotLogistics.Domain.ValueObjects;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
-
     /// <summary>
     /// Google Maps implementation of the mapping service.
     /// </summary>

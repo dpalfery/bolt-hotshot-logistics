@@ -4,15 +4,11 @@
 
 namespace HotshotLogistics.Tests.Utils.Infrastructure
 {
-    using System;
-    using System.Collections.Generic;
     using System.Security.Claims;
     using System.Threading.Tasks;
     using FluentAssertions;
     using HotshotLogistics.Application.Authorization;
     using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
     using Moq;
     using Xunit;

@@ -1,7 +1,5 @@
 using FluentValidation.TestHelper;
 using HotshotLogistics.Application.Validators;
-using HotshotLogistics.Domain.DTOs;
-using HotshotLogistics.Domain.ValueObjects;
 
 namespace HotshotLogistics.Tests.Drivers
 {

@@ -4,29 +4,26 @@
 
 namespace HotshotLogistics.Api.Controllers
 {
-    using HotshotLogistics.Domain.Entities;
-    using HotshotLogistics.Domain.ValueObjects;
-    using HotshotLogistics.Core.Enums;
-    using HotshotLogistics.Domain.DTOs;
-    using HotshotLogistics.Contracts.Services;
-    using Microsoft.AspNetCore.Authorization;
-    using HotshotLogistics.Application.Authorization;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Logging;
-
     using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using HotshotLogistics.Application.Authorization;
+    using HotshotLogistics.Contracts.Services;
+    using HotshotLogistics.Core.Enums;
+    using HotshotLogistics.Domain.DTOs;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Logging;
 
 
     /// <summary>
     /// API controller for managing job assignments.
 	/// </summary>
  	[Authorize]
- 	[ApiController]
- 	[Route("api/[controller]")]
+    [ApiController]
+    [Route("api/[controller]")]
     public class JobAssignmentsController : ControllerBase
     {
         private readonly IJobAssignmentService assignmentService;

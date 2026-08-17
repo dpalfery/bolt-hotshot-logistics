@@ -1,6 +1,6 @@
+using HotshotLogistics.Application.Hubs;
 using HotshotLogistics.Contracts.Hubs;
 using Microsoft.AspNetCore.SignalR;
-using HotshotLogistics.Application.Hubs;
 
 namespace HotshotLogistics.Application.Services;
 

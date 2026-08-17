@@ -1,13 +1,5 @@
-namespace HotshotLogistics.Data.Repositories;
-#pragma warning disable SA1202 // False positive - public members are correctly ordered before protected members
-
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Core.Repositories;
@@ -16,6 +8,9 @@ using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Domain.ValueObjects;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+
+namespace HotshotLogistics.Data.Repositories;
+#pragma warning disable SA1202 // False positive - public members are correctly ordered before protected members
 
 /// <summary>
 /// Repository implementation for invoice operations using native ADO.NET.

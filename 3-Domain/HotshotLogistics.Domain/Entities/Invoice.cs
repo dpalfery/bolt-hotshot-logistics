@@ -2,15 +2,16 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using HotshotLogistics.Domain.ValueObjects;
 using HotshotLogistics.Core.Enums;
+using HotshotLogistics.Domain.ValueObjects;
+
 namespace HotshotLogistics.Domain.Entities
 {
 
     /// <summary>
     /// Represents an invoice in the system.
     /// </summary>
-    public class Invoice 
+    public class Invoice
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Invoice"/> class.

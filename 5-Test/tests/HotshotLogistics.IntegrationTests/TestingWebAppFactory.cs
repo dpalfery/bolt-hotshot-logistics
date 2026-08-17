@@ -1,7 +1,5 @@
-using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 public class TestingWebAppFactory<TProgram> : WebApplicationFactory<TProgram> where TProgram : class

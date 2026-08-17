@@ -5,7 +5,6 @@
 namespace HotshotLogistics.Application.Services
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using HotshotLogistics.Contracts.Factories;
     using HotshotLogistics.Contracts.Services;
@@ -18,9 +17,9 @@ namespace HotshotLogistics.Application.Services
     /// </summary>
     public class MappingServiceFactory : IMappingServiceFactory
     {
-        private readonly IConfiguration configuration;
-        private readonly ILogger<MappingServiceFactory> logger;
-        private readonly IServiceProvider serviceProvider;
+        private readonly IConfiguration _configuration;
+        private readonly ILogger<MappingServiceFactory> _logger;
+        private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MappingServiceFactory"/> class.
@@ -33,16 +32,16 @@ namespace HotshotLogistics.Application.Services
             ILogger<MappingServiceFactory> logger,
             IServiceProvider serviceProvider)
         {
-            this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            this._configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this._serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
         /// <inheritdoc/>
         public IMappingService CreateMappingService()
         {
-            var providerName = NormalizeProviderName(configuration["Mapping:Provider"] ?? "Mock");
-            var mappingServiceDict = serviceProvider.GetServices<IMappingService>()
+            var providerName = NormalizeProviderName(_configuration["Mapping:Provider"] ?? "Mock");
+            var mappingServiceDict = _serviceProvider.GetServices<IMappingService>()
                 .GroupBy(s => s.GetType())
                 .Select(g => g.First())
                 .ToDictionary(
@@ -51,11 +50,11 @@ namespace HotshotLogistics.Application.Services
 
             if (mappingServiceDict.TryGetValue(providerName, out var service))
             {
-                logger.LogInformation("Using mapping service: {ProviderName}", providerName);
+                _logger.LogInformation("Using mapping service: {ProviderName}", providerName);
                 return service;
             }
 
-            logger.LogError("Unsupported mapping provider: {ProviderName}. Falling back to Mock.", providerName);
+            _logger.LogError("Unsupported mapping provider: {ProviderName}. Falling back to Mock.", providerName);
             if (mappingServiceDict.TryGetValue("MockMapping", out var mockService) || mappingServiceDict.TryGetValue("Mock", out mockService))
             {
                 return mockService;

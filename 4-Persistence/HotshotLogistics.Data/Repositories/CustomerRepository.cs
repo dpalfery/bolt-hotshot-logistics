@@ -1,7 +1,4 @@
-namespace HotshotLogistics.Data.Repositories;
-
 using System.Data;
-using System.Linq;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Core.Repositories;
@@ -9,6 +6,8 @@ using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Domain.ValueObjects;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+
+namespace HotshotLogistics.Data.Repositories;
 
 /// <summary>
 /// Repository for customer data access using native ADO.NET.

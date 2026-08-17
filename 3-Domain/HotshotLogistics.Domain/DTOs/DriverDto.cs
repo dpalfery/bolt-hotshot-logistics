@@ -1,12 +1,10 @@
-using System;
-using System.Collections.Generic;
 using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Domain.ValueObjects;
 namespace HotshotLogistics.Domain.DTOs;
 /// <summary>
 /// Data Transfer Object for Driver information.
 /// </summary>
-public class DriverDto 
+public class DriverDto
 {
     public int Id { get; set; }
     public string FirstName { get; set; } = string.Empty;

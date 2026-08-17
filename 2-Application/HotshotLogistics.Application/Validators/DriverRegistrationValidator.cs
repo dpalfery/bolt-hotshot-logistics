@@ -1,5 +1,4 @@
 using FluentValidation;
-using HotshotLogistics.Domain.DTOs;
 using DomainDriverDto = HotshotLogistics.Domain.DTOs.DriverDto;
 
 namespace HotshotLogistics.Application.Validators;

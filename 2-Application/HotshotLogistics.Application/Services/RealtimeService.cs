@@ -1,10 +1,9 @@
-using Microsoft.Azure.SignalR.Management;
-using Microsoft.Extensions.Logging;
-using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Contracts.Hubs;
-using HotshotLogistics.Domain.Entities;
+using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Domain.DTOs;
+using HotshotLogistics.Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 
 namespace HotshotLogistics.Application.Services;

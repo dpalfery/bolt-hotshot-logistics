@@ -1,6 +1,5 @@
-using HotshotLogistics.Domain.Entities;
-using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Core.Enums;
+using HotshotLogistics.Domain.Entities;
 
 namespace HotshotLogistics.Domain.Repositories;
 

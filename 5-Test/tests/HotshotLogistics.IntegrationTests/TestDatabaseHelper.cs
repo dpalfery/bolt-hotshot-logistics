@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Configuration;
-using HotshotLogistics.Api;
 using HotshotLogistics.Core.Extensions;
 
 namespace HotshotLogistics.IntegrationTests

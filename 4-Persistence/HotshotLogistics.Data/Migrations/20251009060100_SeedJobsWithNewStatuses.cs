@@ -1,12 +1,9 @@
 #pragma warning disable SA1649
-using System.Collections.Generic;
-using FluentMigrator;
-
 namespace HotshotLogistics.Data.Migrations;
 
 /// <summary>
 /// Seeds the Jobs table with sample data ensuring at least 5 instances
-/// of each new JobStatus: Pending, Assigned, EnRoute, Received
+/// of each new JobStatus: Pending, Assigned, EnRoute, Received.
 /// </summary>
 [Migration(20251009060100)]
 public class SeedJobsWithNewStatuses : Migration

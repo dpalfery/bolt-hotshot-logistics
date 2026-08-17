@@ -2,10 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
 using HotshotLogistics.Domain.Entities;
-using HotshotLogistics.Domain.ValueObjects;
 namespace HotshotLogistics.Domain.DTOs
 {
 

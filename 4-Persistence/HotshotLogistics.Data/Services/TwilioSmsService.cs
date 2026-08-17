@@ -1,24 +1,17 @@
 // <copyright file="TwilioSmsService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+using HotshotLogistics.Contracts.Services;
+using HotshotLogistics.Domain.DTOs;
+using HotshotLogistics.Domain.ValueObjects;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+using Twilio.Types;
 
 namespace HotshotLogistics.Data.Services
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using HotshotLogistics.Contracts.Services;
-    using HotshotLogistics.Domain.DTOs;
-    using HotshotLogistics.Domain.Entities;
-    using HotshotLogistics.Domain.ValueObjects;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
-    using Twilio;
-    using Twilio.Rest.Api.V2010.Account;
-    using Twilio.Types;
-
     /// <summary>
     /// Service for sending SMS messages via Twilio.
     /// </summary>

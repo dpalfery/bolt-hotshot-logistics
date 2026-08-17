@@ -2,21 +2,12 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using FluentAssertions;
 using HotshotLogistics.Api.Controllers;
-using HotshotLogistics.Application.Services;
 using HotshotLogistics.Domain.Entities;
-using HotshotLogistics.Core.Enums;
-using HotshotLogistics.Contracts.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Xunit;
 
 namespace HotshotLogistics.Tests.Billing
 {

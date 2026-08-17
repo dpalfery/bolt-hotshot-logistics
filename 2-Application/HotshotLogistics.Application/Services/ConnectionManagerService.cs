@@ -1,9 +1,8 @@
+using System.Text.Json;
+using HotshotLogistics.Contracts.Hubs;
+using HotshotLogistics.Contracts.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using HotshotLogistics.Contracts.Services;
-using HotshotLogistics.Contracts.Hubs;
-using System.Text.Json;
-using System.Collections.Generic;
 
 namespace HotshotLogistics.Application.Services;
 

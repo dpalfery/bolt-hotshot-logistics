@@ -5,8 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
     <RollForward>LatestMajor</RollForward>
-    <NoWarn>xUnit1051</NoWarn>
+    <NoWarn>$(NoWarn);xUnit1051</NoWarn>
     <UserSecretsId>a562df9b-74fa-48b9-adfc-379cdc5868a7</UserSecretsId>
   </PropertyGroup>
 

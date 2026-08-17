@@ -2,14 +2,14 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Security.Claims;
+using System.Text.Encodings.Web;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
 namespace HotshotLogistics.IntegrationTests
 {
-    using System.Security.Claims;
-    using System.Text.Encodings.Web;
-    using Microsoft.AspNetCore.Authentication;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
-
     /// <summary>
     /// Authentication handler for integration tests that validates the "Test" authentication scheme.
     /// </summary>

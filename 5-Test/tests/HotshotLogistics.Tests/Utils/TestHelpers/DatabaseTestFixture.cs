@@ -12,7 +12,7 @@ public sealed class DatabaseTestFixture : IAsyncLifetime
     private static bool _initialized;
 
     /// <inheritdoc />
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (_initialized)
         {
@@ -47,7 +47,7 @@ public sealed class DatabaseTestFixture : IAsyncLifetime
     }
 
     /// <inheritdoc />
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
     private static async Task RunDbSetupCliAsync(string solutionRoot, string server, string database, string appUser, string appPassword, string saConnectionString)
     {

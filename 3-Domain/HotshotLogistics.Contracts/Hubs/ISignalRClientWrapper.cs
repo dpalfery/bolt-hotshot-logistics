@@ -1,5 +1,3 @@
-using HotshotLogistics.Domain.Entities;
-
 namespace HotshotLogistics.Contracts.Hubs;
 
 /// <summary>

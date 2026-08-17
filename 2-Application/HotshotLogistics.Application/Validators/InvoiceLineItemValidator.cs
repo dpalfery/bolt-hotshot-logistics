@@ -1,5 +1,4 @@
 using FluentValidation;
-using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Domain.ValueObjects;
 
 

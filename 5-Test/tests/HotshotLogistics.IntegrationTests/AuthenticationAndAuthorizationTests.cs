@@ -1,9 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
-using Xunit;
 using FluentAssertions;
-using HotshotLogistics.Api;
 
 namespace HotshotLogistics.IntegrationTests
 {

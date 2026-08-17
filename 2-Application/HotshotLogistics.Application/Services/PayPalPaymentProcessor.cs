@@ -2,11 +2,10 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Core.Enums;
-using HotshotLogistics.Domain.Entities;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace HotshotLogistics.Application.Services;
 

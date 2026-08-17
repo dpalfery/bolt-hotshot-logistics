@@ -3,7 +3,6 @@ using HotshotLogistics.Core.Extensions;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 // Parse command line arguments
 bool rerunAll = args.Any(arg => arg.Equals("--rerun-all", StringComparison.OrdinalIgnoreCase));

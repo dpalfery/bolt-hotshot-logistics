@@ -12,11 +12,9 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
     using System.Threading.Tasks;
     using FluentAssertions;
     using HotshotLogistics.Api.Middleware;
-    using HotshotLogistics.Domain.Entities;
     using HotshotLogistics.Core.Exceptions;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.TestHost;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;

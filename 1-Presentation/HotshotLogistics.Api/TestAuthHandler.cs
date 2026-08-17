@@ -24,6 +24,7 @@ namespace HotshotLogistics.Api
         /// <param name="options">The options.</param>
         /// <param name="logger">The logger.</param>
         /// <param name="encoder">The URL encoder.</param>
+        /// <param name="defaultRole">The default role.</param>
         public TestAuthHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,

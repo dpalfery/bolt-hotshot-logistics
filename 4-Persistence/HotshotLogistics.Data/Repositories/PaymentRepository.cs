@@ -2,10 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace HotshotLogistics.Data.Repositories;
-
 using System.Data;
-using System.Data.Common;
 using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Core.Repositories;
 using HotshotLogistics.Domain.Entities;
@@ -13,6 +10,8 @@ using HotshotLogistics.Domain.Repositories;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+
+namespace HotshotLogistics.Data.Repositories;
 
 /// <summary>
 /// Repository for payment operations.

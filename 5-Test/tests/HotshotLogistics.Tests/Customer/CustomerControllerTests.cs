@@ -2,24 +2,16 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace HotshotLogistics.Tests.Customer
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using FluentAssertions;
-    using HotshotLogistics.Api.Controllers;
-    using HotshotLogistics.Domain.Entities;
-    using HotshotLogistics.Contracts.Services;
+using FluentAssertions;
+using HotshotLogistics.Api.Controllers;
+using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Tests.TestHelpers;
-using HotshotLogistics.Domain.ValueObjects;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Logging;
-    using Moq;
-    using Xunit;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Moq;
 
+namespace HotshotLogistics.Tests.Customers
+{
     /// <summary>
     /// Integration tests for the CustomerController.
     /// </summary>

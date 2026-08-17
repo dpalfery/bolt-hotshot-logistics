@@ -1,23 +1,16 @@
 // <copyright file="SendGridEmailService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+using HotshotLogistics.Contracts.Services;
+using HotshotLogistics.Domain.DTOs;
+using HotshotLogistics.Domain.ValueObjects;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 
 namespace HotshotLogistics.Data.Services
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using HotshotLogistics.Contracts.Services;
-    using HotshotLogistics.Domain.DTOs;
-    using HotshotLogistics.Domain.Entities;
-    using HotshotLogistics.Domain.ValueObjects;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
-    using SendGrid;
-    using SendGrid.Helpers.Mail;
-
     /// <summary>
     /// Service for sending emails via SendGrid.
     /// </summary>

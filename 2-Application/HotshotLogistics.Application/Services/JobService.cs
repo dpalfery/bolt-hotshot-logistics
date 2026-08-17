@@ -1,20 +1,14 @@
 // <copyright file="JobService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Contracts.Services;
-using HotshotLogistics.Core.Exceptions;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
-using HotshotLogistics.Domain.DTOs;
-using HotshotLogistics.Domain.ValueObjects;
 using HotshotLogistics.Core.Enums;
+using HotshotLogistics.Core.Exceptions;
+using HotshotLogistics.Domain.DTOs;
+using HotshotLogistics.Domain.Entities;
+using HotshotLogistics.Domain.ValueObjects;
+using Microsoft.Extensions.Logging;
 
 namespace HotshotLogistics.Application.Services
 {

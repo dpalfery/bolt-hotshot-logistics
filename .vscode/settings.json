@@ -13,5 +13,9 @@
     "chat.mcp.assisted.nuget.enabled": true,
     "chat.promptFilesRecommendations": {},
     "chat.useChatSessionsForCloudButton": true,
-    "inlineChat.enableV2": true
+    "inlineChat.enableV2": true,
+    "resharper.solution.autoOpenSingleSolution": true,
+    "resharper.solution.autoOpenLastSolution": false,
+    "resharper.build.useResharperBuild": false,
+    "resharper.build.customDotnetCliPath": "/usr/local/bin/dotnet"
 }

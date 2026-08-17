@@ -1,29 +1,17 @@
 // <copyright file="JobControllerTests.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using FluentAssertions;
-using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Api.Controllers;
 using HotshotLogistics.Domain.Entities;
-using HotshotLogistics.Domain.ValueObjects;
-using HotshotLogistics.Contracts.Repositories;
-using HotshotLogistics.Contracts.Services;
 using FluentValidation;
 using FluentValidation.Results;
-using HotshotLogistics.Core.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Xunit;
-using HotshotLogistics.Domain.DTOs;
 namespace HotshotLogistics.Tests.Jobs
 {
-        /// <summary>
+    /// <summary>
     /// Integration tests for the JobController.
     /// </summary>
     public class JobControllerTests
@@ -535,7 +523,7 @@ namespace HotshotLogistics.Tests.Jobs
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
             var returnedJobs = okResult.Value.Should().BeAssignableTo<IEnumerable<Domain.Entities.Job>>().Subject;
             returnedJobs.Should().HaveCount(2);
-        }   
+        }
 
         /// <summary>
         /// Creates a test job for testing purposes.

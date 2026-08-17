@@ -1,15 +1,9 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Domain.ValueObjects;
-using Microsoft.AspNetCore.Mvc.Testing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Xunit;
-using System;
-using System.Net.Http.Headers;
-using HotshotLogistics.Core.Enums;
 
 namespace HotshotLogistics.IntegrationTests
 {

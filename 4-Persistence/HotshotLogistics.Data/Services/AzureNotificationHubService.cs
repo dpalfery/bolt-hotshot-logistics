@@ -2,16 +2,12 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Domain.ValueObjects;
 using Microsoft.Azure.NotificationHubs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 namespace HotshotLogistics.Data.Services
 {
     /// <summary>

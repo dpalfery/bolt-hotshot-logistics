@@ -1,15 +1,9 @@
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Core.Repositories;
 using HotshotLogistics.Domain.DTOs;
 using HotshotLogistics.Domain.Entities;
-using HotshotLogistics.Domain.ValueObjects;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 

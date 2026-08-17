@@ -1,11 +1,10 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using HotshotLogistics.Core.Enums;
+using HotshotLogistics.Domain.DTOs;
 using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Domain.ValueObjects;
-using HotshotLogistics.Core.Enums;
-using System.Net.Http.Headers;
-using HotshotLogistics.Contracts;
-using HotshotLogistics.Domain.DTOs;
 
 namespace HotshotLogistics.IntegrationTests
 {
@@ -121,12 +120,12 @@ namespace HotshotLogistics.IntegrationTests
                 var errorContent = await response.Content.ReadAsStringAsync();
                 var statusCode = response.StatusCode;
                 var reasonPhrase = response.ReasonPhrase;
-                
+
                 // Log detailed error information
                 Console.WriteLine($"Status Code: {statusCode}");
                 Console.WriteLine($"Reason Phrase: {reasonPhrase}");
                 Console.WriteLine($"Error Content: {errorContent}");
-                
+
                 // Try to get more details from headers
                 foreach (var header in response.Headers)
                 {
@@ -136,7 +135,7 @@ namespace HotshotLogistics.IntegrationTests
                 {
                     Console.WriteLine($"Content Header {contentHeader.Key}: {string.Join(", ", contentHeader.Value)}");
                 }
-                
+
                 throw new Exception($"Job create failed with status {response.StatusCode}: {errorContent}");
             }
 

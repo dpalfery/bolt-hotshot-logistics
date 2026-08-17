@@ -1,5 +1,3 @@
-using System;
-
 namespace HotshotLogistics.Domain.ValueObjects;
 
 /// <summary>

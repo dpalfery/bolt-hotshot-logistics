@@ -2,7 +2,6 @@ using System.Diagnostics;
 using FluentMigrator.Runner;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace HotshotLogistics.IntegrationTests;
 

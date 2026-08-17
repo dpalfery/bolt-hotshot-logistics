@@ -1,6 +1,5 @@
 namespace HotshotLogistics.Core.Repositories;
 
-using System.Data;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Microsoft.Data.SqlClient;
