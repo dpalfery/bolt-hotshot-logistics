@@ -58,7 +58,11 @@ Never investigate, inspect the codebase, or spawn discovery agents to work out a
 
 `architect` names skills, not agents. Mapping each required skill to the specialist agent that will perform it is **your** job (per §1) — never the architect's. Coordinate execution around this plan, but do not alter or replace its technical content.
 
+
+
 ## 3. Delegate — parallel worker pools
+
+Do not start implementing plans if the plan is in draft status.
 
 Work from the `architect` plan flows through a pipeline, not one task at a time. Model it as three moving parts:
 
