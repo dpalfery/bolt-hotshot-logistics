@@ -1,39 +1,27 @@
 ---
 id: documentation-index
-title: Documentation index
+title: Documentation
 doc-type: index
-status: current
-owner: unassigned
-last-reviewed: 2026-08-14
+status: draft
+owner: 'unassigned'
+last-reviewed: 2026-08-17
 ---
 
-# Documentation index
+# Documentation
 
-Canonical documentation for Hotshot Logistics. The [documentation standard](documentation-standard.md) is the contract. The [catalog](catalog.md) is the runnable inventory.
+The governed documentation corpus for this repository. Every document under
+`6-Docs/` conforms to [the documentation ontology](documentation-ontology.md) and is
+checked by `kyber-weave docs validate` and `kyber-weave docs drift`.
 
-## Start here
+| Directory | Holds |
+|---|---|
+| [standards/](standards/README.md) | Coding standards, one per technology |
+| [plans/](plans/README.md) | Sequenced implementation work |
+| [specs/](specs/README.md) | Upfront specification work |
+| [todo/](todo/README.md) | Work identified but not done now |
+| [adr/](adr/README.md) | Architecture decision records |
+| [rules/](rules/README.md) | Repository-wide rules |
+| [reference/](reference/README.md) | Reference material |
 
-- [Documentation standard](documentation-standard.md)
-- [Documentation ontology](documentation-ontology.md)
-- [Component catalog](catalog.md)
-- [Project overview](project-overview.md)
-- [Clean Architecture layout](architecture.md)
-- [Technology stack](technology-stack.md)
-- [Data access](data-access.md)
-- [Security guidelines](security.md)
-
-## Cataloged runnables
-
-| Component | Onboarding | Architecture |
-| --- | --- | --- |
-| Api | [onboarding](api/onboarding.md) | [architecture](api/architecture.md) |
-| admin-dashboard | [onboarding](admin-dashboard/onboarding.md) | [architecture](admin-dashboard/architecture.md) |
-| DbSetup | [onboarding](dbsetup/onboarding.md) | [architecture](dbsetup/architecture.md) |
-
-## Rules
-
-Engineering rules live under [rules/](rules/file-organization.md). Agents must follow them; see the root `AGENTS.md`.
-
-## Deployment
-
-Terraform and compose files: [7-Deployment README](../7-Deployment/README.md).
+[`catalog.md`](catalog.md) is the authoritative vocabulary for the `component` and
+`owner` keys. Start there when adding a document for something new.

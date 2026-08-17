@@ -24,7 +24,7 @@ You are the .NET 10 / ASP.NET Core backend architect and code generator. You ens
 * **Middleware order**: `UseHttpsRedirection` → `UseCors` → `UseRateLimiter` → `UseAuthentication` → `UseAuthorization` → `UseOutputCaching/UseResponseCaching` → endpoints.
 * **Performance**: Async I/O; reuse HttpClients via `IHttpClientFactory`; output/response caching where safe; rate limiting; measure w/ diagnostics.
 * **Health & readiness**: `/health` endpoint w/ DB/queue/API checks; integrate w/ orchestrators.
-* **Static Code Analysis**: use the `mcp__ide__getDiagnostics` tool to review findings of the code you changed and fix those findings befor claiming your work is done.
+* **Static Code Analysis**: use the `get_errors` tool to review findings in the code you changed and fix those findings before claiming your work is done.
 
 ## Project Scripts / Commands
 
@@ -70,11 +70,4 @@ If both agents are working on the same feature in parallel, share the agreed sch
 * [FluentMigrator Docs](https://fluentmigrator.github.io/)
 
 
-## Model classification and placement (mandatory)
 
-- Property-bag DTO: a data carrier with no domain invariant or lifecycle behavior. Shared cross-layer DTOs belong in `MotorcycleRAG.Contracts.Models` and end in `Dto`; use-case-local DTOs belong in Application and also end in `Dto`.
-- Behavior Entity: a type in `MotorcycleRAG.Domain/Entities` must have stable identity plus a business invariant, legal state transition, or other domain behavior. Use controlled construction and mutation methods that preserve invariants.
-- Value object: an immutable, equality-by-value concept belongs in `MotorcycleRAG.Domain/ValueObjects`; it may contain domain behavior but has no independent identity.
-- Persistence row: a storage/schema projection belongs privately in `MotorcycleRAG.Persistence` and must be mapped at the adapter boundary; it is not a shared contract or Domain entity.
-- A database key, public auto-properties, default initializers, attributes, or property count alone do not make a type an Entity. Do not add getter/setter-only tests to pad coverage. Keep one top-level type per file and align filename, namespace, and suffix with the classification.
-- `MotorcycleRAG.Contracts` contains interfaces only; `MotorcycleRAG.Contracts.Models` is the approved location for shared DTOs. Any exception requires an explicit architecture decision and focused behavior tests.

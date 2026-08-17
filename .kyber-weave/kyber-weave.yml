@@ -2,6 +2,17 @@
 # Reference: 6-Docs/documentation-ontology.md
 ontology:
   docs-root: '6-Docs'
+  technologies:                                                                                                                                     
+    - azure                                                                                                                                         
+    - csharp                                                                                                                                        
+    - data-access-layer                                                                                                                             
+    - github-actions                                                                                                                                
+    - maui                                                                                                                                          
+    - pulumi                                                                                                                                        
+    - python                                                                                                                                        
+    - react                                                                                                                                         
+    - sql                                                                                                                                           
+    - test
 
   # Product defaults exclude five DevOps paths from the repository the ontology
   # was first built for. An empty list clears them.

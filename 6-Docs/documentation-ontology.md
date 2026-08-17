@@ -2,9 +2,9 @@
 id: documentation-ontology
 title: The documentation ontology
 doc-type: reference
-status: current
+status: draft
 owner: 'unassigned'
-last-reviewed: 2026-08-14
+last-reviewed: 2026-08-17
 ---
 
 # The documentation ontology
@@ -20,16 +20,16 @@ parsing.
 
 ```yaml
 ---
-id: api/architecture
-title: Hotshot Logistics API
+id: payments/architecture
+title: Payments service
 doc-type: architecture
-status: draft
-component: Api
-source-root: 1-Presentation/HotshotLogistics.Api
-owner: unassigned
-last-reviewed: 2026-08-14
+status: current
+component: Payments
+source-root: src/Payments
+owner: payments-team
+last-reviewed: 2026-08-17
 code-refs:
-  - JobController
+  - PaymentProcessor
 ---
 ```
 
@@ -41,6 +41,7 @@ code-refs:
 | `status` | Currency of the document, from the closed set below. |
 | `component` | The unit of the system this covers. Must exist in `catalog.md`. |
 | `source-root` | Repository-relative path to that component's source. Must exist. |
+| `technology` | The stack a coding standard governs. Declared in configuration; matches its folder. |
 | `owner` | Who answers for it. Must exist in `catalog.md`. |
 | `last-reviewed` | ISO `yyyy-MM-dd`. Any other format is an error. |
 | `code-refs` | Symbols this document formally claims. Resolved against the code graph. |
@@ -51,9 +52,13 @@ code-refs:
 ## Closed vocabularies
 
 **doc-type** — `architecture`, `onboarding`, `requirements`, `adr`, `plan`, `spec`,
-`runbook`, `reference`, `rule`, `governance`, `index`
+`todo`, `runbook`, `reference`, `rule`, `governance`, `index`, `coding-standard`
 
 **status** — `current`, `draft`, `needs-review`, `superseded`
+
+**technology** — whatever `ontology.technologies` declares. Empty until this
+repository says which stacks it writes code in, which is also what creates each
+standard's folder and its registry property.
 
 A value outside these sets is an error. An open vocabulary is not a vocabulary — it
 is a text field that drifts until two documents of the same kind carry different
@@ -67,9 +72,13 @@ all.
 
 | Doc type | Additionally required |
 |---|---|
-| `architecture`, `requirements`, `runbook`, `plan`, `spec` | `component` |
+| `architecture`, `requirements`, `runbook`, `plan`, `spec`, `todo` | `component` |
 | `onboarding` | `component`, `source-root` |
+| `coding-standard` | `technology` |
 | `adr`, `reference`, `rule`, `governance`, `index` | — |
+
+A standard takes no `component`: a language's standard governs code in every component
+the catalog lists, so naming one of them would be a false claim about its reach.
 
 ## The pairing invariant
 
@@ -81,7 +90,7 @@ detection possible.
 ## code-refs are claims, not mentions
 
 Listing a symbol asserts the document is answerable for it. A document that merely
-discusses `JobController` in prose has not claimed it; one listing it in
+discusses `PaymentProcessor` in prose has not claimed it; one listing it in
 `code-refs` has, and will fail `KW-DOC-DRIFT-001` when the symbol is renamed.
 
 That distinction is the point of the ontology. After a rename, prose still reads

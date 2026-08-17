@@ -159,7 +159,7 @@ heading — never hardcode it, never assume it.
 
 1. **Read the root `AGENTS.md`** and look for the heading
    `## Repository Configuration & Paths Registry (Config Reg)`.
-2. **If it exists, its declared values are authoritative.** Use `<docs-root>`,
+2. **If it exists, its declared values are authoritative.** Use `docs-root`,
    `<documentation-index>`, and `<documentation-ontology>` as `<docs-root>` and its fixed
    files everywhere in this skill.
 3. **If it does not exist, ask the user for the documentation root.** It is a
