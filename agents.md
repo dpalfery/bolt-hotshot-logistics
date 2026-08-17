@@ -38,36 +38,6 @@ In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the re
 If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
 <!-- CODEGRAPH_END -->
 
-## Repository Configuration & Paths Registry (Config Reg)
-
-Agents and skills should look up the following properties dynamically to find the relevant documentation and references for this repository:
-
-- **<docs-root>**: `6 - Docs`
-- **<documentation-index>**: `6-Docs/README.md`
-- **<documentation-standard>**: `6-Docs/documentation-standard.md`
-- **<documentation-ontology>**: `6-Docs/documentation-ontology.md`
-- **<governance-framework-kyber-weave>**: external product [dpalfery/kyber-weave](https://github.com/dpalfery/kyber-weave) — install CLI/MCP via GitHub. host overrides: `.kyber-weave/kyber-weave.yml`; reference: `6-Docs/reference/kyber-weave.md`
-- **<skill-validation-script>**: `7-Deployment/scripts/kyber-weave-validate.sh`
-- **<agent-scratchpad>**: `.agent-scratch-pad/`
-- **<clean-architecture-rules>**: `6-Docs/rules/architecture-general.md`
-- **<component-catalog>**: `6-Docs/catalog.md`
-- **<plan-index>**: `6-Docs/plans/README.md`
-- **<specification-index>**: `6-Docs/specs/README.md`
-- **<architecture-decision-records>**: `6-Docs/adr/` (archived: `6-Docs/archive/adrs/`)
-- **<developer-setup-standard>**: `6-Docs/devops/developer-setup-standard.md`
-- **<msbuild-modernization>**: `6-Docs/devops/msbuild-modernization.md`
-- **<msbuild-anti-patterns>**: `6-Docs/devops/msbuild-antipatterns.md`
-- **<directory-build-organization>**: `6-Docs/devops/directory-build-organization.md`
-- **<build-performance>**: `6-Docs/devops/build-performance.md`
-- **<incremental-build>**: `6-Docs/devops/incremental-build.md`
-- **<test-coverage-config>**: `5-Test/scripts/coverage-config.json`
-- **<test-runner-scripts>**: `5-Test/scripts/run-comprehensive-tests.sh` (macOS/Linux), `5-Test/scripts/run-comprehensive-tests.ps1` (Windows)
-- **<configuration-policy>**: `6-Docs/reference/environment-variables.md`
-- **<auth-design>**: `6-Docs/reference/auth-design.md`
-- **<azure-naming-standard>**: `6-Docs/reference/azure-naming-standards.md`
-
-Skills and other portable instruction files SHALL reference these paths by the property name above (e.g. "the path declared as **<test-coverage-config>** in the repository root `AGENTS.md`") rather than embedding a relative link that traverses out of the skill's own directory (e.g. `../../5-Test/...`). This keeps skill files self-contained and correct if repository layout changes — only this table needs updating.
-
 <!-- KYBER_WEAVE_CONFIG_REG_START -->
 ## Repository Configuration & Paths Registry (Config Reg)
 
