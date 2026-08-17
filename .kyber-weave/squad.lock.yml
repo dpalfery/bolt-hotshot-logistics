@@ -1,7 +1,7 @@
 schema: kyber-squad.lock/v1
-squad-version: 0.1.7-rc.2
-cli-version: 0.1.7-rc.2
-mcp-version: 0.1.7-rc.2
+squad-version: 0.1.7-rc.4
+cli-version: 0.1.7-rc.4
+mcp-version: 0.1.7-rc.4
 bundle: full
 targets:
   - copilot

@@ -2,7 +2,7 @@
   "schema": "kyber-squad.receipt/v1",
   "scope": "project",
   "targetRoot": ".",
-  "installedAtUtc": "2026-08-17T04:12:56.4835810Z",
+  "installedAtUtc": "2026-08-17T06:05:41.7920100Z",
   "degradations": [
     {
       "target": "copilot",
@@ -18,121 +18,121 @@
   "files": [
     {
       "relativePath": ".github/agents/architect.agent.md",
-      "sha256": "63bc427f29dc427b6a460aee9fbfcaed3a14c93b8d84f86eb80f492bd5f2081d",
+      "sha256": "76c876ebd69c20d36f61c586d8f033a4bcedcbdd3f2e4253920d358d1aae2f4b",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/architect-v3.agent.md",
-      "sha256": "68d82e2e4745620772677fb38bf734fffc5257a44efd1b8004cc17e0b9a134b2",
+      "sha256": "e3339efc4c1f747b2d8c12d08ec9ade7ef06d612bcbddf24e95d37cd24063189",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/azure-reader.agent.md",
-      "sha256": "1bf073e5ac5a6140c1da2730b4c3ab49331fa7ba97f4a8467d8c43d5e34f0387",
+      "sha256": "44c9933aa5f67f8dfdc31a362b5171d568a36eadad7ae81d6ca2975d1c94af0c",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/bug-crusher-investigator.agent.md",
-      "sha256": "c61a66cbed5e5e21a5786f02efc2e18a3cc264bde25f01f73da59b90507db589",
+      "sha256": "0ef86a0321e61a103c82d90d9c1f39331c39a989c8d705df3bd4d4c9d3faf676",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/code-reviewer.agent.md",
-      "sha256": "86a7cea6c744f183f41a18304b6688c22c0ee9f548c63a83ddb0938d46f740e7",
+      "sha256": "80db9c7101f76822bdf61c886f037596a7eef88131e531f51b0e81a587b1e99d",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/conductor.agent.md",
-      "sha256": "4fc82d34c5bca3a7605a376154fa76a438f2921da97be407923f7a231ad1c3aa",
+      "sha256": "d96efdd4fa8d0a9408aaa0497316e46924762a43d8fbd492ac82d9096caf5c5b",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/conductor-v3.agent.md",
-      "sha256": "26eff56cf0db9c41b5f058be485a9cb5dba0989c9eabede9683a7654e6c79738",
+      "sha256": "3bf40b969063b667a5fcfd3440e91703f5800659c71f08e6f5d8f14872af005c",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/csharp-dev.agent.md",
-      "sha256": "5fa7b0827b4d22cf5e68f99c9e116b32c90560e07f70df777c90e767fc2a95a2",
+      "sha256": "8b324273f346d45e4a585f8f4510a5e63e2d32a17d32091ccc9ef2b561308643",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/dal-dev.agent.md",
-      "sha256": "ea90eacf576a55a6a0410978a47a63f59f2a14ad4a8d7f3bcfb485c7bf2dec90",
+      "sha256": "4e6f954c57a498c8b29877f01906f0025e5153e2b021aa5e4c7d7dee13f32cb1",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/docs-dev.agent.md",
-      "sha256": "b0f0744c9560078b7cc720387250b982c8e9f774d224632e26a0cefab3c37b76",
+      "sha256": "41fc8bc00b5fda406c7bd6d2bcc02a669fc537262399e653e4cace3bf101a978",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/github-devops.agent.md",
-      "sha256": "f4ca798a8ef6127969071094396f10cb6d057f5f7a333478dc0e3bac86a4de8c",
+      "sha256": "baf51e14bcc03f775f63cd15cc9094327561ed8e5ba0f394ba5e8158deff41ff",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/maui-dev.agent.md",
-      "sha256": "08a6a17df0c370abaea8874a2d29b2f1a886209ffd860499074a0b5b05173153",
+      "sha256": "61d41c8809ccd47fdf09d7425136460bc03ae4d997932a6a716a98d2a629cd3e",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/product-owner.agent.md",
-      "sha256": "24ff0a1166586e112fa096f062014d82e9e813fcf921a41f0e579a12995bc53b",
+      "sha256": "cff89f78deef854cf4e54fea87660e4c1616f80594df9eed7c4ca1daf1828fd5",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/pulumi-dev.agent.md",
-      "sha256": "621989e10159a0c921bc5a28be1aff1e44320e5f137af81a5dd5c27099684fd2",
+      "sha256": "766606dafb617a33cf0a6ff1651c12234663e302b5165f607da266f835c9307d",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/python-dev.agent.md",
-      "sha256": "5150c7bccb2bd386fa16dedc3961323e1919d7b72eba2322419d9ec9a8978a0b",
+      "sha256": "a810fa4cc91728a54218585b61e74b03f220d1d1c97e2b82332ac117d4beaf73",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/react-dev.agent.md",
-      "sha256": "293f2f4c15dbda5a915cf34c15988ed8c2195e506481d9019a7b8be9af890e38",
+      "sha256": "9e1204c4cec23b80958b5b4056b221bc011fcf23e9dff662df3d4b3f8183890f",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/research-agent.agent.md",
-      "sha256": "23705bbe49be09ae67a09edf63e474173c3b98fe003064183a1ad4d26c72cca5",
+      "sha256": "90c3e0db4f786da8988dde1b4265fac1660641ff012fe168623d3430ea2c3589",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/sql-database-architect.agent.md",
-      "sha256": "724c3691b34d1bf11fb85c3d36bc537175e1a63da97785a4a90e6dcdbe6eda58",
+      "sha256": "61aa3b83475300f51a00299bdb4118c8d20f5f2822f06f51f77611856d94f726",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/tauri-dev.agent.md",
-      "sha256": "f3e6b53246cdb2bcc80c49d46d3022393b07965f1a08292da41f2bfc9af80512",
+      "sha256": "e6eb423e163cd330dcac86eafa2814bc1198144858a9a1b99b728a1ef9cedcff",
       "target": "copilot",
       "adopted": false
     },
     {
       "relativePath": ".github/agents/test-dev.agent.md",
-      "sha256": "175ea85ab56c4660a4a0596553181df065e8a0941d0844b2a92a2d4f0b45ee74",
+      "sha256": "7fe7cfe80e840749d24156206990fcf65ecfe905dae2866d26f40c16e925e064",
       "target": "copilot",
       "adopted": false
     },
@@ -168,7 +168,7 @@
     },
     {
       "relativePath": ".github/skills/code-review/SKILL.md",
-      "sha256": "53c285d23731cf24bacd2efdd77b5ec85f55e5341fa2d7ae59443b54e74a4f6a",
+      "sha256": "70257d4c4fc5f7acdb4ccf4a43e4a8b379e1b3d8604347d9f6a929a006a89ac3",
       "target": "copilot",
       "adopted": false
     },

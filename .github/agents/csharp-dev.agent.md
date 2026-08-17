@@ -2,12 +2,7 @@
 name: csharp-dev
 description: '.NET/C# backend implementation: ASP.NET Core controllers, service classes, dependency injection, middleware. Use for backend .cs changes. Does not handle data-access/persistence, database migrations, CI/CD, tests, or client UI.'
 model: GPT-5.6 Luna (copilot)
-tools:
-- execute
-- read
-- edit
-- search
-- todo
+tools: [vscode, execute, read, 'codegraph/*', 'kyber-weave/*', 'context7/*', edit, search, todo]
 user-invocable: false
 metadata:
   capability-profile: worker

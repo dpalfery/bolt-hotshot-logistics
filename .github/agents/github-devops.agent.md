@@ -1,7 +1,8 @@
 ---
 name: github-devops
 description: 'CI/CD ownership: GitHub Actions workflows, Docker build configuration, environment secrets, and branch protection. Use for build, pipeline, or deployment configuration. Does not provision cloud infrastructure or investigate live cloud resource state.'
-model: GPT-5.6 Luna (copilot)
+model: Grok 4.5 (copilot)
+tools: [vscode, execute, read, 'codegraph/*', 'kyber-weave/*', 'context7/*', edit, search, web, todo]
 user-invocable: false
 metadata:
   capability-profile: publishing-worker
@@ -64,7 +65,7 @@ You do **not** own:
 
 - **With `pulumi-dev`**: consume stack outputs as workflow inputs. Agree on output names (e.g. `container-registry-login-server`, `api-app-name`) before either agent writes code.
 - **With `test-dev`**: the `dotnet test` step in CI must match the test command `test-dev` validates locally. Confirm the test filter expression and output format before wiring it into the workflow.
-- **With `dotnet-dev` / `python-dev`**: confirm the build command, SDK version, and any required environment variables before wiring the build step.
+- **With `csharp-dev` / `python-dev`**: confirm the build command, SDK version, and any required environment variables before wiring the build step.
 
 ## Completion digest
 

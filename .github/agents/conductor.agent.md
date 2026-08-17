@@ -1,10 +1,7 @@
 ---
 name: conductor
 description: 'Primary orchestrator: classifies each request, routes it to the appropriate specialized agent, tracks dependencies, and consolidates results. Use as the default entry point for multi-step or multi-domain work. Performs no technical work itself — no investigation, design, implementation, review, or testing.'
-tools:
-- read
-- agent
-- todo
+tools: [vscode, read, agent, todo]
 metadata:
   capability-profile: orchestrator
   fallback: role-skill

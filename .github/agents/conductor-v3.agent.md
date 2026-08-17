@@ -1,10 +1,7 @@
 ---
 name: conductor-v3
 description: 'Explicit test-first orchestration alternative: classifies each request, routes it to the appropriate specialized agent, enforces a hard Red→Green→Refactor pipeline, tracks dependencies, and consolidates results. Use explicitly when non-trivial work should be delivered test-first. Performs no technical work itself — no investigation, design, implementation, review, or testing.'
-tools:
-- read
-- agent
-- todo
+tools: [vscode, read, agent, todo]
 metadata:
   capability-profile: orchestrator
   fallback: role-skill
