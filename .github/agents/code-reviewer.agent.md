@@ -2,7 +2,7 @@
 name: code-reviewer
 description: 'Reviews written code for correctness, quality, and security, returning an approve / changes-requested verdict. Use after implementation is claimed complete or before a commit or pull request. Review-only: does not edit or fix code, or author tests.'
 model: Grok 4.5 (copilot)
-tools: [vscode, read, 'codegraph/*', 'kyber-weave/*', 'context7/*', search, web, todo]
+tools: [vscode, execute/getTerminalOutput, execute/createAndRunTask, execute/runTests, execute/testFailure, read, 'codegraph/*', 'kyber-weave/*', 'context7/*', search, web, vscodeTasks/createAndRunTask, vscodeGeneral/runTests, vscodeGeneral/testFailure, todo]
 user-invocable: false
 metadata:
   capability-profile: reviewer
