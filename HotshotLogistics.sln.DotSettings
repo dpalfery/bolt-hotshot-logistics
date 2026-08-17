@@ -3,4 +3,8 @@
                         xmlns:s="clr-namespace:System;assembly=mscorlib"
                         xmlns:ss="clr-namespace:JetBrains.Application.Settings.Storage.Shared;assembly=JetBrains.Platform.ComponentModel">
     <s:Boolean x:Key="/Default/UnitTesting/UseVsTestRunner/@EntryValue">true</s:Boolean>
+    <s:String x:Key="/Default/UnitTesting/PlatformType/@EntryValue">Arm64</s:String>
+    <s:String x:Key="/Default/UnitTesting/DefaultUnitTestSessionSettings/PlatformType/@EntryValue">Arm64</s:String>
+    <s:String x:Key="/Default/UnitTestingSettings/PlatformType/@EntryValue">Arm64</s:String>
+    <s:String x:Key="/Default/UnitTestingSettings/DefaultUnitTestSessionSettings/PlatformType/@EntryValue">Arm64</s:String>
 </wpf:ResourceDictionary>

@@ -24,5 +24,6 @@
       (CS1591) stay suppressed until a full documentation pass is intentional.
     -->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <PlatformTarget Condition="$([MSBuild]::IsOSPlatform('OSX'))">ARM64</PlatformTarget>
   </PropertyGroup>
 </Project>
