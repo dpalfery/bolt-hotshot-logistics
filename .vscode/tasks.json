@@ -89,6 +89,120 @@
 			"command": "host start",
 			"isBackground": true,
 			"problemMatcher": "$func-dotnet-watch"
+		},
+		{
+			"label": "build-data-t2-review",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"4-Persistence/HotshotLogistics.Data/HotshotLogistics.Data.csproj",
+				"-c",
+				"Debug",
+				"/p:BuildProjectReferences=false",
+				"--verbosity",
+				"minimal"
+			],
+			"group": "build"
+		},
+		{
+			"label": "build-application-t3-review",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"2-Application/HotshotLogistics.Application/HotshotLogistics.Application.csproj",
+				"-c",
+				"Debug",
+				"--verbosity",
+				"minimal"
+			],
+			"group": "build"
+		},
+		{
+			"label": "build-api-t4-review",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj",
+				"-c",
+				"Debug",
+				"--verbosity",
+				"minimal",
+				"/p:WarningLevel=4"
+			],
+			"group": "build"
+		},
+		{
+			"label": "test-t10-job-service",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				"5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj",
+				"--filter",
+				"FullyQualifiedName~JobServiceGetJobStatusSummaryTests",
+				"-c",
+				"Debug",
+				"--verbosity",
+				"minimal",
+				"/p:TreatWarningsAsErrors=false"
+			],
+			"group": "test"
+		},
+		{
+			"label": "tsc-admin-dashboard-t6",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"exec",
+				"tsc",
+				"--",
+				"--noEmit"
+			],
+			"group": "build"
+		},
+		{
+			"label": "tsc-t6-admin-dashboard",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"exec",
+				"tsc",
+				"--",
+				"--noEmit"
+			],
+			"group": "build"
+		},
+		{
+			"label": "test-t11-job-status-summary-integration",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				"5-Test/tests/HotshotLogistics.IntegrationTests/HotshotLogistics.IntegrationTests.csproj",
+				"--filter",
+				"FullyQualifiedName~GetJobStatusSummary_WithSeededStatusDistribution_ReturnsMatchingCounts",
+				"-c",
+				"Debug",
+				"--verbosity",
+				"minimal",
+				"/p:TreatWarningsAsErrors=false"
+			],
+			"group": "test"
+		},
+		{
+			"label": "tsc-t6-cd-admin",
+			"type": "shell",
+			"command": "cd",
+			"args": [
+				"1-Presentation/admin-dashboard",
+				"&&",
+				"./node_modules/.bin/tsc",
+				"--noEmit"
+			],
+			"group": "build"
 		}
 	]
 }

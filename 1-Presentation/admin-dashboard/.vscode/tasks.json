@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "tsc-admin-dashboard-t6-cwd",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"exec",
+				"tsc",
+				"--",
+				"--noEmit"
+			],
+			"group": "build"
+		}
+	]
+}
