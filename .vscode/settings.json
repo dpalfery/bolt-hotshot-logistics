@@ -17,5 +17,6 @@
     "resharper.solution.autoOpenSingleSolution": true,
     "resharper.solution.autoOpenLastSolution": false,
     "resharper.build.useResharperBuild": false,
-    "resharper.build.customDotnetCliPath": "/usr/local/bin/dotnet"
+    "resharper.build.customDotnetCliPath": "/usr/local/bin/dotnet",
+    "chat.subagents.allowInvocationsFromSubagents": true
 }

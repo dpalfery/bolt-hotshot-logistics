@@ -1,7 +1,7 @@
 ---
 name: azure-reader
 description: Read-only investigation of live Azure resource state via Azure MCP tools; gathers configuration and runtime facts for debugging, planning, and architecture. Use to learn how Azure is configured or behaving. Does not create or modify infrastructure, or run deployments.
-model: Grok 4.5 (copilot)
+model: GPT-5.6 Luna (copilot)
 tools: [vscode, read, 'codegraph/*', 'kyber-weave/*', 'context7/*', search, web, todo]
 user-invocable: false
 metadata:

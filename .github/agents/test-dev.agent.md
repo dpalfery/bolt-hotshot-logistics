@@ -1,7 +1,7 @@
 ---
 name: test-dev
 description: Authors and maintains the automated test suite — unit, integration, and end-to-end — for .NET (xUnit), Python (pytest), and frontend (Vitest/Playwright). Use whenever tests need to be written or updated. Does not implement application logic; only tests it.
-model: Grok 4.5 (copilot)
+model: GPT-5.6 Luna (copilot)
 tools: [vscode, execute, read, browser, edit, search, 'codegraph/*', 'kyber-weave/*', 'context7/*', todo]
 user-invocable: false
 metadata:
