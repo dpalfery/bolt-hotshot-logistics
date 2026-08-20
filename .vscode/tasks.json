@@ -954,6 +954,248 @@
 			"type": "shell",
 			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && ls 6-Docs/standards/test 2>/dev/null; rg -n 'coverage|threshold|fileLinePercent' AGENTS.md 6-Docs/standards/test 6-Docs/README.md 2>/dev/null | head -40; ls scripts 7-Deployment 2>/dev/null | head -20; find . -name '*comprehensive*test*' -o -name '*coverage*' 2>/dev/null | rg -v 'node_modules|bin/|obj/|TestResults' | head -30",
 			"group": "test"
+		},
+		{
+			"label": "cr-t1-build-domain-contracts",
+			"type": "shell",
+			"command": "dotnet build 3-Domain/HotshotLogistics.Domain/HotshotLogistics.Domain.csproj -c Release --verbosity minimal && dotnet build 3-Domain/HotshotLogistics.Contracts/HotshotLogistics.Contracts.csproj -c Release --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "t4-review-tsc-admin",
+			"type": "shell",
+			"command": "npm exec tsc -- --noEmit",
+			"args": [],
+			"group": "test"
+		},
+		{
+			"label": "cr-t3-build-api",
+			"type": "shell",
+			"command": "dotnet build 1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj -c Release --no-incremental --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "cr-t1-prove-newtonsoft-camelcase",
+			"type": "shell",
+			"command": "python3 - <<'PY'\nimport pathlib,re\n# Prove AddNewtonsoftJson default casing from installed package source if present, else from known MVC behavior via reflection on built dll\nimport subprocess, sys, textwrap, tempfile, os\ncode = r'''\nusing System;\nusing System.Reflection;\nusing Microsoft.AspNetCore.Mvc;\nusing Microsoft.Extensions.DependencyInjection;\nusing Microsoft.Extensions.Options;\nusing Newtonsoft.Json;\nusing Newtonsoft.Json.Serialization;\nusing HotshotLogistics.Domain.DTOs;\n\nvar services = new ServiceCollection();\nservices.AddLogging();\nservices.AddOptions();\nservices.AddMvcCore().AddNewtonsoftJson(o =>\n{\n    o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;\n    o.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;\n});\nvar sp = services.BuildServiceProvider();\nvar mvcOpts = sp.GetRequiredService<IOptions<MvcNewtonsoftJsonOptions>>().Value;\nvar settings = mvcOpts.SerializerSettings;\nConsole.WriteLine(\"ContractResolver=\" + (settings.ContractResolver?.GetType().FullName ?? \"null\"));\nif (settings.ContractResolver is DefaultContractResolver dcr)\n{\n    Console.WriteLine(\"NamingStrategy=\" + (dcr.NamingStrategy?.GetType().FullName ?? \"null\"));\n}\nvar dto = new JobStatusSummaryDto { PendingCount = 1, AssignedCount = 2, EnRouteCount = 3, ReceivedCount = 4, TotalCount = 10 };\nvar json = JsonConvert.SerializeObject(dto, settings);\nConsole.WriteLine(\"JSON=\" + json);\n'''\nproj = pathlib.Path(' /tmp/newtonsoft-proof-t1')\n# write under repo scratch\nroot = pathlib.Path('/Users/dave/git/personal/hotshot-logistics-demo/.agents-scratchpad/newtonsoft-proof-t1')\nif root.exists():\n    import shutil; shutil.rmtree(root)\nroot.mkdir(parents=True)\n(root/'Proof.csproj').write_text('''<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <OutputType>Exe</OutputType>\n    <TargetFramework>net8.0</TargetFramework>\n    <ImplicitUsings>enable</ImplicitUsings>\n    <Nullable>enable</Nullable>\n  </PropertyGroup>\n  <ItemGroup>\n    <PackageReference Include=\"Microsoft.AspNetCore.Mvc.NewtonsoftJson\" Version=\"8.0.11\" />\n    <PackageReference Include=\"Microsoft.AspNetCore.Mvc.Core\" Version=\"2.2.5\" />\n    <PackageReference Include=\"Microsoft.Extensions.DependencyInjection\" Version=\"8.0.1\" />\n    <ProjectReference Include=\"../../3-Domain/HotshotLogistics.Domain/HotshotLogistics.Domain.csproj\" />\n  </ItemGroup>\n</Project>\n''')\n(root/'Program.cs').write_text(code)\nr = subprocess.run(['dotnet','run','--project',str(root/'Proof.csproj'),'-c','Release'], cwd=str(root), capture_output=True, text=True)\nprint('EXIT', r.returncode)\nprint(r.stdout)\nprint(r.stderr[-4000:] if r.stderr else '')\nPY",
+			"group": "build"
+		},
+		{
+			"label": "review-t2-build-data",
+			"type": "shell",
+			"command": "dotnet build 4-Persistence/HotshotLogistics.Data/HotshotLogistics.Data.csproj -c Release --no-incremental --verbosity minimal && dotnet build 2-Application/HotshotLogistics.Application/HotshotLogistics.Application.csproj -c Release --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "cr-t1-newtonsoft-default-settings",
+			"type": "shell",
+			"command": "python3 - <<'PY'\nfrom pathlib import Path\nimport shutil, subprocess\nroot = Path('/Users/dave/git/personal/hotshot-logistics-demo/.agents-scratchpad/newtonsoft-proof-t1b')\nif root.exists(): shutil.rmtree(root)\nroot.mkdir(parents=True)\n(root/'Proof.csproj').write_text('''<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <OutputType>Exe</OutputType>\n    <TargetFramework>net8.0</TargetFramework>\n    <ImplicitUsings>enable</ImplicitUsings>\n    <Nullable>enable</Nullable>\n    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>\n    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>\n  </PropertyGroup>\n  <ItemGroup>\n    <FrameworkReference Include=\"Microsoft.AspNetCore.App\" />\n    <PackageReference Include=\"Microsoft.AspNetCore.Mvc.NewtonsoftJson\" Version=\"8.0.11\" />\n  </ItemGroup>\n</Project>\n''')\n(root/'Program.cs').write_text(r'''\nusing System.Runtime.Serialization;\nusing Microsoft.AspNetCore.Mvc;\nusing Microsoft.Extensions.DependencyInjection;\nusing Microsoft.Extensions.Options;\nusing Newtonsoft.Json;\nusing Newtonsoft.Json.Serialization;\n\n[DataContract]\npublic class SampleDto\n{\n    [DataMember(Name = \"pendingCount\")]\n    public int PendingCount { get; set; } = 1;\n\n    public int AssignedCount { get; set; } = 2;\n}\n\nvar services = new ServiceCollection();\nservices.AddLogging();\nservices.AddOptions();\nservices.AddControllers().AddNewtonsoftJson(o =>\n{\n    o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;\n    o.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;\n});\nvar sp = services.BuildServiceProvider();\nvar mvcOpts = sp.GetRequiredService<IOptions<MvcNewtonsoftJsonOptions>>().Value;\nvar settings = mvcOpts.SerializerSettings;\nConsole.WriteLine(\"ContractResolver=\" + (settings.ContractResolver?.GetType().FullName ?? \"null\"));\nif (settings.ContractResolver is DefaultContractResolver dcr)\n{\n    Console.WriteLine(\"NamingStrategy=\" + (dcr.NamingStrategy?.GetType().FullName ?? \"null\"));\n    Console.WriteLine(\"IgnoreSerializableAttribute=\" + dcr.IgnoreSerializableAttribute);\n}\nvar json = JsonConvert.SerializeObject(new SampleDto(), settings);\nConsole.WriteLine(\"JSON=\" + json);\n// also serialize with pure default JsonSerializerSettings\nConsole.WriteLine(\"DEFAULT_JSON=\" + JsonConvert.SerializeObject(new SampleDto()));\n''')\nr = subprocess.run(['dotnet','run','--project',str(root/'Proof.csproj'),'-c','Release','--no-restore'], cwd=str(root), capture_output=True, text=True)\n# restore first\nr0 = subprocess.run(['dotnet','restore',str(root/'Proof.csproj')], capture_output=True, text=True)\nprint('RESTORE', r0.returncode)\nprint(r0.stdout[-1000:])\nprint(r0.stderr[-1000:])\nr = subprocess.run(['dotnet','run','--project',str(root/'Proof.csproj'),'-c','Release'], cwd=str(root), capture_output=True, text=True)\nprint('EXIT', r.returncode)\nprint(r.stdout)\nprint(r.stderr[-3000:])\nPY",
+			"group": "build"
+		},
+		{
+			"label": "t4-cr-tsc-admin",
+			"type": "shell",
+			"command": "cd 1-Presentation/admin-dashboard && npm exec tsc -- --noEmit",
+			"group": "test"
+		},
+		{
+			"label": "t4-cr-npm-build",
+			"type": "shell",
+			"command": "cd 1-Presentation/admin-dashboard && npm run build",
+			"group": "build"
+		},
+		{
+			"label": "t4-cr-eslint",
+			"type": "shell",
+			"command": "cd 1-Presentation/admin-dashboard && npm run lint -- src/types/index.ts src/services/api.ts src/components/dashboard/JobStatusCards.tsx src/components/dashboard/DashboardOverview.tsx src/components/jobs/JobsManagement.tsx src/components/tracking/TrackingDashboard.tsx",
+			"group": "test"
+		},
+		{
+			"label": "cr-t1-newtonsoft-casing-proof",
+			"type": "shell",
+			"command": "python3 - <<'PY'\nfrom pathlib import Path\nimport shutil, subprocess\nroot = Path('/Users/dave/git/personal/hotshot-logistics-demo/.agents-scratchpad/newtonsoft-proof-t1c')\nif root.exists(): shutil.rmtree(root)\nroot.mkdir(parents=True)\n(root/'Proof.csproj').write_text('''<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <OutputType>Exe</OutputType>\n    <TargetFramework>net8.0</TargetFramework>\n    <ImplicitUsings>enable</ImplicitUsings>\n    <Nullable>enable</Nullable>\n    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>\n  </PropertyGroup>\n  <ItemGroup>\n    <FrameworkReference Include=\"Microsoft.AspNetCore.App\" />\n    <PackageReference Include=\"Microsoft.AspNetCore.Mvc.NewtonsoftJson\" Version=\"8.0.11\" />\n  </ItemGroup>\n</Project>\n''')\n(root/'Program.cs').write_text('''using System.Runtime.Serialization;\nusing Microsoft.AspNetCore.Mvc;\nusing Microsoft.Extensions.DependencyInjection;\nusing Microsoft.Extensions.Options;\nusing Newtonsoft.Json;\nusing Newtonsoft.Json.Serialization;\n\nvar services = new ServiceCollection();\nservices.AddLogging();\nservices.AddOptions();\nservices.AddControllers().AddNewtonsoftJson(o =>\n{\n    o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;\n    o.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;\n});\nvar sp = services.BuildServiceProvider();\nvar settings = sp.GetRequiredService<IOptions<MvcNewtonsoftJsonOptions>>().Value.SerializerSettings;\nConsole.WriteLine(\"ContractResolver=\" + (settings.ContractResolver?.GetType().FullName ?? \"null\"));\nif (settings.ContractResolver is DefaultContractResolver dcr)\n{\n    Console.WriteLine(\"NamingStrategy=\" + (dcr.NamingStrategy?.GetType().FullName ?? \"null\"));\n    Console.WriteLine(\"IgnoreSerializableAttribute=\" + dcr.IgnoreSerializableAttribute);\n    Console.WriteLine(\"IgnoreIsSpecifiedMembers=\" + dcr.IgnoreIsSpecifiedMembers);\n    Console.WriteLine(\"SerializeCompilerGeneratedMembers=\" + dcr.SerializeCompilerGeneratedMembers);\n}\n\nvar withAttrs = new SampleWithDataContract { PendingCount = 1, AssignedCount = 2, EnRouteCount = 3, ReceivedCount = 4, TotalCount = 10 };\nvar plain = new SamplePlain { PendingCount = 1, AssignedCount = 2, EnRouteCount = 3, ReceivedCount = 4, TotalCount = 10 };\nConsole.WriteLine(\"WITH_ATTRS=\" + JsonConvert.SerializeObject(withAttrs, settings));\nConsole.WriteLine(\"PLAIN=\" + JsonConvert.SerializeObject(plain, settings));\n\n[DataContract]\npublic class SampleWithDataContract\n{\n    [DataMember(Name = \"pendingCount\")] public int PendingCount { get; set; }\n    [DataMember(Name = \"assignedCount\")] public int AssignedCount { get; set; }\n    [DataMember(Name = \"enRouteCount\")] public int EnRouteCount { get; set; }\n    [DataMember(Name = \"receivedCount\")] public int ReceivedCount { get; set; }\n    [DataMember(Name = \"totalCount\")] public int TotalCount { get; set; }\n}\n\npublic class SamplePlain\n{\n    public int PendingCount { get; set; }\n    public int AssignedCount { get; set; }\n    public int EnRouteCount { get; set; }\n    public int ReceivedCount { get; set; }\n    public int TotalCount { get; set; }\n}\n''')\nr0 = subprocess.run(['dotnet','restore',str(root/'Proof.csproj')], capture_output=True, text=True)\nprint('RESTORE', r0.returncode)\nr = subprocess.run(['dotnet','run','--project',str(root/'Proof.csproj'),'-c','Release'], cwd=str(root), capture_output=True, text=True)\nprint('EXIT', r.returncode)\nprint(r.stdout)\nprint(r.stderr[-2500:])\nPY",
+			"group": "build"
+		},
+		{
+			"label": "cr-t1-build-api-consumers",
+			"type": "shell",
+			"command": "dotnet build 1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj -c Release --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "t4-cr-tsc-proof",
+			"type": "shell",
+			"command": "cd \"1-Presentation/admin-dashboard\" && ./node_modules/.bin/tsc --noEmit; echo EXIT:$?",
+			"group": "test"
+		},
+		{
+			"label": "t5-cr-git-diff",
+			"type": "shell",
+			"command": "git diff -- 1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx 1-Presentation/admin-dashboard/src/services/signalr.ts 1-Presentation/admin-dashboard/src/hooks/useJobStatusSummarySignalR.ts && git status --short -- 1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx 1-Presentation/admin-dashboard/src/services/signalr.ts 1-Presentation/admin-dashboard/src/hooks/useJobStatusSummarySignalR.ts 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx",
+			"group": "build"
+		},
+		{
+			"label": "t5-review-git-status",
+			"type": "shell",
+			"command": "git status --short && git diff --stat -- '1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx' '1-Presentation/admin-dashboard/src/services/signalr.ts' '1-Presentation/admin-dashboard/src/hooks/useJobStatusSummarySignalR.ts' && git diff -- '1-Presentation/admin-dashboard/src/hooks/useJobStatusSummarySignalR.ts' '1-Presentation/admin-dashboard/src/services/signalr.ts' | sed -n '1,200p'",
+			"group": "build"
+		},
+		{
+			"label": "t5-git-plain",
+			"type": "shell",
+			"command": "GIT_PAGER=cat git status --short --untracked-files=all -- '1-Presentation/admin-dashboard/src/components/dashboard/' '1-Presentation/admin-dashboard/src/services/signalr.ts' '1-Presentation/admin-dashboard/src/hooks/' && GIT_PAGER=cat git diff --no-ext-diff -- '1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx' '1-Presentation/admin-dashboard/src/services/signalr.ts' '1-Presentation/admin-dashboard/src/hooks/useJobStatusSummarySignalR.ts'",
+			"group": "build"
+		},
+		{
+			"label": "t5-verify-frontend",
+			"type": "shell",
+			"command": "cd \"1-Presentation/admin-dashboard\" && npm exec tsc -- --noEmit; echo TSC_EXIT:$?; npm run lint -- src/components/dashboard/DashboardOverview.tsx src/services/signalr.ts src/hooks/useJobStatusSummarySignalR.ts; echo LINT_EXIT:$?; npm run build; echo BUILD_EXIT:$?",
+			"group": "build"
+		},
+		{
+			"label": "t5-check-env-guid",
+			"type": "shell",
+			"command": "GIT_PAGER=cat git log -1 --oneline -- '1-Presentation/admin-dashboard/scripts/generate-env.js' '1-Presentation/admin-dashboard/src/config' 2>/dev/null; ls -la '1-Presentation/admin-dashboard/.env.local' 2>/dev/null | awk '{print $1,$5,$9}'; python3 - <<'PY'\nfrom pathlib import Path\np=Path('1-Presentation/admin-dashboard/.env.local')\nprint('exists', p.exists())\nif p.exists():\n    for line in p.read_text().splitlines():\n        if 'AZURE' in line or 'CLIENT' in line or 'TENANT' in line:\n            k,_,_,v=line.partition('=')\n            v=v.strip().strip('\"').strip(\"'\")\n            print(k, 'len='+str(len(v)), 'prefix='+v[:8]+'...' if len(v)>8 else v)\nPY",
+			"group": "build"
+		},
+		{
+			"label": "t5-env-guid-check",
+			"type": "shell",
+			"command": "python3 -c \"from pathlib import Path; p=Path('1-Presentation/admin-dashboard/.env.local'); print(p.exists());\n[print(line.split('=',1)[0], 'has_value='+str(bool(line.split('=',1)[1].strip())), 'is_zero='+str(line.split('=',1)[1].strip().startswith('00000000'))) for line in p.read_text().splitlines() if '=' in line and ('AZURE' in line or 'CLIENT' in line or 'TENANT' in line)]\"",
+			"group": "build"
+		},
+		{
+			"label": "t6-cr-build-tests",
+			"type": "shell",
+			"command": "dotnet build 5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj -c Release --verbosity minimal && dotnet build 5-Test/tests/HotshotLogistics.IntegrationTests/HotshotLogistics.IntegrationTests.csproj -c Release --verbosity minimal && dotnet test 5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj -c Release --no-build --filter \"FullyQualifiedName~GetJobStatusSummary\" --verbosity normal",
+			"group": "test"
+		},
+		{
+			"label": "t3-cr-build-api",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && git status --short -- 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 2-Application/HotshotLogistics.Application/Hubs/RealtimeHub.cs 2-Application/HotshotLogistics.Application/Services/RealtimeService.cs 3-Domain/HotshotLogistics.Contracts/Hubs/IRealtimeHub.cs 3-Domain/HotshotLogistics.Contracts/Services/IRealtimeService.cs && echo '---DIFF---' && git diff -- 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 2-Application/HotshotLogistics.Application/Hubs/RealtimeHub.cs 2-Application/HotshotLogistics.Application/Services/RealtimeService.cs 3-Domain/HotshotLogistics.Contracts/Hubs/IRealtimeHub.cs 3-Domain/HotshotLogistics.Contracts/Services/IRealtimeService.cs && echo '---BUILD---' && dotnet build 1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj -c Release --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "t3-cr-unit-controller-and-realtime",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet test 5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj -c Release --filter \"FullyQualifiedName~GetJobStatusSummary|FullyQualifiedName~RealtimeService\" --verbosity minimal",
+			"group": "test"
+		},
+		{
+			"label": "t6-cr-integration-filter",
+			"type": "shell",
+			"command": "dotnet test 5-Test/tests/HotshotLogistics.IntegrationTests/HotshotLogistics.IntegrationTests.csproj -c Release --no-build --filter \"FullyQualifiedName~GetJobStatusSummary\" --verbosity normal",
+			"group": "test"
+		},
+		{
+			"label": "t6-cr-id-length-math",
+			"type": "shell",
+			"command": "python3 - <<'PY'\nfrom uuid import uuid4\nrepo=f\"jss-{uuid4().hex}\"\nprint('repo', len(repo), repo)\nfor s in ['pending','assigned','enroute','received']:\n    i=f\"jss-{uuid4().hex}-{s}\"\n    print(s, len(i), i, 'OK' if len(i)<=50 else 'TOO LONG')\nPY",
+			"group": "test"
+		},
+		{
+			"label": "t3-cr-integration-status-summary",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet test 5-Test/tests/HotshotLogistics.IntegrationTests/HotshotLogistics.IntegrationTests.csproj -c Release --filter FullyQualifiedName~GetJobStatusSummary --verbosity minimal",
+			"group": "test"
+		},
+		{
+			"label": "t3-cr-unit-pure-controller-realtime",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet test 5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj -c Release --filter \"FullyQualifiedName~JobControllerTests.GetJobStatusSummary|FullyQualifiedName~RealtimeServiceTests\" --verbosity minimal && echo '---SCAN---' && rg -n \"ReceiveJobStatusSummaryUpdate|BroadcastJobStatusSummary|Clients\\.All|manager-admins|IRealtimeHub\\b\" 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 2-Application/HotshotLogistics.Application/Hubs/RealtimeHub.cs 2-Application/HotshotLogistics.Application/Services/RealtimeService.cs 3-Domain/HotshotLogistics.Contracts/Hubs/IRealtimeHub.cs 3-Domain/HotshotLogistics.Contracts/Services/IRealtimeService.cs 5-Test/tests/HotshotLogistics.Tests/Communication/RealtimeServiceTests.cs 5-Test/tests/HotshotLogistics.Tests/Job/JobControllerTests.cs",
+			"group": "test"
+		},
+		{
+			"label": "t5-rereview-npm-build",
+			"type": "shell",
+			"command": "npm run build",
+			"args": [],
+			"group": "build"
+		},
+		{
+			"label": "t5-rereview-verify-frontend",
+			"type": "shell",
+			"command": "cd 1-Presentation/admin-dashboard && npm run build && npm exec tsc -- --noEmit && npx eslint src/components/dashboard/DashboardOverview.tsx src/services/signalr.ts src/hooks/useJobStatusSummarySignalR.ts",
+			"group": "build"
+		},
+		{
+			"label": "t5-rereview-tsc-only",
+			"type": "shell",
+			"command": "cd 1-Presentation/admin-dashboard && npm exec tsc -- --noEmit",
+			"group": "build"
+		},
+		{
+			"label": "t5-rereview-eslint-only",
+			"type": "shell",
+			"command": "cd 1-Presentation/admin-dashboard && npx eslint src/components/dashboard/DashboardOverview.tsx src/services/signalr.ts src/hooks/useJobStatusSummarySignalR.ts",
+			"group": "test"
+		},
+		{
+			"label": "t5-rereview-build-valid-guid",
+			"type": "shell",
+			"command": "cd 1-Presentation/admin-dashboard && NEXT_PUBLIC_AZURE_CLIENT_ID=11111111-1111-1111-1111-111111111111 NEXT_PUBLIC_AZURE_TENANT_ID=22222222-2222-2222-2222-222222222222 npm run build",
+			"group": "build"
+		},
+		{
+			"label": "t5-rereview-build-rfc4122",
+			"type": "shell",
+			"command": "cd 1-Presentation/admin-dashboard && NEXT_PUBLIC_AZURE_CLIENT_ID=12345678-1234-4234-a234-123456789012 NEXT_PUBLIC_AZURE_TENANT_ID=87654321-4321-4321-b321-210987654321 npm run build",
+			"group": "build"
+		},
+		{
+			"label": "t5-rereview-tsc2",
+			"type": "shell",
+			"command": "cd 1-Presentation/admin-dashboard && npm exec tsc -- --noEmit; echo EXIT:$?",
+			"group": "build"
+		},
+		{
+			"label": "t5-rereview-eslint2",
+			"type": "shell",
+			"command": "cd 1-Presentation/admin-dashboard && npx eslint src/components/dashboard/DashboardOverview.tsx src/services/signalr.ts src/hooks/useJobStatusSummarySignalR.ts; echo EXIT:$?",
+			"group": "test"
+		},
+		{
+			"label": "t5-rereview-diff-scope",
+			"type": "shell",
+			"command": "git status --short -- 1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx 1-Presentation/admin-dashboard/src/services/signalr.ts 1-Presentation/admin-dashboard/src/hooks/useJobStatusSummarySignalR.ts && git diff -- 1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx 1-Presentation/admin-dashboard/src/services/signalr.ts 1-Presentation/admin-dashboard/src/hooks/useJobStatusSummarySignalR.ts",
+			"group": "build"
+		},
+		{
+			"label": "t3-cr-build-api",
+			"type": "shell",
+			"command": "dotnet build 1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj -c Release --verbosity minimal && dotnet build 5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj -c Release --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "t3-cr-unit-controller-and-realtime",
+			"type": "shell",
+			"command": "dotnet test 5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj -c Release --no-restore --filter \"FullyQualifiedName~RealtimeServiceTests|FullyQualifiedName~RealtimeHubTests|FullyQualifiedName~JobControllerTests.GetJobStatusSummary\" --verbosity normal",
+			"group": "test"
+		},
+		{
+			"label": "t3-cr-unit-pure-controller-realtime",
+			"type": "shell",
+			"command": "dotnet test 5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj -c Release --no-restore --filter \"FullyQualifiedName~HotshotLogistics.Tests.Communication.RealtimeServiceTests|FullyQualifiedName~HotshotLogistics.Tests.Communication.RealtimeHubTests|FullyQualifiedName~JobControllerTests.GetJobStatusSummary_ReturnsOkWithStatusSummaryDto\" --verbosity normal",
+			"group": "test"
+		},
+		{
+			"label": "t3-cr-build-api",
+			"type": "shell",
+			"command": "dotnet build 1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj -c Release --verbosity minimal 2>&1 | tail -40",
+			"group": "build"
+		},
+		{
+			"label": "t3-cr-hub-unit-only",
+			"type": "shell",
+			"command": "dotnet test 5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj -c Release --no-restore --filter \"FullyQualifiedName~HotshotLogistics.Tests.Communication.RealtimeHubTests\" --verbosity normal",
+			"group": "test"
+		},
+		{
+			"label": "t3-cr-diff-and-build-confirm",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; git diff -- 2-Application/HotshotLogistics.Application/Services/RealtimeService.cs 3-Domain/HotshotLogistics.Contracts/Hubs/IRealtimeHub.cs 3-Domain/HotshotLogistics.Contracts/Services/IRealtimeService.cs 5-Test/tests/HotshotLogistics.Tests/Communication/RealtimeServiceTests.cs 5-Test/tests/HotshotLogistics.Tests/Communication/RealtimeHubTests.cs | sed -n '1,260p'; echo '---BUILD---'; dotnet build 1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj -c Release --verbosity minimal; echo EXIT:$?",
+			"group": "build"
 		}
 	]
 }

@@ -12,6 +12,72 @@
 				"--noEmit"
 			],
 			"group": "build"
+		},
+		{
+			"label": "t4-review-tsc-noemit",
+			"type": "shell",
+			"command": "npm exec tsc -- --noEmit",
+			"group": "test"
+		},
+		{
+			"label": "t4-review-npm-build",
+			"type": "shell",
+			"command": "npm run build",
+			"group": "build"
+		},
+		{
+			"label": "t4-review-eslint-changed",
+			"type": "shell",
+			"command": "npm run lint -- src/types/index.ts src/services/api.ts src/components/dashboard/JobStatusCards.tsx src/components/dashboard/DashboardOverview.tsx src/components/jobs/JobsManagement.tsx src/components/tracking/TrackingDashboard.tsx",
+			"group": "test"
+		},
+		{
+			"label": "t5-cr-npm-build",
+			"type": "shell",
+			"command": "npm run build",
+			"group": "build"
+		},
+		{
+			"label": "t5-cr-tsc",
+			"type": "shell",
+			"command": "npm exec tsc -- --noEmit",
+			"group": "build"
+		},
+		{
+			"label": "t5-cr-eslint",
+			"type": "shell",
+			"command": "npm run lint -- src/components/dashboard/DashboardOverview.tsx src/services/signalr.ts src/hooks/useJobStatusSummarySignalR.ts",
+			"group": "build"
+		},
+		{
+			"label": "t5-review-tsc-noemit",
+			"type": "shell",
+			"command": "npm exec tsc -- --noEmit",
+			"group": "build"
+		},
+		{
+			"label": "t5-frontend-verify",
+			"type": "shell",
+			"command": "npm exec tsc -- --noEmit; echo TSC_EXIT:$?; npm run lint -- src/components/dashboard/DashboardOverview.tsx src/services/signalr.ts src/hooks/useJobStatusSummarySignalR.ts; echo LINT_EXIT:$?; npm run build; echo BUILD_EXIT:$?",
+			"group": "build"
+		},
+		{
+			"label": "t5-rereview-npm-build-admin",
+			"type": "shell",
+			"command": "npm run build",
+			"group": "build"
+		},
+		{
+			"label": "t5-rereview-tsc",
+			"type": "shell",
+			"command": "npm exec tsc -- --noEmit",
+			"group": "build"
+		},
+		{
+			"label": "t5-rereview-eslint",
+			"type": "shell",
+			"command": "npx eslint src/components/dashboard/DashboardOverview.tsx src/services/signalr.ts src/hooks/useJobStatusSummarySignalR.ts",
+			"group": "test"
 		}
 	]
 }
