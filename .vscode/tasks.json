@@ -203,6 +203,757 @@
 				"--noEmit"
 			],
 			"group": "build"
+		},
+		{
+			"label": "build-application-t1b-review",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"2-Application/HotshotLogistics.Application/HotshotLogistics.Application.csproj",
+				"-c",
+				"Debug",
+				"--verbosity",
+				"minimal"
+			],
+			"group": "build"
+		},
+		{
+			"label": "build-contracts-t1b-review",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"3-Domain/HotshotLogistics.Contracts/HotshotLogistics.Contracts.csproj",
+				"-c",
+				"Debug",
+				"--verbosity",
+				"minimal"
+			],
+			"group": "build"
+		},
+		{
+			"label": "build-data-t1a-review",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"4-Persistence/HotshotLogistics.Data/HotshotLogistics.Data.csproj",
+				"-c",
+				"Debug",
+				"--verbosity",
+				"minimal"
+			],
+			"group": "build"
+		},
+		{
+			"label": "build-api-t2-review",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj",
+				"-c",
+				"Debug",
+				"--verbosity",
+				"minimal",
+				"/p:WarningLevel=4"
+			],
+			"group": "build"
+		},
+		{
+			"label": "tsc-t3-admin-dashboard-review",
+			"type": "shell",
+			"command": "cd",
+			"args": [
+				"1-Presentation/admin-dashboard",
+				"&&",
+				"./node_modules/.bin/tsc",
+				"--noEmit",
+				"--pretty",
+				"false",
+				"2>&1",
+				"|",
+				"rg",
+				"-n",
+				"src/(types/index|services/api)\\.ts|error TS",
+				"||",
+				"true"
+			],
+			"group": "build"
+		},
+		{
+			"label": "build-contracts-t1b-review",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"3-Domain/HotshotLogistics.Contracts/HotshotLogistics.Contracts.csproj",
+				"-c",
+				"Debug",
+				"--verbosity",
+				"minimal"
+			],
+			"group": "build"
+		},
+		{
+			"label": "build-application-t1b-review",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"2-Application/HotshotLogistics.Application/HotshotLogistics.Application.csproj",
+				"-c",
+				"Debug",
+				"--verbosity",
+				"minimal"
+			],
+			"group": "build"
+		},
+		{
+			"label": "build-data-t1a-review",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"4-Persistence/HotshotLogistics.Data/HotshotLogistics.Data.csproj",
+				"-c",
+				"Debug",
+				"--verbosity",
+				"minimal"
+			],
+			"group": "build"
+		},
+		{
+			"label": "build-api-t2-rereview",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj",
+				"-c",
+				"Debug",
+				"--verbosity",
+				"minimal",
+				"/p:WarningLevel=4"
+			],
+			"group": "build"
+		},
+		{
+			"label": "tsc-t4-job-status-cards-review",
+			"type": "shell",
+			"command": "cd",
+			"args": [
+				"1-Presentation/admin-dashboard",
+				"&&",
+				"./node_modules/.bin/tsc",
+				"--noEmit",
+				"--pretty",
+				"false"
+			],
+			"group": "build"
+		},
+		{
+			"label": "test-t5-unit-job-status-summary",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				"5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj",
+				"--filter",
+				"FullyQualifiedName~JobServiceGetJobStatusSummaryTests",
+				"-c",
+				"Debug",
+				"--verbosity",
+				"minimal",
+				"/p:TreatWarningsAsErrors=false"
+			],
+			"group": "test"
+		},
+		{
+			"label": "test-t5-integration-job-status-summary",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				"5-Test/tests/HotshotLogistics.IntegrationTests/HotshotLogistics.IntegrationTests.csproj",
+				"--filter",
+				"FullyQualifiedName~GetJobStatusSummary_WithSeededStatusDistribution_ReturnsMatchingCounts",
+				"-c",
+				"Debug",
+				"--verbosity",
+				"minimal",
+				"/p:TreatWarningsAsErrors=false"
+			],
+			"group": "test"
+		},
+		{
+			"label": "tsc-t4-job-status-cards-rereview",
+			"type": "shell",
+			"command": "cd",
+			"args": [
+				"1-Presentation/admin-dashboard",
+				"&&",
+				"./node_modules/.bin/tsc",
+				"--noEmit",
+				"--pretty",
+				"false"
+			],
+			"group": "build"
+		},
+		{
+			"label": "git-diff-job-status-cards",
+			"type": "shell",
+			"command": "git status --short && echo '---' && git diff --name-only && echo '---' && git log --oneline -15 && echo '---' && git diff -- 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 3-Domain/HotshotLogistics.Contracts/Repositories/IJobRepository.cs 3-Domain/HotshotLogistics.Contracts/Services/IJobService.cs 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 1-Presentation/admin-dashboard/src/types/index.ts 1-Presentation/admin-dashboard/src/services/api.ts 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx 1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs",
+			"group": "build"
+		},
+		{
+			"label": "git-show-scope-diff",
+			"type": "shell",
+			"command": "git rev-parse --abbrev-ref HEAD; git status -sb; echo '===NAME-STATUS==='; git diff --name-status HEAD -- 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 3-Domain/HotshotLogistics.Contracts/Repositories/IJobRepository.cs 3-Domain/HotshotLogistics.Contracts/Services/IJobService.cs 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 1-Presentation/admin-dashboard/src/types/index.ts 1-Presentation/admin-dashboard/src/services/api.ts 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx 1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs 2>/dev/null; echo '===UNTRACKED==='; git ls-files --others --exclude-standard -- 3-Domain 2-Application 4-Persistence 1-Presentation 5-Test | rg -n 'JobStatus|JobStatusCards|DashboardOverview|JobServiceGetJobStatus|JobControllerIntegration|api\\.ts|types/index' || true; echo '===STAT vs main==='; git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD main 2>/dev/null || true; git diff --stat $(git merge-base HEAD main 2>/dev/null || git merge-base HEAD origin/main 2>/dev/null || echo HEAD~20)...HEAD -- 3-Domain 2-Application 4-Persistence 1-Presentation/HotshotLogistics.Api 1-Presentation/admin-dashboard/src 5-Test 2>/dev/null | tail -n 40",
+			"group": "build"
+		},
+		{
+			"label": "git-status-diff-plain",
+			"type": "shell",
+			"command": "git rev-parse --abbrev-ref HEAD; git status -sb; printf '\\n--- tracked diff names ---\\n'; git diff --name-only HEAD; printf '\\n--- cached ---\\n'; git diff --cached --name-only; printf '\\n--- untracked feature files ---\\n'; ls -la 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx 2>&1; printf '\\n--- blame/log on key files ---\\n'; git log --oneline -5 -- 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 2>&1 | head -40",
+			"group": "build"
+		},
+		{
+			"label": "review-build-api",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj",
+				"-c",
+				"Debug",
+				"--verbosity",
+				"minimal",
+				"/p:WarningLevel=4"
+			],
+			"group": "build"
+		},
+		{
+			"label": "review-tsc-admin",
+			"type": "shell",
+			"command": "cd",
+			"args": [
+				"1-Presentation/admin-dashboard",
+				"&&",
+				"./node_modules/.bin/tsc",
+				"--noEmit",
+				"--pretty",
+				"false"
+			],
+			"group": "build"
+		},
+		{
+			"label": "review-unit-job-status",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				"5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj",
+				"--filter",
+				"FullyQualifiedName~JobServiceGetJobStatusSummaryTests",
+				"-c",
+				"Debug",
+				"--verbosity",
+				"normal",
+				"/p:TreatWarningsAsErrors=false"
+			],
+			"group": "test"
+		},
+		{
+			"label": "review-integration-job-status",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				"5-Test/tests/HotshotLogistics.IntegrationTests/HotshotLogistics.IntegrationTests.csproj",
+				"--filter",
+				"FullyQualifiedName~GetJobStatusSummary_WithSeededStatusDistribution_ReturnsMatchingCounts",
+				"-c",
+				"Debug",
+				"--verbosity",
+				"normal",
+				"/p:TreatWarningsAsErrors=false"
+			],
+			"group": "test"
+		},
+		{
+			"label": "git-diff-u0-feature",
+			"type": "shell",
+			"command": "git diff -U0 -- 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs 1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx 1-Presentation/admin-dashboard/src/services/api.ts 1-Presentation/admin-dashboard/src/types/index.ts 3-Domain/HotshotLogistics.Contracts/Repositories/IJobRepository.cs 3-Domain/HotshotLogistics.Contracts/Services/IJobService.cs | sed -n '1,400p'; printf '\\n===== NEW FILES =====\\n'; git status --short -- 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx; wc -l 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx",
+			"group": "build"
+		},
+		{
+			"label": "review-dotnet-test-release-unit",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				"5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj",
+				"-c",
+				"Release",
+				"--verbosity",
+				"minimal",
+				"/p:TreatWarningsAsErrors=false",
+				"--filter",
+				"FullyQualifiedName~Job|FullyQualifiedName~Service"
+			],
+			"group": "test"
+		},
+		{
+			"label": "cr-build-api",
+			"type": "shell",
+			"command": "dotnet build 1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj -c Debug --verbosity minimal /p:WarningLevel=4",
+			"group": "build"
+		},
+		{
+			"label": "cr-tsc-admin",
+			"type": "shell",
+			"command": "cd 1-Presentation/admin-dashboard && npm exec tsc -- --noEmit --pretty false",
+			"group": "build"
+		},
+		{
+			"label": "cr-unit-job-status",
+			"type": "shell",
+			"command": "dotnet test 5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj --filter FullyQualifiedName~JobServiceGetJobStatusSummaryTests -c Debug --verbosity normal /p:TreatWarningsAsErrors=false",
+			"group": "test"
+		},
+		{
+			"label": "cr-integration-job-status",
+			"type": "shell",
+			"command": "dotnet test 5-Test/tests/HotshotLogistics.IntegrationTests/HotshotLogistics.IntegrationTests.csproj --filter FullyQualifiedName~GetJobStatusSummary_WithSeededStatusDistribution_ReturnsMatchingCounts -c Debug --verbosity normal /p:TreatWarningsAsErrors=false",
+			"group": "test"
+		},
+		{
+			"label": "cr-dotnet-test-release",
+			"type": "shell",
+			"command": "dotnet test HotshotLogistics.sln -c Release --verbosity minimal /p:TreatWarningsAsErrors=false",
+			"group": "test"
+		},
+		{
+			"label": "cr-git-attr-feature",
+			"type": "shell",
+			"command": "git rev-parse --abbrev-ref HEAD; git status -sb; printf '\\n--- name-status vs HEAD ---\\n'; git diff --name-status HEAD -- 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 3-Domain/HotshotLogistics.Contracts/Repositories/IJobRepository.cs 3-Domain/HotshotLogistics.Contracts/Services/IJobService.cs 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 1-Presentation/admin-dashboard/src/types/index.ts 1-Presentation/admin-dashboard/src/services/api.ts 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx 1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs; printf '\\n--- untracked ---\\n'; git ls-files --others --exclude-standard -- 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx; printf '\\n--- diff stat ---\\n'; git diff --stat HEAD -- 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs 1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx 1-Presentation/admin-dashboard/src/services/api.ts 1-Presentation/admin-dashboard/src/types/index.ts; printf '\\n--- JobService hunk ---\\n'; git diff -U3 HEAD -- 2-Application/HotshotLogistics.Application/Services/JobService.cs | sed -n '1,80p'; printf '\\n--- JobRepository hunk ---\\n'; git diff -U3 HEAD -- 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs | sed -n '1,120p'; printf '\\n--- JobController hunk ---\\n'; git diff -U3 HEAD -- 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs | sed -n '1,80p'; printf '\\n--- IntegrationTests hunk ---\\n'; git diff -U3 HEAD -- 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs | sed -n '1,160p'",
+			"group": "build"
+		},
+		{
+			"label": "cr-git-diff-proof",
+			"type": "shell",
+			"command": "git rev-parse --abbrev-ref HEAD && git status -sb && echo '---' && git diff --name-status HEAD -- '3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs' '3-Domain/HotshotLogistics.Contracts/Repositories/IJobRepository.cs' '3-Domain/HotshotLogistics.Contracts/Services/IJobService.cs' '2-Application/HotshotLogistics.Application/Services/JobService.cs' '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs' '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs' '1-Presentation/admin-dashboard/src/types/index.ts' '1-Presentation/admin-dashboard/src/services/api.ts' '1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx' '1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx' '5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs' '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs' && echo '---untracked---' && git ls-files --others --exclude-standard | rg -n 'JobStatusSummary|JobStatusCards|JobServiceGetJobStatusSummary' || true && echo '---numstat---' && git diff --numstat HEAD -- '2-Application/HotshotLogistics.Application/Services/JobService.cs' '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs' '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs' '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs' '1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx' '1-Presentation/admin-dashboard/src/services/api.ts' '1-Presentation/admin-dashboard/src/types/index.ts' '3-Domain/HotshotLogistics.Contracts/Repositories/IJobRepository.cs' '3-Domain/HotshotLogistics.Contracts/Services/IJobService.cs' && echo '---hunks---' && git diff -U2 HEAD -- '2-Application/HotshotLogistics.Application/Services/JobService.cs' '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs' '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs' '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs' '1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx' '1-Presentation/admin-dashboard/src/services/api.ts' '1-Presentation/admin-dashboard/src/types/index.ts' | sed -n '1,260p'",
+			"group": "build"
+		},
+		{
+			"label": "cr-git-diff-nopager",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat PAGER=cat; git rev-parse --abbrev-ref HEAD; git status -sb; echo '===NAMESTATUS==='; git --no-pager diff --name-status HEAD -- 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 3-Domain/HotshotLogistics.Contracts/Repositories/IJobRepository.cs 3-Domain/HotshotLogistics.Contracts/Services/IJobService.cs 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 1-Presentation/admin-dashboard/src/types/index.ts 1-Presentation/admin-dashboard/src/services/api.ts 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx 1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs; echo '===UNTRACKED==='; git --no-pager ls-files --others --exclude-standard | grep -E 'JobStatusSummary|JobStatusCards|JobServiceGetJobStatusSummary' || true; echo '===DIFF==='; git --no-pager diff -U3 HEAD -- 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs 1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx 1-Presentation/admin-dashboard/src/services/api.ts 1-Presentation/admin-dashboard/src/types/index.ts 3-Domain/HotshotLogistics.Contracts/Repositories/IJobRepository.cs 3-Domain/HotshotLogistics.Contracts/Services/IJobService.cs",
+			"group": "build"
+		},
+		{
+			"label": "cr-json-casing-check",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; python3 - <<'PY'\nimport json\n# Simulate Newtonsoft default (PascalCase) vs frontend access\napi = {'Pending': 2, 'Assigned': 3, 'EnRoute': 4, 'Received': 5, 'Total': 14}\nkeys = ['pending','assigned','enRoute','received']\nprint('PascalCase payload access:', {k: api.get(k) for k in keys})\n# Simulate if camelCase were configured\napi_c = {'pending': 2, 'assigned': 3, 'enRoute': 4, 'received': 5, 'total': 14}\nprint('camelCase payload access:', {k: api_c.get(k) for k in keys})\nPY",
+			"group": "build"
+		},
+		{
+			"label": "cr-newtonsoft-default",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cat > /tmp/newtonsoft-case-check.csx <<'EOF'\n#r \"nuget: Newtonsoft.Json, 13.0.3\"\nusing Newtonsoft.Json;\nvar dto = new { Pending = 2, Assigned = 3, EnRoute = 4, Received = 5, Total = 14 };\nConsole.WriteLine(JsonConvert.SerializeObject(dto));\nvar settings = new JsonSerializerSettings { ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver() };\nConsole.WriteLine(JsonConvert.SerializeObject(dto, settings));\nEOF\ndotnet script /tmp/newtonsoft-case-check.csx 2>/dev/null || python3 - <<'PY'\n# Newtonsoft default keeps property names as-is (PascalCase for C# props)\nprint('default would be: {\"Pending\":2,\"Assigned\":3,\"EnRoute\":4,\"Received\":5,\"Total\":14}')\nprint('camelCase resolver would be: {\"pending\":2,\"assigned\":3,\"enRoute\":4,\"received\":5,\"total\":14}')\nprint('ASP.NET Core AddNewtonsoftJson does NOT enable camelCase unless ContractResolver set')\nPY",
+			"group": "build"
+		},
+		{
+			"label": "cr-check-newtonsoft-mvc-default",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; python3 - <<'PY'\nimport glob,os,zipfile,re\nroots=[]\nfor p in [\n os.path.expanduser('~/.nuget/packages/microsoft.aspnetcore.mvc.newtonsoftjson'),\n '/usr/local/share/dotnet/packs',\n]:\n if os.path.isdir(p): roots.append(p)\nprint('roots', roots)\nmatches=[]\nfor root in roots:\n for dirpath,_,files in os.walk(root):\n  for f in files:\n   if f.endswith(('.dll','.xml','.cs')) and 'NewtonsoftJson' in f:\n    matches.append(os.path.join(dirpath,f))\nprint('sample matches', matches[:20], 'count', len(matches))\n# search cshtml/xml docs or decompile strings via strings on dll\nfor dll in matches:\n if dll.endswith('.dll') and 'Microsoft.AspNetCore.Mvc.NewtonsoftJson' in dll and '/lib/' in dll.replace('\\\\','/'):\n  print('DLL', dll)\n  try:\n   data=open(dll,'rb').read()\n  except Exception as e:\n   print(e); continue\n  for s in [b'CamelCasePropertyNamesContractResolver', b'CamelCaseNamingStrategy', b'ContractResolver']:\n   print(s.decode(), data.find(s)>=0)\nPY\n# also look in project assets\nrg -n \"CamelCasePropertyNamesContractResolver|MvcNewtonsoftJsonOptions\" ~/.nuget/packages/microsoft.aspnetcore.mvc.newtonsoftjson -g '*' 2>/dev/null | head -40 || true\nls ~/.nuget/packages/microsoft.aspnetcore.mvc.newtonsoftjson 2>/dev/null | head",
+			"group": "build"
+		},
+		{
+			"label": "cr-read-newtonsoft-source",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; PKG=$(ls -d ~/.nuget/packages/microsoft.aspnetcore.mvc.newtonsoftjson/8.0.30 2>/dev/null | head -1); echo PKG=$PKG; find \"$PKG\" -type f | head -40; python3 - <<'PY'\nimport os,glob\nbase=os.path.expanduser('~/.nuget/packages/microsoft.aspnetcore.mvc.newtonsoftjson/8.0.30')\nfor root,_,files in os.walk(base):\n  for f in files:\n    path=os.path.join(root,f)\n    if f.endswith('.dll') and 'NewtonsoftJson' in f:\n      data=open(path,'rb').read()\n      print(path, 'size', len(data))\n      for s in [b'CamelCasePropertyNamesContractResolver', b'CamelCaseNamingStrategy', b'JsonSerializerSettings', b'UseCamelCasing', b'ContractResolver']:\n        print(' ', s.decode(), data.find(s)>=0)\n# try extract xml docs\nfor path in glob.glob(base+'/**/*.xml', recursive=True):\n  txt=open(path,errors='ignore').read()\n  if 'CamelCase' in txt or 'ContractResolver' in txt:\n    print('xml', path)\n    for line in txt.splitlines():\n      if 'Camel' in line or 'ContractResolver' in line:\n        print(line[:200])\nPY",
+			"group": "build"
+		},
+		{
+			"label": "cr-prove-newtonsoft-default-settings",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; python3 - <<'PY'\n# Disassemble MvcNewtonsoftJsonOptions ctor defaults from IL strings around CamelCaseNamingStrategy\nfrom pathlib import Path\np=Path.home()/'.nuget/packages/microsoft.aspnetcore.mvc.newtonsoftjson/8.0.30/lib/net8.0/Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll'\ndata=p.read_bytes()\n# Find UTF-16 and UTF-8 occurrences context\nidx=data.find(b'CamelCaseNamingStrategy')\nprint('utf8 idx', idx)\n# Also search in xml for CreateSerializerSettings / default\nxml=(p.parent/'Microsoft.AspNetCore.Mvc.NewtonsoftJson.xml').read_text(errors='ignore')\nfor line in xml.splitlines():\n    if 'default' in line.lower() and ('camel' in line.lower() or 'casing' in line.lower() or 'serializer' in line.lower()):\n        print(line.strip()[:250])\nprint('--- UseCamelCasing docs ---')\ncap=False\nfor line in xml.splitlines():\n    if 'UseCamelCasing(' in line:\n        cap=True\n    if cap:\n        print(line.strip()[:250])\n        if '</member>' in line:\n            break\nprint('--- UseMemberCasing docs ---')\ncap=False\nfor line in xml.splitlines():\n    if 'UseMemberCasing(' in line:\n        cap=True\n    if cap:\n        print(line.strip()[:250])\n        if '</member>' in line:\n            break\nPY\n# Read Microsoft docs snippet via strings in dll for JsonSerializerSettingsProvider if present in shared framework\npython3 - <<'PY'\nimport os\nfor root,dirs,files in os.walk(os.path.expanduser('~/.nuget/packages')):\n  for f in files:\n    if f=='Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll' and '8.0.30' in root:\n      pass\n# search shared framework\nfor root,dirs,files in os.walk('/usr/local/share/dotnet'):\n  for f in files:\n    if 'NewtonsoftJson' in f and f.endswith('.dll'):\n      path=os.path.join(root,f)\n      if '8.0' in path and 'Mvc.NewtonsoftJson' in f:\n        data=open(path,'rb').read()\n        if b'CreateSerializerSettings' in data:\n          print('found CreateSerializerSettings', path)\nPY",
+			"group": "build"
+		},
+		{
+			"label": "cr-git-status-diff",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && git status --short && echo '---' && git rev-parse --abbrev-ref HEAD && echo '---' && git log --oneline -15 --no-decorate && echo '---DIFF NAME-ONLY---' && git diff --name-only && echo '---CACHED---' && git diff --cached --name-only && echo '---MERGE-BASE origin/HEAD---' && git merge-base HEAD origin/HEAD 2>/dev/null || git merge-base HEAD origin/main 2>/dev/null || echo 'no origin base'; echo '---BRANCH FILES---' && (git diff --name-only origin/HEAD...HEAD 2>/dev/null || git diff --name-only origin/main...HEAD 2>/dev/null || true)",
+			"group": "build"
+		},
+		{
+			"label": "cr-feature-diff-full",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && git diff -- 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 3-Domain/HotshotLogistics.Contracts/Repositories/IJobRepository.cs 3-Domain/HotshotLogistics.Contracts/Services/IJobService.cs 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 1-Presentation/admin-dashboard/src/types/index.ts 1-Presentation/admin-dashboard/src/services/api.ts 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx 1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs && echo '---UNTRACKED---' && git status --short -- 3-Domain/HotshotLogistics.Contracts/Models/ 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx 5-Test/tests/HotshotLogistics.Tests/Services/ && for f in 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs; do echo \"===== $f =====\"; cat \"$f\"; done",
+			"group": "build"
+		},
+		{
+			"label": "cr-build-api-feature",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet build 1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj -c Release --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "cr-build-tests-feature",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet build 5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj -c Release --verbosity minimal && dotnet build 5-Test/tests/HotshotLogistics.IntegrationTests/HotshotLogistics.IntegrationTests.csproj -c Release --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "cr-tsc-admin-feature",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo/1-Presentation/admin-dashboard && npm exec tsc -- --noEmit",
+			"group": "build"
+		},
+		{
+			"label": "cr-prove-newtonsoft-casing",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; python3 - <<'PY'\nfrom pathlib import Path\nimport glob\n# Find MvcNewtonsoftJson package and check default contract resolver via decompile strings / source if available\ncands=list(Path.home().glob('.nuget/packages/microsoft.aspnetcore.mvc.newtonsoftjson/**/lib/**/*.dll'))\nprint('dlls', len(cands))\nfor p in cands:\n  if '8.' in str(p) or '9.' in str(p) or '10.' in str(p):\n    data=p.read_bytes()\n    for s in [b'CamelCasePropertyNamesContractResolver', b'CamelCaseNamingStrategy', b'DefaultContractResolver', b'ContractResolver']:\n      print(p.parent.parent.name if False else p, s.decode(), s in data)\n    break\n# Also check installed source packages\nfor p in Path.home().glob('.nuget/packages/microsoft.aspnetcore.mvc.newtonsoftjson/**/*.xml'):\n  t=p.read_text(errors='ignore')\n  if 'CamelCase' in t:\n    print('xml', p)\n    for line in t.splitlines():\n      if 'Camel' in line or 'ContractResolver' in line or 'SerializerSettings' in line:\n        if 'summary' in line.lower() or 'Camel' in line or 'default' in line.lower():\n          print(line.strip()[:220])\nPY\n# Quick runtime proof with Newtonsoft defaults vs MVC helper if available\ncd /Users/dave/git/personal/hotshot-logistics-demo && cat > /tmp/newtonsoft_casing_check.csx <<'CS'\n#r \"nuget: Newtonsoft.Json, 13.0.3\"\n#r \"nuget: Microsoft.AspNetCore.Mvc.NewtonsoftJson, 8.0.11\"\nusing Newtonsoft.Json;\nusing Newtonsoft.Json.Serialization;\nusing Microsoft.AspNetCore.Mvc;\nvar dto = new { Pending = 1, Assigned = 2, EnRoute = 3, Received = 4, Total = 10 };\nvar plain = JsonConvert.SerializeObject(dto);\nConsole.WriteLine(\"JsonConvert default: \" + plain);\nvar mvc = new MvcNewtonsoftJsonOptions();\nConsole.WriteLine(\"Mvc options settings null? \" + (mvc.SerializerSettings==null));\nvar s = JsonSerializer.Create(mvc.SerializerSettings);\nvar sw = new StringWriter();\ns.Serialize(sw, dto);\nConsole.WriteLine(\"MvcNewtonsoftJsonOptions default serialize: \" + sw.ToString());\nConsole.WriteLine(\"ContractResolver: \" + mvc.SerializerSettings.ContractResolver?.GetType().FullName);\nCS\n# try dotnet-script if present else a tiny project\nif command -v dotnet-script >/dev/null 2>&1; then dotnet-script /tmp/newtonsoft_casing_check.csx; else\n  rm -rf /tmp/njc && mkdir -p /tmp/njc && cd /tmp/njc && dotnet new console -f net8.0 --force >/dev/null && dotnet add package Newtonsoft.Json --version 13.0.3 >/dev/null && dotnet add package Microsoft.AspNetCore.Mvc.NewtonsoftJson --version 8.0.11 >/dev/null && cat > Program.cs <<'CS'\nusing System.IO;\nusing Microsoft.AspNetCore.Mvc;\nusing Newtonsoft.Json;\nvar dto = new Dictionary<string,int>{{ \"Pending\",1},{\"Assigned\",2},{\"EnRoute\",3},{\"Received\",4},{\"Total\",10}};\n// better: anonymous with PascalCase props via record\nvar obj = new { Pending = 1, Assigned = 2, EnRoute = 3, Received = 4, Total = 10 };\nConsole.WriteLine(\"JsonConvert default: \" + JsonConvert.SerializeObject(obj));\nvar mvc = new MvcNewtonsoftJsonOptions();\nConsole.WriteLine(\"ContractResolver: \" + (mvc.SerializerSettings.ContractResolver?.GetType().FullName ?? \"null\"));\nvar sw = new StringWriter();\nJsonSerializer.Create(mvc.SerializerSettings).Serialize(sw, obj);\nConsole.WriteLine(\"MvcNewtonsoftJsonOptions serialize: \" + sw);\nCS\n  dotnet run -c Release --no-restore 2>/dev/null || (dotnet restore >/dev/null && dotnet run -c Release)\nfi",
+			"group": "build"
+		},
+		{
+			"label": "cr-unit-job-status-summary",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet test 5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj -c Release --no-build --filter FullyQualifiedName~JobServiceGetJobStatusSummaryTests --verbosity normal",
+			"group": "build"
+		},
+		{
+			"label": "cr-integration-job-status-summary",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet test 5-Test/tests/HotshotLogistics.IntegrationTests/HotshotLogistics.IntegrationTests.csproj -c Release --filter FullyQualifiedName~GetJobStatusSummary_WithSeededStatusDistribution_ReturnsMatchingCounts --verbosity normal",
+			"group": "build"
+		},
+		{
+			"label": "cr-diff-attr-feature-lines",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && git diff -U0 -- 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 2-Application/HotshotLogistics.Application/Services/JobService.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs | rg -n \"^@@|GetJobStatusSummary|JobStatusSummary|status-summary|\\\\+\" | head -200",
+			"group": "build"
+		},
+		{
+			"label": "cr-git-blame-problems-lines",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && echo '=== JobRepository hunks ===' && git diff -U3 -- 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs | head -120 && echo '=== JobService hunks ===' && git diff -U3 -- 2-Application/HotshotLogistics.Application/Services/JobService.cs | head -80 && echo '=== JobController hunks ===' && git diff -U3 -- 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs | head -100 && echo '=== IntegrationTests hunks around summary ===' && git diff -U3 -- 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs | head -160 && echo '=== line attribution for problem lines ===' && for spec in '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs:110' '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs:118' '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs:125' '2-Application/HotshotLogistics.Application/Services/JobService.cs:89' '2-Application/HotshotLogistics.Application/Services/JobService.cs:321' '2-Application/HotshotLogistics.Application/Services/JobService.cs:340' '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs:131' '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs:143' '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs:194' '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs:267' '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs:379' '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs:423' '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs:34' '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs:48' '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs:62' '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs:72'; do f=${spec%:*}; l=${spec#*:}; echo \"-- $spec\"; git blame -L ${l},${l} -- \"$f\" 2>/dev/null | head -1; git diff -U0 -- \"$f\" | rg -n \"^@@\" -A2 | head -40; done",
+			"group": "build"
+		},
+		{
+			"label": "cr-dotnet-test-release-full",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet test -c Release --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "cr-git-status-diff",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && git status --short && echo '====' && git diff --stat && echo '====' && git diff --name-only && echo '====' && git log --oneline -5",
+			"group": "build"
+		},
+		{
+			"label": "cr-feature-diff-full",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && git diff -- 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 3-Domain/HotshotLogistics.Contracts/Repositories/IJobRepository.cs 3-Domain/HotshotLogistics.Contracts/Services/IJobService.cs 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 1-Presentation/admin-dashboard/src/types/index.ts 1-Presentation/admin-dashboard/src/services/api.ts 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx 1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs",
+			"group": "build"
+		},
+		{
+			"label": "cr-build-api-feature",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet build 1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj -c Release --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "cr-build-tests-feature",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet build 5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj -c Release --verbosity minimal && dotnet build 5-Test/tests/HotshotLogistics.IntegrationTests/HotshotLogistics.IntegrationTests.csproj -c Release --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "cr-tsc-admin-feature",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo/1-Presentation/admin-dashboard && npm exec tsc -- --noEmit",
+			"group": "build"
+		},
+		{
+			"label": "cr-unit-job-status-summary",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet test 5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj --filter FullyQualifiedName~JobServiceGetJobStatusSummaryTests -c Release --verbosity normal --no-build",
+			"group": "build"
+		},
+		{
+			"label": "cr-integration-job-status-summary",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet test 5-Test/tests/HotshotLogistics.IntegrationTests/HotshotLogistics.IntegrationTests.csproj --filter FullyQualifiedName~GetJobStatusSummary_WithSeededStatusDistribution_ReturnsMatchingCounts -c Release --verbosity normal",
+			"group": "build"
+		},
+		{
+			"label": "cr-prove-newtonsoft-casing",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && python3 - <<'PY'\nimport os\nroot='1-Presentation/HotshotLogistics.Api/bin/Release/net8.0'\nfor dirpath,_,files in os.walk(root):\n  for f in files:\n    if f.endswith('.dll') and 'Newtonsoft' in f:\n      path=os.path.join(dirpath,f)\n      data=open(path,'rb').read()\n      print(path, 'size', len(data))\n      for s in [b'CamelCasePropertyNamesContractResolver', b'CamelCaseNamingStrategy', b'UseCamelCasing']:\n        print(' ', s.decode(), data.find(s)>=0)\nprint('--- Program.cs Newtonsoft block ---')\nprint(open('1-Presentation/HotshotLogistics.Api/Program.cs').read().split('AddNewtonsoftJson')[1][:500] if 'AddNewtonsoftJson' in open('1-Presentation/HotshotLogistics.Api/Program.cs').read() else 'missing')\nPY",
+			"group": "build"
+		},
+		{
+			"label": "cr-json-casing-check",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && cat > /tmp/JsonCaseCheck.csx <<'EOF'\n#r \"nuget: Newtonsoft.Json, 13.0.3\"\nusing Newtonsoft.Json;\nusing Newtonsoft.Json.Serialization;\nvar dto = new { Pending = 2, Assigned = 3, EnRoute = 4, Received = 5, Total = 14 };\nConsole.WriteLine(\"Default:\" + JsonConvert.SerializeObject(dto));\nvar settings = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };\nConsole.WriteLine(\"Camel:\" + JsonConvert.SerializeObject(dto, settings));\n// MVC AddNewtonsoftJson default resolver historically CamelCasePropertyNamesContractResolver in ASP.NET Core\nEOF\ndotnet script /tmp/JsonCaseCheck.csx 2>/dev/null || python3 - <<'PY'\n# Prove ASP.NET Core Newtonsoft.Json default via package source if available\nimport glob,os,re\npaths=glob.glob(os.path.expanduser('~/.nuget/packages/microsoft.aspnetcore.mvc.newtonsoftjson/*/**/*.cs'), recursive=True)\n# try decompile-ish: look in xml docs or any local source\ncands=[]\nfor root,dirs,files in os.walk(os.path.expanduser('~/.nuget/packages/microsoft.aspnetcore.mvc.newtonsoftjson')):\n  for f in files:\n    if f.endswith(('.dll','.xml','.md')):\n      cands.append(os.path.join(root,f))\nprint('newtonsoftjson package files sample:', len(cands))\nfor p in cands[:20]:\n  print(p)\n# binary search for CamelCase in Mvc.NewtonsoftJson dll\nfor p in cands:\n  if p.endswith('.dll') and 'NewtonsoftJson' in p and 'resources' not in p.lower():\n    data=open(p,'rb').read()\n    print('DLL', p)\n    for s in [b'CamelCasePropertyNamesContractResolver', b'CamelCaseNamingStrategy', b'ContractResolver', b'UseCamelCasing']:\n      print(' ',s.decode(), data.find(s)>=0)\nPY\n",
+			"group": "build"
+		},
+		{
+			"label": "cr-dotnet-test-release-full",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet test -c Release --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "cr-git-blame-problems-lines",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && echo '=== JobRepository hunks ===' && git diff -U3 -- 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs | head -120 && echo '=== JobService hunks ===' && git diff -U3 -- 2-Application/HotshotLogistics.Application/Services/JobService.cs | head -80 && echo '=== JobController hunks ===' && git diff -U3 -- 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs | head -100 && echo '=== IntegrationTests hunks around summary ===' && git diff -U3 -- 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs | head -160 && echo '=== line attribution for problem lines ===' && for spec in '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs:110' '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs:118' '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs:125' '2-Application/HotshotLogistics.Application/Services/JobService.cs:89' '2-Application/HotshotLogistics.Application/Services/JobService.cs:321' '2-Application/HotshotLogistics.Application/Services/JobService.cs:340' '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs:131' '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs:143' '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs:194' '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs:267' '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs:379' '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs:423' '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs:34' '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs:48' '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs:62' '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs:72'; do f=${spec%:*}; l=${spec#*:}; echo \"-- $spec\"; git blame -L ${l},${l} -- \"$f\" 2>/dev/null | head -1; git diff -U0 -- \"$f\" | rg -n \"^@@\" -A2 | head -40; done",
+			"group": "build"
+		},
+		{
+			"label": "cr-diff-attr-feature-lines",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && git diff -U0 -- 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 2-Application/HotshotLogistics.Application/Services/JobService.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs | rg -n \"^@@|GetJobStatusSummary|JobStatusSummary|status-summary|\\\\+\" | head -200",
+			"group": "build"
+		},
+		{
+			"label": "cr-check-job-status-json",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /tmp/njc 2>/dev/null || (rm -rf /tmp/njc && mkdir -p /tmp/njc && cd /tmp/njc && dotnet new console -f net8.0 --force >/dev/null && dotnet add package Newtonsoft.Json --version 13.0.3 >/dev/null && dotnet add package Microsoft.AspNetCore.Mvc.NewtonsoftJson --version 8.0.11 >/dev/null); cd /tmp/njc && cat > Program.cs <<'CS'\nusing System.IO;\nusing Microsoft.AspNetCore.Mvc;\nusing Newtonsoft.Json;\nenum JobStatus { Pending, Assigned, EnRoute, Received }\nvar obj = new { status = JobStatus.Received, status2 = JobStatus.EnRoute };\nvar mvc = new MvcNewtonsoftJsonOptions();\nvar sw = new StringWriter();\nJsonSerializer.Create(mvc.SerializerSettings).Serialize(sw, obj);\nConsole.WriteLine(sw.ToString());\nCS\ndotnet run -c Release --verbosity quiet",
+			"group": "build"
+		},
+		{
+			"label": "cr2-git-diff-scope",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && git status --short -- 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 3-Domain/HotshotLogistics.Contracts/Repositories/IJobRepository.cs 3-Domain/HotshotLogistics.Contracts/Services/IJobService.cs 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 1-Presentation/admin-dashboard/src/types/index.ts 1-Presentation/admin-dashboard/src/services/api.ts 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx 1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx 1-Presentation/admin-dashboard/src/components/jobs/JobsManagement.tsx 1-Presentation/admin-dashboard/src/components/tracking/TrackingDashboard.tsx 1-Presentation/admin-dashboard/tests/dashboard-overview.spec.ts 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs && echo '---DIFF---' && git diff -- 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 3-Domain/HotshotLogistics.Contracts/Repositories/IJobRepository.cs 3-Domain/HotshotLogistics.Contracts/Services/IJobService.cs 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 1-Presentation/admin-dashboard/src/types/index.ts 1-Presentation/admin-dashboard/src/services/api.ts 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx 1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx 1-Presentation/admin-dashboard/src/components/jobs/JobsManagement.tsx 1-Presentation/admin-dashboard/src/components/tracking/TrackingDashboard.tsx 1-Presentation/admin-dashboard/tests/dashboard-overview.spec.ts 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs",
+			"group": "build"
+		},
+		{
+			"label": "cr2-build-api",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet build 1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj -c Release --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "cr2-unit-job-status",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet test 5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj -c Release --filter FullyQualifiedName~JobServiceGetJobStatusSummaryTests --verbosity minimal --no-restore",
+			"group": "build"
+		},
+		{
+			"label": "cr2-integration-job-status",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet test 5-Test/tests/HotshotLogistics.IntegrationTests/HotshotLogistics.IntegrationTests.csproj -c Release --filter FullyQualifiedName~GetJobStatusSummary_WithSeededStatusDistribution --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "cr2-tsc-admin",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo/1-Presentation/admin-dashboard && npm exec tsc -- --noEmit",
+			"group": "build"
+		},
+		{
+			"label": "cr2-newtonsoft-casing",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /tmp && rm -rf njc2 && mkdir njc2 && cd njc2 && dotnet new console -f net8.0 --force >/dev/null && dotnet add package Newtonsoft.Json --version 13.0.3 >/dev/null && dotnet add package Microsoft.AspNetCore.Mvc.NewtonsoftJson --version 8.0.11 >/dev/null && cat > Program.cs <<'CS'\nusing System.IO;\nusing Microsoft.AspNetCore.Mvc;\nusing Newtonsoft.Json;\nenum JobStatus { Pending, Assigned, EnRoute, Received }\npublic sealed record JobStatusSummaryDto { public int Pending { get; init; } public int Assigned { get; init; } public int EnRoute { get; init; } public int Received { get; init; } public int Total { get; init; } }\nvar dto = new JobStatusSummaryDto { Pending = 1, Assigned = 2, EnRoute = 3, Received = 4, Total = 10 };\nvar mvc = new MvcNewtonsoftJsonOptions();\nvar sw = new StringWriter();\nJsonSerializer.Create(mvc.SerializerSettings).Serialize(sw, dto);\nConsole.WriteLine(\"DEFAULT:\" + sw);\nvar camel = new MvcNewtonsoftJsonOptions();\ncamel.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver();\nvar sw2 = new StringWriter();\nJsonSerializer.Create(camel.SerializerSettings).Serialize(sw2, dto);\nConsole.WriteLine(\"CAMEL:\" + sw2);\nCS\ndotnet run -c Release --verbosity quiet && echo '---' && rg -n \"AddNewtonsoftJson|CamelCase|ContractResolver|JsonSerializerSettings\" /Users/dave/git/personal/hotshot-logistics-demo/1-Presentation/HotshotLogistics.Api /Users/dave/git/personal/hotshot-logistics-demo -g'*.cs' | head -80",
+			"group": "build"
+		},
+		{
+			"label": "cr2-dotnet-test-release",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet test HotshotLogistics.sln -c Release --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "cr2-git-status-and-diff",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && git status --short && echo '====' && git diff --stat -- 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 3-Domain/HotshotLogistics.Contracts/Repositories/IJobRepository.cs 3-Domain/HotshotLogistics.Contracts/Services/IJobService.cs 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 1-Presentation/admin-dashboard/src/types/index.ts 1-Presentation/admin-dashboard/src/services/api.ts 1-Presentation/admin-dashboard/src/components/dashboard/ 1-Presentation/admin-dashboard/src/components/jobs/JobsManagement.tsx 1-Presentation/admin-dashboard/src/components/tracking/TrackingDashboard.tsx 1-Presentation/admin-dashboard/tests/dashboard-overview.spec.ts 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs && echo '====' && git diff -U0 -- 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs | head -400",
+			"group": "build"
+		},
+		{
+			"label": "cr2-newtonsoft-casing-fixed",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /tmp && rm -rf njc3 && mkdir njc3 && cd njc3 && dotnet new console -f net8.0 --force >/dev/null && dotnet add package Newtonsoft.Json --version 13.0.3 >/dev/null && dotnet add package Microsoft.AspNetCore.Mvc.NewtonsoftJson --version 8.0.11 >/dev/null && cat > Program.cs <<'CS'\nusing System.IO;\nusing Microsoft.AspNetCore.Mvc;\nusing Newtonsoft.Json;\nusing Newtonsoft.Json.Serialization;\nvar dto = new { Pending = 1, Assigned = 2, EnRoute = 3, Received = 4, Total = 10 };\nvar mvc = new MvcNewtonsoftJsonOptions();\nvar sw = new StringWriter();\nJsonSerializer.Create(mvc.SerializerSettings).Serialize(sw, dto);\nConsole.WriteLine(\"DEFAULT:\" + sw);\nvar camel = new MvcNewtonsoftJsonOptions();\ncamel.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();\nvar sw2 = new StringWriter();\nJsonSerializer.Create(camel.SerializerSettings).Serialize(sw2, dto);\nConsole.WriteLine(\"CAMEL:\" + sw2);\nCS\ndotnet run -c Release --verbosity quiet; echo '---API Program Newtonsoft---'; sed -n '40,70p' /Users/dave/git/personal/hotshot-logistics-demo/1-Presentation/HotshotLogistics.Api/Program.cs",
+			"group": "build"
+		},
+		{
+			"label": "cr2-blame-problem-lines",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && for f in '2-Application/HotshotLogistics.Application/Services/JobService.cs' '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs' '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs' '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs'; do echo \"===== $f =====\"; git blame -L 53,60 -- \"$f\" 2>/dev/null | head -20; done; echo '===== GetJobStatusSummary method blame ====='; git blame -L 131,135 -- 2-Application/HotshotLogistics.Application/Services/JobService.cs; git blame -L 257,292 -- 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs; git blame -L 53,60 -- 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs; git blame -L 256,285 -- 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs; echo '===== problem line attribution ====='; git blame -L 110,125 -- 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs | head -20; git blame -L 89,90 -- 2-Application/HotshotLogistics.Application/Services/JobService.cs; git blame -L 321,322 -- 2-Application/HotshotLogistics.Application/Services/JobService.cs; git blame -L 131,132 -- 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs; git blame -L 34,35 -- 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs",
+			"group": "build"
+		},
+		{
+			"label": "cr2-diff-new-code-var-check",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && git diff -U3 -- 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 3-Domain/HotshotLogistics.Contracts/ 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs | rg -n \"^\\+|var |GetJobStatusSummary|status-summary|JobStatusSummary\" | head -250 && echo '====UNTRACKED NEW FILES====' && git status --short -- 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx && echo '====LS NEW FILES====' && ls -la 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx 2>/dev/null; git ls-files --others --exclude-standard -- 5-Test 3-Domain 1-Presentation/admin-dashboard | head -50",
+			"group": "build"
+		},
+		{
+			"label": "cr2-git-show-feature-hunks",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && git log --oneline -15 && echo '====' && git branch -vv | head -20 && echo '====' && git diff HEAD --stat | tail -40 && echo '====' && git diff HEAD -U0 -- 1-Presentation/admin-dashboard/src/types/index.ts 1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx 1-Presentation/admin-dashboard/tests/dashboard-overview.spec.ts | head -300",
+			"group": "build"
+		},
+		{
+			"label": "cr2-diff-frontend-details",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && git diff HEAD -U2 -- 1-Presentation/admin-dashboard/src/types/index.ts 1-Presentation/admin-dashboard/src/services/api.ts 1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx 1-Presentation/admin-dashboard/src/components/jobs/JobsManagement.tsx 1-Presentation/admin-dashboard/src/components/tracking/TrackingDashboard.tsx 1-Presentation/admin-dashboard/tests/dashboard-overview.spec.ts | head -450 && echo '==== NEW JobStatusCards ====' && wc -l 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs",
+			"group": "build"
+		},
+		{
+			"label": "cr2-target-typed-new-check",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && rg -n \"\\bvar\\b\" 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs && echo '---new hunks only var?---' && git diff -U0 -- 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 2-Application/HotshotLogistics.Application/Services/JobService.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs | rg '^\\+.*\\bvar\\b' || echo 'NO_VAR_IN_ADDED_LINES'",
+			"group": "build"
+		},
+		{
+			"label": "cr3-git-status-diff",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && git status --short && echo '==== DIFF NAMES ====' && git diff --name-only && echo '==== STAGED NAMES ====' && git diff --cached --name-only && echo '==== FULL DIFF SCOPE ====' && git diff -- 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 3-Domain/HotshotLogistics.Contracts/Repositories/IJobRepository.cs 3-Domain/HotshotLogistics.Contracts/Services/IJobService.cs 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 1-Presentation/admin-dashboard/src/types/index.ts 1-Presentation/admin-dashboard/src/services/api.ts 1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx 1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx 1-Presentation/admin-dashboard/src/components/jobs/JobsManagement.tsx 1-Presentation/admin-dashboard/src/components/tracking/TrackingDashboard.tsx 1-Presentation/admin-dashboard/tests/dashboard-overview.spec.ts 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs",
+			"group": "build"
+		},
+		{
+			"label": "cr3-build-api",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet build 1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj -c Release --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "cr3-unit-job-status",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet test 5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj -c Release --filter FullyQualifiedName~JobServiceGetJobStatusSummaryTests --verbosity minimal --no-restore 2>&1 || dotnet test 5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj -c Release --filter FullyQualifiedName~JobServiceGetJobStatusSummaryTests --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "cr3-integration-job-status",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet test 5-Test/tests/HotshotLogistics.IntegrationTests/HotshotLogistics.IntegrationTests.csproj -c Release --filter FullyQualifiedName~GetJobStatusSummary --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "cr3-integration-job-status",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && dotnet test 5-Test/tests/HotshotLogistics.IntegrationTests/HotshotLogistics.IntegrationTests.csproj -c Release --filter FullyQualifiedName~GetJobStatusSummary_WithSeededStatusDistribution_ReturnsMatchingCounts --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "cr3-tsc-admin",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo/1-Presentation/admin-dashboard && npm exec tsc -- --noEmit",
+			"group": "build"
+		},
+		{
+			"label": "cr3-var-and-newtonsoft",
+			"type": "shell",
+			"command": "export GIT_PAGER=cat PAGER=cat; cd /Users/dave/git/personal/hotshot-logistics-demo && echo '=== VAR IN ADDED LINES ===' && git diff -U0 -- 3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs 3-Domain/HotshotLogistics.Contracts/Repositories/IJobRepository.cs 3-Domain/HotshotLogistics.Contracts/Services/IJobService.cs 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs | rg '^\\+.*\\bvar\\b' || echo 'NO_VAR_IN_ADDED_LINES' && echo '=== NEWTONSOFT DEFAULT ===' && rg -n \"AddNewtonsoftJson|CamelCasePropertyNamesContractResolver|ContractResolver|JsonSerializerSettings\" 1-Presentation/HotshotLogistics.Api/Program.cs 1-Presentation/HotshotLogistics.Api/Program.Api.cs 2-Application 0-Base -g'*.cs' || true && echo '=== STATUS ===' && git status --short -- 3-Domain/HotshotLogistics.Contracts 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 1-Presentation/admin-dashboard 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs && echo '=== DIFFSTAT ===' && git diff --stat -- 3-Domain/HotshotLogistics.Contracts 2-Application/HotshotLogistics.Application/Services/JobService.cs 4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs 1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs 1-Presentation/admin-dashboard 5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs 5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs",
+			"group": "build"
+		},
+		{
+			"label": "cr4-git-diff-scope",
+			"type": "shell",
+			"command": "git status --short && echo '---' && git diff --name-only && echo '---' && git diff --stat && echo '---FEATURE---' && git log --oneline -5 && git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD main 2>/dev/null || true && git diff --name-only $(git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD main 2>/dev/null || echo HEAD~20)...HEAD 2>/dev/null | head -80",
+			"group": "test"
+		},
+		{
+			"label": "cr4-build-api",
+			"type": "shell",
+			"command": "dotnet build 1-Presentation/HotshotLogistics.Api/HotshotLogistics.Api.csproj -c Release --verbosity minimal",
+			"group": "build"
+		},
+		{
+			"label": "cr4-unit-job-status",
+			"type": "shell",
+			"command": "dotnet test 5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj -c Release --filter FullyQualifiedName~JobServiceGetJobStatusSummary --verbosity normal --no-restore 2>&1 || dotnet test 5-Test/tests/HotshotLogistics.Tests/HotshotLogistics.Tests.csproj -c Release --filter FullyQualifiedName~JobServiceGetJobStatusSummary --verbosity normal",
+			"group": "test"
+		},
+		{
+			"label": "cr4-tsc-admin",
+			"type": "shell",
+			"command": "cd 1-Presentation/admin-dashboard && npm exec tsc -- --noEmit",
+			"group": "test"
+		},
+		{
+			"label": "cr4-integration-job-status",
+			"type": "shell",
+			"command": "dotnet test 5-Test/tests/HotshotLogistics.IntegrationTests/HotshotLogistics.IntegrationTests.csproj -c Release --filter FullyQualifiedName~GetJobStatusSummary --verbosity normal",
+			"group": "test"
+		},
+		{
+			"label": "cr4-dotnet-test-release",
+			"type": "shell",
+			"command": "dotnet test HotshotLogistics.sln -c Release --verbosity minimal",
+			"group": "test"
+		},
+		{
+			"label": "cr4-newtonsoft-var-proof",
+			"type": "shell",
+			"command": "python3 - <<'PY'\nimport inspect, os\n# Prove MVC Newtonsoft default contract resolver naming\ntry:\n    import clr  # unlikely\nexcept Exception:\n    pass\nprint('--- Newtonsoft MVC defaults via reflection of installed package ---')\nimport glob, zipfile, re\nroots=[\n '1-Presentation/HotshotLogistics.Api/bin/Release/net8.0',\n os.path.expanduser('~/.nuget/packages/microsoft.aspnetcore.mvc.newtonsoftjson')\n]\nfound=False\nfor root in roots:\n  if not os.path.exists(root):\n    continue\n  for path in glob.glob(root+'/**/Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll', recursive=True):\n    print('DLL', path)\n    found=True\n  for path in glob.glob(root+'/**/*NewtonsoftJson*.dll', recursive=True)[:20]:\n    print('cand', path)\nif not found:\n  print('no dll found under known roots')\n# Also print Program.cs Newtonsoft block and check JobStatusSummary new C# for var\nprint('--- GetJobStatusSummary methods source scan for var ---')\nfiles=[\n'1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs',\n'2-Application/HotshotLogistics.Application/Services/JobService.cs',\n'4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs',\n'3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs',\n'3-Domain/HotshotLogistics.Contracts/Repositories/IJobRepository.cs',\n'3-Domain/HotshotLogistics.Contracts/Services/IJobService.cs',\n'5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs',\n]\nimport pathlib\nfor f in files:\n  p=pathlib.Path(f)\n  if not p.exists():\n    print('MISSING', f); continue\n  text=p.read_text()\n  # extract method bodies containing JobStatusSummary\n  for i,line in enumerate(text.splitlines(),1):\n    if 'JobStatusSummary' in line or 'GetJobStatusSummary' in line:\n      print(f'{f}:{i}:{line}')\n    if re.search(r'\\bvar\\b', line) and ('JobStatus' in line or 'summary' in line.lower() or 'PendingStatus' in line):\n      print('VAR_NEAR', f, i, line)\nprint('--- done ---')\nPY\n# decompile default settings with strings\npython3 - <<'PY'\nimport glob,os,subprocess,struct\npkg=os.path.expanduser('~/.nuget/packages/microsoft.aspnetcore.mvc.newtonsoftjson')\ndlls=glob.glob(pkg+'/**/Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll', recursive=True)\nprint('nuget dlls', dlls[:5])\nfor d in dlls[:3]:\n  data=open(d,'rb').read()\n  for s in [b'CamelCasePropertyNamesContractResolver', b'ContractResolver', b'JsonSerializerSettingsProvider', b'AddNewtonsoftJson']:\n    print(d.split('microsoft.aspnetcore.mvc.newtonsoftjson')[-1], s.decode(), data.find(s)>=0)\nPY\n",
+			"group": "test"
+		},
+		{
+			"label": "cr4-git-attr-problems",
+			"type": "shell",
+			"command": "git status -sb; echo '---'; git rev-parse --abbrev-ref HEAD; echo '---'; git log --oneline -8; echo '---MERGEBASE---'; MB=$(git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD main 2>/dev/null || echo ''); echo MB=$MB; echo '---NAMEONLY---'; if [ -n \"$MB\" ]; then git diff --name-only $MB...HEAD; else git status --short; fi; echo '---STAT---'; if [ -n \"$MB\" ]; then git diff --stat $MB...HEAD | tail -40; fi; echo '---HUNKS feature files---'; if [ -n \"$MB\" ]; then git diff $MB...HEAD -- '**/JobStatus*' '**/JobController.cs' '**/JobService.cs' '**/JobRepository.cs' '**/IJobRepository.cs' '**/IJobService.cs' '**/JobControllerIntegrationTests.cs' '**/JobServiceGetJobStatusSummaryTests.cs' '1-Presentation/admin-dashboard/src/types/index.ts' '1-Presentation/admin-dashboard/src/services/api.ts' '1-Presentation/admin-dashboard/src/components/dashboard/*' '1-Presentation/admin-dashboard/src/components/jobs/JobsManagement.tsx' '1-Presentation/admin-dashboard/src/components/tracking/TrackingDashboard.tsx' '1-Presentation/admin-dashboard/tests/dashboard-overview.spec.ts' | head -400; fi",
+			"group": "test"
+		},
+		{
+			"label": "cr4-git-diff-plain",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && git status -sb && git rev-parse --abbrev-ref HEAD && MB=$(git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD main 2>/dev/null || true); echo MB=$MB; if [ -n \"$MB\" ]; then git diff --name-only \"$MB\"...HEAD; echo '---'; git diff -U0 \"$MB\"...HEAD -- '3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs' '2-Application/HotshotLogistics.Application/Services/JobService.cs' '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs' '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs' '5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs' '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs' '1-Presentation/admin-dashboard/src/types/index.ts' '1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx' '1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx' | sed -n '1,250p'; fi; echo '---UNSTAGED---'; git diff --name-only; git diff -U0 -- '1-Presentation/admin-dashboard/src/types/index.ts' '1-Presentation/admin-dashboard/src/components/dashboard/*' '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs' '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs' | sed -n '1,200p'",
+			"group": "test"
+		},
+		{
+			"label": "cr4-newtonsoft-default-settings",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && python3 - <<'PY'\nimport glob, os, re, struct\n# Extract readable strings around JsonSerializerSettingsProvider from the DLL\npath='/Users/dave/.nuget/packages/microsoft.aspnetcore.mvc.newtonsoftjson/8.0.30/lib/net8.0/Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll'\ndata=open(path,'rb').read()\n# pull utf-8ish strings length>=10\nstrings=re.findall(rb'[\\x20-\\x7e]{10,}', data)\nkeys=[s.decode('ascii') for s in strings if any(k in s.decode('ascii') for k in ['Camel','Contract','Naming','JsonSerializer','Settings','Resolver','Property'])]\nfor k in sorted(set(keys)):\n    print(k)\nprint('---')\n# Also check source package if available\nfor p in glob.glob(os.path.expanduser('~/.nuget/packages/microsoft.aspnetcore.mvc.newtonsoftjson/8.0.30/**/*'), recursive=True):\n    if p.endswith(('.cs','.xml','.md')) and ('Json' in os.path.basename(p) or 'Newtonsoft' in os.path.basename(p)):\n        print('file', p)\nPY\n# use monodis/ilspycmd if present\n(which ilspycmd || true); (which monodis || true); (ls ~/.dotnet/tools 2>/dev/null || true)\n# compile tiny program against the package via existing build output\ncat > /tmp/newtonsoft_default_check.csx <<'CS'\n#r \"nuget: Microsoft.AspNetCore.Mvc.NewtonsoftJson, 8.0.30\"\nusing Microsoft.AspNetCore.Mvc;\nusing Microsoft.Extensions.Options;\nvar opts = new MvcNewtonsoftJsonOptions();\nConsole.WriteLine(opts.SerializerSettings.ContractResolver?.GetType().FullName ?? \"null\");\nConsole.WriteLine(opts.SerializerSettings.ContractResolver);\nCS\ndotnet script /tmp/newtonsoft_default_check.csx 2>/dev/null || python3 - <<'PY'\n# fallback: read XML docs\nimport glob\nfor p in glob.glob('/Users/dave/.nuget/packages/microsoft.aspnetcore.mvc.newtonsoftjson/8.0.30/**/*.xml', recursive=True):\n  print('xml',p)\n  t=open(p,errors='ignore').read()\n  for line in t.splitlines():\n    if 'Camel' in line or 'ContractResolver' in line or 'JsonSerializerSettings' in line:\n      print(line[:200])\nPY\n",
+			"group": "test"
+		},
+		{
+			"label": "cr4-git-feature-files",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && git status -sb | head -5 && git branch -vv | head -5 && git log --oneline --all --grep='status summary\\|Job Status\\|status-summary\\|JobStatusCards' -i | head -20 && echo '---' && git log --oneline -15 -- '**/JobStatusSummary*' '**/JobStatusCards*' '**/JobServiceGetJobStatusSummary*' && echo '---BLAME new methods---' && git blame -L 53,60 -- '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs' && git blame -L 257,293 -- '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs' && git blame -L 256,292 -- '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs' | head -50 && echo '---DIFF vs HEAD parent for feature---' && git log -1 --format='%H %s' -- '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs' && git log -3 -p -- '1-Presentation/admin-dashboard/src/types/index.ts' | head -120 && git log -3 -p -- '1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx' | head -120 && git log -3 -p -- '1-Presentation/admin-dashboard/src/components/dashboard/DashboardOverview.tsx' | head -150",
+			"group": "test"
+		},
+		{
+			"label": "cr4-ide-preexist-proof",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && echo 'Problem lines attribution' && for spec in \\\n  '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs:110' \\\n  '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs:118' \\\n  '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs:125' \\\n  '2-Application/HotshotLogistics.Application/Services/JobService.cs:89' \\\n  '2-Application/HotshotLogistics.Application/Services/JobService.cs:321' \\\n  '2-Application/HotshotLogistics.Application/Services/JobService.cs:340' \\\n  '2-Application/HotshotLogistics.Application/Services/JobService.cs:351' \\\n  '2-Application/HotshotLogistics.Application/Services/JobService.cs:362' \\\n  '2-Application/HotshotLogistics.Application/Services/JobService.cs:368' \\\n  '2-Application/HotshotLogistics.Application/Services/JobService.cs:412' \\\n  '2-Application/HotshotLogistics.Application/Services/JobService.cs:544' \\\n  '2-Application/HotshotLogistics.Application/Services/JobService.cs:573' \\\n  '2-Application/HotshotLogistics.Application/Services/JobService.cs:613' \\\n  '2-Application/HotshotLogistics.Application/Services/JobService.cs:634' \\\n  '2-Application/HotshotLogistics.Application/Services/JobService.cs:684' \\\n  '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs:131' \\\n  '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs:143' \\\n  '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs:194' \\\n  '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs:267' \\\n  '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs:379' \\\n  '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs:423' \\\n  '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs:34' \\\n  '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs:48' \\\n  '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs:62' \\\n  '5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs:72'; do \\\n  f=${spec%:*}; l=${spec##*:}; \\\n  echo \"## $f:$l\"; \\\n  git blame -L $l,$l -- \"$f\" | cat; \\\n  git log -1 --format='commit %h %ci %s' -L $l,$l:\"$f\" 2>/dev/null | head -3; \\\ndone && echo '---NEW method lines blame---' && git blame -L 257,293 -- '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs' | cat && git blame -L 53,60 -- '1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs' | cat && git blame -L 132,135 -- '2-Application/HotshotLogistics.Application/Services/JobService.cs' | cat",
+			"group": "test"
+		},
+		{
+			"label": "cr4-prove-newtonsoft-casing",
+			"type": "shell",
+			"command": "cd /tmp && rm -rf nsw-check && mkdir nsw-check && cd nsw-check && cat > nsw.csproj <<'EOF'\n<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <OutputType>Exe</OutputType>\n    <TargetFramework>net8.0</TargetFramework>\n    <ImplicitUsings>enable</ImplicitUsings>\n    <Nullable>enable</Nullable>\n  </PropertyGroup>\n  <ItemGroup>\n    <PackageReference Include=\"Microsoft.AspNetCore.Mvc.NewtonsoftJson\" Version=\"8.0.30\" />\n  </ItemGroup>\n</Project>\nEOF\ncat > Program.cs <<'EOF'\nusing Microsoft.AspNetCore.Mvc;\nusing Newtonsoft.Json;\nusing Newtonsoft.Json.Serialization;\n\nvar options = new MvcNewtonsoftJsonOptions();\n// Mimic AddNewtonsoftJson default path: settings come from JsonSerializerSettingsProvider via options ctor defaults\nvar settings = options.SerializerSettings;\nConsole.WriteLine(\"ContractResolverType=\" + (settings.ContractResolver?.GetType().FullName ?? \"null\"));\nif (settings.ContractResolver is DefaultContractResolver dcr)\n{\n    Console.WriteLine(\"NamingStrategy=\" + (dcr.NamingStrategy?.GetType().FullName ?? \"null\"));\n}\n\nvar dto = new { Pending = 1, Assigned = 2, EnRoute = 3, Received = 4, Total = 10 };\nvar json = JsonConvert.SerializeObject(dto, settings);\nConsole.WriteLine(\"Serialized=\" + json);\n\n// Also prove CreateSerializerSettings if accessible via reflection\nvar t = Type.GetType(\"Microsoft.AspNetCore.Mvc.NewtonsoftJson.JsonSerializerSettingsProvider, Microsoft.AspNetCore.Mvc.NewtonsoftJson\");\nif (t != null)\n{\n    var m = t.GetMethod(\"CreateSerializerSettings\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);\n    if (m != null)\n    {\n        var s2 = (JsonSerializerSettings)m.Invoke(null, null)!;\n        Console.WriteLine(\"ProviderContractResolver=\" + (s2.ContractResolver?.GetType().FullName ?? \"null\"));\n        if (s2.ContractResolver is DefaultContractResolver dcr2)\n            Console.WriteLine(\"ProviderNamingStrategy=\" + (dcr2.NamingStrategy?.GetType().FullName ?? \"null\"));\n        Console.WriteLine(\"ProviderSerialized=\" + JsonConvert.SerializeObject(dto, s2));\n    }\n}\nEOF\ndotnet run -c Release --verbosity quiet\n",
+			"group": "test"
+		},
+		{
+			"label": "cr4-scan-new-var",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && python3 - <<'PY'\nimport re, pathlib, subprocess\n# Scan uncommitted feature hunks for added lines with var\nfiles = [\n'3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs',\n'3-Domain/HotshotLogistics.Contracts/Repositories/IJobRepository.cs',\n'3-Domain/HotshotLogistics.Contracts/Services/IJobService.cs',\n'2-Application/HotshotLogistics.Application/Services/JobService.cs',\n'4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs',\n'1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs',\n'5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs',\n'5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs',\n]\n# get unstaged+staged diff added lines\nproc=subprocess.run(['git','diff','HEAD','--',*files], capture_output=True, text=True)\ndiff=proc.stdout\nprint('diff bytes', len(diff))\nadded=[]\ncur=None\nfor line in diff.splitlines():\n    if line.startswith('+++ b/'):\n        cur=line[6:]\n    elif line.startswith('+') and not line.startswith('+++'):\n        added.append((cur, line[1:]))\nvar_hits=[(f,l) for f,l in added if re.search(r'\\bvar\\b', l)]\nprint('added lines', len(added))\nprint('var hits in added lines', len(var_hits))\nfor f,l in var_hits:\n    print('VAR', f, l)\n# also method-local scan of GetJobStatusSummary bodies\nprint('--- method body var scan ---')\nbody_files={\n'1-Presentation/HotshotLogistics.Api/Controllers/JobController.cs': range(53,61),\n'2-Application/HotshotLogistics.Application/Services/JobService.cs': range(132,136),\n'4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs': range(257,294),\n'5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs': range(1,50),\n'5-Test/tests/HotshotLogistics.IntegrationTests/JobControllerIntegrationTests.cs': range(255,330),\n'3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs': range(1,20),\n}\nfor f,r in body_files.items():\n    lines=pathlib.Path(f).read_text().splitlines()\n    for i in r:\n        if i-1 < len(lines) and re.search(r'\\bvar\\b', lines[i-1]):\n            print(f'{f}:{i}:{lines[i-1]}')\nprint('done')\nPY",
+			"group": "test"
+		},
+		{
+			"label": "cr4-git-status-names",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && git status --porcelain | rg -n 'JobStatus|JobController|JobService|JobRepository|IJob|admin-dashboard/(src|tests)|dashboard-overview|types/index|api\\.ts|JobsManagement|TrackingDashboard|DashboardOverview' || true; echo '---'; git diff --stat HEAD -- '3-Domain/HotshotLogistics.Contracts' '2-Application/HotshotLogistics.Application' '4-Persistence/HotshotLogistics.Data/Repositories/JobRepository.cs' '1-Presentation/HotshotLogistics.Api' '5-Test' '1-Presentation/admin-dashboard' | cat",
+			"group": "test"
+		},
+		{
+			"label": "cr4-untracked-feature",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && git status --porcelain -- '3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs' '5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs' '1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx' && ls -la '3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs' '5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs' '1-Presentation/admin-dashboard/src/components/dashboard/JobStatusCards.tsx' && git check-ignore -v '3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs' '5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs' 2>&1 || true && git ls-files --error-unmatch '3-Domain/HotshotLogistics.Contracts/Models/JobStatusSummaryDto.cs' '5-Test/tests/HotshotLogistics.Tests/Services/JobServiceGetJobStatusSummaryTests.cs' 2>&1 || true",
+			"group": "test"
+		},
+		{
+			"label": "cr4-coverage-note",
+			"type": "shell",
+			"command": "cd /Users/dave/git/personal/hotshot-logistics-demo && ls 6-Docs/standards/test 2>/dev/null; rg -n 'coverage|threshold|fileLinePercent' AGENTS.md 6-Docs/standards/test 6-Docs/README.md 2>/dev/null | head -40; ls scripts 7-Deployment 2>/dev/null | head -20; find . -name '*comprehensive*test*' -o -name '*coverage*' 2>/dev/null | rg -v 'node_modules|bin/|obj/|TestResults' | head -30",
+			"group": "test"
 		}
 	]
 }

@@ -79,6 +79,10 @@ bld/
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
+# Playwright
+playwright-report/
+test-results/
+
 # NUNIT
 *.VisualState.xml
 TestResult.xml

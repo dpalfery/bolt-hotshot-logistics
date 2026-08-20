@@ -40,10 +40,16 @@ license: MIT
      - Build succeeds (`dotnet build` step inside the script).
      - Unit, integration, and end-to-end test projects for the host repository all green.
      - Unit-coverage report at or above the configured `fileLinePercent` / `classLinePercent` thresholds.
+      - IDE Problems Gate PASS (`get_errors` inventory attached; no blocking diagnostics).
    - **What is opt-in (do not block on these unless the change touches the area):**
      - `--azure-integration-tests` — requires live Azure credentials; only required if the diff touches Azure-integrated code paths.
      - `--load-tests` — requires the API running locally; only required for performance-sensitive changes.
-   - **On failure:** record each failing suite/coverage shortfall as a `Critical` finding in the "Pre-Merge Gate Findings" section of the report, including the exact failing test path, the command that was run, and the threshold gap. Do **not** return `Approve` until the gate is re-run green.
+    - **On failure:** record each failing suite/coverage shortfall as a `Critical` finding in the "Pre-Merge Gate Findings" section of the report, including the exact failing test path, the command that was run, and the threshold gap. Do **not** return `Approve` until the gate is re-run green.
+7b. **IDE Problems Gate (always — blocking):**
+   Run `get_errors` on every changed/added file. For final approval of a multi-task feature, also run workspace-wide `get_errors`.
+   - Emit section **IDE Problems Gate** with total count and per-finding disposition.
+   - Apply the code-reviewer agent rules for pre-existing proof (§9b).
+   - A green Pre-Merge test gate does not satisfy this step.
 8. **Compile Feedback:** Create a structured output of findings as requested, folding Pre-Merge Gate and security-review findings into the same report. The Pre-Merge Gate status (pass/fail) MUST appear in the Overall Assessment.
 
 ## Universal Code Review Dimensions
@@ -82,4 +88,6 @@ List each issue found clearly:
 - **Verdict:** (Approve / Needs Changes)
 - **Pre-Merge Gate:** (PASS / FAIL) — reference the `run-comprehensive-tests` output artifact path.
 - **Coverage:** file-line / class-line percentages vs. the **Test Coverage Config** floor.
+- **IDE Problems Gate:** PASS | FAIL — `get_errors` total=N; in-scope blocking=M; pre-existing (proved)=P
+- **Problems inventory path:** (inline table or scratchpad path under <agent-scratchpad>)
 - **Summary:** A brief summary of the overall code quality and a clear next step. When the Pre-Merge Gate is FAIL, the next step is the remediation actions listed in the Pre-Merge Gate Findings section, not additional code-style polish.

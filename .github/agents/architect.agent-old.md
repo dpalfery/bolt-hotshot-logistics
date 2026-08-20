@@ -1,7 +1,7 @@
 ---
 name: architect
 description: 'Produces an implementation plan before coding: decomposes the task, resolves design decisions, negotiates scope. Use when a non-trivial change needs planning before implementation. Plans only — does not write source code, run mutating commands, or author formal spec documents.'
-model: Gemini 3.6 Flash (copilot)
+model: GPT-5.4 (copilot)
 tools: [vscode, read, agent, edit/createDirectory, edit/createFile, edit/editFiles, edit/rename, search, web, 'codegraph/*', 'kyber-weave/*', 'context7/*', vscodeGeneral/rename, todo]
 agents: ['research-agent', 'azure-reader']
 user-invocable: false

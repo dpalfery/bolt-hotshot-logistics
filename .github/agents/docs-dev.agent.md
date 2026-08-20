@@ -2,7 +2,7 @@
 name: docs-dev
 description: 'Technical documentation: READMEs, API docs, ADRs, runbooks, and inline code docs in Markdown/Mermaid. Use when the deliverable is documentation. Does not write implementation code, tests, CI/CD config, or spec-flow documents.'
 model: GPT-5.6 Luna (copilot)
-tools: [vscode, read, 'codegraph/*', 'kyber-weave/*', 'context7/*', edit, search, todo]
+tools: [vscode, execute/runInTerminal, read, edit, search, 'codegraph/*', 'kyber-weave/*', 'context7/*', azure-mcp/search, todo]
 user-invocable: false
 metadata:
   capability-profile: documentation

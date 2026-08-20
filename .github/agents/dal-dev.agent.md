@@ -50,6 +50,16 @@ Deliver `IRepository<T>` implementations that satisfy the interfaces in the Cont
 4. Implement the change. Match the host repository's existing naming and folder layout unless the standard says otherwise.
 5. Hand test authorship to `test-dev`.
 
+Run `get_errors` on the complete contents of every file you edited or created, not only the changed methods or symbols. Also run `get_errors` without `filePaths` once after the final edit to capture the workspace-wide Problems state for the affected projects.
+
+Every diagnostic returned by `get_errors` counts: compiler errors, nullable analysis, analyzer warnings, style warnings, redundant qualifiers/casts, possible multiple enumeration, namespace/file-location warnings, unused members, and dead-code findings.
+
+A scoped build, `tsc --noEmit`, `dotnet test`, or `git diff --check` does not replace the Problems-panel gate. Report them separately.
+
+Capture a diagnostic baseline before the first edit. Do not label a finding "pre-existing" solely because its line was not changed; use the baseline to prove it existed before the task.
+
+- **Mandatory completion gate:** run `get_errors` on every file you edited or created before READY_FOR_REVIEW. A successful `dotnet build` or `dotnet test` does not replace this gate.
+
 ## Hard rules
 
 - Never embed a relative path to a standard. Resolve the registry names above.
@@ -65,5 +75,6 @@ When done, return:
 STATUS: READY_FOR_REVIEW
 ARTIFACTS: <list of persistence file paths changed or created>
 SUMMARY: <2–4 sentences: repositories/migrations touched, and any hand-offs>
+DIAGNOSTICS: get_errors clean on <paths> | remaining: <none or list with pre-existing proof>
 OPEN_QUESTIONS: <bullets, or "none">
 ```

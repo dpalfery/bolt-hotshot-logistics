@@ -78,7 +78,7 @@ Read the path declared as **<test-coding-standard>** before reviewing any test. 
          - **UNVERIFIED CLAIMS**: Statements made without proof
          - **INCOMPLETE WORK**: Tasks marked done but not actually finished
          - **VIOLATIONS**: Project rules that were broken
-         - **Static Code Analysis**: verify compiler, linter, and diagnostic findings across the workspace, report every finding in changed or newly added files, and resolve all such findings before returning a verdict
+         - **Static Code Analysis / IDE Problems:** Execute §9a–9c. Report every `get_errors` finding in scope. Do not Approve with unproven pre-existing dismissals or without a Problems inventory. Reviewer action on findings is Needs Changes + inventory, not code edits.
          
 
       8. **BE RELENTLESS**:
@@ -99,6 +99,35 @@ Read the path declared as **<test-coding-standard>** before reviewing any test. 
          - No Warnings of any kind. Un resolved warning make me cranky
          - Ensure the code follows applicable repository rules, standards, and guidelines.
          - Review the specification under `<docs-root>/specs/` and plan under `<docs-root>/plans/` for alignment with delivered changes.
+
+## 9a. IDE Problems Gate (blocking before Approve)
+
+1. Run `get_errors` on every file created or modified in the diff (full file, not only new hunks).
+   For final feature approval, also run workspace-wide `get_errors`.
+2. Report a section **IDE Problems Gate**:
+   - Tool: `get_errors` with exact paths or "workspace".
+   - Total count, in-scope count, blocking count, pre-existing (proved) count.
+   - Table: path | line | message | introduced-by-diff? | disposition.
+3. Dispositions:
+   - New file → Needs Changes.
+   - Changed line in diff → Needs Changes.
+   - Unchanged line in touched file → may be pre-existing only with proof (baseline snapshot or `git diff` attribution). List it with proof; otherwise Needs Changes.
+4. Approve is invalid if the IDE Problems Gate section is missing or if any unproved/in-scope finding remains.
+5. Reviewers do not edit code. “Clearing the gate” means returning Needs Changes with the inventory.
+
+## 9b. Pre-existing proof required
+
+A diagnostic may be marked pre-existing only if:
+- A baseline `get_errors` snapshot from before the change (or `main`/merge-base) contains the same path+line+message, OR
+- The line is unchanged in `git diff` and the message does not reference a symbol introduced by the diff.
+
+Forbidden without proof: "pre-existing", "analyzer noise", "known false positive".
+
+## 9c. Build vs Problems — do not conflate
+
+- Green `dotnet build` / `TreatWarningsAsErrors` proves compiler and build-severity analyzers only.
+- Suggestion/silent EditorConfig and IDE inspections can remain in the Problems tab while CLI is green (see Directory.Build.props). Those still count for §9a.
+- Filtered `dotnet test` and path-scoped `tsc --noEmit` never clear §9a.
 
       10. **Security**
           - When reviewing code, act as a security auditor. For each function or endpoint, ask these questions:

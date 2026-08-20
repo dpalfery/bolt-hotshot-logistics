@@ -41,6 +41,16 @@ You do **not** own:
 5. Run the tests with the command the standard names. Fix setup issues; do not change application code to make a test pass unless the implementation is wrong — escalate that.
 6. Report coverage gaps if the implementation has untested branches — note them in `COVERAGE_GAPS` rather than silently skipping them.
 
+Run `get_errors` on the complete contents of every file you edited or created, not only the changed methods or symbols. Also run `get_errors` without `filePaths` once after the final edit to capture the workspace-wide Problems state for the affected projects.
+
+Every diagnostic returned by `get_errors` counts: compiler errors, nullable analysis, analyzer warnings, style warnings, redundant qualifiers/casts, possible multiple enumeration, namespace/file-location warnings, unused members, and dead-code findings.
+
+A scoped build, `tsc --noEmit`, `dotnet test`, or `git diff --check` does not replace the Problems-panel gate. Report them separately.
+
+Capture a diagnostic baseline before the first edit. Do not label a finding "pre-existing" solely because its line was not changed; use the baseline to prove it existed before the task.
+
+- **Mandatory completion gate:** run `get_errors` on every file you edited or created before READY_FOR_REVIEW. A successful `dotnet build` or `dotnet test` does not replace this gate.
+
 ## Coordination
 
 - **With implementation agents:** they deliver testable code (DI, interfaces, no global state). You author the tests. Do not edit their files.
@@ -60,5 +70,6 @@ When done, return:
 STATUS: READY_FOR_REVIEW
 ARTIFACTS: <list of test file paths>
 SUMMARY: <2–4 sentences: what layers are covered, test count, any notable gaps>
+DIAGNOSTICS: get_errors clean on <paths> | remaining: <none or list with pre-existing proof>
 COVERAGE_GAPS: <untested branches or scenarios, or "none">
 ```
