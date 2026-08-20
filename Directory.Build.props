@@ -18,7 +18,7 @@
       generation is enabled: https://github.com/dotnet/roslyn/issues/41640
     -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <WarningsAsErrors>$(WarningsAsErrors);IDE0005</WarningsAsErrors>
+    <WarningsAsErrors>$(WarningsAsErrors);IDE0005;IDE1006</WarningsAsErrors>
     <!--
       XML docs are required only so IDE0005 can fire on build. Missing comments
       (CS1591) stay suppressed until a full documentation pass is intentional.

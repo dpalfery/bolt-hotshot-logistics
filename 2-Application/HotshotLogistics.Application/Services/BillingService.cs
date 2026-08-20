@@ -17,18 +17,18 @@ namespace HotshotLogistics.Application.Services
     /// </summary>
     public class BillingService : IBillingService
     {
-        private readonly IInvoiceRepository invoiceRepository;
-        private readonly IJobRepository jobRepository;
-        private readonly ICustomerRepository customerRepository;
-        private readonly IPaymentRepository paymentRepository;
-        private readonly INotificationService notificationService;
-        private readonly IPaymentProcessorFactory paymentProcessorFactory;
-        private readonly ILogger<BillingService> logger;
+        private readonly IInvoiceRepository _invoiceRepository;
+        private readonly IJobRepository _jobRepository;
+        private readonly ICustomerRepository _customerRepository;
+        private readonly IPaymentRepository _paymentRepository;
+        private readonly INotificationService _notificationService;
+        private readonly IPaymentProcessorFactory _paymentProcessorFactory;
+        private readonly ILogger<BillingService> _logger;
 
-        private readonly AsyncRetryPolicy retryPolicy;
+        private readonly AsyncRetryPolicy _retryPolicy;
 
         // Tax rates by state (simplified for demo)
-        private readonly Dictionary<string, decimal> stateTaxRates = new()
+        private readonly Dictionary<string, decimal> _stateTaxRates = new()
         {
             { "CA", 0.0875m }, // California
             { "TX", 0.0625m }, // Texas
@@ -47,7 +47,7 @@ namespace HotshotLogistics.Application.Services
         /// <param name="paymentRepository">The payment repository.</param>
         /// <param name="notificationService">The notification service.</param>
         /// <param name="paymentProcessorFactory">The payment processor factory.</param>
-        /// <param name="logger">The logger.</param>
+        /// <param name="logger">The _logger.</param>
         public BillingService(
             IInvoiceRepository invoiceRepository,
             IJobRepository jobRepository,
@@ -57,32 +57,32 @@ namespace HotshotLogistics.Application.Services
             IPaymentProcessorFactory paymentProcessorFactory,
             ILogger<BillingService> logger)
         {
-            this.invoiceRepository = invoiceRepository ?? throw new ArgumentNullException(nameof(invoiceRepository));
-            this.jobRepository = jobRepository ?? throw new ArgumentNullException(nameof(jobRepository));
-            this.customerRepository = customerRepository ?? throw new ArgumentNullException(nameof(customerRepository));
-            this.paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
-            this.notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
-            this.paymentProcessorFactory = paymentProcessorFactory ?? throw new ArgumentNullException(nameof(paymentProcessorFactory));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _invoiceRepository = invoiceRepository ?? throw new ArgumentNullException(nameof(invoiceRepository));
+            _jobRepository = jobRepository ?? throw new ArgumentNullException(nameof(jobRepository));
+            _customerRepository = customerRepository ?? throw new ArgumentNullException(nameof(customerRepository));
+            _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
+            _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+            _paymentProcessorFactory = paymentProcessorFactory ?? throw new ArgumentNullException(nameof(paymentProcessorFactory));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             // Configure retry policy for payment processing
-            this.retryPolicy = Policy
+            _retryPolicy = Policy
                 .Handle<Exception>()
                 .WaitAndRetryAsync(
                     retryCount: 3,
                     sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                     onRetry: (exception, timeSpan, retryCount, context) =>
                     {
-                        logger.LogWarning(exception, "Payment processing failed, retrying in {RetryTimeSpan}. Retry attempt {RetryCount}", timeSpan, retryCount);
+                        _logger.LogWarning(exception, "Payment processing failed, retrying in {RetryTimeSpan}. Retry attempt {RetryCount}", timeSpan, retryCount);
                     });
         }
 
         /// <inheritdoc/>
         public async Task<Invoice> GenerateInvoiceAsync(string jobId, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Generating invoice for job");
+            _logger.LogInformation("Generating invoice for job");
 
-            var job = await jobRepository.GetByIdAsync(jobId);
+            var job = await _jobRepository.GetByIdAsync(jobId);
             if (job == null)
             {
                 throw new ArgumentException($"Job {jobId} not found", nameof(jobId));
@@ -93,22 +93,22 @@ namespace HotshotLogistics.Application.Services
                 throw new InvalidOperationException($"Cannot generate invoice for job with status: {job.Status}");
             }
 
-            var customer = await customerRepository.GetByIdAsync(job.CustomerId);
+            var customer = await _customerRepository.GetByIdAsync(job.CustomerId);
             if (customer == null)
             {
                 throw new ArgumentException($"Customer {job.CustomerId} not found");
             }
 
             // Check if invoice already exists for this job
-            var existingInvoices = await invoiceRepository.GetByJobIdAsync(jobId);
+            var existingInvoices = await _invoiceRepository.GetByJobIdAsync(jobId);
             if (existingInvoices.Any())
             {
-                logger.LogWarning("Invoice already exists for job");
+                _logger.LogWarning("Invoice already exists for job");
                 return existingInvoices.First();
             }
 
             // Generate invoice number
-            var invoiceNumber = await invoiceRepository.GetNextInvoiceNumberAsync();
+            var invoiceNumber = await _invoiceRepository.GetNextInvoiceNumberAsync();
 
             // Create invoice
             var invoice = new Invoice
@@ -141,12 +141,12 @@ namespace HotshotLogistics.Application.Services
             invoice.CalculateTotals();
 
             // Save invoice
-            var createdInvoice = await invoiceRepository.AddAsync(invoice);
+            var createdInvoice = await _invoiceRepository.AddAsync(invoice);
 
             // Send notification to customer
             try
             {
-                await notificationService.SendNotificationAsync(
+                await _notificationService.SendNotificationAsync(
                     customer.Id,
                     NotificationType.InvoiceGenerated,
                     "New Invoice Generated",
@@ -155,10 +155,10 @@ namespace HotshotLogistics.Application.Services
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to send invoice notification to customer");
+                _logger.LogWarning(ex, "Failed to send invoice notification to customer");
             }
 
-            logger.LogInformation("Invoice generated successfully: {InvoiceNumber} for job: {JobId}", invoiceNumber, jobId);
+            _logger.LogInformation("Invoice generated successfully: {InvoiceNumber} for job: {JobId}", invoiceNumber, jobId);
             return createdInvoice;
         }
 
@@ -171,22 +171,22 @@ namespace HotshotLogistics.Application.Services
             }
 
             var stateCode = state.ToUpperInvariant();
-            if (stateTaxRates.TryGetValue(stateCode, out var taxRate))
+            if (_stateTaxRates.TryGetValue(stateCode, out var taxRate))
             {
                 return Task.FromResult(taxRate);
             }
 
             // Default tax rate if state not found
-            logger.LogWarning("Tax rate not found for state: {State}, using default rate", state);
+            _logger.LogWarning("Tax rate not found for state: {State}, using default rate", state);
             return Task.FromResult(0.07m); // 7% default
         }
 
         /// <inheritdoc/>
         public async Task<bool> ProcessPaymentAsync(string invoiceId, decimal paymentAmount, string paymentMethod, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Processing payment of ${Amount} for invoice: {InvoiceId} using {PaymentMethod}", paymentAmount, invoiceId, paymentMethod);
+            _logger.LogInformation("Processing payment of ${Amount} for invoice: {InvoiceId} using {PaymentMethod}", paymentAmount, invoiceId, paymentMethod);
 
-            var invoice = await invoiceRepository.GetByIdAsync(invoiceId);
+            var invoice = await _invoiceRepository.GetByIdAsync(invoiceId);
             if (invoice == null)
             {
                 throw new ArgumentException($"Invoice {invoiceId} not found", nameof(invoiceId));
@@ -212,12 +212,12 @@ namespace HotshotLogistics.Application.Services
                 Status = PaymentStatus.Processing
             };
 
-            await paymentRepository.AddAsync(payment);
+            await _paymentRepository.AddAsync(payment);
 
             try
             {
                 // Get the appropriate payment processor
-                var processor = paymentProcessorFactory.GetProcessorForPaymentMethod(payment.PaymentMethod);
+                var processor = _paymentProcessorFactory.GetProcessorForPaymentMethod(payment.PaymentMethod);
 
                 // Prepare payment method details
                 var paymentMethodDetails = new PaymentMethodDetails
@@ -232,7 +232,7 @@ namespace HotshotLogistics.Application.Services
                 };
 
                 // Process payment with retry logic
-                var result = await retryPolicy.ExecuteAsync(async () =>
+                var result = await _retryPolicy.ExecuteAsync(async () =>
                 {
                     var processingResult = await processor.ProcessPaymentAsync(
                         paymentAmount,
@@ -255,20 +255,20 @@ namespace HotshotLogistics.Application.Services
 
                 // Update payment with successful result
                 payment.MarkAsCompleted(result.TransactionId, result.Message);
-                await paymentRepository.UpdateAsync(payment);
+                await _paymentRepository.UpdateAsync(payment);
 
                 // Update invoice with payment
-                var success = await invoiceRepository.UpdatePaidAmountAsync(invoiceId, invoice.PaidAmount + paymentAmount);
+                var success = await _invoiceRepository.UpdatePaidAmountAsync(invoiceId, invoice.PaidAmount + paymentAmount);
                 if (!success)
                 {
-                    logger.LogError("Failed to update invoice payment amount for invoice: {InvoiceId}", invoiceId);
+                    _logger.LogError("Failed to update invoice payment amount for invoice: {InvoiceId}", invoiceId);
                     return false;
                 }
 
                 // Send payment confirmation notification
                 try
                 {
-                    await notificationService.SendNotificationAsync(
+                    await _notificationService.SendNotificationAsync(
                         invoice.CustomerId,
                         NotificationType.PaymentReceived,
                         "Payment Received",
@@ -277,19 +277,19 @@ namespace HotshotLogistics.Application.Services
                 }
                 catch (Exception ex)
                 {
-                    logger.LogWarning(ex, "Failed to send payment notification for invoice {InvoiceId}", invoiceId);
+                    _logger.LogWarning(ex, "Failed to send payment notification for invoice {InvoiceId}", invoiceId);
                 }
 
-                logger.LogInformation("Payment processed successfully for invoice: {InvoiceId}, TransactionId: {TransactionId}", invoiceId, result.TransactionId);
+                _logger.LogInformation("Payment processed successfully for invoice: {InvoiceId}, TransactionId: {TransactionId}", invoiceId, result.TransactionId);
                 return true;
             }
             catch (Exception ex)
             {
                 // Update payment with failed status
                 payment.MarkAsFailed(ex.Message);
-                await paymentRepository.UpdateAsync(payment);
+                await _paymentRepository.UpdateAsync(payment);
 
-                logger.LogError(ex, "Payment processing failed for invoice: {InvoiceId}", invoiceId);
+                _logger.LogError(ex, "Payment processing failed for invoice: {InvoiceId}", invoiceId);
                 return false;
             }
         }
@@ -297,32 +297,32 @@ namespace HotshotLogistics.Application.Services
         /// <inheritdoc/>
         public Task<IEnumerable<Invoice>> GetCustomerInvoicesAsync(string customerId, CancellationToken cancellationToken = default)
         {
-            return invoiceRepository.GetByCustomerIdAsync(customerId);
+            return _invoiceRepository.GetByCustomerIdAsync(customerId);
         }
 
         /// <inheritdoc/>
         public async Task<Invoice?> GetInvoiceByIdAsync(string invoiceId, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Retrieving invoice: {InvoiceId}", invoiceId);
-            return await invoiceRepository.GetByIdAsync(invoiceId, cancellationToken);
+            _logger.LogInformation("Retrieving invoice: {InvoiceId}", invoiceId);
+            return await _invoiceRepository.GetByIdAsync(invoiceId, cancellationToken);
         }
 
         /// <inheritdoc/>
         public Task<IEnumerable<Invoice>> GetOverdueInvoicesAsync(CancellationToken cancellationToken = default)
         {
-            return invoiceRepository.GetOverdueInvoicesAsync();
+            return _invoiceRepository.GetOverdueInvoicesAsync();
         }
 
         /// <inheritdoc/>
         public Task<InvoiceSummary> GetInvoiceSummaryAsync(CancellationToken cancellationToken = default)
         {
-            return invoiceRepository.GetInvoiceSummaryAsync();
+            return _invoiceRepository.GetInvoiceSummaryAsync();
         }
 
         /// <inheritdoc/>
         public Task<IEnumerable<AgingReportEntry>> GetAgingReportAsync(CancellationToken cancellationToken = default)
         {
-            return invoiceRepository.GetAgingReportAsync();
+            return _invoiceRepository.GetAgingReportAsync();
         }
 
         /// <summary>
@@ -335,9 +335,9 @@ namespace HotshotLogistics.Application.Services
         /// <returns>The created invoice.</returns>
         public async Task<Invoice> CreateCustomInvoiceAsync(string customerId, List<InvoiceLineItem> lineItems, string? notes = null, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Creating custom invoice for customer: {CustomerId}", customerId);
+            _logger.LogInformation("Creating custom invoice for customer: {CustomerId}", customerId);
 
-            var customer = await customerRepository.GetByIdAsync(customerId);
+            var customer = await _customerRepository.GetByIdAsync(customerId);
             if (customer == null)
             {
                 throw new ArgumentException($"Customer {customerId} not found", nameof(customerId));
@@ -349,7 +349,7 @@ namespace HotshotLogistics.Application.Services
             }
 
             // Generate invoice number
-            var invoiceNumber = await invoiceRepository.GetNextInvoiceNumberAsync();
+            var invoiceNumber = await _invoiceRepository.GetNextInvoiceNumberAsync();
 
             // Create invoice
             var invoice = new Invoice
@@ -387,9 +387,9 @@ namespace HotshotLogistics.Application.Services
             invoice.CalculateTotals();
 
             // Save invoice
-            var createdInvoice = await invoiceRepository.AddAsync(invoice);
+            var createdInvoice = await _invoiceRepository.AddAsync(invoice);
 
-            logger.LogInformation("Custom invoice created successfully: {InvoiceNumber} for customer: {CustomerId}", invoiceNumber, customerId);
+            _logger.LogInformation("Custom invoice created successfully: {InvoiceNumber} for customer: {CustomerId}", invoiceNumber, customerId);
             return createdInvoice;
         }
 
@@ -401,15 +401,15 @@ namespace HotshotLogistics.Application.Services
         /// <returns>True if the invoice was sent successfully.</returns>
         public async Task<bool> SendInvoiceAsync(string invoiceId, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Sending invoice: {InvoiceId}", invoiceId);
+            _logger.LogInformation("Sending invoice: {InvoiceId}", invoiceId);
 
-            var invoice = await invoiceRepository.GetByIdAsync(invoiceId);
+            var invoice = await _invoiceRepository.GetByIdAsync(invoiceId);
             if (invoice == null)
             {
                 throw new ArgumentException($"Invoice {invoiceId} not found", nameof(invoiceId));
             }
 
-            var customer = await customerRepository.GetByIdAsync(invoice.CustomerId);
+            var customer = await _customerRepository.GetByIdAsync(invoice.CustomerId);
             if (customer == null)
             {
                 throw new ArgumentException($"Customer {invoice.CustomerId} not found");
@@ -420,22 +420,22 @@ namespace HotshotLogistics.Application.Services
                 // Update invoice status to sent
                 invoice.Status = InvoiceStatus.Sent;
                 invoice.UpdatedAt = DateTime.UtcNow;
-                await invoiceRepository.UpdateAsync(invoice);
+                await _invoiceRepository.UpdateAsync(invoice);
 
                 // Send notification to customer
-                await notificationService.SendNotificationAsync(
+                await _notificationService.SendNotificationAsync(
                     customer.Id,
                     NotificationType.InvoiceGenerated,
                     "Invoice Sent",
                     $"Invoice {invoice.InvoiceNumber} for ${invoice.TotalAmount:F2} has been sent. Due date: {invoice.DueDate:MM/dd/yyyy}",
                     cancellationToken);
 
-                logger.LogInformation("Invoice sent successfully: {InvoiceNumber}", invoice.InvoiceNumber);
+                _logger.LogInformation("Invoice sent successfully: {InvoiceNumber}", invoice.InvoiceNumber);
                 return true;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to send invoice: {InvoiceId}", invoiceId);
+                _logger.LogError(ex, "Failed to send invoice: {InvoiceId}", invoiceId);
                 return false;
             }
         }
@@ -450,15 +450,15 @@ namespace HotshotLogistics.Application.Services
         /// <returns>The account statement data.</returns>
         public async Task<AccountStatement> GenerateAccountStatementAsync(string customerId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Generating account statement for customer: {CustomerId} from {StartDate} to {EndDate}", customerId, startDate, endDate);
+            _logger.LogInformation("Generating account statement for customer: {CustomerId} from {StartDate} to {EndDate}", customerId, startDate, endDate);
 
-            var customer = await customerRepository.GetByIdAsync(customerId);
+            var customer = await _customerRepository.GetByIdAsync(customerId);
             if (customer == null)
             {
                 throw new ArgumentException($"Customer {customerId} not found", nameof(customerId));
             }
 
-            var invoices = await invoiceRepository.GetByCustomerIdAsync(customerId);
+            var invoices = await _invoiceRepository.GetByCustomerIdAsync(customerId);
             var statementInvoices = invoices.Where(i => i.InvoiceDate >= startDate && i.InvoiceDate <= endDate).ToList();
 
             var statement = new AccountStatement
@@ -475,7 +475,7 @@ namespace HotshotLogistics.Application.Services
                 OverdueAmount = statementInvoices.Where(i => i.IsOverdue()).Sum(i => i.BalanceDue)
             };
 
-            logger.LogInformation("Account statement generated for customer: {CustomerId}, Total Outstanding: ${TotalOutstanding:F2}", customerId, statement.TotalOutstanding);
+            _logger.LogInformation("Account statement generated for customer: {CustomerId}, Total Outstanding: ${TotalOutstanding:F2}", customerId, statement.TotalOutstanding);
             return statement;
         }
 
@@ -486,9 +486,9 @@ namespace HotshotLogistics.Application.Services
         /// <returns>The number of invoices that had late fees applied.</returns>
         public async Task<int> ApplyLateFeeAsync(CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Applying late fees to overdue invoices");
+            _logger.LogInformation("Applying late fees to overdue invoices");
 
-            var overdueInvoices = await invoiceRepository.GetOverdueInvoicesAsync();
+            var overdueInvoices = await _invoiceRepository.GetOverdueInvoicesAsync();
             var feesApplied = 0;
 
             foreach (var invoice in overdueInvoices)
@@ -507,15 +507,15 @@ namespace HotshotLogistics.Application.Services
                             TaxApplicable = false
                         });
 
-                        await invoiceRepository.UpdateAsync(concreteInvoice);
+                        await _invoiceRepository.UpdateAsync(concreteInvoice);
                         feesApplied++;
 
-                        logger.LogInformation("Late fee of ${LateFee:F2} applied to invoice: {InvoiceNumber}", latePenalty, invoice.InvoiceNumber);
+                        _logger.LogInformation("Late fee of ${LateFee:F2} applied to invoice: {InvoiceNumber}", latePenalty, invoice.InvoiceNumber);
                     }
                 }
             }
 
-            logger.LogInformation("Late fees applied to {Count} invoices", feesApplied);
+            _logger.LogInformation("Late fees applied to {Count} invoices", feesApplied);
             return feesApplied;
         }
 

@@ -26,20 +26,20 @@ namespace HotshotLogistics.Api.Controllers
     [Route("api/[controller]")]
     public class JobAssignmentsController : ControllerBase
     {
-        private readonly IJobAssignmentService assignmentService;
-        private readonly ILogger<JobAssignmentsController> logger;
+        private readonly IJobAssignmentService _assignmentService;
+        private readonly ILogger<JobAssignmentsController> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JobAssignmentsController"/> class.
         /// </summary>
         /// <param name="assignmentService">The job assignment service.</param>
-        /// <param name="logger">The logger.</param>
+        /// <param name="logger">The _logger.</param>
         public JobAssignmentsController(
             IJobAssignmentService assignmentService,
             ILogger<JobAssignmentsController> logger)
         {
-            this.assignmentService = assignmentService ?? throw new ArgumentNullException(nameof(assignmentService));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _assignmentService = assignmentService ?? throw new ArgumentNullException(nameof(assignmentService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace HotshotLogistics.Api.Controllers
         public async Task<ActionResult<JobAssignmentDto>> GetById(string id, CancellationToken cancellationToken = default)
         {
 
-            var assignment = await assignmentService.GetByIdAsync(id, cancellationToken);
+            var assignment = await _assignmentService.GetByIdAsync(id, cancellationToken);
             if (assignment == null)
             {
                 return NotFound();
@@ -75,7 +75,7 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(typeof(IEnumerable<JobAssignmentDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<JobAssignmentDto>>> GetAll(CancellationToken cancellationToken = default)
         {
-            var assignments = await assignmentService.GetAllAsync(cancellationToken);
+            var assignments = await _assignmentService.GetAllAsync(cancellationToken);
             return Ok(assignments);
         }
 
@@ -90,7 +90,7 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(typeof(IEnumerable<JobAssignmentDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<JobAssignmentDto>>> GetByDriverId(int driverId, CancellationToken cancellationToken = default)
         {
-            var assignments = await this.assignmentService.GetByDriverIdAsync(driverId, cancellationToken);
+            var assignments = await _assignmentService.GetByDriverIdAsync(driverId, cancellationToken);
             return this.Ok(assignments);
         }
 
@@ -105,7 +105,7 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(typeof(IEnumerable<JobAssignmentDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<JobAssignmentDto>>> GetByJobId(string jobId, CancellationToken cancellationToken = default)
         {
-            var assignments = await this.assignmentService.GetByJobIdAsync(jobId, cancellationToken);
+            var assignments = await _assignmentService.GetByJobIdAsync(jobId, cancellationToken);
             return this.Ok(assignments);
         }
 
@@ -120,7 +120,7 @@ namespace HotshotLogistics.Api.Controllers
         public async Task<ActionResult<IEnumerable<JobAssignmentDto>>> GetActive(CancellationToken cancellationToken = default)
         {
 
-            var assignments = await this.assignmentService.GetActiveAssignmentsAsync(cancellationToken);
+            var assignments = await _assignmentService.GetActiveAssignmentsAsync(cancellationToken);
             return this.Ok(assignments);
         }
 
@@ -142,7 +142,7 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-                var assignment = await this.assignmentService.AssignJobAsync(
+                var assignment = await _assignmentService.AssignJobAsync(
                     request.JobId,
                     request.DriverId,
                     cancellationToken);
@@ -155,17 +155,17 @@ namespace HotshotLogistics.Api.Controllers
             catch (KeyNotFoundException ex)
             {
 
-                this.logger.LogWarning(ex, "Failed to assign job: {Message}", ex.Message);
+                _logger.LogWarning(ex, "Failed to assign job: {Message}", ex.Message);
                 return this.NotFound(ex.Message);
             }
             catch (InvalidOperationException ex)
             {
-                this.logger.LogWarning(ex, "Failed to assign job: {Message}", ex.Message);
+                _logger.LogWarning(ex, "Failed to assign job: {Message}", ex.Message);
                 return this.Conflict(ex.Message);
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, "An error occurred while assigning job");
+                _logger.LogError(ex, "An error occurred while assigning job");
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -190,17 +190,17 @@ namespace HotshotLogistics.Api.Controllers
             try
             {
 
-                var assignment = await this.assignmentService.UpdateAssignmentStatusAsync(id, status, cancellationToken);
+                var assignment = await _assignmentService.UpdateAssignmentStatusAsync(id, status, cancellationToken);
                 return this.Ok(assignment);
             }
             catch (KeyNotFoundException ex)
             {
-                this.logger.LogWarning(ex, "Failed to update assignment status: {Message}", ex.Message);
+                _logger.LogWarning(ex, "Failed to update assignment status: {Message}", ex.Message);
                 return this.NotFound(ex.Message);
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, "An error occurred while updating assignment status");
+                _logger.LogError(ex, "An error occurred while updating assignment status");
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -217,7 +217,7 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UnassignJob(string id, CancellationToken cancellationToken = default)
         {
-            var result = await this.assignmentService.UnassignJobAsync(id, cancellationToken);
+            var result = await _assignmentService.UnassignJobAsync(id, cancellationToken);
             if (!result)
             {
                 return this.NotFound();

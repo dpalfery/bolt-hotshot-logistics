@@ -15,9 +15,9 @@ namespace HotshotLogistics.Application.Services;
 /// </summary>
 public class PaymentProcessorFactory : IPaymentProcessorFactory
 {
-    private readonly IServiceProvider serviceProvider;
-    private readonly IConfiguration configuration;
-    private readonly ILogger<PaymentProcessorFactory> logger;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IConfiguration _configuration;
+    private readonly ILogger<PaymentProcessorFactory> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PaymentProcessorFactory"/> class.
@@ -30,9 +30,9 @@ public class PaymentProcessorFactory : IPaymentProcessorFactory
         IConfiguration configuration,
         ILogger<PaymentProcessorFactory> logger)
     {
-        this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-        this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
@@ -41,7 +41,7 @@ public class PaymentProcessorFactory : IPaymentProcessorFactory
     /// <returns>The default payment processor.</returns>
     public IPaymentProcessor GetDefaultProcessor()
     {
-        var defaultProcessor = configuration["Payment:DefaultProcessor"] ?? "Stripe";
+        var defaultProcessor = _configuration["Payment:DefaultProcessor"] ?? "Stripe";
         return GetProcessor(defaultProcessor);
     }
 
@@ -53,12 +53,12 @@ public class PaymentProcessorFactory : IPaymentProcessorFactory
     /// <exception cref="ArgumentException">Thrown when the processor name is not supported.</exception>
     public IPaymentProcessor GetProcessor(string processorName)
     {
-        logger.LogDebug("Getting payment processor: {ProcessorName}", processorName);
+        _logger.LogDebug("Getting payment processor: {ProcessorName}", processorName);
 
         return processorName.ToLowerInvariant() switch
         {
-            "stripe" => serviceProvider.GetRequiredService<StripePaymentProcessor>(),
-            "paypal" => serviceProvider.GetRequiredService<PayPalPaymentProcessor>(),
+            "stripe" => _serviceProvider.GetRequiredService<StripePaymentProcessor>(),
+            "paypal" => _serviceProvider.GetRequiredService<PayPalPaymentProcessor>(),
             _ => throw new ArgumentException($"Unsupported payment processor: {processorName}", nameof(processorName))
         };
     }
@@ -71,8 +71,8 @@ public class PaymentProcessorFactory : IPaymentProcessorFactory
     {
         return new List<IPaymentProcessor>
         {
-            serviceProvider.GetRequiredService<StripePaymentProcessor>(),
-            serviceProvider.GetRequiredService<PayPalPaymentProcessor>()
+            _serviceProvider.GetRequiredService<StripePaymentProcessor>(),
+            _serviceProvider.GetRequiredService<PayPalPaymentProcessor>()
         };
     }
 
@@ -85,7 +85,7 @@ public class PaymentProcessorFactory : IPaymentProcessorFactory
     {
         // For now, use default processor for all payment methods
         // In the future, this could route specific payment methods to specific processors
-        logger.LogDebug("Getting processor for payment method type");
+        _logger.LogDebug("Getting processor for payment method type");
         return GetDefaultProcessor();
     }
 

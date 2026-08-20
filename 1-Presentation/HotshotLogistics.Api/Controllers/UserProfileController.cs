@@ -22,20 +22,20 @@ namespace HotshotLogistics.Api.Controllers
     [Authorize]
     public class UserProfileController : ControllerBase
     {
-        private readonly IUserProfileService userProfileService;
-        private readonly ILogger<UserProfileController> logger;
+        private readonly IUserProfileService _userProfileService;
+        private readonly ILogger<UserProfileController> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserProfileController"/> class.
         /// </summary>
         /// <param name="userProfileService">The user profile service.</param>
-        /// <param name="logger">The logger.</param>
+        /// <param name="logger">The _logger.</param>
         public UserProfileController(
             IUserProfileService userProfileService,
             ILogger<UserProfileController> logger)
         {
-            this.userProfileService = userProfileService ?? throw new ArgumentNullException(nameof(userProfileService));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _userProfileService = userProfileService ?? throw new ArgumentNullException(nameof(userProfileService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -49,12 +49,12 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-                var profile = await this.userProfileService.GetCurrentUserProfileAsync(cancellationToken);
+                var profile = await _userProfileService.GetCurrentUserProfileAsync(cancellationToken);
                 return Ok(profile);
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, "An error occurred while retrieving current user profile");
+                _logger.LogError(ex, "An error occurred while retrieving current user profile");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -79,12 +79,12 @@ namespace HotshotLogistics.Api.Controllers
                     return BadRequest("Profile data is required");
                 }
 
-                await this.userProfileService.UpdateCurrentUserProfileAsync(profile, cancellationToken);
+                await _userProfileService.UpdateCurrentUserProfileAsync(profile, cancellationToken);
                 return NoContent();
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, "An error occurred while updating user profile");
+                _logger.LogError(ex, "An error occurred while updating user profile");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -109,12 +109,12 @@ namespace HotshotLogistics.Api.Controllers
                     return BadRequest("Unable to identify current user");
                 }
 
-                await this.userProfileService.SyncUserProfileAsync(userId, cancellationToken);
+                await _userProfileService.SyncUserProfileAsync(userId, cancellationToken);
                 return NoContent();
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, "An error occurred while synchronizing user profile");
+                _logger.LogError(ex, "An error occurred while synchronizing user profile");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }

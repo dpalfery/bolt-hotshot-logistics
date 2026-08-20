@@ -15,7 +15,7 @@ namespace HotshotLogistics.Data.Services
     /// </summary>
     public class MockMappingService : IMappingService
     {
-        private readonly ILogger<MockMappingService> logger;
+        private readonly ILogger<MockMappingService> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MockMappingService"/> class.
@@ -23,14 +23,14 @@ namespace HotshotLogistics.Data.Services
         /// <param name="logger">The logger.</param>
         public MockMappingService(ILogger<MockMappingService> logger)
         {
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.logger.LogInformation("Using MockMappingService for development. No real API calls will be made.");
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger.LogInformation("Using MockMappingService for development. No real API calls will be made.");
         }
 
         /// <inheritdoc/>
         public Task<GeocodingResult> GeocodeAddressAsync(string address, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Mock geocoding address: {Address}", address);
+            _logger.LogInformation("Mock geocoding address: {Address}", address);
 
             // Return mock coordinates based on a hash of the address
             var hash = Math.Abs(address.GetHashCode());
@@ -50,7 +50,7 @@ namespace HotshotLogistics.Data.Services
         /// <inheritdoc/>
         public Task<ReverseGeocodingResult> ReverseGeocodeAsync(decimal latitude, decimal longitude, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Mock reverse geocoding: {Latitude}, {Longitude}", latitude, longitude);
+            _logger.LogInformation("Mock reverse geocoding: {Latitude}, {Longitude}", latitude, longitude);
 
             return Task.FromResult(new ReverseGeocodingResult
             {
@@ -67,7 +67,7 @@ namespace HotshotLogistics.Data.Services
         /// <inheritdoc/>
         public Task<bool> ValidateAddressAsync(string address, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Mock validating address: {Address}", address);
+            _logger.LogInformation("Mock validating address: {Address}", address);
             // Mock implementation always returns true for valid addresses
             return Task.FromResult(!string.IsNullOrWhiteSpace(address));
         }
@@ -75,7 +75,7 @@ namespace HotshotLogistics.Data.Services
         /// <inheritdoc/>
         public Task<RouteResult> CalculateRouteAsync(Location origin, Location destination, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Mock calculating route from {Origin} to {Destination}", origin.FullAddress, destination.FullAddress);
+            _logger.LogInformation("Mock calculating route from {Origin} to {Destination}", origin.FullAddress, destination.FullAddress);
 
             if (!origin.HasCoordinates || !destination.HasCoordinates)
             {
@@ -104,7 +104,7 @@ namespace HotshotLogistics.Data.Services
         /// <inheritdoc/>
         public async Task<OptimizedRouteResult> OptimizeRouteAsync(IList<Location> waypoints, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Mock optimizing route with {WaypointCount} waypoints", waypoints.Count);
+            _logger.LogInformation("Mock optimizing route with {WaypointCount} waypoints", waypoints.Count);
 
             if (waypoints.Count < 2)
             {
@@ -150,7 +150,7 @@ namespace HotshotLogistics.Data.Services
         /// <inheritdoc/>
         public async Task<DistanceResult> CalculateDistanceAsync(Location origin, Location destination, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Mock calculating distance from {Origin} to {Destination}", origin.FullAddress, destination.FullAddress);
+            _logger.LogInformation("Mock calculating distance from {Origin} to {Destination}", origin.FullAddress, destination.FullAddress);
 
             var route = await CalculateRouteAsync(origin, destination, cancellationToken);
             return new DistanceResult

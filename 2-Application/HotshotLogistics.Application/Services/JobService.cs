@@ -17,12 +17,12 @@ namespace HotshotLogistics.Application.Services
     /// </summary>
     public class JobService : IJobService
     {
-        private readonly IJobRepository jobRepository;
-        private readonly ICustomerRepository customerRepository;
-        private readonly IDriverRepository driverRepository;
-        private readonly INotificationService notificationService;
-        private readonly IMappingService mappingService;
-        private readonly ILogger<JobService> logger;
+        private readonly IJobRepository _jobRepository;
+        private readonly ICustomerRepository _customerRepository;
+        private readonly IDriverRepository _driverRepository;
+        private readonly INotificationService _notificationService;
+        private readonly IMappingService _mappingService;
+        private readonly ILogger<JobService> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JobService"/> class.
@@ -32,7 +32,7 @@ namespace HotshotLogistics.Application.Services
         /// <param name="driverRepository">The driver repository.</param>
         /// <param name="notificationService">The notification service.</param>
         /// <param name="mappingService">The mapping service.</param>
-        /// <param name="logger">The logger.</param>
+        /// <param name="logger">The _logger.</param>
         public JobService(
             IJobRepository jobRepository,
             ICustomerRepository customerRepository,
@@ -41,18 +41,18 @@ namespace HotshotLogistics.Application.Services
             IMappingService mappingService,
             ILogger<JobService> logger)
         {
-            this.jobRepository = jobRepository ?? throw new ArgumentNullException(nameof(jobRepository));
-            this.customerRepository = customerRepository ?? throw new ArgumentNullException(nameof(customerRepository));
-            this.driverRepository = driverRepository ?? throw new ArgumentNullException(nameof(driverRepository));
-            this.notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
-            this.mappingService = mappingService ?? throw new ArgumentNullException(nameof(mappingService));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _jobRepository = jobRepository ?? throw new ArgumentNullException(nameof(jobRepository));
+            _customerRepository = customerRepository ?? throw new ArgumentNullException(nameof(customerRepository));
+            _driverRepository = driverRepository ?? throw new ArgumentNullException(nameof(driverRepository));
+            _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+            _mappingService = mappingService ?? throw new ArgumentNullException(nameof(mappingService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <inheritdoc/>
         public async Task<Job> CreateJobAsync(Job job, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Creating job with ID: {JobId}", job.Id);
+            _logger.LogInformation("Creating job with ID: {JobId}", job.Id);
 
             // Validate the job
             if (!await ValidateJobAsync(job, cancellationToken))
@@ -61,7 +61,7 @@ namespace HotshotLogistics.Application.Services
             }
 
             // Verify customer exists and is active
-            var customer = await customerRepository.GetByIdAsync(job.CustomerId);
+            var customer = await _customerRepository.GetByIdAsync(job.CustomerId);
             if (customer == null || !customer.IsActive)
             {
                 throw new BusinessRuleException($"Customer {job.CustomerId} not found or inactive");
@@ -94,12 +94,12 @@ namespace HotshotLogistics.Application.Services
                 };
             }
 
-            var createdJob = await jobRepository.CreateJobAsync(job, cancellationToken);
+            var createdJob = await _jobRepository.CreateJobAsync(job, cancellationToken);
 
             // Send notification for job creation
             try
             {
-                await notificationService.SendNotificationAsync(
+                await _notificationService.SendNotificationAsync(
                     job.CustomerId,
                     NotificationType.JobCreated,
                     "Job Created",
@@ -108,23 +108,23 @@ namespace HotshotLogistics.Application.Services
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to send job creation notification for job {JobId}", job.Id);
+                _logger.LogWarning(ex, "Failed to send job creation notification for job {JobId}", job.Id);
             }
 
-            logger.LogInformation("Job created successfully with ID: {JobId}", createdJob.Id);
+            _logger.LogInformation("Job created successfully with ID: {JobId}", createdJob.Id);
             return createdJob;
         }
 
         /// <inheritdoc/>
         public Task<Job?> GetJobByIdAsync(string id, CancellationToken cancellationToken = default)
         {
-            return jobRepository.GetJobByIdAsync(id, cancellationToken);
+            return _jobRepository.GetJobByIdAsync(id, cancellationToken);
         }
 
         /// <inheritdoc/>
         public Task<IEnumerable<Job>> GetJobsAsync(CancellationToken cancellationToken = default)
         {
-            return jobRepository.GetJobsAsync(cancellationToken);
+            return _jobRepository.GetJobsAsync(cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -134,21 +134,21 @@ namespace HotshotLogistics.Application.Services
             SortParameters? sort = null,
             CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Getting jobs with filter: {@Filter}, pagination: {@Pagination}, sort: {@Sort}",
+            _logger.LogInformation("Getting jobs with filter: {@Filter}, pagination: {@Pagination}, sort: {@Sort}",
                 filter, pagination, sort);
 
-            return jobRepository.GetJobsAsync(filter, pagination, sort, cancellationToken);
+            return _jobRepository.GetJobsAsync(filter, pagination, sort, cancellationToken);
         }
 
         /// <inheritdoc/>
         public async Task<Job?> UpdateJobAsync(string id, Job jobDetails, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Updating job with ID: {JobId}", id);
+            _logger.LogInformation("Updating job with ID: {JobId}", id);
 
-            var existingJob = await jobRepository.GetJobByIdAsync(id, cancellationToken);
+            var existingJob = await _jobRepository.GetJobByIdAsync(id, cancellationToken);
             if (existingJob == null)
             {
-                logger.LogWarning("Job not found with ID: {JobId}", id);
+                _logger.LogWarning("Job not found with ID: {JobId}", id);
                 return null;
             }
 
@@ -159,36 +159,36 @@ namespace HotshotLogistics.Application.Services
             }
 
             jobDetails.UpdatedAt = DateTime.UtcNow;
-            var updatedJob = await jobRepository.UpdateJobAsync(id, jobDetails, cancellationToken);
+            var updatedJob = await _jobRepository.UpdateJobAsync(id, jobDetails, cancellationToken);
 
-            logger.LogInformation("Job updated successfully with ID: {JobId}", id);
+            _logger.LogInformation("Job updated successfully with ID: {JobId}", id);
             return updatedJob;
         }
 
         /// <inheritdoc/>
         public async Task<bool> DeleteJobAsync(string id, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Deleting job with ID: {JobId}", id);
+            _logger.LogInformation("Deleting job with ID: {JobId}", id);
 
-            var job = await jobRepository.GetJobByIdAsync(id, cancellationToken);
+            var job = await _jobRepository.GetJobByIdAsync(id, cancellationToken);
             if (job == null)
             {
-                logger.LogWarning("Job not found with ID: {JobId}", id);
+                _logger.LogWarning("Job not found with ID: {JobId}", id);
                 return false;
             }
 
             // Check if job can be deleted (only allow deletion of jobs that haven't started)
             if (job.Status != JobStatus.Pending)
             {
-                logger.LogWarning("Cannot delete job with status: {Status}", job.Status);
+                _logger.LogWarning("Cannot delete job with status: {Status}", job.Status);
                 throw new BusinessRuleException($"Cannot delete job with status: {job.Status}");
             }
 
-            var result = await jobRepository.DeleteJobAsync(id, cancellationToken);
+            var result = await _jobRepository.DeleteJobAsync(id, cancellationToken);
 
             if (result)
             {
-                logger.LogInformation("Job deleted successfully with ID: {JobId}", id);
+                _logger.LogInformation("Job deleted successfully with ID: {JobId}", id);
             }
 
             return result;
@@ -197,15 +197,15 @@ namespace HotshotLogistics.Application.Services
         /// <inheritdoc/>
         public async Task<Job> AssignDriverAsync(string jobId, int driverId, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Assigning driver {DriverId} to job {JobId}", driverId, jobId);
+            _logger.LogInformation("Assigning driver {DriverId} to job {JobId}", driverId, jobId);
 
-            var job = await jobRepository.GetJobByIdAsync(jobId, cancellationToken);
+            var job = await _jobRepository.GetJobByIdAsync(jobId, cancellationToken);
             if (job == null)
             {
                 throw new BusinessRuleException($"Job {jobId} not found");
             }
 
-            var driver = await driverRepository.GetDriverByIdAsync(driverId);
+            var driver = await _driverRepository.GetDriverByIdAsync(driverId);
             if (driver == null)
             {
                 throw new BusinessRuleException($"Driver {driverId} not found");
@@ -222,7 +222,7 @@ namespace HotshotLogistics.Application.Services
             job.Status = JobStatus.Assigned;
             job.UpdatedAt = DateTime.UtcNow;
 
-            var updatedJob = await jobRepository.UpdateJobAsync(jobId, job, cancellationToken);
+            var updatedJob = await _jobRepository.UpdateJobAsync(jobId, job, cancellationToken);
             if (updatedJob == null)
             {
                 throw new InvalidOperationException($"Failed to update job {jobId}");
@@ -231,7 +231,7 @@ namespace HotshotLogistics.Application.Services
             // Send notification to driver
             try
             {
-                await notificationService.SendNotificationAsync(
+                await _notificationService.SendNotificationAsync(
                     driverId.ToString(),
                     NotificationType.JobAssignment,
                     "New Job Assignment",
@@ -240,19 +240,19 @@ namespace HotshotLogistics.Application.Services
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to send job assignment notification to driver {DriverId}", driverId);
+                _logger.LogWarning(ex, "Failed to send job assignment notification to driver {DriverId}", driverId);
             }
 
-            logger.LogInformation("Driver {DriverId} assigned to job {JobId} successfully", driverId, jobId);
+            _logger.LogInformation("Driver {DriverId} assigned to job {JobId} successfully", driverId, jobId);
             return updatedJob;
         }
 
         /// <inheritdoc/>
         public async Task<Job> UpdateJobStatusAsync(string jobId, JobStatus status, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Updating job {JobId} status to {Status}", jobId, status);
+            _logger.LogInformation("Updating job {JobId} status to {Status}", jobId, status);
 
-            var job = await jobRepository.GetJobByIdAsync(jobId, cancellationToken);
+            var job = await _jobRepository.GetJobByIdAsync(jobId, cancellationToken);
             if (job == null)
             {
                 throw new BusinessRuleException($"Job {jobId} not found");
@@ -275,7 +275,7 @@ namespace HotshotLogistics.Application.Services
                     break;
             }
 
-            var updatedJob = await jobRepository.UpdateJobAsync(jobId, job, cancellationToken);
+            var updatedJob = await _jobRepository.UpdateJobAsync(jobId, job, cancellationToken);
             if (updatedJob == null)
             {
                 throw new InvalidOperationException($"Failed to update job {jobId}");
@@ -288,10 +288,10 @@ namespace HotshotLogistics.Application.Services
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to send status change notifications for job {JobId}", jobId);
+                _logger.LogWarning(ex, "Failed to send status change notifications for job {JobId}", jobId);
             }
 
-            logger.LogInformation("Job {JobId} status updated to {Status} successfully", jobId, status);
+            _logger.LogInformation("Job {JobId} status updated to {Status} successfully", jobId, status);
             return updatedJob;
         }
 
@@ -313,66 +313,66 @@ namespace HotshotLogistics.Application.Services
 
             if (job == null)
             {
-                logger.LogWarning("Job validation failed: job is null");
+                _logger.LogWarning("Job validation failed: job is null");
                 AddError("Job", "Job is null");
                 throw new ValidationException("Job validation failed", errors.ToDictionary(kv => kv.Key, kv => kv.Value.ToArray()));
             }
 
             if (string.IsNullOrWhiteSpace(job.CustomerId))
             {
-                logger.LogWarning("Job validation failed: customer ID is empty");
+                _logger.LogWarning("Job validation failed: customer ID is empty");
                 AddError("CustomerId", "Customer ID is required");
             }
 
             if (string.IsNullOrWhiteSpace(job.Title))
             {
-                logger.LogWarning("Job validation failed: job title is empty");
+                _logger.LogWarning("Job validation failed: job title is empty");
                 AddError("Title", "Job title is required");
             }
 
             if (job.PickupLocation == null || !job.PickupLocation.IsValid())
             {
-                logger.LogWarning("Job validation failed: pickup location is invalid");
+                _logger.LogWarning("Job validation failed: pickup location is invalid");
                 AddError("PickupLocation", "Pickup location is invalid");
             }
             else if (!await ValidateLocationWithGeocodingAsync(job.PickupLocation, "pickup", cancellationToken))
             {
-                logger.LogWarning("Job validation failed: pickup location geocoding validation failed");
+                _logger.LogWarning("Job validation failed: pickup location geocoding validation failed");
                 AddError("PickupLocation", "Pickup location geocoding validation failed");
             }
 
             if (job.DeliveryLocation == null || !job.DeliveryLocation.IsValid())
             {
-                logger.LogWarning("Job validation failed: delivery location is invalid");
+                _logger.LogWarning("Job validation failed: delivery location is invalid");
                 AddError("DeliveryLocation", "Delivery location is invalid");
             }
             else if (!await ValidateLocationWithGeocodingAsync(job.DeliveryLocation, "delivery", cancellationToken))
             {
-                logger.LogWarning("Job validation failed: delivery location geocoding validation failed");
+                _logger.LogWarning("Job validation failed: delivery location geocoding validation failed");
                 AddError("DeliveryLocation", "Delivery location geocoding validation failed");
             }
 
             if (job.Cargo == null || !job.Cargo.IsValid())
             {
-                logger.LogWarning("Job validation failed: cargo details are invalid");
+                _logger.LogWarning("Job validation failed: cargo details are invalid");
                 AddError("Cargo", "Cargo details are invalid");
             }
 
             if (job.Pricing == null || !job.Pricing.IsValid())
             {
-                logger.LogWarning("Job validation failed: pricing details are invalid");
+                _logger.LogWarning("Job validation failed: pricing details are invalid");
                 AddError("Pricing", "Pricing details are invalid");
             }
 
             if (job.ScheduledPickupTime <= DateTime.UtcNow)
             {
-                logger.LogWarning("Job validation failed: scheduled pickup time is in the past");
+                _logger.LogWarning("Job validation failed: scheduled pickup time is in the past");
                 AddError("ScheduledPickupTime", "Scheduled pickup time must be in the future");
             }
 
             if (job.EstimatedDeliveryTime <= job.ScheduledPickupTime)
             {
-                logger.LogWarning("Job validation failed: estimated delivery time must be after pickup time");
+                _logger.LogWarning("Job validation failed: estimated delivery time must be after pickup time");
                 AddError("EstimatedDeliveryTime", "Estimated delivery time must be after pickup time");
             }
 
@@ -398,19 +398,19 @@ namespace HotshotLogistics.Application.Services
                 // If coordinates are already provided, validate them with reverse geocoding
                 if (location.HasCoordinates)
                 {
-                    var reverseResult = await mappingService.ReverseGeocodeAsync(location.Latitude!.Value, location.Longitude!.Value, cancellationToken);
+                    var reverseResult = await _mappingService.ReverseGeocodeAsync(location.Latitude!.Value, location.Longitude!.Value, cancellationToken);
 
                     // If mapping service returned null (e.g. mocked default), treat it as mapping unavailability and allow the job,
                     // while logging a warning. Keep explicit invalid results as failures.
                     if (reverseResult == null)
                     {
-                        logger.LogWarning("Location validation warning: reverse geocoding returned null for {LocationType} coordinates; allowing job due to mapping service unavailability", locationType);
+                        _logger.LogWarning("Location validation warning: reverse geocoding returned null for {LocationType} coordinates; allowing job due to mapping service unavailability", locationType);
                         return true;
                     }
 
                     if (!reverseResult.IsValid)
                     {
-                        logger.LogWarning("Location validation failed: reverse geocoding failed for {LocationType} coordinates", locationType);
+                        _logger.LogWarning("Location validation failed: reverse geocoding failed for {LocationType} coordinates", locationType);
                         return false;
                     }
 
@@ -418,10 +418,10 @@ namespace HotshotLogistics.Application.Services
                 }
 
                 // Otherwise, geocode the address to get coordinates
-                var geocodeResult = await mappingService.GeocodeAddressAsync(location.FullAddress, cancellationToken);
+                var geocodeResult = await _mappingService.GeocodeAddressAsync(location.FullAddress, cancellationToken);
                 if (!geocodeResult.IsValid)
                 {
-                    logger.LogWarning("Location validation failed: geocoding failed for {LocationType} address: {Address}", locationType, location.FullAddress);
+                    _logger.LogWarning("Location validation failed: geocoding failed for {LocationType} address: {Address}", locationType, location.FullAddress);
                     return false;
                 }
 
@@ -429,14 +429,14 @@ namespace HotshotLogistics.Application.Services
                 location.Latitude = geocodeResult.Latitude;
                 location.Longitude = geocodeResult.Longitude;
 
-                logger.LogInformation("Location validated and geocoded for {LocationType}: {Address} -> ({Lat}, {Lon})",
+                _logger.LogInformation("Location validated and geocoded for {LocationType}: {Address} -> ({Lat}, {Lon})",
                     locationType, location.FullAddress, location.Latitude, location.Longitude);
 
                 return true;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error validating location with geocoding for {LocationType}: {Address}", locationType, location.FullAddress);
+                _logger.LogError(ex, "Error validating location with geocoding for {LocationType}: {Address}", locationType, location.FullAddress);
                 // If geocoding fails, still allow the job but log the error
                 return true;
             }
@@ -453,7 +453,7 @@ namespace HotshotLogistics.Application.Services
             try
             {
                 // Use mapping service to get accurate distance and duration
-                var distanceResult = await mappingService.CalculateDistanceAsync(job.PickupLocation, job.DeliveryLocation, cancellationToken);
+                var distanceResult = await _mappingService.CalculateDistanceAsync(job.PickupLocation, job.DeliveryLocation, cancellationToken);
 
                 double distance;
                 TimeSpan travelTime;
@@ -466,7 +466,7 @@ namespace HotshotLogistics.Application.Services
                 else
                 {
                     // Fallback to basic calculation if mapping service fails
-                    logger.LogWarning("Mapping service failed for distance calculation, using fallback calculation");
+                    _logger.LogWarning("Mapping service failed for distance calculation, using fallback calculation");
                     distance = job.PickupLocation.DistanceTo(job.DeliveryLocation) ?? 100; // Default 100 miles if no coordinates
                     var averageSpeed = 55; // Average highway speed in mph
                     travelTime = TimeSpan.FromHours(distance / averageSpeed);
@@ -486,14 +486,14 @@ namespace HotshotLogistics.Application.Services
 
                 var estimatedDeliveryTime = job.ScheduledPickupTime.Add(totalTime).Add(bufferTime);
 
-                logger.LogInformation("Calculated delivery time for job: distance={Distance} miles, travelTime={TravelTime}, totalTime={TotalTime}, buffer={Buffer}, ETA={ETA}",
+                _logger.LogInformation("Calculated delivery time for job: distance={Distance} miles, travelTime={TravelTime}, totalTime={TotalTime}, buffer={Buffer}, ETA={ETA}",
                     distance, travelTime, totalTime, bufferTime, estimatedDeliveryTime);
 
                 return estimatedDeliveryTime;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error calculating estimated delivery time, using fallback calculation");
+                _logger.LogError(ex, "Error calculating estimated delivery time, using fallback calculation");
 
                 // Fallback calculation
                 var distance = job.PickupLocation.DistanceTo(job.DeliveryLocation) ?? 100;
@@ -520,12 +520,12 @@ namespace HotshotLogistics.Application.Services
         /// <returns>The estimated time of arrival.</returns>
         public async Task<DateTime?> CalculateCurrentETAAsync(string jobId, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Calculating current ETA for job {JobId}", jobId);
+            _logger.LogInformation("Calculating current ETA for job {JobId}", jobId);
 
-            var job = await jobRepository.GetJobByIdAsync(jobId, cancellationToken);
+            var job = await _jobRepository.GetJobByIdAsync(jobId, cancellationToken);
             if (job == null)
             {
-                logger.LogWarning("Job not found for ETA calculation: {JobId}", jobId);
+                _logger.LogWarning("Job not found for ETA calculation: {JobId}", jobId);
                 return null;
             }
 
@@ -553,7 +553,7 @@ namespace HotshotLogistics.Application.Services
                         Latitude = currentLocation.Latitude,
                         Longitude = currentLocation.Longitude
                     };
-                    var distanceResult = await mappingService.CalculateDistanceAsync(currentLocationAsLocation, job.PickupLocation, cancellationToken);
+                    var distanceResult = await _mappingService.CalculateDistanceAsync(currentLocationAsLocation, job.PickupLocation, cancellationToken);
                     if (distanceResult.IsValid)
                     {
                         eta = DateTime.UtcNow.Add(distanceResult.Duration);
@@ -570,7 +570,7 @@ namespace HotshotLogistics.Application.Services
                     eta = eta.AddMinutes(30);
 
                     // Add delivery time
-                    var deliveryResult = await mappingService.CalculateDistanceAsync(job.PickupLocation, job.DeliveryLocation, cancellationToken);
+                    var deliveryResult = await _mappingService.CalculateDistanceAsync(job.PickupLocation, job.DeliveryLocation, cancellationToken);
                     if (deliveryResult.IsValid)
                     {
                         eta = eta.Add(deliveryResult.Duration);
@@ -593,7 +593,7 @@ namespace HotshotLogistics.Application.Services
                         Latitude = currentLocation.Latitude,
                         Longitude = currentLocation.Longitude
                     };
-                    var distanceResult = await mappingService.CalculateDistanceAsync(currentLocationAsLocation, job.DeliveryLocation, cancellationToken);
+                    var distanceResult = await _mappingService.CalculateDistanceAsync(currentLocationAsLocation, job.DeliveryLocation, cancellationToken);
                     if (distanceResult.IsValid)
                     {
                         eta = DateTime.UtcNow.Add(distanceResult.Duration);
@@ -610,12 +610,12 @@ namespace HotshotLogistics.Application.Services
                     eta = eta.AddMinutes(30);
                 }
 
-                logger.LogInformation("Calculated ETA for job {JobId}: {ETA}", jobId, eta);
+                _logger.LogInformation("Calculated ETA for job {JobId}: {ETA}", jobId, eta);
                 return eta;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error calculating current ETA for job {JobId}, using fallback", jobId);
+                _logger.LogError(ex, "Error calculating current ETA for job {JobId}, using fallback", jobId);
 
                 // Fallback to original calculation
                 var targetLocation = job.Status == JobStatus.Assigned || job.Status == JobStatus.EnRoute
@@ -640,14 +640,14 @@ namespace HotshotLogistics.Application.Services
         /// <inheritdoc/>
         public async Task<bool> IsDriverAvailableAsync(int driverId, DateTime startTime, DateTime? endTime = null, CancellationToken cancellationToken = default)
         {
-            var driver = await driverRepository.GetDriverByIdAsync(driverId);
+            var driver = await _driverRepository.GetDriverByIdAsync(driverId);
             if (driver == null || !driver.IsActive)
             {
                 return false;
             }
 
             // Check if driver has any conflicting jobs
-            var driverJobs = await jobRepository.GetByDriverIdAsync(driverId, cancellationToken);
+            var driverJobs = await _jobRepository.GetByDriverIdAsync(driverId, cancellationToken);
             var activeJobs = driverJobs.Where(j =>
                 j.Status == JobStatus.Assigned ||
                 j.Status == JobStatus.EnRoute);
@@ -685,7 +685,7 @@ namespace HotshotLogistics.Application.Services
             };
 
             // Notify customer
-            await notificationService.SendNotificationAsync(
+            await _notificationService.SendNotificationAsync(
                 job.CustomerId,
                 NotificationType.JobStatusUpdate,
                 "Job Status Update",
@@ -702,7 +702,7 @@ namespace HotshotLogistics.Application.Services
                     _ => $"Job status updated to {job.Status}"
                 };
 
-                await notificationService.SendNotificationAsync(
+                await _notificationService.SendNotificationAsync(
                     job.AssignedDriverId.Value.ToString(),
                     NotificationType.JobStatusUpdate,
                     "Job Status Update",

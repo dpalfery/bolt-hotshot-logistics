@@ -9,14 +9,14 @@ namespace HotshotLogistics.Tests.Jobs
     /// </summary>
     public class CreateJobValidatorTests
     {
-        private readonly CreateJobValidator validator;
+        private readonly CreateJobValidator _validator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateJobValidatorTests"/> class.
         /// </summary>
         public CreateJobValidatorTests()
         {
-            this.validator = new CreateJobValidator();
+            _validator = new CreateJobValidator();
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace HotshotLogistics.Tests.Jobs
             };
 
             // Act
-            var result = this.validator.TestValidate(jobDto);
+            var result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldNotHaveAnyValidationErrors();
@@ -87,7 +87,7 @@ namespace HotshotLogistics.Tests.Jobs
             var jobDto = new ContractsJobDto { Title = string.Empty };
 
             // Act
-            var result = this.validator.TestValidate(jobDto);
+            var result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.Title)
@@ -104,7 +104,7 @@ namespace HotshotLogistics.Tests.Jobs
             var jobDto = new ContractsJobDto { Title = new string('A', 201) };
 
             // Act
-            var result = this.validator.TestValidate(jobDto);
+            var result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.Title)
@@ -121,7 +121,7 @@ namespace HotshotLogistics.Tests.Jobs
             var jobDto = new ContractsJobDto { PickupAddress = string.Empty };
 
             // Act
-            var result = this.validator.TestValidate(jobDto);
+            var result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.PickupAddress)
@@ -138,7 +138,7 @@ namespace HotshotLogistics.Tests.Jobs
             var jobDto = new ContractsJobDto { Amount = 0 };
 
             // Act
-            var result = this.validator.TestValidate(jobDto);
+            var result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.Amount)
@@ -155,7 +155,7 @@ namespace HotshotLogistics.Tests.Jobs
             var jobDto = new ContractsJobDto { Amount = 150000.00m };
 
             // Act
-            var result = this.validator.TestValidate(jobDto);
+            var result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.Amount)
@@ -172,7 +172,7 @@ namespace HotshotLogistics.Tests.Jobs
             var jobDto = new ContractsJobDto { ScheduledPickupTime = DateTime.UtcNow.AddHours(-1) };
 
             // Act
-            var result = this.validator.TestValidate(jobDto);
+            var result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.ScheduledPickupTime)
@@ -194,7 +194,7 @@ namespace HotshotLogistics.Tests.Jobs
             };
 
             // Act
-            var result = this.validator.TestValidate(jobDto);
+            var result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.EstimatedDeliveryTime)
@@ -211,7 +211,7 @@ namespace HotshotLogistics.Tests.Jobs
             var jobDto = new ContractsJobDto { CustomerId = string.Empty };
 
             // Act
-            var result = this.validator.TestValidate(jobDto);
+            var result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.CustomerId)
@@ -228,7 +228,7 @@ namespace HotshotLogistics.Tests.Jobs
             var jobDto = new ContractsJobDto { PickupLocation = null! };
 
             // Act
-            var result = this.validator.TestValidate(jobDto);
+            var result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.PickupLocation)
@@ -245,7 +245,7 @@ namespace HotshotLogistics.Tests.Jobs
             var jobDto = new ContractsJobDto { Cargo = null! };
 
             // Act
-            var result = this.validator.TestValidate(jobDto);
+            var result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.Cargo)
@@ -262,7 +262,7 @@ namespace HotshotLogistics.Tests.Jobs
             var jobDto = new ContractsJobDto { Pricing = null! };
 
             // Act
-            var result = this.validator.TestValidate(jobDto);
+            var result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.Pricing)

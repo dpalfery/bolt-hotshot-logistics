@@ -22,15 +22,15 @@ namespace HotshotLogistics.Application.Services
     /// </summary>
     public class TrackingService : ITrackingService
     {
-        private readonly ILocationTrackingRepository locationTrackingRepository;
-        private readonly IJobRepository jobRepository;
-        private readonly IDriverRepository driverRepository;
-        private readonly INotificationService notificationService;
-        private readonly IDistributedCache cache;
-        private readonly ILogger<TrackingService> logger;
+        private readonly ILocationTrackingRepository _locationTrackingRepository;
+        private readonly IJobRepository _jobRepository;
+        private readonly IDriverRepository _driverRepository;
+        private readonly INotificationService _notificationService;
+        private readonly IDistributedCache _cache;
+        private readonly ILogger<TrackingService> _logger;
 
         // Route deviation threshold in miles
-        private const double RouteDeviationThresholdMiles = 5.0;
+        private const double s_routeDeviationThresholdMiles = 5.0;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TrackingService"/> class.
@@ -39,8 +39,8 @@ namespace HotshotLogistics.Application.Services
         /// <param name="jobRepository">The job repository.</param>
         /// <param name="driverRepository">The driver repository.</param>
         /// <param name="notificationService">The notification service.</param>
-        /// <param name="cache">The distributed cache.</param>
-        /// <param name="logger">The logger.</param>
+        /// <param name="cache">The distributed _cache.</param>
+        /// <param name="logger">The _logger.</param>
         public TrackingService(
             ILocationTrackingRepository locationTrackingRepository,
             IJobRepository jobRepository,
@@ -49,38 +49,38 @@ namespace HotshotLogistics.Application.Services
             IDistributedCache cache,
             ILogger<TrackingService> logger)
         {
-            this.locationTrackingRepository = locationTrackingRepository ?? throw new ArgumentNullException(nameof(locationTrackingRepository));
-            this.jobRepository = jobRepository ?? throw new ArgumentNullException(nameof(jobRepository));
-            this.driverRepository = driverRepository ?? throw new ArgumentNullException(nameof(driverRepository));
-            this.notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
-            this.cache = cache ?? throw new ArgumentNullException(nameof(cache));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _locationTrackingRepository = locationTrackingRepository ?? throw new ArgumentNullException(nameof(locationTrackingRepository));
+            _jobRepository = jobRepository ?? throw new ArgumentNullException(nameof(jobRepository));
+            _driverRepository = driverRepository ?? throw new ArgumentNullException(nameof(driverRepository));
+            _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <inheritdoc/>
         public async Task<bool> StartTrackingAsync(string jobId, int driverId, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Starting tracking for job {JobId} with driver {DriverId}", jobId, driverId);
+            _logger.LogInformation("Starting tracking for job {JobId} with driver {DriverId}", jobId, driverId);
 
             // Validate job exists and is assigned to the driver
-            var job = await jobRepository.GetByIdAsync(jobId);
+            var job = await _jobRepository.GetByIdAsync(jobId);
             if (job == null)
             {
-                logger.LogWarning("Job not found: {JobId}", jobId);
+                _logger.LogWarning("Job not found: {JobId}", jobId);
                 return false;
             }
 
             if (job.AssignedDriverId != driverId)
             {
-                logger.LogWarning("Driver {DriverId} is not assigned to job {JobId}", driverId, jobId);
+                _logger.LogWarning("Driver {DriverId} is not assigned to job {JobId}", driverId, jobId);
                 return false;
             }
 
             // Validate driver exists and is active
-            var driver = await driverRepository.GetDriverByIdAsync(driverId);
+            var driver = await _driverRepository.GetDriverByIdAsync(driverId);
             if (driver == null || !driver.IsActive)
             {
-                logger.LogWarning("Driver not found or inactive: {DriverId}", driverId);
+                _logger.LogWarning("Driver not found or inactive: {DriverId}", driverId);
                 return false;
             }
 
@@ -95,19 +95,19 @@ namespace HotshotLogistics.Application.Services
             };
 
             var trackingJson = JsonSerializer.Serialize(trackingInfo);
-            await cache.SetStringAsync(trackingKey, trackingJson, new DistributedCacheEntryOptions
+            await _cache.SetStringAsync(trackingKey, trackingJson, new DistributedCacheEntryOptions
             {
                 SlidingExpiration = TimeSpan.FromHours(24) // Keep tracking active for 24 hours
             }, cancellationToken);
 
-            logger.LogInformation("Tracking started successfully for job {JobId} with driver {DriverId}", jobId, driverId);
+            _logger.LogInformation("Tracking started successfully for job {JobId} with driver {DriverId}", jobId, driverId);
             return true;
         }
 
         /// <inheritdoc/>
         public async Task<LocationTracking> UpdateLocationAsync(string jobId, int driverId, LocationUpdate locationUpdate, CancellationToken cancellationToken = default)
         {
-            logger.LogDebug("Updating location for job {JobId} with driver {DriverId}", jobId, driverId);
+            _logger.LogDebug("Updating location for job {JobId} with driver {DriverId}", jobId, driverId);
 
             // Validate location update
             if (!locationUpdate.IsValid())
@@ -117,7 +117,7 @@ namespace HotshotLogistics.Application.Services
 
             // Check if tracking is active
             var trackingKey = $"tracking:{jobId}";
-            var trackingJson = await cache.GetStringAsync(trackingKey, cancellationToken);
+            var trackingJson = await _cache.GetStringAsync(trackingKey, cancellationToken);
             if (string.IsNullOrEmpty(trackingJson))
             {
                 throw new InvalidOperationException($"Tracking is not active for job {jobId}");
@@ -125,12 +125,12 @@ namespace HotshotLogistics.Application.Services
 
             // Create location tracking record
             var locationTracking = LocationTracking.FromLocationUpdate(jobId, driverId, locationUpdate);
-            var savedLocation = await locationTrackingRepository.AddAsync(locationTracking);
+            var savedLocation = await _locationTrackingRepository.AddAsync(locationTracking);
 
             // Update cache with latest location
             var cacheKey = $"location:current:{jobId}";
             var locationJson = JsonSerializer.Serialize(locationUpdate);
-            await cache.SetStringAsync(cacheKey, locationJson, new DistributedCacheEntryOptions
+            await _cache.SetStringAsync(cacheKey, locationJson, new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30) // Cache for 30 minutes
             }, cancellationToken);
@@ -142,7 +142,7 @@ namespace HotshotLogistics.Application.Services
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to update job tracking info for job {JobId}", jobId);
+                _logger.LogWarning(ex, "Failed to update job tracking info for job {JobId}", jobId);
             }
 
             // Check for route deviation
@@ -156,27 +156,27 @@ namespace HotshotLogistics.Application.Services
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to check route deviation for job {JobId}", jobId);
+                _logger.LogWarning(ex, "Failed to check route deviation for job {JobId}", jobId);
             }
 
-            logger.LogDebug("Location updated successfully for job {JobId}", jobId);
+            _logger.LogDebug("Location updated successfully for job {JobId}", jobId);
             return savedLocation;
         }
 
         /// <inheritdoc/>
         public async Task<bool> StopTrackingAsync(string jobId, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Stopping tracking for job {JobId}", jobId);
+            _logger.LogInformation("Stopping tracking for job {JobId}", jobId);
 
             // Remove tracking status from cache
             var trackingKey = $"tracking:{jobId}";
-            await cache.RemoveAsync(trackingKey, cancellationToken);
+            await _cache.RemoveAsync(trackingKey, cancellationToken);
 
             // Remove current location from cache
             var locationKey = $"location:current:{jobId}";
-            await cache.RemoveAsync(locationKey, cancellationToken);
+            await _cache.RemoveAsync(locationKey, cancellationToken);
 
-            logger.LogInformation("Tracking stopped successfully for job {JobId}", jobId);
+            _logger.LogInformation("Tracking stopped successfully for job {JobId}", jobId);
             return true;
         }
 
@@ -185,7 +185,7 @@ namespace HotshotLogistics.Application.Services
         {
             // Try to get from cache first
             var cacheKey = $"location:current:{jobId}";
-            var cachedLocationJson = await cache.GetStringAsync(cacheKey, cancellationToken);
+            var cachedLocationJson = await _cache.GetStringAsync(cacheKey, cancellationToken);
 
             if (!string.IsNullOrEmpty(cachedLocationJson))
             {
@@ -195,7 +195,7 @@ namespace HotshotLogistics.Application.Services
                     if (cachedLocation != null)
                     {
                         // Get driver ID from job
-                        var job = await jobRepository.GetByIdAsync(jobId);
+                        var job = await _jobRepository.GetByIdAsync(jobId);
                         if (job?.AssignedDriverId.HasValue == true)
                         {
                             return LocationTracking.FromLocationUpdate(jobId, job.AssignedDriverId.Value, cachedLocation);
@@ -204,18 +204,18 @@ namespace HotshotLogistics.Application.Services
                 }
                 catch (JsonException ex)
                 {
-                    logger.LogWarning(ex, "Failed to deserialize cached location for job {JobId}", jobId);
+                    _logger.LogWarning(ex, "Failed to deserialize cached location for job {JobId}", jobId);
                 }
             }
 
             // Fall back to database
-            return await locationTrackingRepository.GetLatestByJobIdAsync(jobId);
+            return await _locationTrackingRepository.GetLatestByJobIdAsync(jobId);
         }
 
         /// <inheritdoc/>
         public Task<IEnumerable<LocationTracking>> GetLocationHistoryAsync(string jobId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken = default)
         {
-            return locationTrackingRepository.GetByJobIdAndTimeRangeAsync(jobId, startTime, endTime);
+            return _locationTrackingRepository.GetByJobIdAndTimeRangeAsync(jobId, startTime, endTime);
         }
 
         /// <inheritdoc/>
@@ -223,7 +223,7 @@ namespace HotshotLogistics.Application.Services
         {
             try
             {
-                var job = await jobRepository.GetByIdAsync(jobId);
+                var job = await _jobRepository.GetByIdAsync(jobId);
                 if (job == null)
                 {
                     return false;
@@ -240,11 +240,11 @@ namespace HotshotLogistics.Application.Services
                 var closestDistance = expectedRoute.Min(point => currentLocation.DistanceTo(point));
 
                 // Check if current location is too far from the expected route
-                return closestDistance > RouteDeviationThresholdMiles;
+                return closestDistance > s_routeDeviationThresholdMiles;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error checking route deviation for job {JobId}", jobId);
+                _logger.LogError(ex, "Error checking route deviation for job {JobId}", jobId);
                 return false;
             }
         }
@@ -292,9 +292,9 @@ namespace HotshotLogistics.Application.Services
         /// <returns>The tracking link URL.</returns>
         public async Task<string> GenerateTrackingLinkAsync(string jobId, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Generating tracking link for job {JobId}", jobId);
+            _logger.LogInformation("Generating tracking link for job {JobId}", jobId);
 
-            var job = await jobRepository.GetByIdAsync(jobId);
+            var job = await _jobRepository.GetByIdAsync(jobId);
             if (job == null)
             {
                 throw new ArgumentException($"Job {jobId} not found", nameof(jobId));
@@ -305,7 +305,7 @@ namespace HotshotLogistics.Application.Services
 
             // Store tracking token in cache with expiration
             var tokenKey = $"tracking:token:{trackingToken}";
-            await cache.SetStringAsync(tokenKey, jobId, new DistributedCacheEntryOptions
+            await _cache.SetStringAsync(tokenKey, jobId, new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(7) // Token valid for 7 days
             }, cancellationToken);
@@ -313,7 +313,7 @@ namespace HotshotLogistics.Application.Services
             // Generate tracking URL (in real implementation, use proper base URL from configuration)
             var trackingUrl = $"https://tracking.hotshotlogistics.com/track/{trackingToken}";
 
-            logger.LogInformation("Tracking link generated for job {JobId}: {TrackingUrl}", jobId, trackingUrl);
+            _logger.LogInformation("Tracking link generated for job {JobId}: {TrackingUrl}", jobId, trackingUrl);
             return trackingUrl;
         }
 
@@ -326,12 +326,12 @@ namespace HotshotLogistics.Application.Services
         /// <returns>A task representing the asynchronous operation.</returns>
         public async Task UpdateJobTrackingInfoAsync(string jobId, LocationUpdate locationUpdate, CancellationToken cancellationToken = default)
         {
-            logger.LogDebug("Updating job tracking info for job {JobId}", jobId);
+            _logger.LogDebug("Updating job tracking info for job {JobId}", jobId);
 
-            var job = await jobRepository.GetByIdAsync(jobId);
+            var job = await _jobRepository.GetByIdAsync(jobId);
             if (job == null)
             {
-                logger.LogWarning("Job not found for tracking update: {JobId}", jobId);
+                _logger.LogWarning("Job not found for tracking update: {JobId}", jobId);
                 return;
             }
 
@@ -365,9 +365,9 @@ namespace HotshotLogistics.Application.Services
 
             // Save updated job
             job.UpdatedAt = DateTime.UtcNow;
-            await jobRepository.UpdateAsync(job);
+            await _jobRepository.UpdateAsync(job);
 
-            logger.LogDebug("Job tracking info updated for job {JobId}", jobId);
+            _logger.LogDebug("Job tracking info updated for job {JobId}", jobId);
         }
 
         /// <summary>
@@ -409,7 +409,7 @@ namespace HotshotLogistics.Application.Services
             {
                 try
                 {
-                    await notificationService.SendNotificationAsync(
+                    await _notificationService.SendNotificationAsync(
                         job.CustomerId,
                         NotificationType.JobStatusUpdate,
                         "Job Status Update",
@@ -418,7 +418,7 @@ namespace HotshotLogistics.Application.Services
                 }
                 catch (Exception ex)
                 {
-                    logger.LogWarning(ex, "Failed to send status update notification for job {JobId}", job.Id);
+                    _logger.LogWarning(ex, "Failed to send status update notification for job {JobId}", job.Id);
                 }
             }
         }
@@ -431,15 +431,15 @@ namespace HotshotLogistics.Application.Services
         /// <returns>The tracking statistics.</returns>
         public async Task<TrackingStatistics> GetTrackingStatisticsAsync(string jobId, CancellationToken cancellationToken = default)
         {
-            logger.LogDebug("Getting tracking statistics for job {JobId}", jobId);
+            _logger.LogDebug("Getting tracking statistics for job {JobId}", jobId);
 
-            var job = await jobRepository.GetByIdAsync(jobId);
+            var job = await _jobRepository.GetByIdAsync(jobId);
             if (job == null)
             {
                 throw new ArgumentException($"Job {jobId} not found", nameof(jobId));
             }
 
-            var locationHistory = await locationTrackingRepository.GetByJobIdAsync(jobId);
+            var locationHistory = await _locationTrackingRepository.GetByJobIdAsync(jobId);
             var locations = locationHistory.ToList();
 
             var statistics = new TrackingStatistics
@@ -459,7 +459,7 @@ namespace HotshotLogistics.Application.Services
                 statistics.TotalDuration = statistics.LastUpdate.Value - statistics.FirstUpdate.Value;
             }
 
-            logger.LogDebug("Tracking statistics calculated for job {JobId}: {TotalUpdates} updates, {TotalDistance:F2} miles",
+            _logger.LogDebug("Tracking statistics calculated for job {JobId}: {TotalUpdates} updates, {TotalDistance:F2} miles",
                 jobId, statistics.TotalUpdates, statistics.TotalDistance);
 
             return statistics;
@@ -517,10 +517,10 @@ namespace HotshotLogistics.Application.Services
         /// <returns>A task representing the asynchronous operation.</returns>
         private async Task HandleRouteDeviationAsync(string jobId, int driverId, LocationUpdate currentLocation, CancellationToken cancellationToken)
         {
-            logger.LogWarning("Route deviation detected for job {JobId} at location {Lat}, {Lon}",
+            _logger.LogWarning("Route deviation detected for job {JobId} at location {Lat}, {Lon}",
                 jobId, currentLocation.Latitude, currentLocation.Longitude);
 
-            var job = await jobRepository.GetByIdAsync(jobId);
+            var job = await _jobRepository.GetByIdAsync(jobId);
             if (job == null)
             {
                 return;
@@ -529,7 +529,7 @@ namespace HotshotLogistics.Application.Services
             // Send notification to customer
             try
             {
-                await notificationService.SendNotificationAsync(
+                await _notificationService.SendNotificationAsync(
                     job.CustomerId,
                     NotificationType.RouteDeviation,
                     "Route Deviation Alert",
@@ -538,13 +538,13 @@ namespace HotshotLogistics.Application.Services
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to send route deviation notification to customer for job {JobId}", jobId);
+                _logger.LogWarning(ex, "Failed to send route deviation notification to customer for job {JobId}", jobId);
             }
 
             // Send notification to driver
             try
             {
-                await notificationService.SendNotificationAsync(
+                await _notificationService.SendNotificationAsync(
                     driverId.ToString(),
                     NotificationType.RouteDeviation,
                     "Route Deviation Alert",
@@ -553,7 +553,7 @@ namespace HotshotLogistics.Application.Services
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to send route deviation notification to driver {DriverId}", driverId);
+                _logger.LogWarning(ex, "Failed to send route deviation notification to driver {DriverId}", driverId);
             }
         }
     }

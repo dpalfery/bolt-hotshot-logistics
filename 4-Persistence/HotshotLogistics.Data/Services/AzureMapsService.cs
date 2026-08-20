@@ -16,9 +16,9 @@ namespace HotshotLogistics.Data.Services
     /// </summary>
     public class AzureMapsService : IMappingService
     {
-        private readonly HttpClient httpClient;
-        private readonly ILogger<AzureMapsService> logger;
-        private readonly string subscriptionKey;
+        private readonly HttpClient _httpClient;
+        private readonly ILogger<AzureMapsService> _logger;
+        private readonly string _subscriptionKey;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureMapsService"/> class.
@@ -28,10 +28,10 @@ namespace HotshotLogistics.Data.Services
         /// <param name="settings">The Azure Maps settings.</param>
         public AzureMapsService(HttpClient httpClient, ILogger<AzureMapsService> logger, IOptions<AzureMapsSettings> settings)
         {
-            this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             var settingsValue = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
-            this.subscriptionKey = settingsValue.SubscriptionKey ?? throw new ArgumentNullException(nameof(settingsValue.SubscriptionKey));
+            _subscriptionKey = settingsValue.SubscriptionKey ?? throw new ArgumentNullException(nameof(settingsValue.SubscriptionKey));
         }
 
         /// <inheritdoc/>
@@ -39,9 +39,9 @@ namespace HotshotLogistics.Data.Services
         {
             try
             {
-                var url = $"https://atlas.microsoft.com/search/address/json?api-version=1.0&subscription-key={subscriptionKey}&query={Uri.EscapeDataString(address)}";
+                var url = $"https://atlas.microsoft.com/search/address/json?api-version=1.0&subscription-key={_subscriptionKey}&query={Uri.EscapeDataString(address)}";
 
-                var response = await httpClient.GetAsync(url, cancellationToken);
+                var response = await _httpClient.GetAsync(url, cancellationToken);
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -68,7 +68,7 @@ namespace HotshotLogistics.Data.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to geocode address: {Address}", address);
+                _logger.LogError(ex, "Failed to geocode address: {Address}", address);
                 return new GeocodingResult
                 {
                     IsValid = false,
@@ -82,9 +82,9 @@ namespace HotshotLogistics.Data.Services
         {
             try
             {
-                var url = $"https://atlas.microsoft.com/search/address/reverse/json?api-version=1.0&subscription-key={subscriptionKey}&query={latitude},{longitude}";
+                var url = $"https://atlas.microsoft.com/search/address/reverse/json?api-version=1.0&subscription-key={_subscriptionKey}&query={latitude},{longitude}";
 
-                var response = await httpClient.GetAsync(url, cancellationToken);
+                var response = await _httpClient.GetAsync(url, cancellationToken);
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -113,7 +113,7 @@ namespace HotshotLogistics.Data.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to reverse geocode coordinates");
+                _logger.LogError(ex, "Failed to reverse geocode coordinates");
                 return new ReverseGeocodingResult
                 {
                     IsValid = false,
@@ -143,9 +143,9 @@ namespace HotshotLogistics.Data.Services
                     };
                 }
 
-                var url = $"https://atlas.microsoft.com/route/directions/json?api-version=1.0&subscription-key={subscriptionKey}&query={origin.Latitude},{origin.Longitude}:{destination.Latitude},{destination.Longitude}";
+                var url = $"https://atlas.microsoft.com/route/directions/json?api-version=1.0&subscription-key={_subscriptionKey}&query={origin.Latitude},{origin.Longitude}:{destination.Latitude},{destination.Longitude}";
 
-                var response = await httpClient.GetAsync(url, cancellationToken);
+                var response = await _httpClient.GetAsync(url, cancellationToken);
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -175,7 +175,7 @@ namespace HotshotLogistics.Data.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to calculate route between {Origin} and {Destination}", origin.FullAddress, destination.FullAddress);
+                _logger.LogError(ex, "Failed to calculate route between {Origin} and {Destination}", origin.FullAddress, destination.FullAddress);
                 return new RouteResult
                 {
                     IsValid = false,
@@ -233,7 +233,7 @@ namespace HotshotLogistics.Data.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to optimize route with {WaypointCount} waypoints", waypoints.Count);
+                _logger.LogError(ex, "Failed to optimize route with {WaypointCount} waypoints", waypoints.Count);
                 return new OptimizedRouteResult
                 {
                     IsValid = false,

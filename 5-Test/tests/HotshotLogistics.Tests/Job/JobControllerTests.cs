@@ -16,22 +16,22 @@ namespace HotshotLogistics.Tests.Jobs
     /// </summary>
     public class JobControllerTests
     {
-        private readonly Mock<IJobService> mockJobService;
-        private readonly Mock<IJobRepository> mockJobRepository;
-        private readonly Mock<IValidator<Domain.Entities.Job>> mockJobValidator;
-        private readonly Mock<ILogger<JobController>> mockLogger;
-        private readonly JobController controller;
+        private readonly Mock<IJobService> _mockJobService;
+        private readonly Mock<IJobRepository> _mockJobRepository;
+        private readonly Mock<IValidator<Domain.Entities.Job>> _mockJobValidator;
+        private readonly Mock<ILogger<JobController>> _mockLogger;
+        private readonly JobController _controller;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JobControllerTests"/> class.
         /// </summary>
         public JobControllerTests()
         {
-            mockJobService = new Mock<IJobService>();
-            mockJobRepository = new Mock<IJobRepository>();
-            mockJobValidator = new Mock<IValidator<Domain.Entities.Job>>();
-            mockLogger = new Mock<ILogger<JobController>>();
-            controller = new JobController(mockJobService.Object, mockJobRepository.Object, mockLogger.Object, mockJobValidator.Object);
+            _mockJobService = new Mock<IJobService>();
+            _mockJobRepository = new Mock<IJobRepository>();
+            _mockJobValidator = new Mock<IValidator<Domain.Entities.Job>>();
+            _mockLogger = new Mock<ILogger<JobController>>();
+            _controller = new JobController(_mockJobService.Object, _mockJobRepository.Object, _mockLogger.Object, _mockJobValidator.Object);
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace HotshotLogistics.Tests.Jobs
                 PageSize = 10
             };
 
-            mockJobRepository.Setup(r => r.GetJobsAsync(
+            _mockJobRepository.Setup(r => r.GetJobsAsync(
                 It.IsAny<JobFilterDto>(),
                 It.IsAny<PaginationParameters>(),
                 It.IsAny<SortParameters>(),
@@ -64,7 +64,7 @@ namespace HotshotLogistics.Tests.Jobs
                 .ReturnsAsync(pagedResult);
 
             // Act
-            var result = await controller.GetJobs(
+            var result = await _controller.GetJobs(
                 status: JobStatus.Pending,
                 pageNumber: 1,
                 pageSize: 10);
@@ -88,11 +88,11 @@ namespace HotshotLogistics.Tests.Jobs
             var jobId = "test-job-id";
             var expectedJob = CreateTestJob(jobId, JobStatus.Pending);
 
-            mockJobService.Setup(s => s.GetJobByIdAsync(jobId, It.IsAny<CancellationToken>()))
+            _mockJobService.Setup(s => s.GetJobByIdAsync(jobId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedJob);
 
             // Act
-            var result = await controller.GetJobById(jobId);
+            var result = await _controller.GetJobById(jobId);
 
             // Assert
             result.Should().NotBeNull();
@@ -111,11 +111,11 @@ namespace HotshotLogistics.Tests.Jobs
             // Arrange
             var jobId = "non-existent-job";
 
-            mockJobService.Setup(s => s.GetJobByIdAsync(jobId, It.IsAny<CancellationToken>()))
+            _mockJobService.Setup(s => s.GetJobByIdAsync(jobId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Domain.Entities.Job?)null);
 
             // Act
-            var result = await controller.GetJobById(jobId);
+            var result = await _controller.GetJobById(jobId);
 
             // Assert
             result.Should().NotBeNull();
@@ -144,14 +144,14 @@ namespace HotshotLogistics.Tests.Jobs
 
             var createdJob = CreateTestJob(jobDto.Id, jobDto.Status);
 
-            mockJobValidator.Setup(v => v.ValidateAsync(jobDto, It.IsAny<CancellationToken>()))
+            _mockJobValidator.Setup(v => v.ValidateAsync(jobDto, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
 
-            mockJobService.Setup(s => s.CreateJobAsync(jobDto, It.IsAny<CancellationToken>()))
+            _mockJobService.Setup(s => s.CreateJobAsync(jobDto, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(createdJob);
 
             // Act
-            var result = await controller.CreateJob(jobDto);
+            var result = await _controller.CreateJob(jobDto);
 
             // Assert
             result.Should().NotBeNull();
@@ -171,7 +171,7 @@ namespace HotshotLogistics.Tests.Jobs
         public async Task CreateJob_WithNullData_ReturnsBadRequest()
         {
             // Act
-            var result = await controller.CreateJob(null!);
+            var result = await _controller.CreateJob(null!);
 
             // Assert
             result.Should().NotBeNull();
@@ -200,11 +200,11 @@ namespace HotshotLogistics.Tests.Jobs
             };
             var validationResult = new FluentValidation.Results.ValidationResult(validationFailures);
 
-            mockJobValidator.Setup(v => v.ValidateAsync(jobDto, It.IsAny<CancellationToken>()))
+            _mockJobValidator.Setup(v => v.ValidateAsync(jobDto, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(validationResult);
 
             // Act
-            var result = await controller.CreateJob(jobDto);
+            var result = await _controller.CreateJob(jobDto);
 
             // Assert
             result.Should().NotBeNull();
@@ -238,11 +238,11 @@ namespace HotshotLogistics.Tests.Jobs
 
             var updatedJob = CreateTestJob(jobId, JobStatus.Assigned);
 
-            mockJobService.Setup(s => s.UpdateJobAsync(jobId, It.IsAny<Domain.Entities.Job>(), It.IsAny<CancellationToken>()))
+            _mockJobService.Setup(s => s.UpdateJobAsync(jobId, It.IsAny<Domain.Entities.Job>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(updatedJob);
 
             // Act
-            var result = await controller.UpdateJob(jobId, jobDto);
+            var result = await _controller.UpdateJob(jobId, jobDto);
 
             // Assert
             result.Should().NotBeNull();
@@ -262,11 +262,11 @@ namespace HotshotLogistics.Tests.Jobs
             var jobId = "non-existent-job";
             var jobDto = new Domain.Entities.Job { Id = jobId, Title = "Test" };
 
-            mockJobService.Setup(s => s.UpdateJobAsync(jobId, It.IsAny<Domain.Entities.Job>(), It.IsAny<CancellationToken>()))
+            _mockJobService.Setup(s => s.UpdateJobAsync(jobId, It.IsAny<Domain.Entities.Job>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Domain.Entities.Job?)null);
 
             // Act
-            var result = await controller.UpdateJob(jobId, jobDto);
+            var result = await _controller.UpdateJob(jobId, jobDto);
 
             // Assert
             result.Should().NotBeNull();
@@ -285,11 +285,11 @@ namespace HotshotLogistics.Tests.Jobs
             // Arrange
             var jobId = "job-to-delete";
 
-            mockJobService.Setup(s => s.DeleteJobAsync(jobId, It.IsAny<CancellationToken>()))
+            _mockJobService.Setup(s => s.DeleteJobAsync(jobId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             // Act
-            var result = await controller.DeleteJob(jobId);
+            var result = await _controller.DeleteJob(jobId);
 
             // Assert
             result.Should().BeOfType<NoContentResult>();
@@ -305,11 +305,11 @@ namespace HotshotLogistics.Tests.Jobs
             // Arrange
             var jobId = "non-existent-job";
 
-            mockJobService.Setup(s => s.DeleteJobAsync(jobId, It.IsAny<CancellationToken>()))
+            _mockJobService.Setup(s => s.DeleteJobAsync(jobId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
             // Act
-            var result = await controller.DeleteJob(jobId);
+            var result = await _controller.DeleteJob(jobId);
 
             // Assert
             result.Should().BeOfType<NotFoundObjectResult>();
@@ -325,11 +325,11 @@ namespace HotshotLogistics.Tests.Jobs
             // Arrange
             var jobId = "job-in-progress";
 
-            mockJobService.Setup(s => s.DeleteJobAsync(jobId, It.IsAny<CancellationToken>()))
+            _mockJobService.Setup(s => s.DeleteJobAsync(jobId, It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new InvalidOperationException("Cannot delete job with status: InProgress"));
 
             // Act
-            var result = await controller.DeleteJob(jobId);
+            var result = await _controller.DeleteJob(jobId);
 
             // Assert
             result.Should().BeOfType<BadRequestObjectResult>();
@@ -349,11 +349,11 @@ namespace HotshotLogistics.Tests.Jobs
             var updatedJob = CreateTestJob(jobId, JobStatus.Assigned);
             updatedJob.AssignedDriverId = driverId;
 
-            mockJobService.Setup(s => s.AssignDriverAsync(jobId, driverId, It.IsAny<CancellationToken>()))
+            _mockJobService.Setup(s => s.AssignDriverAsync(jobId, driverId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(updatedJob);
 
             // Act
-            var result = await controller.AssignDriver(jobId, request);
+            var result = await _controller.AssignDriver(jobId, request);
 
             // Assert
             result.Should().NotBeNull();
@@ -374,11 +374,11 @@ namespace HotshotLogistics.Tests.Jobs
             var driverId = 123;
             var request = new AssignDriverRequest { DriverId = driverId };
 
-            mockJobService.Setup(s => s.AssignDriverAsync(jobId, driverId, It.IsAny<CancellationToken>()))
+            _mockJobService.Setup(s => s.AssignDriverAsync(jobId, driverId, It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new InvalidOperationException("Driver is not available"));
 
             // Act
-            var result = await controller.AssignDriver(jobId, request);
+            var result = await _controller.AssignDriver(jobId, request);
 
             // Assert
             result.Should().NotBeNull();
@@ -398,11 +398,11 @@ namespace HotshotLogistics.Tests.Jobs
             var request = new UpdateJobStatusRequest { Status = newStatus };
             var updatedJob = CreateTestJob(jobId, newStatus);
 
-            mockJobService.Setup(s => s.UpdateJobStatusAsync(jobId, newStatus, It.IsAny<CancellationToken>()))
+            _mockJobService.Setup(s => s.UpdateJobStatusAsync(jobId, newStatus, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(updatedJob);
 
             // Act
-            var result = await controller.UpdateJobStatus(jobId, request);
+            var result = await _controller.UpdateJobStatus(jobId, request);
 
             // Assert
             result.Should().NotBeNull();
@@ -426,11 +426,11 @@ namespace HotshotLogistics.Tests.Jobs
                 CreateTestJob("job2", status)
             };
 
-            mockJobRepository.Setup(r => r.GetJobsByStatusAsync(status, It.IsAny<CancellationToken>()))
+            _mockJobRepository.Setup(r => r.GetJobsByStatusAsync(status, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedJobs);
 
             // Act
-            var result = await controller.GetJobsByStatus(status);
+            var result = await _controller.GetJobsByStatus(status);
 
             // Assert
             result.Should().NotBeNull();
@@ -455,11 +455,11 @@ namespace HotshotLogistics.Tests.Jobs
                 CreateTestJob("job2", JobStatus.EnRoute, driverId)
             };
 
-            mockJobRepository.Setup(r => r.GetJobsByDriverAsync(driverId, It.IsAny<CancellationToken>()))
+            _mockJobRepository.Setup(r => r.GetJobsByDriverAsync(driverId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedJobs);
 
             // Act
-            var result = await controller.GetJobsByDriver(driverId);
+            var result = await _controller.GetJobsByDriver(driverId);
 
             // Assert
             result.Should().NotBeNull();
@@ -484,11 +484,11 @@ namespace HotshotLogistics.Tests.Jobs
                 CreateTestJob("job2", JobStatus.Received, customerId: customerId)
             };
 
-            mockJobRepository.Setup(r => r.GetJobsByCustomerAsync(customerId, It.IsAny<CancellationToken>()))
+            _mockJobRepository.Setup(r => r.GetJobsByCustomerAsync(customerId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedJobs);
 
             // Act
-            var result = await controller.GetJobsByCustomer(customerId);
+            var result = await _controller.GetJobsByCustomer(customerId);
 
             // Assert
             result.Should().NotBeNull();
@@ -512,11 +512,11 @@ namespace HotshotLogistics.Tests.Jobs
                 CreateTestJob("overdue2", JobStatus.Assigned)
             };
 
-            mockJobRepository.Setup(r => r.GetOverdueJobsAsync(It.IsAny<CancellationToken>()))
+            _mockJobRepository.Setup(r => r.GetOverdueJobsAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(overdueJobs);
 
             // Act
-            var result = await controller.GetOverdueJobs();
+            var result = await _controller.GetOverdueJobs();
 
             // Assert
             result.Should().NotBeNull();

@@ -16,20 +16,20 @@ namespace HotshotLogistics.Tests.Billing
     /// </summary>
     public class BillingControllerTests
     {
-        private readonly Mock<IBillingService> mockBillingService;
-        private readonly Mock<HotshotLogistics.Contracts.Services.IPaymentProcessorFactory> mockPaymentProcessorFactory;
-        private readonly Mock<ILogger<BillingController>> mockLogger;
-        private readonly BillingController controller;
+        private readonly Mock<IBillingService> _mockBillingService;
+        private readonly Mock<HotshotLogistics.Contracts.Services.IPaymentProcessorFactory> _mockPaymentProcessorFactory;
+        private readonly Mock<ILogger<BillingController>> _mockLogger;
+        private readonly BillingController _controller;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BillingControllerTests"/> class.
         /// </summary>
         public BillingControllerTests()
         {
-            mockBillingService = new Mock<IBillingService>();
-            mockPaymentProcessorFactory = new Mock<HotshotLogistics.Contracts.Services.IPaymentProcessorFactory>();
-            mockLogger = new Mock<ILogger<BillingController>>();
-            controller = new BillingController(mockBillingService.Object, mockPaymentProcessorFactory.Object, mockLogger.Object);
+            _mockBillingService = new Mock<IBillingService>();
+            _mockPaymentProcessorFactory = new Mock<HotshotLogistics.Contracts.Services.IPaymentProcessorFactory>();
+            _mockLogger = new Mock<ILogger<BillingController>>();
+            _controller = new BillingController(_mockBillingService.Object, _mockPaymentProcessorFactory.Object, _mockLogger.Object);
         }
 
         /// <summary>
@@ -43,11 +43,11 @@ namespace HotshotLogistics.Tests.Billing
             var jobId = "test-job-id";
             var expectedInvoice = CreateTestInvoice("invoice-1", "customer-1");
 
-            mockBillingService.Setup(s => s.GenerateInvoiceAsync(jobId, It.IsAny<CancellationToken>()))
+            _mockBillingService.Setup(s => s.GenerateInvoiceAsync(jobId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedInvoice);
 
             // Act
-            var result = await controller.GenerateInvoice(jobId);
+            var result = await _controller.GenerateInvoice(jobId);
 
             // Assert
             result.Should().NotBeNull();
@@ -66,11 +66,11 @@ namespace HotshotLogistics.Tests.Billing
             // Arrange
             var jobId = "invalid-job-id";
 
-            mockBillingService.Setup(s => s.GenerateInvoiceAsync(jobId, It.IsAny<CancellationToken>()))
+            _mockBillingService.Setup(s => s.GenerateInvoiceAsync(jobId, It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new ArgumentException("Invalid job ID"));
 
             // Act
-            var result = await controller.GenerateInvoice(jobId);
+            var result = await _controller.GenerateInvoice(jobId);
 
             // Assert
             result.Should().NotBeNull();
@@ -87,11 +87,11 @@ namespace HotshotLogistics.Tests.Billing
             // Arrange
             var jobId = "non-existent-job";
 
-            mockBillingService.Setup(s => s.GenerateInvoiceAsync(jobId, It.IsAny<CancellationToken>()))
+            _mockBillingService.Setup(s => s.GenerateInvoiceAsync(jobId, It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new KeyNotFoundException("Job not found"));
 
             // Act
-            var result = await controller.GenerateInvoice(jobId);
+            var result = await _controller.GenerateInvoice(jobId);
 
             // Assert
             result.Should().NotBeNull();
@@ -113,11 +113,11 @@ namespace HotshotLogistics.Tests.Billing
                 CreateTestInvoice("invoice-2", customerId)
             };
 
-            mockBillingService.Setup(s => s.GetCustomerInvoicesAsync(customerId, It.IsAny<CancellationToken>()))
+            _mockBillingService.Setup(s => s.GetCustomerInvoicesAsync(customerId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedInvoices);
 
             // Act
-            var result = await controller.GetCustomerInvoices(customerId);
+            var result = await _controller.GetCustomerInvoices(customerId);
 
             // Assert
             result.Should().NotBeNull();
@@ -141,11 +141,11 @@ namespace HotshotLogistics.Tests.Billing
                 CreateTestInvoice("overdue-2", "customer-2", InvoiceStatus.Overdue)
             };
 
-            mockBillingService.Setup(s => s.GetOverdueInvoicesAsync(It.IsAny<CancellationToken>()))
+            _mockBillingService.Setup(s => s.GetOverdueInvoicesAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(overdueInvoices);
 
             // Act
-            var result = await controller.GetOverdueInvoices();
+            var result = await _controller.GetOverdueInvoices();
 
             // Assert
             result.Should().NotBeNull();
@@ -171,11 +171,11 @@ namespace HotshotLogistics.Tests.Billing
                 Reference = "REF123"
             };
 
-            mockBillingService.Setup(s => s.ProcessPaymentAsync(invoiceId, request.Amount, request.PaymentMethod, It.IsAny<CancellationToken>()))
+            _mockBillingService.Setup(s => s.ProcessPaymentAsync(invoiceId, request.Amount, request.PaymentMethod, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             // Act
-            var result = await controller.ProcessPayment(invoiceId, request);
+            var result = await _controller.ProcessPayment(invoiceId, request);
 
             // Assert
             result.Should().NotBeNull();
@@ -197,7 +197,7 @@ namespace HotshotLogistics.Tests.Billing
             var invoiceId = "invoice-1";
 
             // Act
-            var result = await controller.ProcessPayment(invoiceId, null!);
+            var result = await _controller.ProcessPayment(invoiceId, null!);
 
             // Assert
             result.Should().NotBeNull();
@@ -220,7 +220,7 @@ namespace HotshotLogistics.Tests.Billing
             };
 
             // Act
-            var result = await controller.ProcessPayment(invoiceId, request);
+            var result = await _controller.ProcessPayment(invoiceId, request);
 
             // Assert
             result.Should().NotBeNull();
@@ -243,7 +243,7 @@ namespace HotshotLogistics.Tests.Billing
             };
 
             // Act
-            var result = await controller.ProcessPayment(invoiceId, request);
+            var result = await _controller.ProcessPayment(invoiceId, request);
 
             // Assert
             result.Should().NotBeNull();
@@ -265,11 +265,11 @@ namespace HotshotLogistics.Tests.Billing
             };
             var expectedTaxAmount = 87.5m; // 8.75% tax rate
 
-            mockBillingService.Setup(s => s.CalculateTaxAsync(request.Amount, request.State, It.IsAny<CancellationToken>()))
+            _mockBillingService.Setup(s => s.CalculateTaxAsync(request.Amount, request.State, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedTaxAmount);
 
             // Act
-            var result = await controller.CalculateTax(request);
+            var result = await _controller.CalculateTax(request);
 
             // Assert
             result.Should().NotBeNull();
@@ -289,7 +289,7 @@ namespace HotshotLogistics.Tests.Billing
         public async Task CalculateTax_WithNullRequest_ReturnsBadRequest()
         {
             // Act
-            var result = await controller.CalculateTax(null!);
+            var result = await _controller.CalculateTax(null!);
 
             // Assert
             result.Should().NotBeNull();
@@ -311,7 +311,7 @@ namespace HotshotLogistics.Tests.Billing
             };
 
             // Act
-            var result = await controller.CalculateTax(request);
+            var result = await _controller.CalculateTax(request);
 
             // Assert
             result.Should().NotBeNull();
@@ -332,11 +332,11 @@ namespace HotshotLogistics.Tests.Billing
                 CreateTestInvoice("overdue-2", "customer-2", InvoiceStatus.Overdue, 2000m, 1500m)
             };
 
-            mockBillingService.Setup(s => s.GetOverdueInvoicesAsync(It.IsAny<CancellationToken>()))
+            _mockBillingService.Setup(s => s.GetOverdueInvoicesAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(overdueInvoices);
 
             // Act
-            var result = await controller.GetAccountsReceivableReport();
+            var result = await _controller.GetAccountsReceivableReport();
 
             // Assert
             result.Should().NotBeNull();

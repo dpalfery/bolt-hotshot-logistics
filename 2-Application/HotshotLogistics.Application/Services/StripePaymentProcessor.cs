@@ -14,10 +14,10 @@ namespace HotshotLogistics.Application.Services;
 /// </summary>
 public class StripePaymentProcessor : IPaymentProcessor
 {
-    private readonly ILogger<StripePaymentProcessor> logger;
-    private readonly IHttpClientFactory httpClientFactory;
-    private readonly string apiKey;
-    private readonly string webhookSecret;
+    private readonly ILogger<StripePaymentProcessor> _logger;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly string _apiKey;
+    private readonly string _webhookSecret;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StripePaymentProcessor"/> class.
@@ -30,11 +30,11 @@ public class StripePaymentProcessor : IPaymentProcessor
         IHttpClientFactory httpClientFactory,
         IConfiguration configuration)
     {
-        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        this.httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
 
-        apiKey = configuration["Stripe:ApiKey"] ?? throw new ArgumentNullException("Stripe:ApiKey configuration is required");
-        webhookSecret = configuration["Stripe:WebhookSecret"] ?? throw new ArgumentNullException("Stripe:WebhookSecret configuration is required");
+        _apiKey = configuration["Stripe:ApiKey"] ?? throw new ArgumentNullException("Stripe:ApiKey configuration is required");
+        _webhookSecret = configuration["Stripe:WebhookSecret"] ?? throw new ArgumentNullException("Stripe:WebhookSecret configuration is required");
     }
 
     /// <inheritdoc/>
@@ -48,7 +48,7 @@ public class StripePaymentProcessor : IPaymentProcessor
         Dictionary<string, string> metadata,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Processing payment of {Amount} {Currency} via Stripe", amount, currency);
+        _logger.LogInformation("Processing payment of {Amount} {Currency} via Stripe", amount, currency);
 
         try
         {
@@ -56,14 +56,14 @@ public class StripePaymentProcessor : IPaymentProcessor
             // For now, simulate the payment processing
             var result = await SimulateStripePaymentAsync(amount, currency, paymentMethod, metadata, cancellationToken);
 
-            logger.LogInformation("Stripe payment processing completed: {Success}, TransactionId: {TransactionId}",
+            _logger.LogInformation("Stripe payment processing completed: {Success}, TransactionId: {TransactionId}",
                 result.Success, result.TransactionId);
 
             return result;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error processing payment via Stripe");
+            _logger.LogError(ex, "Error processing payment via Stripe");
             return new PaymentProcessingResult
             {
                 Success = false,
@@ -80,20 +80,20 @@ public class StripePaymentProcessor : IPaymentProcessor
         string reason,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Processing refund of {Amount} for transaction {TransactionId} via Stripe", amount, transactionId);
+        _logger.LogInformation("Processing refund of {Amount} for transaction {TransactionId} via Stripe", amount, transactionId);
 
         try
         {
             // In a real implementation, this would integrate with Stripe SDK
             var result = await SimulateStripeRefundAsync(transactionId, amount, reason, cancellationToken);
 
-            logger.LogInformation("Stripe refund processing completed: {Success}", result.Success);
+            _logger.LogInformation("Stripe refund processing completed: {Success}", result.Success);
 
             return result;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error processing refund via Stripe for transaction {TransactionId}", transactionId);
+            _logger.LogError(ex, "Error processing refund via Stripe for transaction {TransactionId}", transactionId);
             return new PaymentProcessingResult
             {
                 Success = false,
@@ -114,7 +114,7 @@ public class StripePaymentProcessor : IPaymentProcessor
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error validating Stripe webhook signature");
+            _logger.LogError(ex, "Error validating Stripe webhook signature");
             return false;
         }
     }
@@ -124,14 +124,14 @@ public class StripePaymentProcessor : IPaymentProcessor
         WebhookEventData webhookData,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Processing Stripe webhook event: {EventType}", webhookData.EventType);
+        _logger.LogInformation("Processing Stripe webhook event: {EventType}", webhookData.EventType);
 
         try
         {
             // Validate signature first
-            if (!ValidateWebhookSignature(webhookData.Payload, webhookData.Signature, webhookSecret))
+            if (!ValidateWebhookSignature(webhookData.Payload, webhookData.Signature, _webhookSecret))
             {
-                logger.LogWarning("Invalid Stripe webhook signature");
+                _logger.LogWarning("Invalid Stripe webhook signature");
                 return new WebhookProcessingResult
                 {
                     Success = false,
@@ -142,13 +142,13 @@ public class StripePaymentProcessor : IPaymentProcessor
             // In a real implementation, this would parse Stripe webhook events
             var result = await SimulateStripeWebhookProcessingAsync(webhookData, cancellationToken);
 
-            logger.LogInformation("Stripe webhook processing completed: {Success}", result.Success);
+            _logger.LogInformation("Stripe webhook processing completed: {Success}", result.Success);
 
             return result;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error processing Stripe webhook");
+            _logger.LogError(ex, "Error processing Stripe webhook");
             return new WebhookProcessingResult
             {
                 Success = false,

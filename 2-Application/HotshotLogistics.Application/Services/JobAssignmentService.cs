@@ -14,9 +14,9 @@ namespace HotshotLogistics.Application.Services
     /// </summary>
     public class JobAssignmentService : IJobAssignmentService
     {
-        private readonly IJobAssignmentRepository assignmentRepository;
-        private readonly IJobRepository jobRepository;
-        private readonly IDriverRepository driverRepository;
+        private readonly IJobAssignmentRepository _assignmentRepository;
+        private readonly IJobRepository _jobRepository;
+        private readonly IDriverRepository _driverRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JobAssignmentService"/> class.
@@ -29,9 +29,9 @@ namespace HotshotLogistics.Application.Services
             IJobRepository jobRepository,
             IDriverRepository driverRepository)
         {
-            this.assignmentRepository = assignmentRepository ?? throw new ArgumentNullException(nameof(assignmentRepository));
-            this.jobRepository = jobRepository ?? throw new ArgumentNullException(nameof(jobRepository));
-            this.driverRepository = driverRepository ?? throw new ArgumentNullException(nameof(driverRepository));
+            _assignmentRepository = assignmentRepository ?? throw new ArgumentNullException(nameof(assignmentRepository));
+            _jobRepository = jobRepository ?? throw new ArgumentNullException(nameof(jobRepository));
+            _driverRepository = driverRepository ?? throw new ArgumentNullException(nameof(driverRepository));
         }
 
         /// <inheritdoc/>
@@ -42,13 +42,13 @@ namespace HotshotLogistics.Application.Services
                 throw new ArgumentException("Assignment ID cannot be empty.", nameof(id));
             }
 
-            return await this.assignmentRepository.GetByIdAsync(id, cancellationToken);
+            return await _assignmentRepository.GetByIdAsync(id, cancellationToken);
         }
 
         /// <inheritdoc/>
         public async Task<IEnumerable<JobAssignmentDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await this.assignmentRepository.GetAllAsync(cancellationToken);
+            return await _assignmentRepository.GetAllAsync(cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -59,7 +59,7 @@ namespace HotshotLogistics.Application.Services
                 throw new ArgumentException("Driver ID must be greater than zero.", nameof(driverId));
             }
 
-            return await this.assignmentRepository.GetByDriverIdAsync(driverId, cancellationToken);
+            return await _assignmentRepository.GetByDriverIdAsync(driverId, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -70,13 +70,13 @@ namespace HotshotLogistics.Application.Services
                 throw new ArgumentException("Job ID cannot be empty.", nameof(jobId));
             }
 
-            return await this.assignmentRepository.GetByJobIdAsync(jobId, cancellationToken);
+            return await _assignmentRepository.GetByJobIdAsync(jobId, cancellationToken);
         }
 
         /// <inheritdoc/>
         public async Task<IEnumerable<JobAssignmentDto>> GetActiveAssignmentsAsync(CancellationToken cancellationToken = default)
         {
-            return await this.assignmentRepository.GetActiveAssignmentsAsync(cancellationToken);
+            return await _assignmentRepository.GetActiveAssignmentsAsync(cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -93,7 +93,7 @@ namespace HotshotLogistics.Application.Services
             }
 
             // Verify job exists
-            var job = await this.jobRepository.GetJobByIdAsync(jobId, cancellationToken);
+            var job = await _jobRepository.GetJobByIdAsync(jobId, cancellationToken);
 
             if (job == null)
             {
@@ -101,14 +101,14 @@ namespace HotshotLogistics.Application.Services
             }
 
             // Verify driver exists
-            var driver = await this.driverRepository.GetDriverByIdAsync(driverId, cancellationToken);
+            var driver = await _driverRepository.GetDriverByIdAsync(driverId, cancellationToken);
             if (driver == null)
             {
                 throw new KeyNotFoundException($"Driver with ID {driverId} not found.");
             }
 
             // Check if assignment already exists
-            var existingAssignments = await this.assignmentRepository.GetByJobIdAsync(jobId, cancellationToken);
+            var existingAssignments = await _assignmentRepository.GetByJobIdAsync(jobId, cancellationToken);
             var activeAssignment = existingAssignments.FirstOrDefault(a => a.Status == JobAssignmentStatus.Active);
 
             if (activeAssignment != null)
@@ -124,7 +124,7 @@ namespace HotshotLogistics.Application.Services
                 Status = JobAssignmentStatus.Active
             };
 
-            return await this.assignmentRepository.CreateAsync(assignment, cancellationToken);
+            return await _assignmentRepository.CreateAsync(assignment, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -135,11 +135,11 @@ namespace HotshotLogistics.Application.Services
                 throw new ArgumentException("Assignment ID cannot be empty.", nameof(id));
             }
 
-            var assignment = await this.assignmentRepository.GetByIdAsync(id, cancellationToken)
+            var assignment = await _assignmentRepository.GetByIdAsync(id, cancellationToken)
                 ?? throw new KeyNotFoundException($"Assignment with ID {id} not found.");
 
             assignment.Status = status;
-            return await this.assignmentRepository.UpdateAsync(assignment, cancellationToken);
+            return await _assignmentRepository.UpdateAsync(assignment, cancellationToken);
 
         }
 
@@ -151,7 +151,7 @@ namespace HotshotLogistics.Application.Services
                 throw new ArgumentException("Assignment ID cannot be empty.", nameof(id));
             }
 
-            return await this.assignmentRepository.DeleteAsync(id, cancellationToken);
+            return await _assignmentRepository.DeleteAsync(id, cancellationToken);
 
         }
     }

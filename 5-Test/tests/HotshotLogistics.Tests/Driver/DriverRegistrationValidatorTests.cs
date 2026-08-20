@@ -8,14 +8,14 @@ namespace HotshotLogistics.Tests.Drivers
     /// </summary>
     public class DriverRegistrationValidatorTests
     {
-        private readonly DriverRegistrationValidator validator;
+        private readonly DriverRegistrationValidator _validator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DriverRegistrationValidatorTests"/> class.
         /// </summary>
         public DriverRegistrationValidatorTests()
         {
-            this.validator = new DriverRegistrationValidator();
+            _validator = new DriverRegistrationValidator();
         }
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace HotshotLogistics.Tests.Drivers
         {
             var driver = CreateValidDriver();
 
-            var result = this.validator.TestValidate(driver);
+            var result = _validator.TestValidate(driver);
 
             result.ShouldNotHaveAnyValidationErrors();
         }
@@ -40,7 +40,7 @@ namespace HotshotLogistics.Tests.Drivers
             var driver = CreateValidDriver();
             driver.PersonalInfo.FirstName = string.Empty;
 
-            var result = this.validator.TestValidate(driver);
+            var result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.PersonalInfo.FirstName)
                   .WithErrorMessage("First name is required.");
@@ -55,7 +55,7 @@ namespace HotshotLogistics.Tests.Drivers
             var driver = CreateValidDriver();
             driver.PersonalInfo.FirstName = "John123";
 
-            var result = this.validator.TestValidate(driver);
+            var result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.PersonalInfo.FirstName)
                   .WithErrorMessage("First name can only contain letters, spaces, hyphens, and apostrophes.");
@@ -70,7 +70,7 @@ namespace HotshotLogistics.Tests.Drivers
             var driver = CreateValidDriver();
             driver.PersonalInfo.LastName = string.Empty;
 
-            var result = this.validator.TestValidate(driver);
+            var result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.PersonalInfo.LastName)
                   .WithErrorMessage("Last name is required.");
@@ -85,7 +85,7 @@ namespace HotshotLogistics.Tests.Drivers
             var driver = CreateValidDriver();
             driver.PersonalInfo.Email = string.Empty;
 
-            var result = this.validator.TestValidate(driver);
+            var result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.PersonalInfo.Email)
                   .WithErrorMessage("Email address is required.");
@@ -100,7 +100,7 @@ namespace HotshotLogistics.Tests.Drivers
             var driver = CreateValidDriver();
             driver.PersonalInfo.Email = "invalid-email";
 
-            var result = this.validator.TestValidate(driver);
+            var result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.PersonalInfo.Email)
                   .WithErrorMessage("A valid email address is required.");
@@ -115,7 +115,7 @@ namespace HotshotLogistics.Tests.Drivers
             var driver = CreateValidDriver();
             driver.PersonalInfo.PhoneNumber = string.Empty;
 
-            var result = this.validator.TestValidate(driver);
+            var result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.PersonalInfo.PhoneNumber)
                   .WithErrorMessage("Phone number is required.");
@@ -130,7 +130,7 @@ namespace HotshotLogistics.Tests.Drivers
             var driver = CreateValidDriver();
             driver.PersonalInfo.PhoneNumber = "123-456-789";
 
-            var result = this.validator.TestValidate(driver);
+            var result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.PersonalInfo.PhoneNumber)
                   .WithErrorMessage("A valid US phone number is required.");
@@ -145,7 +145,7 @@ namespace HotshotLogistics.Tests.Drivers
             var driver = CreateValidDriver();
             driver.License.LicenseNumber = string.Empty;
 
-            var result = this.validator.TestValidate(driver);
+            var result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.License.LicenseNumber)
                   .WithErrorMessage("Driver's license number is required.");
@@ -160,7 +160,7 @@ namespace HotshotLogistics.Tests.Drivers
             var driver = CreateValidDriver();
             driver.License.LicenseNumber = "DL@123";
 
-            var result = this.validator.TestValidate(driver);
+            var result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.License.LicenseNumber)
                   .WithErrorMessage("License number can only contain letters, numbers, and hyphens.");
@@ -175,7 +175,7 @@ namespace HotshotLogistics.Tests.Drivers
             var driver = CreateValidDriver();
             driver.License.LicenseExpiryDate = default;
 
-            var result = this.validator.TestValidate(driver);
+            var result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.License.LicenseExpiryDate)
                   .WithErrorMessage("License expiry date is required.");
@@ -190,7 +190,7 @@ namespace HotshotLogistics.Tests.Drivers
             var driver = CreateValidDriver();
             driver.License.LicenseExpiryDate = DateTime.UtcNow.AddDays(20);
 
-            var result = this.validator.TestValidate(driver);
+            var result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x)
                   .WithErrorMessage("License must be valid for at least 30 days.");
@@ -205,7 +205,7 @@ namespace HotshotLogistics.Tests.Drivers
             var driver = CreateValidDriver();
             driver.License.LicenseExpiryDate = DateTime.UtcNow.AddDays(100);
 
-            var result = this.validator.TestValidate(driver);
+            var result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x)
                   .WithErrorMessage("License must be valid and meet minimum requirements for registration.");
@@ -237,14 +237,14 @@ namespace HotshotLogistics.Tests.Drivers
     /// </summary>
     public class DriverUpdateValidatorTests
     {
-        private readonly DriverUpdateValidator validator;
+        private readonly DriverUpdateValidator _validator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DriverUpdateValidatorTests"/> class.
         /// </summary>
         public DriverUpdateValidatorTests()
         {
-            this.validator = new DriverUpdateValidator();
+            _validator = new DriverUpdateValidator();
         }
 
         /// <summary>
@@ -270,7 +270,7 @@ namespace HotshotLogistics.Tests.Drivers
                 }
             };
 
-            var result = this.validator.TestValidate(driver);
+            var result = _validator.TestValidate(driver);
 
             result.ShouldNotHaveAnyValidationErrors();
         }
@@ -283,7 +283,7 @@ namespace HotshotLogistics.Tests.Drivers
         {
             var driver = new DriverDto { Id = 0 };
 
-            var result = this.validator.TestValidate(driver);
+            var result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.Id)
                   .WithErrorMessage("Driver ID is required for updates.");

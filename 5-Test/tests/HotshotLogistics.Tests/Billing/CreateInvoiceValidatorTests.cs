@@ -8,14 +8,14 @@ namespace HotshotLogistics.Tests.Billing
     /// </summary>
     public class CreateInvoiceValidatorTests
     {
-        private readonly CreateInvoiceValidator validator;
+        private readonly CreateInvoiceValidator _validator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateInvoiceValidatorTests"/> class.
         /// </summary>
         public CreateInvoiceValidatorTests()
         {
-            this.validator = new CreateInvoiceValidator();
+            _validator = new CreateInvoiceValidator();
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace HotshotLogistics.Tests.Billing
             };
 
             // Act
-            var result = this.validator.TestValidate(invoice);
+            var result = _validator.TestValidate(invoice);
 
             // Assert
             result.ShouldNotHaveAnyValidationErrors();
@@ -69,7 +69,7 @@ namespace HotshotLogistics.Tests.Billing
             var invoice = new Invoice { InvoiceNumber = string.Empty };
 
             // Act
-            var result = this.validator.TestValidate(invoice);
+            var result = _validator.TestValidate(invoice);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.InvoiceNumber)
@@ -86,7 +86,7 @@ namespace HotshotLogistics.Tests.Billing
             var invoice = new Invoice { InvoiceNumber = "INVALID@NUMBER" };
 
             // Act
-            var result = this.validator.TestValidate(invoice);
+            var result = _validator.TestValidate(invoice);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.InvoiceNumber)
@@ -103,7 +103,7 @@ namespace HotshotLogistics.Tests.Billing
             var invoice = new Invoice { CustomerId = string.Empty };
 
             // Act
-            var result = this.validator.TestValidate(invoice);
+            var result = _validator.TestValidate(invoice);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.CustomerId)
@@ -120,7 +120,7 @@ namespace HotshotLogistics.Tests.Billing
             var invoice = new Invoice { InvoiceDate = DateTime.UtcNow.Date.AddDays(1) };
 
             // Act
-            var result = this.validator.TestValidate(invoice);
+            var result = _validator.TestValidate(invoice);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.InvoiceDate)
@@ -141,7 +141,7 @@ namespace HotshotLogistics.Tests.Billing
             };
 
             // Act
-            var result = this.validator.TestValidate(invoice);
+            var result = _validator.TestValidate(invoice);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.DueDate)
@@ -158,7 +158,7 @@ namespace HotshotLogistics.Tests.Billing
             var invoice = new Invoice { LineItems = new List<InvoiceLineItem>() };
 
             // Act
-            var result = this.validator.TestValidate(invoice);
+            var result = _validator.TestValidate(invoice);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.LineItems)
@@ -182,7 +182,7 @@ namespace HotshotLogistics.Tests.Billing
             };
 
             // Act
-            var result = this.validator.TestValidate(invoice);
+            var result = _validator.TestValidate(invoice);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.SubTotal)
@@ -199,7 +199,7 @@ namespace HotshotLogistics.Tests.Billing
             var invoice = new Invoice { TaxRate = 1.5m }; // 150% tax rate
 
             // Act
-            var result = this.validator.TestValidate(invoice);
+            var result = _validator.TestValidate(invoice);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.TaxRate)
@@ -222,7 +222,7 @@ namespace HotshotLogistics.Tests.Billing
             };
 
             // Act
-            var result = this.validator.TestValidate(invoice);
+            var result = _validator.TestValidate(invoice);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.TotalAmount)
@@ -243,7 +243,7 @@ namespace HotshotLogistics.Tests.Billing
             };
 
             // Act
-            var result = this.validator.TestValidate(invoice);
+            var result = _validator.TestValidate(invoice);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.PaidAmount)
@@ -260,7 +260,7 @@ namespace HotshotLogistics.Tests.Billing
             var invoice = new Invoice { Terms = null! };
 
             // Act
-            var result = this.validator.TestValidate(invoice);
+            var result = _validator.TestValidate(invoice);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.Terms)

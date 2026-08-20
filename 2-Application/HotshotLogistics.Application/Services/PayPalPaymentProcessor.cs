@@ -14,11 +14,11 @@ namespace HotshotLogistics.Application.Services;
 /// </summary>
 public class PayPalPaymentProcessor : IPaymentProcessor
 {
-    private readonly ILogger<PayPalPaymentProcessor> logger;
-    private readonly IHttpClientFactory httpClientFactory;
-    private readonly string clientId;
-    private readonly string clientSecret;
-    private readonly string webhookId;
+    private readonly ILogger<PayPalPaymentProcessor> _logger;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly string _clientId;
+    private readonly string _clientSecret;
+    private readonly string _webhookId;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PayPalPaymentProcessor"/> class.
@@ -31,12 +31,12 @@ public class PayPalPaymentProcessor : IPaymentProcessor
         IHttpClientFactory httpClientFactory,
         IConfiguration configuration)
     {
-        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        this.httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
 
-        clientId = configuration["PayPal:ClientId"] ?? throw new ArgumentNullException("PayPal:ClientId configuration is required");
-        clientSecret = configuration["PayPal:ClientSecret"] ?? throw new ArgumentNullException("PayPal:ClientSecret configuration is required");
-        webhookId = configuration["PayPal:WebhookId"] ?? throw new ArgumentNullException("PayPal:WebhookId configuration is required");
+        _clientId = configuration["PayPal:ClientId"] ?? throw new ArgumentNullException("PayPal:ClientId configuration is required");
+        _clientSecret = configuration["PayPal:ClientSecret"] ?? throw new ArgumentNullException("PayPal:ClientSecret configuration is required");
+        _webhookId = configuration["PayPal:WebhookId"] ?? throw new ArgumentNullException("PayPal:WebhookId configuration is required");
     }
 
     /// <inheritdoc/>
@@ -50,7 +50,7 @@ public class PayPalPaymentProcessor : IPaymentProcessor
         Dictionary<string, string> metadata,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Processing payment of {Amount} {Currency} via PayPal", amount, currency);
+        _logger.LogInformation("Processing payment of {Amount} {Currency} via PayPal", amount, currency);
 
         try
         {
@@ -58,14 +58,14 @@ public class PayPalPaymentProcessor : IPaymentProcessor
             // For now, simulate the payment processing
             var result = await SimulatePayPalPaymentAsync(amount, currency, paymentMethod, metadata, cancellationToken);
 
-            logger.LogInformation("PayPal payment processing completed: {Success}, TransactionId: {TransactionId}",
+            _logger.LogInformation("PayPal payment processing completed: {Success}, TransactionId: {TransactionId}",
                 result.Success, result.TransactionId);
 
             return result;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error processing payment via PayPal");
+            _logger.LogError(ex, "Error processing payment via PayPal");
             return new PaymentProcessingResult
             {
                 Success = false,
@@ -82,20 +82,20 @@ public class PayPalPaymentProcessor : IPaymentProcessor
         string reason,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Processing refund of {Amount} for transaction {TransactionId} via PayPal", amount, transactionId);
+        _logger.LogInformation("Processing refund of {Amount} for transaction {TransactionId} via PayPal", amount, transactionId);
 
         try
         {
             // In a real implementation, this would integrate with PayPal SDK
             var result = await SimulatePayPalRefundAsync(transactionId, amount, reason, cancellationToken);
 
-            logger.LogInformation("PayPal refund processing completed: {Success}", result.Success);
+            _logger.LogInformation("PayPal refund processing completed: {Success}", result.Success);
 
             return result;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error processing refund via PayPal for transaction {TransactionId}", transactionId);
+            _logger.LogError(ex, "Error processing refund via PayPal for transaction {TransactionId}", transactionId);
             return new PaymentProcessingResult
             {
                 Success = false,
@@ -116,7 +116,7 @@ public class PayPalPaymentProcessor : IPaymentProcessor
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error validating PayPal webhook signature");
+            _logger.LogError(ex, "Error validating PayPal webhook signature");
             return false;
         }
     }
@@ -126,14 +126,14 @@ public class PayPalPaymentProcessor : IPaymentProcessor
         WebhookEventData webhookData,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Processing PayPal webhook event: {EventType}", webhookData.EventType);
+        _logger.LogInformation("Processing PayPal webhook event: {EventType}", webhookData.EventType);
 
         try
         {
             // Validate signature first
-            if (!ValidateWebhookSignature(webhookData.Payload, webhookData.Signature, webhookId))
+            if (!ValidateWebhookSignature(webhookData.Payload, webhookData.Signature, _webhookId))
             {
-                logger.LogWarning("Invalid PayPal webhook signature");
+                _logger.LogWarning("Invalid PayPal webhook signature");
                 return new WebhookProcessingResult
                 {
                     Success = false,
@@ -144,13 +144,13 @@ public class PayPalPaymentProcessor : IPaymentProcessor
             // In a real implementation, this would parse PayPal webhook events
             var result = await SimulatePayPalWebhookProcessingAsync(webhookData, cancellationToken);
 
-            logger.LogInformation("PayPal webhook processing completed: {Success}", result.Success);
+            _logger.LogInformation("PayPal webhook processing completed: {Success}", result.Success);
 
             return result;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error processing PayPal webhook");
+            _logger.LogError(ex, "Error processing PayPal webhook");
             return new WebhookProcessingResult
             {
                 Success = false,

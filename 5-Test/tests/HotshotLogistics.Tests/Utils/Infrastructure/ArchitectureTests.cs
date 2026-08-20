@@ -7,17 +7,17 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
     /// </summary>
     public class ArchitectureTests
     {
-        private const string Presentation = "HotshotLogistics.Api";
-        private const string Infrastructure = "HotshotLogistics.Infrastructure";
-        private const string Application = "HotshotLogistics.Application";
-        private const string Data = "HotshotLogistics.Data";
+        private const string s_presentation = "HotshotLogistics.Api";
+        private const string s_infrastructure = "HotshotLogistics.Infrastructure";
+        private const string s_application = "HotshotLogistics.Application";
+        private const string s_data = "HotshotLogistics.Data";
 
         [Fact]
         public void Domain_should_not_depend_on_other_layers()
         {
             var result = Types.InAssembly(typeof(HotshotLogistics.Domain.Entities.Driver).Assembly)
                 .ShouldNot()
-                .HaveDependencyOnAny(Application, Data, Infrastructure, Presentation)
+                .HaveDependencyOnAny(s_application, s_data, s_infrastructure, s_presentation)
                 .GetResult();
 
             Assert.True(result.IsSuccessful, string.Join(',', result.FailingTypeNames ?? Array.Empty<string>()));
@@ -28,7 +28,7 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
         {
             var result = Types.InAssembly(typeof(DriverService).Assembly)
                 .ShouldNot()
-                .HaveDependencyOn(Presentation)
+                .HaveDependencyOn(s_presentation)
                 .GetResult();
 
             Assert.True(result.IsSuccessful, string.Join(',', result.FailingTypeNames ?? Array.Empty<string>()));

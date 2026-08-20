@@ -6,11 +6,11 @@ namespace HotshotLogistics.Tests.TestHelpers
     /// </summary>
     public class CustomerBuilder
     {
-        private readonly HotshotLogistics.Domain.Entities.Customer customer;
+        private readonly HotshotLogistics.Domain.Entities.Customer _customer;
 
         private CustomerBuilder()
         {
-            customer = new HotshotLogistics.Domain.Entities.Customer
+            _customer = new HotshotLogistics.Domain.Entities.Customer
             {
                 Id = Guid.NewGuid().ToString(),
                 CompanyName = "Test Company",
@@ -24,14 +24,14 @@ namespace HotshotLogistics.Tests.TestHelpers
 
         public static CustomerBuilder New() => new CustomerBuilder();
 
-        public CustomerBuilder WithId(string id) { customer.Id = id; return this; }
-        public CustomerBuilder WithCompanyName(string name) { customer.CompanyName = name; return this; }
-        public CustomerBuilder WithIsActive(bool isActive) { customer.IsActive = isActive; return this; }
-        public CustomerBuilder WithCreditLimit(decimal limit) { customer.CreditLimit = limit; return this; }
-        public CustomerBuilder WithContact(Contact contact) { customer.Contacts.Add(contact); return this; }
-        public CustomerBuilder WithContacts(IEnumerable<Contact> contacts) { customer.Contacts = new List<Contact>(contacts); return this; }
-        public CustomerBuilder WithBillingAddress(Address address) { customer.BillingAddress = address; return this; }
+        public CustomerBuilder WithId(string id) { _customer.Id = id; return this; }
+        public CustomerBuilder WithCompanyName(string name) { _customer.CompanyName = name; return this; }
+        public CustomerBuilder WithIsActive(bool isActive) { _customer.IsActive = isActive; return this; }
+        public CustomerBuilder WithCreditLimit(decimal limit) { _customer.CreditLimit = limit; return this; }
+        public CustomerBuilder WithContact(Contact contact) { _customer.Contacts.Add(contact); return this; }
+        public CustomerBuilder WithContacts(IEnumerable<Contact> contacts) { _customer.Contacts = new List<Contact>(contacts); return this; }
+        public CustomerBuilder WithBillingAddress(Address address) { _customer.BillingAddress = address; return this; }
 
-        public HotshotLogistics.Domain.Entities.Customer Build() => customer;
+        public HotshotLogistics.Domain.Entities.Customer Build() => _customer;
     }
 }

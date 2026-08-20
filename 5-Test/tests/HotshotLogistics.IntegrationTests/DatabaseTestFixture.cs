@@ -10,21 +10,21 @@ namespace HotshotLogistics.IntegrationTests;
 /// </summary>
 public sealed class DatabaseTestFixture : IAsyncLifetime
 {
-    private static readonly SemaphoreSlim SetupSemaphore = new(1, 1);
-    private static bool _initialized;
+    private static readonly SemaphoreSlim s_setupSemaphore = new(1, 1);
+    private static bool s_initialized;
 
     /// <inheritdoc />
     public async ValueTask InitializeAsync()
     {
-        if (_initialized)
+        if (s_initialized)
         {
             return;
         }
 
-        await SetupSemaphore.WaitAsync();
+        await s_setupSemaphore.WaitAsync();
         try
         {
-            if (_initialized)
+            if (s_initialized)
             {
                 return;
             }
@@ -41,11 +41,11 @@ public sealed class DatabaseTestFixture : IAsyncLifetime
             // Run database migrations to ensure schema is up to date
             await RunMigrationsAsync(connectionString);
 
-            _initialized = true;
+            s_initialized = true;
         }
         finally
         {
-            SetupSemaphore.Release();
+            s_setupSemaphore.Release();
         }
     }
 

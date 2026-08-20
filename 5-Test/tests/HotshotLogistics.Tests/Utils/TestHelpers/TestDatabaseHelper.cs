@@ -10,9 +10,9 @@ namespace HotshotLogistics.Tests
     /// </summary>
     public static class TestDatabaseHelper
     {
-        private static readonly object SyncLock = new();
-        private static IConfiguration? configuration;
-        private static string? cachedConnectionString;
+        private static readonly object s_syncLock = new();
+        private static IConfiguration? s_configuration;
+        private static string? s_cachedConnectionString;
 
         /// <summary>
         /// Gets a value indicating whether a test database connection is configured.
@@ -41,16 +41,16 @@ namespace HotshotLogistics.Tests
 
         private static string? TryGetConnectionString()
         {
-            if (cachedConnectionString is not null)
+            if (s_cachedConnectionString is not null)
             {
-                return cachedConnectionString;
+                return s_cachedConnectionString;
             }
 
-            lock (SyncLock)
+            lock (s_syncLock)
             {
-                if (cachedConnectionString is not null)
+                if (s_cachedConnectionString is not null)
                 {
-                    return cachedConnectionString;
+                    return s_cachedConnectionString;
                 }
 
                 var config = GetConfiguration();
@@ -62,27 +62,27 @@ namespace HotshotLogistics.Tests
 
                 if (!string.IsNullOrWhiteSpace(connectionString))
                 {
-                    cachedConnectionString = connectionString;
+                    s_cachedConnectionString = connectionString;
                 }
 
-                return cachedConnectionString;
+                return s_cachedConnectionString;
             }
         }
 
         private static IConfiguration GetConfiguration()
         {
-            if (configuration is not null)
+            if (s_configuration is not null)
             {
-                return configuration;
+                return s_configuration;
             }
 
             var configBuilder = new ConfigurationBuilder()
                 .AddUserSecrets(typeof(Program).Assembly, optional: true)
                 .AddEnvironmentVariables();
             configBuilder.AddAzureAppConfigurationIfConfigured(useDefaultAzureCredential: false);
-            configuration = configBuilder.Build();
+            s_configuration = configBuilder.Build();
 
-            return configuration;
+            return s_configuration;
         }
 
         private static string? BuildConnectionStringFromParts(IConfiguration config)

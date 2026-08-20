@@ -22,28 +22,28 @@ namespace HotshotLogistics.Application.Services
     /// </summary>
     public class NotificationService : INotificationService
     {
-        private readonly IDistributedCache cache;
-        private readonly ILogger<NotificationService> logger;
-        private readonly ICommunicationServiceFactory communicationFactory;
+        private readonly IDistributedCache _cache;
+        private readonly ILogger<NotificationService> _logger;
+        private readonly ICommunicationServiceFactory _communicationFactory;
 
         // Retry configuration
-        private const int MaxRetryAttempts = 3;
-        private static readonly TimeSpan BaseRetryDelay = TimeSpan.FromSeconds(1);
+        private const int s_maxRetryAttempts = 3;
+        private static readonly TimeSpan s_baseRetryDelay = TimeSpan.FromSeconds(1);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationService"/> class.
         /// </summary>
-        /// <param name="cache">The distributed cache.</param>
-        /// <param name="logger">The logger.</param>
+        /// <param name="cache">The distributed _cache.</param>
+        /// <param name="logger">The _logger.</param>
         /// <param name="communicationFactory">The communication service factory.</param>
         public NotificationService(
             IDistributedCache cache,
             ILogger<NotificationService> logger,
             ICommunicationServiceFactory communicationFactory)
         {
-            this.cache = cache ?? throw new ArgumentNullException(nameof(cache));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.communicationFactory = communicationFactory ?? throw new ArgumentNullException(nameof(communicationFactory));
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _communicationFactory = communicationFactory ?? throw new ArgumentNullException(nameof(communicationFactory));
         }
 
         /// <inheritdoc/>
@@ -61,7 +61,7 @@ namespace HotshotLogistics.Application.Services
 
             return await ExecuteWithRetryAsync(async () =>
             {
-                logger.LogInformation("Sending SMS to {PhoneNumber}", phoneNumber);
+                _logger.LogInformation("Sending SMS to {PhoneNumber}", phoneNumber);
 
                 var commMessage = new CommunicationMessage
                 {
@@ -69,7 +69,7 @@ namespace HotshotLogistics.Application.Services
                     Body = message
                 };
 
-                var service = communicationFactory.GetService("Sms");
+                var service = _communicationFactory.GetService("Sms");
                 return await service.SendAsync(commMessage, cancellationToken);
             }, $"SMS to {phoneNumber}");
         }
@@ -94,7 +94,7 @@ namespace HotshotLogistics.Application.Services
 
             return await ExecuteWithRetryAsync(async () =>
             {
-                logger.LogInformation("Sending email with subject: {Subject} to recipient", subject);
+                _logger.LogInformation("Sending email with subject: {Subject} to recipient", subject);
 
                 var commMessage = new CommunicationMessage
                 {
@@ -103,7 +103,7 @@ namespace HotshotLogistics.Application.Services
                     Body = message
                 };
 
-                var service = communicationFactory.GetService("Email");
+                var service = _communicationFactory.GetService("Email");
                 return await service.SendAsync(commMessage, cancellationToken);
             }, "Email notification");
         }
@@ -128,7 +128,7 @@ namespace HotshotLogistics.Application.Services
 
             return await ExecuteWithRetryAsync(async () =>
             {
-                logger.LogInformation("Sending push notification to device {DeviceToken}", deviceToken);
+                _logger.LogInformation("Sending push notification to device {DeviceToken}", deviceToken);
 
                 var commMessage = new CommunicationMessage
                 {
@@ -137,7 +137,7 @@ namespace HotshotLogistics.Application.Services
                     Body = message
                 };
 
-                var service = communicationFactory.GetService("Push");
+                var service = _communicationFactory.GetService("Push");
                 return await service.SendAsync(commMessage, cancellationToken);
             }, $"Push notification to {deviceToken}");
         }
@@ -145,19 +145,19 @@ namespace HotshotLogistics.Application.Services
         /// <inheritdoc/>
         public async Task<bool> SendNotificationAsync(string userId, NotificationType notificationType, string title, string message, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Sending {NotificationType} notification to user {UserId}", notificationType, userId);
+            _logger.LogInformation("Sending {NotificationType} notification to user {UserId}", notificationType, userId);
 
             var preferences = await GetNotificationPreferencesAsync(userId, cancellationToken);
             if (preferences == null)
             {
-                logger.LogWarning("No notification preferences found for user {UserId}", userId);
+                _logger.LogWarning("No notification preferences found for user {UserId}", userId);
                 return false;
             }
 
             // Check if user wants to receive this type of notification
             if (!preferences.EnabledNotificationTypes.Contains(notificationType))
             {
-                logger.LogDebug("User {UserId} has disabled {NotificationType} notifications", userId, notificationType);
+                _logger.LogDebug("User {UserId} has disabled {NotificationType} notifications", userId, notificationType);
                 return true; // Return true as it's not an error, just user preference
             }
 
@@ -190,11 +190,11 @@ namespace HotshotLogistics.Application.Services
 
             if (success)
             {
-                logger.LogInformation("Notification sent successfully to user {UserId}", userId);
+                _logger.LogInformation("Notification sent successfully to user {UserId}", userId);
             }
             else
             {
-                logger.LogWarning("Failed to send notification to user {UserId}", userId);
+                _logger.LogWarning("Failed to send notification to user {UserId}", userId);
             }
 
             return success;
@@ -204,7 +204,7 @@ namespace HotshotLogistics.Application.Services
         public async Task<NotificationPreferences?> GetNotificationPreferencesAsync(string userId, CancellationToken cancellationToken = default)
         {
             var cacheKey = $"notification_preferences:{userId}";
-            var preferencesJson = await cache.GetStringAsync(cacheKey, cancellationToken);
+            var preferencesJson = await _cache.GetStringAsync(cacheKey, cancellationToken);
 
             if (!string.IsNullOrEmpty(preferencesJson))
             {
@@ -214,7 +214,7 @@ namespace HotshotLogistics.Application.Services
                 }
                 catch (JsonException ex)
                 {
-                    logger.LogWarning(ex, "Failed to deserialize notification preferences for user {UserId}", userId);
+                    _logger.LogWarning(ex, "Failed to deserialize notification preferences for user {UserId}", userId);
                 }
             }
 
@@ -251,17 +251,17 @@ namespace HotshotLogistics.Application.Services
                 var cacheKey = $"notification_preferences:{userId}";
                 var preferencesJson = JsonSerializer.Serialize(preferences);
 
-                await cache.SetStringAsync(cacheKey, preferencesJson, new DistributedCacheEntryOptions
+                await _cache.SetStringAsync(cacheKey, preferencesJson, new DistributedCacheEntryOptions
                 {
                     SlidingExpiration = TimeSpan.FromDays(30) // Cache for 30 days
                 }, cancellationToken);
 
-                logger.LogInformation("Notification preferences updated for user {UserId}", userId);
+                _logger.LogInformation("Notification preferences updated for user {UserId}", userId);
                 return true;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to update notification preferences for user {UserId}", userId);
+                _logger.LogError(ex, "Failed to update notification preferences for user {UserId}", userId);
                 return false;
             }
         }
@@ -276,10 +276,10 @@ namespace HotshotLogistics.Application.Services
         /// <returns>The notification history.</returns>
         public async Task<List<NotificationHistory>> GetNotificationHistoryAsync(string userId, DateTime? startDate = null, DateTime? endDate = null, CancellationToken cancellationToken = default)
         {
-            logger.LogDebug("Getting notification history for user {UserId}", userId);
+            _logger.LogDebug("Getting notification history for user {UserId}", userId);
 
             var cacheKey = $"notification_history:{userId}";
-            var historyJson = await cache.GetStringAsync(cacheKey, cancellationToken);
+            var historyJson = await _cache.GetStringAsync(cacheKey, cancellationToken);
 
             var history = new List<NotificationHistory>();
 
@@ -291,7 +291,7 @@ namespace HotshotLogistics.Application.Services
                 }
                 catch (JsonException ex)
                 {
-                    logger.LogWarning(ex, "Failed to deserialize notification history for user {UserId}", userId);
+                    _logger.LogWarning(ex, "Failed to deserialize notification history for user {UserId}", userId);
                 }
             }
 
@@ -304,7 +304,7 @@ namespace HotshotLogistics.Application.Services
                 ).ToList();
             }
 
-            logger.LogDebug("Retrieved {Count} notification history records for user {UserId}", history.Count, userId);
+            _logger.LogDebug("Retrieved {Count} notification history records for user {UserId}", history.Count, userId);
             return history;
         }
 
@@ -324,7 +324,7 @@ namespace HotshotLogistics.Application.Services
                 throw new ArgumentException("User IDs list cannot be empty", nameof(userIds));
             }
 
-            logger.LogInformation("Sending batch {NotificationType} notification to {UserCount} users", notificationType, userIds.Count);
+            _logger.LogInformation("Sending batch {NotificationType} notification to {UserCount} users", notificationType, userIds.Count);
 
             var successCount = 0;
             var tasks = new List<Task<bool>>();
@@ -348,7 +348,7 @@ namespace HotshotLogistics.Application.Services
                 }
             }
 
-            logger.LogInformation("Batch notification completed: {SuccessCount}/{TotalCount} sent successfully", successCount, userIds.Count);
+            _logger.LogInformation("Batch notification completed: {SuccessCount}/{TotalCount} sent successfully", successCount, userIds.Count);
             return successCount;
         }
 
@@ -362,12 +362,12 @@ namespace HotshotLogistics.Application.Services
         /// <returns>True if at least one channel succeeded.</returns>
         public async Task<bool> SendUrgentNotificationAsync(string userId, string title, string message, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Sending urgent notification to user {UserId}", userId);
+            _logger.LogInformation("Sending urgent notification to user {UserId}", userId);
 
             var preferences = await GetNotificationPreferencesAsync(userId, cancellationToken);
             if (preferences == null)
             {
-                logger.LogWarning("No notification preferences found for user {UserId}", userId);
+                _logger.LogWarning("No notification preferences found for user {UserId}", userId);
                 return false;
             }
 
@@ -391,7 +391,7 @@ namespace HotshotLogistics.Application.Services
 
             if (!tasks.Any())
             {
-                logger.LogWarning("No notification channels available for user {UserId}", userId);
+                _logger.LogWarning("No notification channels available for user {UserId}", userId);
                 return false;
             }
 
@@ -403,11 +403,11 @@ namespace HotshotLogistics.Application.Services
 
             if (success)
             {
-                logger.LogInformation("Urgent notification sent successfully to user {UserId}", userId);
+                _logger.LogInformation("Urgent notification sent successfully to user {UserId}", userId);
             }
             else
             {
-                logger.LogError("Failed to send urgent notification to user {UserId} via all channels", userId);
+                _logger.LogError("Failed to send urgent notification to user {UserId} via all channels", userId);
             }
 
             return success;
@@ -431,7 +431,7 @@ namespace HotshotLogistics.Application.Services
             {
                 if (!IsValidPhoneNumber(preferences.PhoneNumber))
                 {
-                    logger.LogWarning("Invalid phone number format: {PhoneNumber}", preferences.PhoneNumber);
+                    _logger.LogWarning("Invalid phone number format: {PhoneNumber}", preferences.PhoneNumber);
                     return false;
                 }
             }
@@ -441,7 +441,7 @@ namespace HotshotLogistics.Application.Services
             {
                 if (!IsValidEmail(preferences.EmailAddress))
                 {
-                    logger.LogWarning("Invalid email format: {EmailAddress}", preferences.EmailAddress);
+                    _logger.LogWarning("Invalid email format: {EmailAddress}", preferences.EmailAddress);
                     return false;
                 }
             }
@@ -487,14 +487,14 @@ namespace HotshotLogistics.Application.Services
                 var cacheKey = $"notification_history:{userId}";
                 var historyJson = JsonSerializer.Serialize(history);
 
-                await cache.SetStringAsync(cacheKey, historyJson, new DistributedCacheEntryOptions
+                await _cache.SetStringAsync(cacheKey, historyJson, new DistributedCacheEntryOptions
                 {
                     SlidingExpiration = TimeSpan.FromDays(30)
                 }, cancellationToken);
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to log notification history for user {UserId}", userId);
+                _logger.LogWarning(ex, "Failed to log notification history for user {UserId}", userId);
             }
         }
 
@@ -533,7 +533,7 @@ namespace HotshotLogistics.Application.Services
         /// <returns>True if the operation succeeded, false otherwise.</returns>
         private async Task<bool> ExecuteWithRetryAsync(Func<Task<bool>> operation, string operationName)
         {
-            for (int attempt = 1; attempt <= MaxRetryAttempts; attempt++)
+            for (int attempt = 1; attempt <= s_maxRetryAttempts; attempt++)
             {
                 try
                 {
@@ -543,26 +543,26 @@ namespace HotshotLogistics.Application.Services
                         return true;
                     }
 
-                    if (attempt < MaxRetryAttempts)
+                    if (attempt < s_maxRetryAttempts)
                     {
-                        var delay = TimeSpan.FromMilliseconds(BaseRetryDelay.TotalMilliseconds * Math.Pow(2, attempt - 1));
-                        logger.LogInformation("Retrying {OperationName} in {Delay}ms (attempt {Attempt}/{MaxAttempts})",
-                            operationName, delay.TotalMilliseconds, attempt, MaxRetryAttempts);
+                        var delay = TimeSpan.FromMilliseconds(s_baseRetryDelay.TotalMilliseconds * Math.Pow(2, attempt - 1));
+                        _logger.LogInformation("Retrying {OperationName} in {Delay}ms (attempt {Attempt}/{MaxAttempts})",
+                            operationName, delay.TotalMilliseconds, attempt, s_maxRetryAttempts);
                         await Task.Delay(delay);
                     }
                 }
                 catch (Exception ex)
                 {
-                    logger.LogWarning(ex, "Attempt {Attempt}/{MaxAttempts} failed for {OperationName}",
-                        attempt, MaxRetryAttempts, operationName);
+                    _logger.LogWarning(ex, "Attempt {Attempt}/{MaxAttempts} failed for {OperationName}",
+                        attempt, s_maxRetryAttempts, operationName);
 
-                    if (attempt == MaxRetryAttempts)
+                    if (attempt == s_maxRetryAttempts)
                     {
-                        logger.LogError(ex, "All retry attempts failed for {OperationName}", operationName);
+                        _logger.LogError(ex, "All retry attempts failed for {OperationName}", operationName);
                         return false;
                     }
 
-                    var delay = TimeSpan.FromMilliseconds(BaseRetryDelay.TotalMilliseconds * Math.Pow(2, attempt - 1));
+                    var delay = TimeSpan.FromMilliseconds(s_baseRetryDelay.TotalMilliseconds * Math.Pow(2, attempt - 1));
                     await Task.Delay(delay);
                 }
             }

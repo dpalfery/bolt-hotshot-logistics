@@ -18,8 +18,8 @@ namespace HotshotLogistics.Application.Services
     /// </summary>
     public class UserProfileService : IUserProfileService
     {
-        private readonly GraphServiceClient graphServiceClient;
-        private readonly ILogger<UserProfileService> logger;
+        private readonly GraphServiceClient _graphServiceClient;
+        private readonly ILogger<UserProfileService> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserProfileService"/> class.
@@ -30,8 +30,8 @@ namespace HotshotLogistics.Application.Services
             GraphServiceClient graphServiceClient,
             ILogger<UserProfileService> logger)
         {
-            this.graphServiceClient = graphServiceClient ?? throw new ArgumentNullException(nameof(graphServiceClient));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _graphServiceClient = graphServiceClient ?? throw new ArgumentNullException(nameof(graphServiceClient));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <inheritdoc/>
@@ -39,7 +39,7 @@ namespace HotshotLogistics.Application.Services
         {
             try
             {
-                var user = await this.graphServiceClient.Me
+                var user = await _graphServiceClient.Me
                     .GetAsync(requestConfiguration =>
                     {
                         requestConfiguration.QueryParameters.Select = new[] { "id", "displayName", "givenName", "surname", "userPrincipalName", "mail", "jobTitle", "department", "officeLocation", "mobilePhone", "businessPhones", "preferredLanguage" };
@@ -72,7 +72,7 @@ namespace HotshotLogistics.Application.Services
             }
             catch (ServiceException ex)
             {
-                this.logger.LogError(ex, "Failed to retrieve current user profile from Microsoft Graph");
+                _logger.LogError(ex, "Failed to retrieve current user profile from Microsoft Graph");
                 throw new InvalidOperationException("Unable to retrieve user profile", ex);
             }
         }
@@ -94,14 +94,14 @@ namespace HotshotLogistics.Application.Services
                     PreferredLanguage = profile.PreferredLanguage
                 };
 
-                await this.graphServiceClient.Me
+                await _graphServiceClient.Me
                     .PatchAsync(userUpdate, null, cancellationToken);
 
-                this.logger.LogInformation("Successfully updated user profile for user {UserId}", profile.Id);
+                _logger.LogInformation("Successfully updated user profile for user {UserId}", profile.Id);
             }
             catch (ServiceException ex)
             {
-                this.logger.LogError(ex, "Failed to update user profile in Microsoft Graph for user {UserId}", profile.Id);
+                _logger.LogError(ex, "Failed to update user profile in Microsoft Graph for user {UserId}", profile.Id);
                 throw new InvalidOperationException("Unable to update user profile", ex);
             }
         }
@@ -116,14 +116,14 @@ namespace HotshotLogistics.Application.Services
 
                 // Here you would typically sync with your local user database
                 // For now, we'll just log the sync operation
-                this.logger.LogInformation("User profile synchronized for user {UserId}: {DisplayName}", userId, graphProfile.DisplayName);
+                _logger.LogInformation("User profile synchronized for user {UserId}: {DisplayName}", userId, graphProfile.DisplayName);
 
                 // TODO: Implement actual synchronization with local user store
                 // This would involve updating local user records with Graph data
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, "Failed to sync user profile for user {UserId}", userId);
+                _logger.LogError(ex, "Failed to sync user profile for user {UserId}", userId);
                 throw;
             }
         }

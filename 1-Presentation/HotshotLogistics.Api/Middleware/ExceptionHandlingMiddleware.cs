@@ -18,18 +18,18 @@ namespace HotshotLogistics.Api.Middleware
     /// </summary>
     public class ExceptionHandlingMiddleware
     {
-        private readonly RequestDelegate next;
-        private readonly ILogger<ExceptionHandlingMiddleware> logger;
+        private readonly RequestDelegate _next;
+        private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExceptionHandlingMiddleware"/> class.
         /// </summary>
         /// <param name="next">The next middleware in the pipeline.</param>
-        /// <param name="logger">The logger.</param>
+        /// <param name="logger">The _logger.</param>
         public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
         {
-            this.next = next ?? throw new ArgumentNullException(nameof(next));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _next = next ?? throw new ArgumentNullException(nameof(next));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace HotshotLogistics.Api.Middleware
         {
             try
             {
-                await next(context);
+                await _next(context);
             }
             catch (Exception ex)
             {
@@ -166,7 +166,7 @@ namespace HotshotLogistics.Api.Middleware
         {
             var logLevel = statusCode >= HttpStatusCode.InternalServerError ? LogLevel.Error : LogLevel.Warning;
 
-            logger.Log(logLevel, exception, "Exception handled by middleware. CorrelationId: {CorrelationId}, StatusCode: {StatusCode}", correlationId, (int)statusCode);
+            _logger.Log(logLevel, exception, "Exception handled by middleware. CorrelationId: {CorrelationId}, StatusCode: {StatusCode}", correlationId, (int)statusCode);
         }
     }
 }

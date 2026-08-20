@@ -7,20 +7,20 @@ namespace HotshotLogistics.DbSetup;
 public class PasswordManager
 {
     private readonly ILogger<PasswordManager> _logger;
-    private const int DefaultLength = 24;
-    private const int MinimumLength = 16;
+    private const int s_defaultLength = 24;
+    private const int s_minimumLength = 16;
 
     public PasswordManager(ILogger<PasswordManager> logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public string GeneratePassword(int length = DefaultLength)
+    public string GeneratePassword(int length = s_defaultLength)
     {
-        if (length < MinimumLength)
+        if (length < s_minimumLength)
         {
-            _logger.LogWarning("Password length {Length} is below minimum {MinimumLength}, using minimum", length, MinimumLength);
-            length = MinimumLength;
+            _logger.LogWarning("Password length {Length} is below minimum {MinimumLength}, using minimum", length, s_minimumLength);
+            length = s_minimumLength;
         }
 
         var password = new StringBuilder(length);
@@ -61,9 +61,9 @@ public class PasswordManager
             return false;
         }
 
-        if (password.Length < MinimumLength)
+        if (password.Length < s_minimumLength)
         {
-            _logger.LogWarning("Password validation failed: length {Length} is below minimum {MinimumLength}", password.Length, MinimumLength);
+            _logger.LogWarning("Password validation failed: length {Length} is below minimum {MinimumLength}", password.Length, s_minimumLength);
             return false;
         }
 
@@ -102,7 +102,7 @@ public class PasswordManager
 
     public string GetPasswordPolicyDescription()
     {
-        return $"Password must be at least {MinimumLength} characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one symbol.";
+        return $"Password must be at least {s_minimumLength} characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one symbol.";
     }
 
     private static int RandomInt(RandomNumberGenerator random, int maxValue)

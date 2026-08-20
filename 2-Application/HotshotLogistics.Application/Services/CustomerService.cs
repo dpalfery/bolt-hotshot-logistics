@@ -16,9 +16,9 @@ namespace HotshotLogistics.Application.Services
     /// </summary>
     public class CustomerService : ICustomerService
     {
-        private readonly ICustomerRepository customerRepository;
-        private readonly IJobRepository jobRepository;
-        private readonly IInvoiceRepository invoiceRepository;
+        private readonly ICustomerRepository _customerRepository;
+        private readonly IJobRepository _jobRepository;
+        private readonly IInvoiceRepository _invoiceRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CustomerService"/> class.
@@ -31,82 +31,82 @@ namespace HotshotLogistics.Application.Services
             IJobRepository jobRepository,
             IInvoiceRepository invoiceRepository)
         {
-            this.customerRepository = customerRepository;
-            this.jobRepository = jobRepository;
-            this.invoiceRepository = invoiceRepository;
+            _customerRepository = customerRepository;
+            _jobRepository = jobRepository;
+            _invoiceRepository = invoiceRepository;
         }
 
         /// <inheritdoc/>
         public Task<IEnumerable<Customer>> GetCustomersAsync(CancellationToken cancellationToken = default)
         {
-            return customerRepository.GetAllAsync();
+            return _customerRepository.GetAllAsync();
         }
 
         /// <inheritdoc/>
         public Task<Customer?> GetCustomerByIdAsync(string id, CancellationToken cancellationToken = default)
         {
-            return customerRepository.GetByIdAsync(id);
+            return _customerRepository.GetByIdAsync(id);
         }
 
         /// <inheritdoc/>
         public Task<Customer> CreateCustomerAsync(Customer customer, CancellationToken cancellationToken = default)
         {
-            return customerRepository.AddAsync(customer);
+            return _customerRepository.AddAsync(customer);
         }
 
         /// <inheritdoc/>
         public async Task<Customer?> UpdateCustomerAsync(string id, Customer customer, CancellationToken cancellationToken = default)
         {
-            var existingCustomer = await customerRepository.GetByIdAsync(id);
+            var existingCustomer = await _customerRepository.GetByIdAsync(id);
             if (existingCustomer == null)
             {
                 return null;
             }
 
             customer.Id = id;
-            return await customerRepository.UpdateAsync(customer);
+            return await _customerRepository.UpdateAsync(customer);
         }
 
         /// <inheritdoc/>
         public Task<bool> DeleteCustomerAsync(string id, CancellationToken cancellationToken = default)
         {
-            return customerRepository.DeleteAsync(id);
+            return _customerRepository.DeleteAsync(id);
         }
 
         /// <inheritdoc/>
         public Task<IEnumerable<Customer>> GetActiveCustomersAsync(CancellationToken cancellationToken = default)
         {
-            return customerRepository.GetActiveCustomersAsync();
+            return _customerRepository.GetActiveCustomersAsync();
         }
 
         /// <inheritdoc/>
         public Task<IEnumerable<Customer>> GetOverdueCustomersAsync(CancellationToken cancellationToken = default)
         {
-            return customerRepository.GetOverdueCustomersAsync();
+            return _customerRepository.GetOverdueCustomersAsync();
         }
 
         /// <inheritdoc/>
         public Task<IEnumerable<Job>> GetCustomerJobsAsync(string customerId, CancellationToken cancellationToken = default)
         {
-            return jobRepository.GetJobsByCustomerAsync(customerId, cancellationToken);
+            return _jobRepository.GetJobsByCustomerAsync(customerId, cancellationToken);
         }
 
         /// <inheritdoc/>
         public Task<IEnumerable<Invoice>> GetCustomerInvoicesAsync(string customerId, CancellationToken cancellationToken = default)
         {
-            return invoiceRepository.GetByCustomerIdAsync(customerId);
+            return _invoiceRepository.GetByCustomerIdAsync(customerId);
         }
 
         /// <inheritdoc/>
         public Task<bool> UpdateCreditLimitAsync(string customerId, decimal newLimit, CancellationToken cancellationToken = default)
         {
-            return customerRepository.UpdateCreditLimitAsync(customerId, newLimit);
+            return _customerRepository.UpdateCreditLimitAsync(customerId, newLimit);
         }
 
         /// <inheritdoc/>
         public Task<bool> UpdateCreditTermsAsync(string customerId, CreditTerms creditTerms, CancellationToken cancellationToken = default)
         {
-            return customerRepository.UpdateCreditTermsAsync(customerId, creditTerms);
+            return _customerRepository.UpdateCreditTermsAsync(customerId, creditTerms);
         }
 
         /// <inheritdoc/>

@@ -17,18 +17,18 @@ namespace HotshotLogistics.Tests.Customers
     /// </summary>
     public class CustomerControllerTests
     {
-        private readonly Mock<ICustomerService> mockCustomerService;
-        private readonly Mock<ILogger<CustomerController>> mockLogger;
-        private readonly CustomerController controller;
+        private readonly Mock<ICustomerService> _mockCustomerService;
+        private readonly Mock<ILogger<CustomerController>> _mockLogger;
+        private readonly CustomerController _controller;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CustomerControllerTests"/> class.
         /// </summary>
         public CustomerControllerTests()
         {
-            mockCustomerService = new Mock<ICustomerService>();
-            mockLogger = new Mock<ILogger<CustomerController>>();
-            controller = new CustomerController(mockCustomerService.Object, mockLogger.Object);
+            _mockCustomerService = new Mock<ICustomerService>();
+            _mockLogger = new Mock<ILogger<CustomerController>>();
+            _controller = new CustomerController(_mockCustomerService.Object, _mockLogger.Object);
         }
 
         /// <summary>
@@ -45,11 +45,11 @@ namespace HotshotLogistics.Tests.Customers
                 CreateTestCustomer("customer2", "Test Company 2")
             };
 
-            mockCustomerService.Setup(s => s.GetCustomersAsync(It.IsAny<CancellationToken>()))
+            _mockCustomerService.Setup(s => s.GetCustomersAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedCustomers);
 
             // Act
-            var result = await controller.GetCustomers();
+            var result = await _controller.GetCustomers();
 
             // Assert
             result.Should().NotBeNull();
@@ -69,11 +69,11 @@ namespace HotshotLogistics.Tests.Customers
             var customerId = "test-customer-id";
             var expectedCustomer = CreateTestCustomer(customerId, "Test Company");
 
-            mockCustomerService.Setup(s => s.GetCustomerByIdAsync(customerId, It.IsAny<CancellationToken>()))
+            _mockCustomerService.Setup(s => s.GetCustomerByIdAsync(customerId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedCustomer);
 
             // Act
-            var result = await controller.GetCustomerById(customerId);
+            var result = await _controller.GetCustomerById(customerId);
 
             // Assert
             result.Should().NotBeNull();
@@ -92,11 +92,11 @@ namespace HotshotLogistics.Tests.Customers
             // Arrange
             var customerId = "non-existent-customer";
 
-            mockCustomerService.Setup(s => s.GetCustomerByIdAsync(customerId, It.IsAny<CancellationToken>()))
+            _mockCustomerService.Setup(s => s.GetCustomerByIdAsync(customerId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Customer?)null);
 
             // Act
-            var result = await controller.GetCustomerById(customerId);
+            var result = await _controller.GetCustomerById(customerId);
 
             // Assert
             result.Should().NotBeNull();
@@ -114,11 +114,11 @@ namespace HotshotLogistics.Tests.Customers
             var customerData = CreateTestCustomer("new-customer-id", "New Test Company");
             var createdCustomer = CreateTestCustomer("new-customer-id", "New Test Company");
 
-            mockCustomerService.Setup(s => s.CreateCustomerAsync(It.IsAny<Customer>(), It.IsAny<CancellationToken>()))
+            _mockCustomerService.Setup(s => s.CreateCustomerAsync(It.IsAny<Customer>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(createdCustomer);
 
             // Act
-            var result = await controller.CreateCustomer(customerData);
+            var result = await _controller.CreateCustomer(customerData);
 
             // Assert
             result.Should().NotBeNull();
@@ -135,7 +135,7 @@ namespace HotshotLogistics.Tests.Customers
         public async Task CreateCustomer_WithNullData_ReturnsBadRequest()
         {
             // Act
-            var result = await controller.CreateCustomer(null!);
+            var result = await _controller.CreateCustomer(null!);
 
             // Assert
             result.Should().NotBeNull();
@@ -152,11 +152,11 @@ namespace HotshotLogistics.Tests.Customers
             // Arrange
             var invalidCustomer = CreateTestCustomer("", ""); // Invalid data
 
-            mockCustomerService.Setup(s => s.CreateCustomerAsync(It.IsAny<Customer>(), It.IsAny<CancellationToken>()))
+            _mockCustomerService.Setup(s => s.CreateCustomerAsync(It.IsAny<Customer>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new ArgumentException("Customer validation failed"));
 
             // Act
-            var result = await controller.CreateCustomer(invalidCustomer);
+            var result = await _controller.CreateCustomer(invalidCustomer);
 
             // Assert
             result.Should().NotBeNull();
@@ -175,11 +175,11 @@ namespace HotshotLogistics.Tests.Customers
             var customerData = CreateTestCustomer(customerId, "Updated Company Name");
             var updatedCustomer = CreateTestCustomer(customerId, "Updated Company Name");
 
-            mockCustomerService.Setup(s => s.UpdateCustomerAsync(customerId, It.IsAny<Customer>(), It.IsAny<CancellationToken>()))
+            _mockCustomerService.Setup(s => s.UpdateCustomerAsync(customerId, It.IsAny<Customer>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(updatedCustomer);
 
             // Act
-            var result = await controller.UpdateCustomer(customerId, customerData);
+            var result = await _controller.UpdateCustomer(customerId, customerData);
 
             // Assert
             result.Should().NotBeNull();
@@ -199,11 +199,11 @@ namespace HotshotLogistics.Tests.Customers
             var customerId = "non-existent-customer";
             var customerData = CreateTestCustomer(customerId, "Test Company");
 
-            mockCustomerService.Setup(s => s.UpdateCustomerAsync(customerId, It.IsAny<Customer>(), It.IsAny<CancellationToken>()))
+            _mockCustomerService.Setup(s => s.UpdateCustomerAsync(customerId, It.IsAny<Customer>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Customer?)null);
 
             // Act
-            var result = await controller.UpdateCustomer(customerId, customerData);
+            var result = await _controller.UpdateCustomer(customerId, customerData);
 
             // Assert
             result.Should().NotBeNull();
@@ -220,11 +220,11 @@ namespace HotshotLogistics.Tests.Customers
             // Arrange
             var customerId = "customer-to-delete";
 
-            mockCustomerService.Setup(s => s.DeleteCustomerAsync(customerId, It.IsAny<CancellationToken>()))
+            _mockCustomerService.Setup(s => s.DeleteCustomerAsync(customerId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             // Act
-            var result = await controller.DeleteCustomer(customerId);
+            var result = await _controller.DeleteCustomer(customerId);
 
             // Assert
             result.Should().BeOfType<NoContentResult>();
@@ -240,11 +240,11 @@ namespace HotshotLogistics.Tests.Customers
             // Arrange
             var customerId = "non-existent-customer";
 
-            mockCustomerService.Setup(s => s.DeleteCustomerAsync(customerId, It.IsAny<CancellationToken>()))
+            _mockCustomerService.Setup(s => s.DeleteCustomerAsync(customerId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
             // Act
-            var result = await controller.DeleteCustomer(customerId);
+            var result = await _controller.DeleteCustomer(customerId);
 
             // Assert
             result.Should().BeOfType<NotFoundObjectResult>();
@@ -264,11 +264,11 @@ namespace HotshotLogistics.Tests.Customers
                 CreateTestCustomer("active2", "Active Company 2", true)
             };
 
-            mockCustomerService.Setup(s => s.GetActiveCustomersAsync(It.IsAny<CancellationToken>()))
+            _mockCustomerService.Setup(s => s.GetActiveCustomersAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(activeCustomers);
 
             // Act
-            var result = await controller.GetActiveCustomers();
+            var result = await _controller.GetActiveCustomers();
 
             // Assert
             result.Should().NotBeNull();
@@ -292,11 +292,11 @@ namespace HotshotLogistics.Tests.Customers
                 CreateTestCustomer("overdue2", "Overdue Company 2")
             };
 
-            mockCustomerService.Setup(s => s.GetOverdueCustomersAsync(It.IsAny<CancellationToken>()))
+            _mockCustomerService.Setup(s => s.GetOverdueCustomersAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(overdueCustomers);
 
             // Act
-            var result = await controller.GetOverdueCustomers();
+            var result = await _controller.GetOverdueCustomers();
 
             // Assert
             result.Should().NotBeNull();
@@ -321,13 +321,13 @@ namespace HotshotLogistics.Tests.Customers
                 CreateTestJob("job2", customerId)
             };
 
-            mockCustomerService.Setup(s => s.GetCustomerByIdAsync(customerId, It.IsAny<CancellationToken>()))
+            _mockCustomerService.Setup(s => s.GetCustomerByIdAsync(customerId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(customer);
-            mockCustomerService.Setup(s => s.GetCustomerJobsAsync(customerId, It.IsAny<CancellationToken>()))
+            _mockCustomerService.Setup(s => s.GetCustomerJobsAsync(customerId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(jobs);
 
             // Act
-            var result = await controller.GetCustomerJobs(customerId);
+            var result = await _controller.GetCustomerJobs(customerId);
 
             // Assert
             result.Should().NotBeNull();
@@ -353,13 +353,13 @@ namespace HotshotLogistics.Tests.Customers
                 CreateTestInvoice("invoice2", customerId)
             };
 
-            mockCustomerService.Setup(s => s.GetCustomerByIdAsync(customerId, It.IsAny<CancellationToken>()))
+            _mockCustomerService.Setup(s => s.GetCustomerByIdAsync(customerId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(customer);
-            mockCustomerService.Setup(s => s.GetCustomerInvoicesAsync(customerId, It.IsAny<CancellationToken>()))
+            _mockCustomerService.Setup(s => s.GetCustomerInvoicesAsync(customerId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(invoices);
 
             // Act
-            var result = await controller.GetCustomerInvoices(customerId);
+            var result = await _controller.GetCustomerInvoices(customerId);
 
             // Assert
             result.Should().NotBeNull();
@@ -380,11 +380,11 @@ namespace HotshotLogistics.Tests.Customers
             var customerId = "customer-to-update";
             var request = new UpdateCreditLimitRequest { NewLimit = 50000m };
 
-            mockCustomerService.Setup(s => s.UpdateCreditLimitAsync(customerId, request.NewLimit, It.IsAny<CancellationToken>()))
+            _mockCustomerService.Setup(s => s.UpdateCreditLimitAsync(customerId, request.NewLimit, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             // Act
-            var result = await controller.UpdateCreditLimit(customerId, request);
+            var result = await _controller.UpdateCreditLimit(customerId, request);
 
             // Assert
             result.Should().BeOfType<NoContentResult>();
@@ -402,7 +402,7 @@ namespace HotshotLogistics.Tests.Customers
             var request = new UpdateCreditLimitRequest { NewLimit = -1000m };
 
             // Act
-            var result = await controller.UpdateCreditLimit(customerId, request);
+            var result = await _controller.UpdateCreditLimit(customerId, request);
 
             // Assert
             result.Should().BeOfType<BadRequestObjectResult>();
@@ -425,11 +425,11 @@ namespace HotshotLogistics.Tests.Customers
                 ExpiryDate = DateTime.UtcNow.AddYears(1)
             };
 
-            mockCustomerService.Setup(s => s.UpdateCreditTermsAsync(customerId, creditTerms, It.IsAny<CancellationToken>()))
+            _mockCustomerService.Setup(s => s.UpdateCreditTermsAsync(customerId, creditTerms, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             // Act
-            var result = await controller.UpdateCreditTerms(customerId, creditTerms);
+            var result = await _controller.UpdateCreditTerms(customerId, creditTerms);
 
             // Assert
             result.Should().BeOfType<NoContentResult>();
@@ -446,7 +446,7 @@ namespace HotshotLogistics.Tests.Customers
             var customerId = "customer-to-update";
 
             // Act
-            var result = await controller.UpdateCreditTerms(customerId, null!);
+            var result = await _controller.UpdateCreditTerms(customerId, null!);
 
             // Assert
             result.Should().BeOfType<BadRequestObjectResult>();
@@ -468,7 +468,7 @@ namespace HotshotLogistics.Tests.Customers
             };
 
             // Act
-            var result = await controller.UpdateCreditTerms(customerId, creditTerms);
+            var result = await _controller.UpdateCreditTerms(customerId, creditTerms);
 
             // Assert
             result.Should().BeOfType<BadRequestObjectResult>();
@@ -489,11 +489,11 @@ namespace HotshotLogistics.Tests.Customers
                 Status = CreditStatus.Approved
             };
 
-            mockCustomerService.Setup(s => s.UpdateCreditTermsAsync(customerId, creditTerms, It.IsAny<CancellationToken>()))
+            _mockCustomerService.Setup(s => s.UpdateCreditTermsAsync(customerId, creditTerms, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
             // Act
-            var result = await controller.UpdateCreditTerms(customerId, creditTerms);
+            var result = await _controller.UpdateCreditTerms(customerId, creditTerms);
 
             // Assert
             result.Should().BeOfType<NotFoundObjectResult>();

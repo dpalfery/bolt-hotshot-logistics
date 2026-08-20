@@ -15,7 +15,7 @@ namespace HotshotLogistics.Application.Authorization
     /// </summary>
     public class ResourceOwnerAuthorizationHandler : AuthorizationHandler<ResourceOwnerRequirement>
     {
-        private readonly ILogger<ResourceOwnerAuthorizationHandler> logger;
+        private readonly ILogger<ResourceOwnerAuthorizationHandler> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourceOwnerAuthorizationHandler"/> class.
@@ -23,7 +23,7 @@ namespace HotshotLogistics.Application.Authorization
         /// <param name="logger">The logger.</param>
         public ResourceOwnerAuthorizationHandler(ILogger<ResourceOwnerAuthorizationHandler> logger)
         {
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <inheritdoc/>
@@ -33,14 +33,14 @@ namespace HotshotLogistics.Application.Authorization
         {
             if (context.User == null)
             {
-                this.logger.LogWarning("Authorization failed: User is null");
+                _logger.LogWarning("Authorization failed: User is null");
                 return Task.CompletedTask;
             }
 
             // Check if user has Admin role - admins can access all resources
             if (context.User.HasClaim(c => c.Type == "roles" && c.Value == "Admin"))
             {
-                this.logger.LogInformation("Authorization granted: User has Admin role for resource type {ResourceType}", requirement.ResourceType);
+                _logger.LogInformation("Authorization granted: User has Admin role for resource type {ResourceType}", requirement.ResourceType);
                 context.Succeed(requirement);
                 return Task.CompletedTask;
             }
@@ -49,7 +49,7 @@ namespace HotshotLogistics.Application.Authorization
             if (context.User.HasClaim(c => c.Type == "roles" && c.Value == "Manager") &&
                 requirement.ResourceType != "System")
             {
-                this.logger.LogInformation("Authorization granted: User has Manager role for resource type {ResourceType}", requirement.ResourceType);
+                _logger.LogInformation("Authorization granted: User has Manager role for resource type {ResourceType}", requirement.ResourceType);
                 context.Succeed(requirement);
                 return Task.CompletedTask;
             }
@@ -67,7 +67,7 @@ namespace HotshotLogistics.Application.Authorization
                     // For customer resources, check if the user is associated with the customer
                     if (requirement.ResourceType == "Customer" && this.IsCustomerResourceOwner(userId, resourceId))
                     {
-                        this.logger.LogInformation("Authorization granted: User {UserId} owns customer resource {ResourceId}", userId, resourceId);
+                        _logger.LogInformation("Authorization granted: User {UserId} owns customer resource {ResourceId}", userId, resourceId);
                         context.Succeed(requirement);
                         return Task.CompletedTask;
                     }
@@ -75,14 +75,14 @@ namespace HotshotLogistics.Application.Authorization
                     // For job resources, check if the user is assigned to the job
                     if (requirement.ResourceType == "Job" && this.IsJobResourceOwner(userId, resourceId))
                     {
-                        this.logger.LogInformation("Authorization granted: User {UserId} owns job resource {ResourceId}", userId, resourceId);
+                        _logger.LogInformation("Authorization granted: User {UserId} owns job resource {ResourceId}", userId, resourceId);
                         context.Succeed(requirement);
                         return Task.CompletedTask;
                     }
                 }
             }
 
-            this.logger.LogWarning("Authorization denied: User does not have access to resource type {ResourceType}", requirement.ResourceType);
+            _logger.LogWarning("Authorization denied: User does not have access to resource type {ResourceType}", requirement.ResourceType);
             return Task.CompletedTask;
         }
 

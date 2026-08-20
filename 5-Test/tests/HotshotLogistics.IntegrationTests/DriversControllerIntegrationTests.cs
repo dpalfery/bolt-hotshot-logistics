@@ -14,16 +14,16 @@ namespace HotshotLogistics.IntegrationTests
     [Collection("DatabaseCollection")]
     public class DriversControllerIntegrationTests : IntegrationTestBase, IClassFixture<CustomWebApplicationFactory<Program>>
     {
-        private readonly HttpClient client;
-        private readonly CustomWebApplicationFactory<Program> factory;
+        private readonly HttpClient _client;
+        private readonly CustomWebApplicationFactory<Program> _factory;
 
         public DriversControllerIntegrationTests(CustomWebApplicationFactory<Program> factory) : base(factory)
         {
             // Set the test authentication header
             Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Test");
 
-            this.factory = factory;
-            this.client = factory.CreateClient(new WebApplicationFactoryClientOptions
+            _factory = factory;
+            _client = factory.CreateClient(new WebApplicationFactoryClientOptions
             {
                 AllowAutoRedirect = false,
             });

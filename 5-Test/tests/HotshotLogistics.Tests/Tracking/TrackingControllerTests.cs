@@ -22,18 +22,18 @@ namespace HotshotLogistics.Tests.Tracking
     /// </summary>
     public class TrackingControllerTests
     {
-        private readonly Mock<ITrackingService> mockTrackingService;
-        private readonly Mock<ILogger<TrackingController>> mockLogger;
-        private readonly TrackingController controller;
+        private readonly Mock<ITrackingService> _mockTrackingService;
+        private readonly Mock<ILogger<TrackingController>> _mockLogger;
+        private readonly TrackingController _controller;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TrackingControllerTests"/> class.
         /// </summary>
         public TrackingControllerTests()
         {
-            mockTrackingService = new Mock<ITrackingService>();
-            mockLogger = new Mock<ILogger<TrackingController>>();
-            controller = new TrackingController(mockTrackingService.Object, mockLogger.Object);
+            _mockTrackingService = new Mock<ITrackingService>();
+            _mockLogger = new Mock<ILogger<TrackingController>>();
+            _controller = new TrackingController(_mockTrackingService.Object, _mockLogger.Object);
         }
 
         /// <summary>
@@ -50,11 +50,11 @@ namespace HotshotLogistics.Tests.Tracking
                 DriverId = 456
             };
 
-            mockTrackingService.Setup(s => s.StartTrackingAsync(request.JobId, request.DriverId, It.IsAny<CancellationToken>()))
+            _mockTrackingService.Setup(s => s.StartTrackingAsync(request.JobId, request.DriverId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             // Act
-            var result = await controller.StartTracking(request);
+            var result = await _controller.StartTracking(request);
 
             // Assert
             result.Should().NotBeNull();
@@ -73,7 +73,7 @@ namespace HotshotLogistics.Tests.Tracking
         public async Task StartTracking_WithNullRequest_ReturnsBadRequest()
         {
             // Act
-            var result = await controller.StartTracking(null!);
+            var result = await _controller.StartTracking(null!);
 
             // Assert
             result.Should().NotBeNull();
@@ -95,7 +95,7 @@ namespace HotshotLogistics.Tests.Tracking
             };
 
             // Act
-            var result = await controller.StartTracking(request);
+            var result = await _controller.StartTracking(request);
 
             // Assert
             result.Should().NotBeNull();
@@ -117,7 +117,7 @@ namespace HotshotLogistics.Tests.Tracking
             };
 
             // Act
-            var result = await controller.StartTracking(request);
+            var result = await _controller.StartTracking(request);
 
             // Assert
             result.Should().NotBeNull();
@@ -134,11 +134,11 @@ namespace HotshotLogistics.Tests.Tracking
             // Arrange
             var jobId = "job-123";
 
-            mockTrackingService.Setup(s => s.StopTrackingAsync(jobId, It.IsAny<CancellationToken>()))
+            _mockTrackingService.Setup(s => s.StopTrackingAsync(jobId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             // Act
-            var result = await controller.StopTracking(jobId);
+            var result = await _controller.StopTracking(jobId);
 
             // Assert
             result.Should().NotBeNull();
@@ -156,7 +156,7 @@ namespace HotshotLogistics.Tests.Tracking
         public async Task StopTracking_WithEmptyJobId_ReturnsBadRequest()
         {
             // Act
-            var result = await controller.StopTracking("");
+            var result = await _controller.StopTracking("");
 
             // Assert
             result.Should().NotBeNull();
@@ -185,7 +185,7 @@ namespace HotshotLogistics.Tests.Tracking
 
             var expectedLocationTracking = CreateTestLocationTracking(request.JobId, request.DriverId);
 
-            mockTrackingService.Setup(s => s.UpdateLocationAsync(
+            _mockTrackingService.Setup(s => s.UpdateLocationAsync(
                 request.JobId,
                 request.DriverId,
                 request.LocationUpdate,
@@ -193,7 +193,7 @@ namespace HotshotLogistics.Tests.Tracking
                 .ReturnsAsync(expectedLocationTracking);
 
             // Act
-            var result = await controller.UpdateLocation(request);
+            var result = await _controller.UpdateLocation(request);
 
             // Assert
             result.Should().NotBeNull();
@@ -210,7 +210,7 @@ namespace HotshotLogistics.Tests.Tracking
         public async Task UpdateLocation_WithNullRequest_ReturnsBadRequest()
         {
             // Act
-            var result = await controller.UpdateLocation(null!);
+            var result = await _controller.UpdateLocation(null!);
 
             // Assert
             result.Should().NotBeNull();
@@ -228,11 +228,11 @@ namespace HotshotLogistics.Tests.Tracking
             var jobId = "job-123";
             var expectedLocation = CreateTestLocationTracking(jobId, 456);
 
-            mockTrackingService.Setup(s => s.GetCurrentLocationAsync(jobId, It.IsAny<CancellationToken>()))
+            _mockTrackingService.Setup(s => s.GetCurrentLocationAsync(jobId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedLocation);
 
             // Act
-            var result = await controller.GetCurrentLocation(jobId);
+            var result = await _controller.GetCurrentLocation(jobId);
 
             // Assert
             result.Should().NotBeNull();
@@ -251,11 +251,11 @@ namespace HotshotLogistics.Tests.Tracking
             // Arrange
             var jobId = "job-123";
 
-            mockTrackingService.Setup(s => s.GetCurrentLocationAsync(jobId, It.IsAny<CancellationToken>()))
+            _mockTrackingService.Setup(s => s.GetCurrentLocationAsync(jobId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((LocationTracking?)null);
 
             // Act
-            var result = await controller.GetCurrentLocation(jobId);
+            var result = await _controller.GetCurrentLocation(jobId);
 
             // Assert
             result.Should().NotBeNull();
@@ -279,11 +279,11 @@ namespace HotshotLogistics.Tests.Tracking
                 CreateTestLocationTracking(jobId, 456)
             };
 
-            mockTrackingService.Setup(s => s.GetLocationHistoryAsync(jobId, startTime, endTime, It.IsAny<CancellationToken>()))
+            _mockTrackingService.Setup(s => s.GetLocationHistoryAsync(jobId, startTime, endTime, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedHistory);
 
             // Act
-            var result = await controller.GetLocationHistory(jobId, startTime, endTime);
+            var result = await _controller.GetLocationHistory(jobId, startTime, endTime);
 
             // Assert
             result.Should().NotBeNull();
@@ -305,7 +305,7 @@ namespace HotshotLogistics.Tests.Tracking
             var endTime = DateTime.UtcNow.AddHours(-1); // End time before start time
 
             // Act
-            var result = await controller.GetLocationHistory(jobId, startTime, endTime);
+            var result = await _controller.GetLocationHistory(jobId, startTime, endTime);
 
             // Assert
             result.Should().NotBeNull();
@@ -331,14 +331,14 @@ namespace HotshotLogistics.Tests.Tracking
                 }
             };
 
-            mockTrackingService.Setup(s => s.CheckRouteDeviationAsync(
+            _mockTrackingService.Setup(s => s.CheckRouteDeviationAsync(
                 request.JobId,
                 request.CurrentLocation,
                 It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false); // No deviation
 
             // Act
-            var result = await controller.CheckRouteDeviation(request);
+            var result = await _controller.CheckRouteDeviation(request);
 
             // Assert
             result.Should().NotBeNull();
@@ -356,7 +356,7 @@ namespace HotshotLogistics.Tests.Tracking
         public async Task CheckRouteDeviation_WithNullRequest_ReturnsBadRequest()
         {
             // Act
-            var result = await controller.CheckRouteDeviation(null!);
+            var result = await _controller.CheckRouteDeviation(null!);
 
             // Assert
             result.Should().NotBeNull();
@@ -374,11 +374,11 @@ namespace HotshotLogistics.Tests.Tracking
             var jobId = "job-123";
             var expectedLocation = CreateTestLocationTracking(jobId, 456);
 
-            mockTrackingService.Setup(s => s.GetCurrentLocationAsync(jobId, It.IsAny<CancellationToken>()))
+            _mockTrackingService.Setup(s => s.GetCurrentLocationAsync(jobId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedLocation);
 
             // Act
-            var result = await controller.GetPublicTrackingInfo(jobId);
+            var result = await _controller.GetPublicTrackingInfo(jobId);
 
             // Assert
             result.Should().NotBeNull();
@@ -399,11 +399,11 @@ namespace HotshotLogistics.Tests.Tracking
             // Arrange
             var jobId = "job-123";
 
-            mockTrackingService.Setup(s => s.GetCurrentLocationAsync(jobId, It.IsAny<CancellationToken>()))
+            _mockTrackingService.Setup(s => s.GetCurrentLocationAsync(jobId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((LocationTracking?)null);
 
             // Act
-            var result = await controller.GetPublicTrackingInfo(jobId);
+            var result = await _controller.GetPublicTrackingInfo(jobId);
 
             // Assert
             result.Should().NotBeNull();

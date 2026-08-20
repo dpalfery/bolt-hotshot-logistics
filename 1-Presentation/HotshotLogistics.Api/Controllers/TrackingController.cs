@@ -21,20 +21,20 @@ namespace HotshotLogistics.Api.Controllers
     [Route("api/[controller]")]
     public class TrackingController : ControllerBase
     {
-        private readonly ITrackingService trackingService;
-        private readonly ILogger<TrackingController> logger;
+        private readonly ITrackingService _trackingService;
+        private readonly ILogger<TrackingController> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TrackingController"/> class.
         /// </summary>
         /// <param name="trackingService">The tracking service.</param>
-        /// <param name="logger">The logger.</param>
+        /// <param name="logger">The _logger.</param>
         public TrackingController(
             ITrackingService trackingService,
             ILogger<TrackingController> logger)
         {
-            this.trackingService = trackingService ?? throw new ArgumentNullException(nameof(trackingService));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _trackingService = trackingService ?? throw new ArgumentNullException(nameof(trackingService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace HotshotLogistics.Api.Controllers
                     return BadRequest("Valid driver ID is required");
                 }
 
-                var success = await trackingService.StartTrackingAsync(request.JobId, request.DriverId, cancellationToken);
+                var success = await _trackingService.StartTrackingAsync(request.JobId, request.DriverId, cancellationToken);
 
                 var result = new TrackingResult
                 {
@@ -83,17 +83,17 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (ArgumentException ex)
             {
-                logger.LogWarning(ex, "Invalid start tracking request: {Message}", ex.Message);
+                _logger.LogWarning(ex, "Invalid start tracking request: {Message}", ex.Message);
                 return BadRequest(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
-                logger.LogWarning(ex, "Job or driver not found: {Message}", ex.Message);
+                _logger.LogWarning(ex, "Job or driver not found: {Message}", ex.Message);
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while starting tracking for job");
+                _logger.LogError(ex, "An error occurred while starting tracking for job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -117,7 +117,7 @@ namespace HotshotLogistics.Api.Controllers
                     return BadRequest("Job ID is required");
                 }
 
-                var success = await trackingService.StopTrackingAsync(jobId, cancellationToken);
+                var success = await _trackingService.StopTrackingAsync(jobId, cancellationToken);
 
                 var result = new TrackingResult
                 {
@@ -131,17 +131,17 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (ArgumentException ex)
             {
-                logger.LogWarning(ex, "Invalid stop tracking request for job: {Message}", ex.Message);
+                _logger.LogWarning(ex, "Invalid stop tracking request for job: {Message}", ex.Message);
                 return BadRequest(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
-                logger.LogWarning(ex, "Job not found for stop tracking");
+                _logger.LogWarning(ex, "Job not found for stop tracking");
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while stopping tracking for job");
+                _logger.LogError(ex, "An error occurred while stopping tracking for job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -182,7 +182,7 @@ namespace HotshotLogistics.Api.Controllers
                     return BadRequest("Location update data is required");
                 }
 
-                var locationTracking = await trackingService.UpdateLocationAsync(
+                var locationTracking = await _trackingService.UpdateLocationAsync(
                     request.JobId,
                     request.DriverId,
                     request.LocationUpdate,
@@ -195,17 +195,17 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (ArgumentException ex)
             {
-                logger.LogWarning(ex, "Invalid location update request: {Message}", ex.Message);
+                _logger.LogWarning(ex, "Invalid location update request: {Message}", ex.Message);
                 return BadRequest(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
-                logger.LogWarning(ex, "Job or driver not found for location update: {Message}", ex.Message);
+                _logger.LogWarning(ex, "Job or driver not found for location update: {Message}", ex.Message);
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while updating location for job");
+                _logger.LogError(ex, "An error occurred while updating location for job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -223,7 +223,7 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-                var locationTracking = await trackingService.GetCurrentLocationAsync(jobId, cancellationToken);
+                var locationTracking = await _trackingService.GetCurrentLocationAsync(jobId, cancellationToken);
                 if (locationTracking == null)
                 {
                     return NotFound($"No location tracking found for job {jobId}");
@@ -233,7 +233,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while retrieving current location for job");
+                _logger.LogError(ex, "An error occurred while retrieving current location for job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -271,12 +271,12 @@ namespace HotshotLogistics.Api.Controllers
                     return BadRequest("Start time must be before end time");
                 }
 
-                var locationHistory = await trackingService.GetLocationHistoryAsync(jobId, start, end, cancellationToken);
+                var locationHistory = await _trackingService.GetLocationHistoryAsync(jobId, start, end, cancellationToken);
                 return Ok(locationHistory);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while retrieving location history for job");
+                _logger.LogError(ex, "An error occurred while retrieving location history for job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -312,7 +312,7 @@ namespace HotshotLogistics.Api.Controllers
                     return BadRequest("Current location is required");
                 }
 
-                var hasDeviated = await trackingService.CheckRouteDeviationAsync(
+                var hasDeviated = await _trackingService.CheckRouteDeviationAsync(
                     request.JobId,
                     request.CurrentLocation,
                     cancellationToken);
@@ -330,17 +330,17 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (ArgumentException ex)
             {
-                logger.LogWarning(ex, "Invalid route deviation request: {Message}", ex.Message);
+                _logger.LogWarning(ex, "Invalid route deviation request: {Message}", ex.Message);
                 return BadRequest(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
-                logger.LogWarning(ex, "Job not found for route deviation check: {Message}", ex.Message);
+                _logger.LogWarning(ex, "Job not found for route deviation check: {Message}", ex.Message);
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while checking route deviation for job");
+                _logger.LogError(ex, "An error occurred while checking route deviation for job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -358,7 +358,7 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-                var currentLocation = await trackingService.GetCurrentLocationAsync(jobId, cancellationToken);
+                var currentLocation = await _trackingService.GetCurrentLocationAsync(jobId, cancellationToken);
                 if (currentLocation == null)
                 {
                     return NotFound($"No tracking information available for job {jobId}");
@@ -378,7 +378,7 @@ namespace HotshotLogistics.Api.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while retrieving public tracking info for job");
+                _logger.LogError(ex, "An error occurred while retrieving public tracking info for job");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }

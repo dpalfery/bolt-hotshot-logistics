@@ -13,18 +13,18 @@ namespace HotshotLogistics.IntegrationTests
     /// </summary>
     public class TestExceptionLoggingMiddleware
     {
-        private readonly RequestDelegate next;
-        private readonly ILogger<TestExceptionLoggingMiddleware> logger;
+        private readonly RequestDelegate _next;
+        private readonly ILogger<TestExceptionLoggingMiddleware> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TestExceptionLoggingMiddleware"/> class.
         /// </summary>
         /// <param name="next">The next middleware in the pipeline.</param>
-        /// <param name="logger">The logger.</param>
+        /// <param name="logger">The _logger.</param>
         public TestExceptionLoggingMiddleware(RequestDelegate next, ILogger<TestExceptionLoggingMiddleware> logger)
         {
-            this.next = next ?? throw new ArgumentNullException(nameof(next));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _next = next ?? throw new ArgumentNullException(nameof(next));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace HotshotLogistics.IntegrationTests
             try
             {
                 // Log the request details
-                logger.LogInformation("TEST REQUEST: {Method} {Path} {QueryString}",
+                _logger.LogInformation("TEST REQUEST: {Method} {Path} {QueryString}",
                     context.Request.Method,
                     context.Request.Path,
                     context.Request.QueryString);
@@ -49,15 +49,15 @@ namespace HotshotLogistics.IntegrationTests
                     var requestBody = await ReadRequestBodyAsync(context.Request);
                     if (!string.IsNullOrEmpty(requestBody))
                     {
-                        logger.LogInformation("TEST REQUEST BODY: {RequestBody}", requestBody);
+                        _logger.LogInformation("TEST REQUEST BODY: {RequestBody}", requestBody);
                     }
                     context.Request.Body.Position = 0;
                 }
 
-                await next(context);
+                await _next(context);
 
                 // Log successful response
-                logger.LogInformation("TEST RESPONSE: {StatusCode} for {Method} {Path}",
+                _logger.LogInformation("TEST RESPONSE: {StatusCode} for {Method} {Path}",
                     context.Response.StatusCode,
                     context.Request.Method,
                     context.Request.Path);
@@ -65,7 +65,7 @@ namespace HotshotLogistics.IntegrationTests
             catch (Exception ex)
             {
                 // Log detailed exception information
-                logger.LogError(ex,
+                _logger.LogError(ex,
                     "TEST EXCEPTION: {ExceptionType} during {Method} {Path}\n" +
                     "Message: {Message}\n" +
                     "Stack Trace: {StackTrace}\n" +

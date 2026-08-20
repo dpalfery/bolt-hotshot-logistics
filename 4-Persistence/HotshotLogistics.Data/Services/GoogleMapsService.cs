@@ -16,9 +16,9 @@ namespace HotshotLogistics.Data.Services
     /// </summary>
     public class GoogleMapsService : IMappingService
     {
-        private readonly HttpClient httpClient;
-        private readonly ILogger<GoogleMapsService> logger;
-        private readonly string apiKey;
+        private readonly HttpClient _httpClient;
+        private readonly ILogger<GoogleMapsService> _logger;
+        private readonly string _apiKey;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GoogleMapsService"/> class.
@@ -28,10 +28,10 @@ namespace HotshotLogistics.Data.Services
         /// <param name="settings">The Google Maps settings.</param>
         public GoogleMapsService(HttpClient httpClient, ILogger<GoogleMapsService> logger, IOptions<GoogleMapsSettings> settings)
         {
-            this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             var googleMapsSettings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
-            this.apiKey = googleMapsSettings.ApiKey ?? throw new ArgumentNullException(nameof(googleMapsSettings.ApiKey));
+            _apiKey = googleMapsSettings.ApiKey ?? throw new ArgumentNullException(nameof(googleMapsSettings.ApiKey));
         }
 
         /// <inheritdoc/>
@@ -39,9 +39,9 @@ namespace HotshotLogistics.Data.Services
         {
             try
             {
-                var url = $"https://maps.googleapis.com/maps/api/geocode/json?address={Uri.EscapeDataString(address)}&key={apiKey}";
+                var url = $"https://maps.googleapis.com/maps/api/geocode/json?address={Uri.EscapeDataString(address)}&key={_apiKey}";
 
-                var response = await httpClient.GetAsync(url, cancellationToken);
+                var response = await _httpClient.GetAsync(url, cancellationToken);
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -70,7 +70,7 @@ namespace HotshotLogistics.Data.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to geocode address: {Address}", address);
+                _logger.LogError(ex, "Failed to geocode address: {Address}", address);
                 return new GeocodingResult
                 {
                     IsValid = false,
@@ -84,9 +84,9 @@ namespace HotshotLogistics.Data.Services
         {
             try
             {
-                var url = $"https://maps.googleapis.com/maps/api/geocode/json?latlng={latitude},{longitude}&key={apiKey}";
+                var url = $"https://maps.googleapis.com/maps/api/geocode/json?latlng={latitude},{longitude}&key={_apiKey}";
 
-                var response = await httpClient.GetAsync(url, cancellationToken);
+                var response = await _httpClient.GetAsync(url, cancellationToken);
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -117,7 +117,7 @@ namespace HotshotLogistics.Data.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to reverse geocode coordinates");
+                _logger.LogError(ex, "Failed to reverse geocode coordinates");
                 return new ReverseGeocodingResult
                 {
                     IsValid = false,
@@ -147,9 +147,9 @@ namespace HotshotLogistics.Data.Services
                     };
                 }
 
-                var url = $"https://maps.googleapis.com/maps/api/directions/json?origin={origin.Latitude},{origin.Longitude}&destination={destination.Latitude},{destination.Longitude}&key={apiKey}";
+                var url = $"https://maps.googleapis.com/maps/api/directions/json?origin={origin.Latitude},{origin.Longitude}&destination={destination.Latitude},{destination.Longitude}&key={_apiKey}";
 
-                var response = await httpClient.GetAsync(url, cancellationToken);
+                var response = await _httpClient.GetAsync(url, cancellationToken);
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -179,7 +179,7 @@ namespace HotshotLogistics.Data.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to calculate route between {Origin} and {Destination}", origin.FullAddress, destination.FullAddress);
+                _logger.LogError(ex, "Failed to calculate route between {Origin} and {Destination}", origin.FullAddress, destination.FullAddress);
                 return new RouteResult
                 {
                     IsValid = false,
@@ -237,7 +237,7 @@ namespace HotshotLogistics.Data.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to optimize route with {WaypointCount} waypoints", waypoints.Count);
+                _logger.LogError(ex, "Failed to optimize route with {WaypointCount} waypoints", waypoints.Count);
                 return new OptimizedRouteResult
                 {
                     IsValid = false,

@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 /// <typeparam name="T">The entity type.</typeparam>
 public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
 {
-    private static readonly Regex SafeIdentifierRegex = new("^[A-Za-z_][A-Za-z0-9_]*$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private static readonly Regex s_safeIdentifierRegex = new("^[A-Za-z_][A-Za-z0-9_]*$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     private readonly string _connectionString;
 
@@ -284,7 +284,7 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
             throw new ArgumentException("Identifier cannot be null or whitespace.", nameof(identifier));
         }
 
-        if (!SafeIdentifierRegex.IsMatch(identifier))
+        if (!s_safeIdentifierRegex.IsMatch(identifier))
         {
             throw new ArgumentException($"Identifier '{identifier}' contains invalid characters.", nameof(identifier));
         }

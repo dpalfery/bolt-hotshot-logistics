@@ -27,14 +27,14 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
     /// </summary>
     public class ExceptionHandlingMiddlewareTests
     {
-        private readonly Mock<ILogger<ExceptionHandlingMiddleware>> mockLogger;
+        private readonly Mock<ILogger<ExceptionHandlingMiddleware>> _mockLogger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExceptionHandlingMiddlewareTests"/> class.
         /// </summary>
         public ExceptionHandlingMiddlewareTests()
         {
-            mockLogger = new Mock<ILogger<ExceptionHandlingMiddleware>>();
+            _mockLogger = new Mock<ILogger<ExceptionHandlingMiddleware>>();
         }
 
         /// <summary>
@@ -212,7 +212,7 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
             var server = new TestServer(new WebHostBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddSingleton(mockLogger.Object);
+                    services.AddSingleton(_mockLogger.Object);
                 })
                 .Configure(app =>
                 {

@@ -18,11 +18,11 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
     /// </summary>
     public class AuthorizationTests
     {
-        private readonly Mock<ILogger<ResourceOwnerAuthorizationHandler>> loggerMock;
+        private readonly Mock<ILogger<ResourceOwnerAuthorizationHandler>> _loggerMock;
 
         public AuthorizationTests()
         {
-            this.loggerMock = new Mock<ILogger<ResourceOwnerAuthorizationHandler>>();
+            _loggerMock = new Mock<ILogger<ResourceOwnerAuthorizationHandler>>();
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
         public async Task ResourceOwnerAuthorizationHandler_AdminRole_GrantsAccess()
         {
             // Arrange
-            var handler = new ResourceOwnerAuthorizationHandler(this.loggerMock.Object);
+            var handler = new ResourceOwnerAuthorizationHandler(_loggerMock.Object);
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
             {
                 new Claim("roles", "Admin")
@@ -58,7 +58,7 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
         public async Task ResourceOwnerAuthorizationHandler_ManagerRole_GrantsAccessToNonSystemResources()
         {
             // Arrange
-            var handler = new ResourceOwnerAuthorizationHandler(this.loggerMock.Object);
+            var handler = new ResourceOwnerAuthorizationHandler(_loggerMock.Object);
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
             {
                 new Claim("roles", "Manager")
@@ -83,7 +83,7 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
         public async Task ResourceOwnerAuthorizationHandler_ManagerRole_DeniesAccessToSystemResources()
         {
             // Arrange
-            var handler = new ResourceOwnerAuthorizationHandler(this.loggerMock.Object);
+            var handler = new ResourceOwnerAuthorizationHandler(_loggerMock.Object);
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
             {
                 new Claim("roles", "Manager")
@@ -108,7 +108,7 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
         public async Task ResourceOwnerAuthorizationHandler_NoAppropriateRole_DeniesAccess()
         {
             // Arrange
-            var handler = new ResourceOwnerAuthorizationHandler(this.loggerMock.Object);
+            var handler = new ResourceOwnerAuthorizationHandler(_loggerMock.Object);
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
             {
                 new Claim("roles", "Driver")
@@ -133,7 +133,7 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
         public async Task ResourceOwnerAuthorizationHandler_NullUser_DeniesAccess()
         {
             // Arrange
-            var handler = new ResourceOwnerAuthorizationHandler(this.loggerMock.Object);
+            var handler = new ResourceOwnerAuthorizationHandler(_loggerMock.Object);
             var context = new AuthorizationHandlerContext(
                 new[] { new ResourceOwnerRequirement("Customer") },
                 null!,
