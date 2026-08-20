@@ -104,24 +104,23 @@ Read the path declared as **<test-coding-standard>** before reviewing any test. 
 
 1. Run `get_errors` on every file created or modified in the diff (full file, not only new hunks).
    For final feature approval, also run workspace-wide `get_errors`.
+   For frontend files, additionally run the project's lint command (e.g., `npm run lint -- <paths>` inside `1-Presentation/admin-dashboard`) on every changed/added frontend file.
 2. Report a section **IDE Problems Gate**:
    - Tool: `get_errors` with exact paths or "workspace".
-   - Total count, in-scope count, blocking count, pre-existing (proved) count.
-   - Table: path | line | message | introduced-by-diff? | disposition.
+   - Total count, in-scope count, unresolved count, escalated count.
+   - Table: path | line | message | status | disposition.
 3. Dispositions:
    - New file → Needs Changes.
    - Changed line in diff → Needs Changes.
-   - Unchanged line in touched file → may be pre-existing only with proof (baseline snapshot or `git diff` attribution). List it with proof; otherwise Needs Changes.
-4. Approve is invalid if the IDE Problems Gate section is missing or if any unproved/in-scope finding remains.
+   - Any other finding in the review scope → Needs Changes unless the implementer has explicitly escalated it with file, line, and a defensible reason why it is outside scope or unsafe to fix.
+4. Approve is invalid if the IDE Problems Gate section is missing or if any unresolved finding in scope remains.
 5. Reviewers do not edit code. “Clearing the gate” means returning Needs Changes with the inventory.
 
-## 9b. Pre-existing proof required
+## 9b. No silent pre-existing dismissals
 
-A diagnostic may be marked pre-existing only if:
-- A baseline `get_errors` snapshot from before the change (or `main`/merge-base) contains the same path+line+message, OR
-- The line is unchanged in `git diff` and the message does not reference a symbol introduced by the diff.
+The default expectation is that every finding in scope is fixed before Approve. A finding may be left unresolved only if the implementer has explicitly escalated it with file, line, and reason. The reviewer may accept the escalation if the reason is defensible; otherwise it remains Needs Changes.
 
-Forbidden without proof: "pre-existing", "analyzer noise", "known false positive".
+Forbidden: "pre-existing", "analyzer noise", "known false positive" as justifications for leaving a finding open.
 
 ## 9c. Build vs Problems — do not conflate
 

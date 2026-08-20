@@ -46,9 +46,9 @@ license: MIT
      - `--load-tests` — requires the API running locally; only required for performance-sensitive changes.
     - **On failure:** record each failing suite/coverage shortfall as a `Critical` finding in the "Pre-Merge Gate Findings" section of the report, including the exact failing test path, the command that was run, and the threshold gap. Do **not** return `Approve` until the gate is re-run green.
 7b. **IDE Problems Gate (always — blocking):**
-   Run `get_errors` on every changed/added file. For final approval of a multi-task feature, also run workspace-wide `get_errors`.
+   Run `get_errors` on every changed/added file. For final approval of a multi-task feature, also run workspace-wide `get_errors`. For frontend files, run the project's lint command on every changed/added frontend file.
    - Emit section **IDE Problems Gate** with total count and per-finding disposition.
-   - Apply the code-reviewer agent rules for pre-existing proof (§9b).
+   - Default disposition: every finding in scope is fixed before Approve. Escalations are allowed only with file, line, and a defensible reason.
    - A green Pre-Merge test gate does not satisfy this step.
 8. **Compile Feedback:** Create a structured output of findings as requested, folding Pre-Merge Gate and security-review findings into the same report. The Pre-Merge Gate status (pass/fail) MUST appear in the Overall Assessment.
 

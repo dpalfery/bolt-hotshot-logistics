@@ -139,6 +139,18 @@ dotnet_naming_rule.non_field_members_should_be_pascal_case.severity = suggestion
 dotnet_naming_rule.non_field_members_should_be_pascal_case.symbols = non_field_members
 dotnet_naming_rule.non_field_members_should_be_pascal_case.style = pascal_case
 
+dotnet_naming_rule.private_fields_should_be_camel_case_prefixed_underscore.severity = warning
+dotnet_naming_rule.private_fields_should_be_camel_case_prefixed_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_should_be_camel_case_prefixed_underscore.style = camel_case_prefixed_underscore
+
+dotnet_naming_rule.private_static_fields_should_be_camel_case_prefixed_s_underscore.severity = warning
+dotnet_naming_rule.private_static_fields_should_be_camel_case_prefixed_s_underscore.symbols = private_static_fields
+dotnet_naming_rule.private_static_fields_should_be_camel_case_prefixed_s_underscore.style = camel_case_prefixed_s_underscore
+
+dotnet_naming_rule.parameters_and_locals_should_be_camel_case.severity = warning
+dotnet_naming_rule.parameters_and_locals_should_be_camel_case.symbols = parameters_and_locals
+dotnet_naming_rule.parameters_and_locals_should_be_camel_case.style = camel_case
+
 # Symbol specifications
 
 dotnet_naming_symbols.interface.applicable_kinds = interface
@@ -153,6 +165,18 @@ dotnet_naming_symbols.non_field_members.applicable_kinds = property, event, meth
 dotnet_naming_symbols.non_field_members.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
 dotnet_naming_symbols.non_field_members.required_modifiers = 
 
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private, private_protected
+dotnet_naming_symbols.private_fields.required_modifiers = 
+
+dotnet_naming_symbols.private_static_fields.applicable_kinds = field
+dotnet_naming_symbols.private_static_fields.applicable_accessibilities = private, private_protected
+dotnet_naming_symbols.private_static_fields.required_modifiers = static
+
+dotnet_naming_symbols.parameters_and_locals.applicable_kinds = parameter, local
+dotnet_naming_symbols.parameters_and_locals.applicable_accessibilities = *
+dotnet_naming_symbols.parameters_and_locals.required_modifiers = 
+
 # Naming styles
 
 dotnet_naming_style.begins_with_i.required_prefix = I
@@ -164,6 +188,21 @@ dotnet_naming_style.pascal_case.required_prefix =
 dotnet_naming_style.pascal_case.required_suffix = 
 dotnet_naming_style.pascal_case.word_separator = 
 dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+dotnet_naming_style.camel_case.required_prefix = 
+dotnet_naming_style.camel_case.required_suffix = 
+dotnet_naming_style.camel_case.word_separator = 
+dotnet_naming_style.camel_case.capitalization = camel_case
+
+dotnet_naming_style.camel_case_prefixed_underscore.required_prefix = _
+dotnet_naming_style.camel_case_prefixed_underscore.required_suffix = 
+dotnet_naming_style.camel_case_prefixed_underscore.word_separator = 
+dotnet_naming_style.camel_case_prefixed_underscore.capitalization = camel_case
+
+dotnet_naming_style.camel_case_prefixed_s_underscore.required_prefix = s_
+dotnet_naming_style.camel_case_prefixed_s_underscore.required_suffix = 
+dotnet_naming_style.camel_case_prefixed_s_underscore.word_separator = 
+dotnet_naming_style.camel_case_prefixed_s_underscore.capitalization = camel_case
 
 # Removed duplicate block for dotnet_naming_style.pascal_case
 dotnet_style_explicit_tuple_names = true:suggestion

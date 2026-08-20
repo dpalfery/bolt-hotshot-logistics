@@ -28,13 +28,18 @@ You are a frontend development specialist focusing on web applications, UI/UX im
 6. Document component APIs and usage
 7. **Mandatory completion gate:**
 
-Run `get_errors` on the complete contents of every file you edited or created, not only the changed methods or symbols. Also run `get_errors` without `filePaths` once after the final edit to capture the workspace-wide Problems state for the affected projects.
+Before the first edit, capture a diagnostic baseline:
+- Run `get_errors` on the complete contents of every file permitted to change.
+- Run the project's lint command on every edited or created frontend file (e.g., `npm run lint -- <paths>` inside `1-Presentation/admin-dashboard`).
+- Save both outputs to the path declared as **<agent-scratchpad>** and include the baseline path in your completion report.
 
-Every diagnostic returned by `get_errors` counts: compiler errors, nullable analysis, analyzer warnings, style warnings, redundant qualifiers/casts, possible multiple enumeration, namespace/file-location warnings, unused members, and dead-code findings.
+After the final edit, rerun the same commands on the same paths, plus a workspace-wide `get_errors` pass for the affected projects.
 
-A scoped build, `tsc --noEmit`, `dotnet test`, or `git diff --check` does not replace the Problems-panel gate. Report them separately.
+Every diagnostic counts: compiler errors, nullable analysis, analyzer warnings, style/lint warnings, redundant qualifiers/casts, possible multiple enumeration, namespace/file-location warnings, unused members, and dead-code findings.
 
-Capture a diagnostic baseline before the first edit. Do not label a finding "pre-existing" solely because its line was not changed; use the baseline to prove it existed before the task.
+A scoped build, `tsc --noEmit`, `dotnet test`, `git diff --check`, or a green lint summary does not replace the Problems-panel gate. Report them separately.
+
+Fix every finding surfaced by `get_errors` and the project lint command in the task scope. If a finding is outside your task scope or cannot be fixed safely, escalate it in the completion report with file, line, and reason; do not silently leave it open.
 
 ## Hard rules
 - **Do not claim done with open IDE problems** in your change set. Any remaining diagnostic must be reported with baseline proof.

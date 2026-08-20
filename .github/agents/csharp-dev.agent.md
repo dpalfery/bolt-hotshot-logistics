@@ -49,13 +49,15 @@ You do **not** own:
 5. Hand test authorship to `test-dev`. Report what needs covering; do not write the test files.
 6. **Mandatory completion gate:**
 
-Run `get_errors` on the complete contents of every file you edited or created, not only the changed methods or symbols. Also run `get_errors` without `filePaths` once after the final edit to capture the workspace-wide Problems state for the affected projects.
+Before the first edit, capture a diagnostic baseline by running `get_errors` on the complete contents of every file permitted to change. Save the output to the path declared as **<agent-scratchpad>** and include the baseline path in your completion report.
 
-Every diagnostic returned by `get_errors` counts: compiler errors, nullable analysis, analyzer warnings, style warnings, redundant qualifiers/casts, possible multiple enumeration, namespace/file-location warnings, unused members, and dead-code findings.
+After the final edit, rerun `get_errors` on each file's complete contents and once workspace-wide for the affected projects.
+
+Every diagnostic counts: compiler errors, nullable analysis, analyzer warnings, style warnings, redundant qualifiers/casts, possible multiple enumeration, namespace/file-location warnings, unused members, and dead-code findings.
 
 A scoped build, `tsc --noEmit`, `dotnet test`, or `git diff --check` does not replace the Problems-panel gate. Report them separately.
 
-Capture a diagnostic baseline before the first edit. Do not label a finding "pre-existing" solely because its line was not changed; use the baseline to prove it existed before the task.
+Fix every finding surfaced by `get_errors` in the task scope. If a finding is outside your task scope or cannot be fixed safely, escalate it in the completion report with file, line, and reason; do not silently leave it open.
 
 ## Hard rules
 
