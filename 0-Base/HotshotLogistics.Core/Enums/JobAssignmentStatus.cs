@@ -1,10 +1,11 @@
-namespace HotshotLogistics.Core.Enums;
-
-/// <summary>
-/// Represents the status of a job assignment.
-/// </summary>
-public enum JobAssignmentStatus
+namespace HotshotLogistics.Core.Enums
 {
-    Active,
-    Completed
+    /// <summary>
+    ///     Represents the status of a job assignment.
+    /// </summary>
+    public enum JobAssignmentStatus
+    {
+        Active,
+        Completed
+    }
 }

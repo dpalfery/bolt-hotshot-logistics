@@ -7,34 +7,36 @@ using HotshotLogistics.Domain.ValueObjects;
 using Microsoft.Azure.NotificationHubs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NotificationHubSettings = HotshotLogistics.Domain.ValueObjects.NotificationHubSettings;
 
 namespace HotshotLogistics.Data.Services
 {
     /// <summary>
-    /// Service for sending push notifications via Azure Notification Hubs.
+    ///     Service for sending push notifications via Azure Notification Hubs.
     /// </summary>
     public class AzureNotificationHubService : ICommunicationService
     {
-        private readonly HotshotLogistics.Domain.ValueObjects.NotificationHubSettings _settings;
         private readonly ILogger<AzureNotificationHubService> _logger;
+        private readonly NotificationHubSettings _settings;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AzureNotificationHubService"/> class.
+        ///     Initializes a new instance of the <see cref="AzureNotificationHubService" /> class.
         /// </summary>
         /// <param name="settings">The Notification Hub settings.</param>
         /// <param name="logger">The logger.</param>
         public AzureNotificationHubService(
-            IOptions<HotshotLogistics.Domain.ValueObjects.NotificationHubSettings> settings,
+            IOptions<NotificationHubSettings> settings,
             ILogger<AzureNotificationHubService> logger)
         {
-            _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
+            ArgumentNullException.ThrowIfNull(settings);
+            _settings = settings.Value ?? throw new ArgumentNullException(nameof(settings));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public string Type => "Push";
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<bool> SendAsync(CommunicationMessage message, CancellationToken cancellationToken = default)
         {
             if (message == null)
@@ -55,15 +57,16 @@ namespace HotshotLogistics.Data.Services
             try
             {
                 // Format message with template data
-                var formattedBody = FormatMessage(message.Body, message.TemplateData);
+                string formattedBody = FormatMessage(message.Body, message.TemplateData);
 
-                var hub = NotificationHubClient.CreateClientFromConnectionString(
+                NotificationHubClient hub = NotificationHubClient.CreateClientFromConnectionString(
                     _settings.ConnectionString,
                     _settings.HubName);
 
                 // Send FCM notification (assuming Android devices)
                 // Using the 'To' field as a tag for targeting specific devices
-                var outcome = await hub.SendFcmNativeNotificationAsync(formattedBody, message.To, cancellationToken);
+                NotificationOutcome outcome =
+                    await hub.SendFcmNativeNotificationAsync(formattedBody, message.To, cancellationToken);
 
                 _logger.LogInformation("Push notification sent to {To}. Outcome: {Outcome}", message.To, outcome.State);
 
@@ -78,20 +81,20 @@ namespace HotshotLogistics.Data.Services
         }
 
         /// <summary>
-        /// Formats a message template with the provided data.
+        ///     Formats a message template with the provided data.
         /// </summary>
         /// <param name="template">The message template.</param>
         /// <param name="data">The template data.</param>
         /// <returns>The formatted message.</returns>
         private static string FormatMessage(string template, Dictionary<string, string> data)
         {
-            if (string.IsNullOrEmpty(template) || data == null || !data.Any())
+            if (string.IsNullOrEmpty(template) || data.Count == 0)
             {
                 return template;
             }
 
-            var result = template;
-            foreach (var kvp in data)
+            string result = template;
+            foreach (KeyValuePair<string, string> kvp in data)
             {
                 result = result.Replace($"{{{kvp.Key}}}", kvp.Value);
             }

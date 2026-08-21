@@ -8,7 +8,6 @@ using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Data.Repositories;
 using HotshotLogistics.Data.Services;
 using HotshotLogistics.Domain.DTOs;
-using HotshotLogistics.Domain.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -16,12 +15,12 @@ using Microsoft.Extensions.Options;
 namespace HotshotLogistics.Data
 {
     /// <summary>
-    /// Extension methods for configuring services.
+    ///     Extension methods for configuring services.
     /// </summary>
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Adds Hotshot repositories to the service collection.
+        ///     Adds Hotshot repositories to the service collection.
         /// </summary>
         /// <param name="services">The service collection.</param>
         /// <returns>The service collection for chaining.</returns>
@@ -45,20 +44,20 @@ namespace HotshotLogistics.Data
             // Register AzureMapsService with proper HttpClient factory and settings
             services.AddTransient<IMappingService>(provider =>
             {
-                var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
-                var httpClient = httpClientFactory.CreateClient("MappingService");
-                var logger = provider.GetRequiredService<ILogger<AzureMapsService>>();
-                var settings = provider.GetRequiredService<IOptions<AzureMapsSettings>>();
+                IHttpClientFactory httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
+                HttpClient httpClient = httpClientFactory.CreateClient("MappingService");
+                ILogger<AzureMapsService> logger = provider.GetRequiredService<ILogger<AzureMapsService>>();
+                IOptions<AzureMapsSettings> settings = provider.GetRequiredService<IOptions<AzureMapsSettings>>();
                 return new AzureMapsService(httpClient, logger, settings);
             });
 
             // Register GoogleMapsService with proper HttpClient factory
             services.AddTransient<IMappingService>(provider =>
             {
-                var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
-                var httpClient = httpClientFactory.CreateClient("MappingService");
-                var logger = provider.GetRequiredService<ILogger<GoogleMapsService>>();
-                var settings = provider.GetRequiredService<IOptions<GoogleMapsSettings>>();
+                IHttpClientFactory httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
+                HttpClient httpClient = httpClientFactory.CreateClient("MappingService");
+                ILogger<GoogleMapsService> logger = provider.GetRequiredService<ILogger<GoogleMapsService>>();
+                IOptions<GoogleMapsSettings> settings = provider.GetRequiredService<IOptions<GoogleMapsSettings>>();
                 return new GoogleMapsService(httpClient, logger, settings);
             });
 

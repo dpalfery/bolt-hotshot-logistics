@@ -5,15 +5,16 @@
 namespace HotshotLogistics.IntegrationTests
 {
     /// <summary>
-    /// Base class for integration tests that sets up the web application factory and provides a test client.
+    ///     Base class for integration tests that sets up the web application factory and provides a test client.
     /// </summary>
-    public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFactory<Program>>, IClassFixture<DatabaseTestFixture>, IDisposable
+    public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFactory<Program>>,
+        IClassFixture<DatabaseTestFixture>, IDisposable
     {
-        protected readonly CustomWebApplicationFactory<Program> Factory;
         protected readonly HttpClient Client;
+        protected readonly CustomWebApplicationFactory<Program> Factory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="IntegrationTestBase"/> class.
+        ///     Initializes a new instance of the <see cref="IntegrationTestBase" /> class.
         /// </summary>
         /// <param name="factory">The web application factory.</param>
         protected IntegrationTestBase(CustomWebApplicationFactory<Program> factory)
@@ -21,12 +22,6 @@ namespace HotshotLogistics.IntegrationTests
             Factory = factory;
             Client = Factory.CreateClient();
         }
-
-        /// <summary>
-        /// Gets the database connection string for tests.
-        /// </summary>
-        /// <returns>The connection string.</returns>
-        protected static string GetConnectionString() => TestDatabaseHelper.GetConnectionString();
 
         /// <inheritdoc />
         public void Dispose()
@@ -36,7 +31,16 @@ namespace HotshotLogistics.IntegrationTests
         }
 
         /// <summary>
-        /// Disposes the HTTP client.
+        ///     Gets the database connection string for tests.
+        /// </summary>
+        /// <returns>The connection string.</returns>
+        protected static string GetConnectionString()
+        {
+            return TestDatabaseHelper.GetConnectionString();
+        }
+
+        /// <summary>
+        ///     Disposes the HTTP client.
         /// </summary>
         /// <param name="disposing">True if called from Dispose(); false if called from a finalizer.</param>
         protected virtual void Dispose(bool disposing)

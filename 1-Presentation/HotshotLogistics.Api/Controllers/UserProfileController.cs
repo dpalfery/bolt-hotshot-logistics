@@ -2,31 +2,26 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using HotshotLogistics.Contracts.Services;
+using HotshotLogistics.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
 namespace HotshotLogistics.Api.Controllers
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using HotshotLogistics.Contracts.Services;
-    using HotshotLogistics.Domain.Entities;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Logging;
-
     /// <summary>
-    /// API controller for user profile management operations.
+    ///     API controller for user profile management operations.
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
     public class UserProfileController : ControllerBase
     {
-        private readonly IUserProfileService _userProfileService;
         private readonly ILogger<UserProfileController> _logger;
+        private readonly IUserProfileService _userProfileService;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UserProfileController"/> class.
+        ///     Initializes a new instance of the <see cref="UserProfileController" /> class.
         /// </summary>
         /// <param name="userProfileService">The user profile service.</param>
         /// <param name="logger">The _logger.</param>
@@ -39,28 +34,30 @@ namespace HotshotLogistics.Api.Controllers
         }
 
         /// <summary>
-        /// Gets the current user's profile information.
+        ///     Gets the current user's profile information.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The user profile information.</returns>
         [HttpGet("me")]
         [ProducesResponseType(typeof(UserProfile), StatusCodes.Status200OK)]
-        public async Task<ActionResult<UserProfile>> GetCurrentUserProfile(CancellationToken cancellationToken = default)
+        public async Task<ActionResult<UserProfile>> GetCurrentUserProfile(
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                var profile = await _userProfileService.GetCurrentUserProfileAsync(cancellationToken);
+                UserProfile profile = await _userProfileService.GetCurrentUserProfileAsync(cancellationToken);
                 return Ok(profile);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving current user profile");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Updates the current user's profile information.
+        ///     Updates the current user's profile information.
         /// </summary>
         /// <param name="profile">The updated profile information.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -69,7 +66,7 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UpdateCurrentUserProfile(
-            [FromBody] UserProfile profile,
+            [FromBody] UserProfile? profile,
             CancellationToken cancellationToken = default)
         {
             try
@@ -85,12 +82,13 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating user profile");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Synchronizes the current user's profile with the local database.
+        ///     Synchronizes the current user's profile with the local database.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>No content if successful.</returns>
@@ -101,8 +99,8 @@ namespace HotshotLogistics.Api.Controllers
             try
             {
                 // Get the current user ID from claims
-                var userId = this.User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value
-                           ?? this.User.FindFirst("oid")?.Value;
+                string? userId = User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value
+                                 ?? User.FindFirst("oid")?.Value;
 
                 if (string.IsNullOrEmpty(userId))
                 {
@@ -115,7 +113,8 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while synchronizing user profile");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
     }

@@ -2,19 +2,16 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using HotshotLogistics.Contracts.Services;
+using HotshotLogistics.Domain.Entities;
+using Microsoft.Extensions.Logging;
+using Microsoft.Graph;
+using Microsoft.Graph.Models;
+
 namespace HotshotLogistics.Application.Services
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using HotshotLogistics.Contracts.Services;
-    using HotshotLogistics.Domain.Entities;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.Graph;
-    using Microsoft.Graph.Models;
-
     /// <summary>
-    /// Service for managing user profiles using Microsoft Graph API.
+    ///     Service for managing user profiles using Microsoft Graph API.
     /// </summary>
     public class UserProfileService : IUserProfileService
     {
@@ -22,7 +19,7 @@ namespace HotshotLogistics.Application.Services
         private readonly ILogger<UserProfileService> _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UserProfileService"/> class.
+        ///     Initializes a new instance of the <see cref="UserProfileService" /> class.
         /// </summary>
         /// <param name="graphServiceClient">The Microsoft Graph service client.</param>
         /// <param name="logger">The logger.</param>
@@ -34,16 +31,21 @@ namespace HotshotLogistics.Application.Services
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<UserProfile> GetCurrentUserProfileAsync(CancellationToken cancellationToken = default)
         {
             try
             {
-                var user = await _graphServiceClient.Me
-                    .GetAsync(requestConfiguration =>
-                    {
-                        requestConfiguration.QueryParameters.Select = new[] { "id", "displayName", "givenName", "surname", "userPrincipalName", "mail", "jobTitle", "department", "officeLocation", "mobilePhone", "businessPhones", "preferredLanguage" };
-                    }, cancellationToken);
+                User? user = await _graphServiceClient.Me
+                    .GetAsync(
+                        requestConfiguration =>
+                        {
+                            requestConfiguration.QueryParameters.Select =
+                            [
+                                "id", "displayName", "givenName", "surname", "userPrincipalName", "mail", "jobTitle",
+                                "department", "officeLocation", "mobilePhone", "businessPhones", "preferredLanguage"
+                            ];
+                        }, cancellationToken);
 
                 if (user == null)
                 {
@@ -51,9 +53,9 @@ namespace HotshotLogistics.Application.Services
                 }
 
                 // Get app role assignments for the current user
-                var roles = new List<string>(); // Simplified for build compatibility
+                List<string> roles = await GetUserAppRolesAsync(cancellationToken);
 
-                return new HotshotLogistics.Domain.Entities.UserProfile
+                return new UserProfile
                 {
                     Id = user.Id,
                     DisplayName = user.DisplayName,
@@ -77,12 +79,13 @@ namespace HotshotLogistics.Application.Services
             }
         }
 
-        /// <inheritdoc/>
-        public async Task UpdateCurrentUserProfileAsync(UserProfile profile, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task UpdateCurrentUserProfileAsync(UserProfile profile,
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                var userUpdate = new User
+                User userUpdate = new()
                 {
                     DisplayName = profile.DisplayName,
                     GivenName = profile.GivenName,
@@ -106,17 +109,18 @@ namespace HotshotLogistics.Application.Services
             }
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task SyncUserProfileAsync(string userId, CancellationToken cancellationToken = default)
         {
             try
             {
                 // Get user profile from Graph API
-                var graphProfile = await this.GetCurrentUserProfileAsync(cancellationToken);
+                UserProfile graphProfile = await GetCurrentUserProfileAsync(cancellationToken);
 
                 // Here you would typically sync with your local user database
                 // For now, we'll just log the sync operation
-                _logger.LogInformation("User profile synchronized for user {UserId}: {DisplayName}", userId, graphProfile.DisplayName);
+                _logger.LogInformation("User profile synchronized for user {UserId}: {DisplayName}", userId,
+                    graphProfile.DisplayName);
 
                 // TODO: Implement actual synchronization with local user store
                 // This would involve updating local user records with Graph data
@@ -129,12 +133,13 @@ namespace HotshotLogistics.Application.Services
         }
 
         /// <summary>
-        /// Gets the app roles assigned to the current user.
+        ///     Gets the app roles assigned to the current user.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of role names.</returns>
-        private Task<List<string>> GetUserAppRolesAsync(CancellationToken cancellationToken = default)
+        private static Task<List<string>> GetUserAppRolesAsync(CancellationToken cancellationToken = default)
         {
+            _ = cancellationToken;
             // Simplified for build compatibility - returns empty list
             return Task.FromResult(new List<string>());
         }

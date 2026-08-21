@@ -1,29 +1,30 @@
 // <copyright file="BillingService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Domain.Entities;
-using HotshotLogistics.Domain.Repositories;
 using HotshotLogistics.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Retry;
+
 namespace HotshotLogistics.Application.Services
 {
     /// <summary>
-    /// Service for billing and invoice management operations.
+    ///     Service for billing and invoice management operations.
     /// </summary>
     public class BillingService : IBillingService
     {
+        private readonly ICustomerRepository _customerRepository;
         private readonly IInvoiceRepository _invoiceRepository;
         private readonly IJobRepository _jobRepository;
-        private readonly ICustomerRepository _customerRepository;
-        private readonly IPaymentRepository _paymentRepository;
+        private readonly ILogger<BillingService> _logger;
         private readonly INotificationService _notificationService;
         private readonly IPaymentProcessorFactory _paymentProcessorFactory;
-        private readonly ILogger<BillingService> _logger;
+        private readonly IPaymentRepository _paymentRepository;
 
         private readonly AsyncRetryPolicy _retryPolicy;
 
@@ -32,14 +33,14 @@ namespace HotshotLogistics.Application.Services
         {
             { "CA", 0.0875m }, // California
             { "TX", 0.0625m }, // Texas
-            { "NY", 0.08m },   // New York
-            { "FL", 0.06m },   // Florida
-            { "WA", 0.065m },  // Washington
+            { "NY", 0.08m }, // New York
+            { "FL", 0.06m }, // Florida
+            { "WA", 0.065m } // Washington
             // Add more states as needed
         };
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BillingService"/> class.
+        ///     Initializes a new instance of the <see cref="BillingService" /> class.
         /// </summary>
         /// <param name="invoiceRepository">The invoice repository.</param>
         /// <param name="jobRepository">The job repository.</param>
@@ -62,27 +63,30 @@ namespace HotshotLogistics.Application.Services
             _customerRepository = customerRepository ?? throw new ArgumentNullException(nameof(customerRepository));
             _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
             _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
-            _paymentProcessorFactory = paymentProcessorFactory ?? throw new ArgumentNullException(nameof(paymentProcessorFactory));
+            _paymentProcessorFactory = paymentProcessorFactory ??
+                                       throw new ArgumentNullException(nameof(paymentProcessorFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             // Configure retry policy for payment processing
             _retryPolicy = Policy
                 .Handle<Exception>()
                 .WaitAndRetryAsync(
-                    retryCount: 3,
-                    sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                    onRetry: (exception, timeSpan, retryCount, context) =>
+                    3,
+                    retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                    (exception, timeSpan, retryCount, _) =>
                     {
-                        _logger.LogWarning(exception, "Payment processing failed, retrying in {RetryTimeSpan}. Retry attempt {RetryCount}", timeSpan, retryCount);
+                        _logger.LogWarning(exception,
+                            "Payment processing failed, retrying in {RetryTimeSpan}. Retry attempt {RetryCount}",
+                            timeSpan, retryCount);
                     });
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<Invoice> GenerateInvoiceAsync(string jobId, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Generating invoice for job");
 
-            var job = await _jobRepository.GetByIdAsync(jobId);
+            Job? job = await _jobRepository.GetJobByIdAsync(jobId, cancellationToken);
             if (job == null)
             {
                 throw new ArgumentException($"Job {jobId} not found", nameof(jobId));
@@ -93,25 +97,25 @@ namespace HotshotLogistics.Application.Services
                 throw new InvalidOperationException($"Cannot generate invoice for job with status: {job.Status}");
             }
 
-            var customer = await _customerRepository.GetByIdAsync(job.CustomerId);
+            Customer? customer = await _customerRepository.GetByIdAsync(job.CustomerId, cancellationToken);
             if (customer == null)
             {
                 throw new ArgumentException($"Customer {job.CustomerId} not found");
             }
 
             // Check if invoice already exists for this job
-            var existingInvoices = await _invoiceRepository.GetByJobIdAsync(jobId);
-            if (existingInvoices.Any())
+            List<Invoice> existingInvoices = (await _invoiceRepository.GetByJobIdAsync(jobId)).ToList();
+            if (existingInvoices.Count > 0)
             {
                 _logger.LogWarning("Invoice already exists for job");
-                return existingInvoices.First();
+                return existingInvoices[0];
             }
 
             // Generate invoice number
-            var invoiceNumber = await _invoiceRepository.GetNextInvoiceNumberAsync();
+            string invoiceNumber = await _invoiceRepository.GetNextInvoiceNumberAsync();
 
             // Create invoice
-            var invoice = new Invoice
+            Invoice invoice = new()
             {
                 Id = Guid.NewGuid().ToString(),
                 InvoiceNumber = invoiceNumber,
@@ -136,12 +140,13 @@ namespace HotshotLogistics.Application.Services
             await AddInvoiceLineItemsAsync(invoice, job);
 
             // Calculate tax
-            var taxRate = await CalculateTaxAsync(invoice.SubTotal, customer.BillingAddress?.State ?? "CA", cancellationToken);
+            decimal taxRate = await CalculateTaxAsync(invoice.SubTotal, customer.BillingAddress.State,
+                cancellationToken);
             invoice.TaxRate = taxRate;
             invoice.CalculateTotals();
 
             // Save invoice
-            var createdInvoice = await _invoiceRepository.AddAsync(invoice);
+            Invoice createdInvoice = await _invoiceRepository.AddAsync(invoice);
 
             // Send notification to customer
             try
@@ -158,20 +163,22 @@ namespace HotshotLogistics.Application.Services
                 _logger.LogWarning(ex, "Failed to send invoice notification to customer");
             }
 
-            _logger.LogInformation("Invoice generated successfully: {InvoiceNumber} for job: {JobId}", invoiceNumber, jobId);
+            _logger.LogInformation("Invoice generated successfully: {InvoiceNumber} for job: {JobId}", invoiceNumber,
+                jobId);
             return createdInvoice;
         }
 
-        /// <inheritdoc/>
-        public Task<decimal> CalculateTaxAsync(decimal amount, string state, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public Task<decimal> CalculateTaxAsync(decimal amount, string state,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(state))
             {
                 return Task.FromResult(0m);
             }
 
-            var stateCode = state.ToUpperInvariant();
-            if (_stateTaxRates.TryGetValue(stateCode, out var taxRate))
+            string stateCode = state.ToUpperInvariant();
+            if (_stateTaxRates.TryGetValue(stateCode, out decimal taxRate))
             {
                 return Task.FromResult(taxRate);
             }
@@ -181,12 +188,14 @@ namespace HotshotLogistics.Application.Services
             return Task.FromResult(0.07m); // 7% default
         }
 
-        /// <inheritdoc/>
-        public async Task<bool> ProcessPaymentAsync(string invoiceId, decimal paymentAmount, string paymentMethod, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<bool> ProcessPaymentAsync(string invoiceId, decimal paymentAmount, string paymentMethod,
+            CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("Processing payment of ${Amount} for invoice: {InvoiceId} using {PaymentMethod}", paymentAmount, invoiceId, paymentMethod);
+            _logger.LogInformation("Processing payment of ${Amount} for invoice: {InvoiceId} using {PaymentMethod}",
+                paymentAmount, invoiceId, paymentMethod);
 
-            var invoice = await _invoiceRepository.GetByIdAsync(invoiceId);
+            Invoice? invoice = await _invoiceRepository.GetByIdAsync(invoiceId, cancellationToken);
             if (invoice == null)
             {
                 throw new ArgumentException($"Invoice {invoiceId} not found", nameof(invoiceId));
@@ -203,7 +212,7 @@ namespace HotshotLogistics.Application.Services
             }
 
             // Create payment record
-            var payment = new Payment
+            Payment payment = new()
             {
                 Id = Guid.NewGuid().ToString(),
                 InvoiceId = invoiceId,
@@ -217,10 +226,11 @@ namespace HotshotLogistics.Application.Services
             try
             {
                 // Get the appropriate payment processor
-                var processor = _paymentProcessorFactory.GetProcessorForPaymentMethod(payment.PaymentMethod);
+                IPaymentProcessor processor =
+                    _paymentProcessorFactory.GetProcessorForPaymentMethod(payment.PaymentMethod);
 
                 // Prepare payment method details
-                var paymentMethodDetails = new PaymentMethodDetails
+                PaymentMethodDetails paymentMethodDetails = new()
                 {
                     Type = payment.PaymentMethod,
                     Token = paymentMethod, // In real implementation, this would be a secure token
@@ -232,9 +242,9 @@ namespace HotshotLogistics.Application.Services
                 };
 
                 // Process payment with retry logic
-                var result = await _retryPolicy.ExecuteAsync(async () =>
+                PaymentProcessingResult result = await _retryPolicy.ExecuteAsync(async () =>
                 {
-                    var processingResult = await processor.ProcessPaymentAsync(
+                    PaymentProcessingResult processingResult = await processor.ProcessPaymentAsync(
                         paymentAmount,
                         "USD", // Default currency
                         paymentMethodDetails,
@@ -258,7 +268,8 @@ namespace HotshotLogistics.Application.Services
                 await _paymentRepository.UpdateAsync(payment);
 
                 // Update invoice with payment
-                var success = await _invoiceRepository.UpdatePaidAmountAsync(invoiceId, invoice.PaidAmount + paymentAmount);
+                bool success =
+                    await _invoiceRepository.UpdatePaidAmountAsync(invoiceId, invoice.PaidAmount + paymentAmount);
                 if (!success)
                 {
                     _logger.LogError("Failed to update invoice payment amount for invoice: {InvoiceId}", invoiceId);
@@ -280,7 +291,9 @@ namespace HotshotLogistics.Application.Services
                     _logger.LogWarning(ex, "Failed to send payment notification for invoice {InvoiceId}", invoiceId);
                 }
 
-                _logger.LogInformation("Payment processed successfully for invoice: {InvoiceId}, TransactionId: {TransactionId}", invoiceId, result.TransactionId);
+                _logger.LogInformation(
+                    "Payment processed successfully for invoice: {InvoiceId}, TransactionId: {TransactionId}",
+                    invoiceId, result.TransactionId);
                 return true;
             }
             catch (Exception ex)
@@ -294,50 +307,52 @@ namespace HotshotLogistics.Application.Services
             }
         }
 
-        /// <inheritdoc/>
-        public Task<IEnumerable<Invoice>> GetCustomerInvoicesAsync(string customerId, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public Task<IEnumerable<Invoice>> GetCustomerInvoicesAsync(string customerId,
+            CancellationToken cancellationToken = default)
         {
             return _invoiceRepository.GetByCustomerIdAsync(customerId);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<Invoice?> GetInvoiceByIdAsync(string invoiceId, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Retrieving invoice: {InvoiceId}", invoiceId);
             return await _invoiceRepository.GetByIdAsync(invoiceId, cancellationToken);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public Task<IEnumerable<Invoice>> GetOverdueInvoicesAsync(CancellationToken cancellationToken = default)
         {
             return _invoiceRepository.GetOverdueInvoicesAsync();
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public Task<InvoiceSummary> GetInvoiceSummaryAsync(CancellationToken cancellationToken = default)
         {
             return _invoiceRepository.GetInvoiceSummaryAsync();
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public Task<IEnumerable<AgingReportEntry>> GetAgingReportAsync(CancellationToken cancellationToken = default)
         {
             return _invoiceRepository.GetAgingReportAsync();
         }
 
         /// <summary>
-        /// Creates a custom invoice not tied to a specific job.
+        ///     Creates a custom invoice not tied to a specific job.
         /// </summary>
         /// <param name="customerId">The customer identifier.</param>
         /// <param name="lineItems">The line items for the invoice.</param>
         /// <param name="notes">Optional notes for the invoice.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The created invoice.</returns>
-        public async Task<Invoice> CreateCustomInvoiceAsync(string customerId, List<InvoiceLineItem> lineItems, string? notes = null, CancellationToken cancellationToken = default)
+        public async Task<Invoice> CreateCustomInvoiceAsync(string customerId, List<InvoiceLineItem> lineItems,
+            string? notes = null, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Creating custom invoice for customer: {CustomerId}", customerId);
 
-            var customer = await _customerRepository.GetByIdAsync(customerId);
+            Customer? customer = await _customerRepository.GetByIdAsync(customerId, cancellationToken);
             if (customer == null)
             {
                 throw new ArgumentException($"Customer {customerId} not found", nameof(customerId));
@@ -349,10 +364,10 @@ namespace HotshotLogistics.Application.Services
             }
 
             // Generate invoice number
-            var invoiceNumber = await _invoiceRepository.GetNextInvoiceNumberAsync();
+            string invoiceNumber = await _invoiceRepository.GetNextInvoiceNumberAsync();
 
             // Create invoice
-            var invoice = new Invoice
+            Invoice invoice = new()
             {
                 Id = Guid.NewGuid().ToString(),
                 InvoiceNumber = invoiceNumber,
@@ -374,27 +389,30 @@ namespace HotshotLogistics.Application.Services
             invoice.DueDate = invoice.InvoiceDate.AddDays(invoice.Terms.Days);
 
             // Add line items
-            foreach (var lineItem in lineItems)
+            foreach (InvoiceLineItem lineItem in lineItems)
             {
                 invoice.AddLineItem(lineItem);
             }
 
             // Calculate tax based on customer location
             // Note: Assuming customer has a State property or we use a default
-            var customerState = "CA"; // Default to California - in real implementation, get from customer.BillingAddress
-            var taxRate = await CalculateTaxAsync(invoice.SubTotal, customerState, cancellationToken);
+            string
+                customerState =
+                    "CA"; // Default to California - in real implementation, get from customer.BillingAddress
+            decimal taxRate = await CalculateTaxAsync(invoice.SubTotal, customerState, cancellationToken);
             invoice.TaxRate = taxRate;
             invoice.CalculateTotals();
 
             // Save invoice
-            var createdInvoice = await _invoiceRepository.AddAsync(invoice);
+            Invoice createdInvoice = await _invoiceRepository.AddAsync(invoice);
 
-            _logger.LogInformation("Custom invoice created successfully: {InvoiceNumber} for customer: {CustomerId}", invoiceNumber, customerId);
+            _logger.LogInformation("Custom invoice created successfully: {InvoiceNumber} for customer: {CustomerId}",
+                invoiceNumber, customerId);
             return createdInvoice;
         }
 
         /// <summary>
-        /// Sends an invoice to the customer.
+        ///     Sends an invoice to the customer.
         /// </summary>
         /// <param name="invoiceId">The invoice identifier.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -403,13 +421,13 @@ namespace HotshotLogistics.Application.Services
         {
             _logger.LogInformation("Sending invoice: {InvoiceId}", invoiceId);
 
-            var invoice = await _invoiceRepository.GetByIdAsync(invoiceId);
+            Invoice? invoice = await _invoiceRepository.GetByIdAsync(invoiceId, cancellationToken);
             if (invoice == null)
             {
                 throw new ArgumentException($"Invoice {invoiceId} not found", nameof(invoiceId));
             }
 
-            var customer = await _customerRepository.GetByIdAsync(invoice.CustomerId);
+            Customer? customer = await _customerRepository.GetByIdAsync(invoice.CustomerId, cancellationToken);
             if (customer == null)
             {
                 throw new ArgumentException($"Customer {invoice.CustomerId} not found");
@@ -441,27 +459,31 @@ namespace HotshotLogistics.Application.Services
         }
 
         /// <summary>
-        /// Generates an account statement for a customer.
+        ///     Generates an account statement for a customer.
         /// </summary>
         /// <param name="customerId">The customer identifier.</param>
         /// <param name="startDate">The start date for the statement period.</param>
         /// <param name="endDate">The end date for the statement period.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The account statement data.</returns>
-        public async Task<AccountStatement> GenerateAccountStatementAsync(string customerId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)
+        public async Task<AccountStatement> GenerateAccountStatementAsync(string customerId, DateTime startDate,
+            DateTime endDate, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("Generating account statement for customer: {CustomerId} from {StartDate} to {EndDate}", customerId, startDate, endDate);
+            _logger.LogInformation(
+                "Generating account statement for customer: {CustomerId} from {StartDate} to {EndDate}", customerId,
+                startDate, endDate);
 
-            var customer = await _customerRepository.GetByIdAsync(customerId);
+            Customer? customer = await _customerRepository.GetByIdAsync(customerId, cancellationToken);
             if (customer == null)
             {
                 throw new ArgumentException($"Customer {customerId} not found", nameof(customerId));
             }
 
-            var invoices = await _invoiceRepository.GetByCustomerIdAsync(customerId);
-            var statementInvoices = invoices.Where(i => i.InvoiceDate >= startDate && i.InvoiceDate <= endDate).ToList();
+            IEnumerable<Invoice> invoices = await _invoiceRepository.GetByCustomerIdAsync(customerId);
+            List<Invoice> statementInvoices =
+                invoices.Where(i => i.InvoiceDate >= startDate && i.InvoiceDate <= endDate).ToList();
 
-            var statement = new AccountStatement
+            AccountStatement statement = new()
             {
                 CustomerId = customerId,
                 CustomerName = customer.CompanyName,
@@ -475,12 +497,14 @@ namespace HotshotLogistics.Application.Services
                 OverdueAmount = statementInvoices.Where(i => i.IsOverdue()).Sum(i => i.BalanceDue)
             };
 
-            _logger.LogInformation("Account statement generated for customer: {CustomerId}, Total Outstanding: ${TotalOutstanding:F2}", customerId, statement.TotalOutstanding);
+            _logger.LogInformation(
+                "Account statement generated for customer: {CustomerId}, Total Outstanding: ${TotalOutstanding:F2}",
+                customerId, statement.TotalOutstanding);
             return statement;
         }
 
         /// <summary>
-        /// Applies late fees to overdue invoices.
+        ///     Applies late fees to all overdue invoices.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The number of invoices that had late fees applied.</returns>
@@ -488,30 +512,29 @@ namespace HotshotLogistics.Application.Services
         {
             _logger.LogInformation("Applying late fees to overdue invoices");
 
-            var overdueInvoices = await _invoiceRepository.GetOverdueInvoicesAsync();
-            var feesApplied = 0;
+            IEnumerable<Invoice> overdueInvoices = await _invoiceRepository.GetOverdueInvoicesAsync();
+            int feesApplied = 0;
 
-            foreach (var invoice in overdueInvoices)
+            foreach (Invoice invoice in overdueInvoices)
             {
-                if (invoice is Invoice concreteInvoice)
+                decimal latePenalty = invoice.CalculateLatePenalty();
+                if (latePenalty > 0)
                 {
-                    var latePenalty = concreteInvoice.CalculateLatePenalty();
-                    if (latePenalty > 0)
+                    // Add late fee as a line item
+                    invoice.AddLineItem(new InvoiceLineItem
                     {
-                        // Add late fee as a line item
-                        concreteInvoice.AddLineItem(new InvoiceLineItem
-                        {
-                            Description = $"Late Payment Fee ({concreteInvoice.DaysOverdue()} days overdue)",
-                            Quantity = 1,
-                            UnitPrice = latePenalty,
-                            TaxApplicable = false
-                        });
+                        Description = $"Late Payment Fee ({invoice.DaysOverdue()} days overdue)",
+                        Quantity = 1,
+                        UnitPrice = latePenalty,
+                        TaxApplicable = false
+                    });
 
-                        await _invoiceRepository.UpdateAsync(concreteInvoice);
-                        feesApplied++;
+                    invoice.CalculateTotals();
+                    await _invoiceRepository.UpdateAsync(invoice);
+                    feesApplied++;
 
-                        _logger.LogInformation("Late fee of ${LateFee:F2} applied to invoice: {InvoiceNumber}", latePenalty, invoice.InvoiceNumber);
-                    }
+                    _logger.LogInformation("Applied late fee of ${LateFee:F2} to invoice {InvoiceNumber}",
+                        latePenalty, invoice.InvoiceNumber);
                 }
             }
 
@@ -520,7 +543,7 @@ namespace HotshotLogistics.Application.Services
         }
 
         /// <summary>
-        /// Adds line items to an invoice based on the job details.
+        ///     Adds line items to an invoice based on the job details.
         /// </summary>
         /// <param name="invoice">The invoice to add line items to.</param>
         /// <param name="job">The job to create line items from.</param>
@@ -528,7 +551,7 @@ namespace HotshotLogistics.Application.Services
         private async Task AddInvoiceLineItemsAsync(Invoice invoice, Job job)
         {
             // Base service charge
-            if (job.Pricing?.BaseRate > 0)
+            if (job.Pricing.BaseRate > 0)
             {
                 invoice.AddLineItem(new InvoiceLineItem
                 {
@@ -540,13 +563,14 @@ namespace HotshotLogistics.Application.Services
             }
 
             // Mileage charge
-            if (job.Pricing?.MileageRate > 0)
+            if (job.Pricing.MileageRate > 0)
             {
                 // Calculate distance using location coordinates or estimate
-                var distanceFromCoords = job.PickupLocation.DistanceTo(job.DeliveryLocation);
-                var estimatedMiles = distanceFromCoords.HasValue
+                double? distanceFromCoords = job.PickupLocation.DistanceTo(job.DeliveryLocation);
+                decimal estimatedMiles = distanceFromCoords.HasValue
                     ? (decimal)distanceFromCoords.Value
-                    : (decimal)await EstimateDistanceAsync(job.PickupLocation.FullAddress, job.DeliveryLocation.FullAddress);
+                    : (decimal)await EstimateDistanceAsync(job.PickupLocation.FullAddress,
+                        job.DeliveryLocation.FullAddress);
 
                 invoice.AddLineItem(new InvoiceLineItem
                 {
@@ -558,7 +582,7 @@ namespace HotshotLogistics.Application.Services
             }
 
             // Fuel surcharge
-            if (job.Pricing?.FuelSurcharge > 0)
+            if (job.Pricing.FuelSurcharge > 0)
             {
                 invoice.AddLineItem(new InvoiceLineItem
                 {
@@ -570,7 +594,7 @@ namespace HotshotLogistics.Application.Services
             }
 
             // Toll charges
-            if (job.Pricing?.TollCharges > 0)
+            if (job.Pricing.TollCharges > 0)
             {
                 invoice.AddLineItem(new InvoiceLineItem
                 {
@@ -582,9 +606,9 @@ namespace HotshotLogistics.Application.Services
             }
 
             // Additional charges based on cargo
-            if (job.Cargo?.Weight > 1000) // Over 1000 lbs
+            if (job.Cargo.Weight > 1000) // Over 1000 lbs
             {
-                var overweightCharge = (job.Cargo.Weight - 1000) * 0.10m; // $0.10 per lb over 1000
+                decimal overweightCharge = (job.Cargo.Weight - 1000) * 0.10m; // $0.10 per lb over 1000
                 invoice.AddLineItem(new InvoiceLineItem
                 {
                     Description = $"Overweight Charge ({job.Cargo.Weight - 1000:F1} lbs over standard)",
@@ -595,9 +619,9 @@ namespace HotshotLogistics.Application.Services
             }
 
             // High-value cargo insurance
-            if (job.Cargo?.Value > 10000) // Over $10,000
+            if (job.Cargo.Value > 10000) // Over $10,000
             {
-                var insuranceCharge = job.Cargo.Value * 0.005m; // 0.5% of cargo value
+                decimal insuranceCharge = job.Cargo.Value * 0.005m; // 0.5% of cargo value
                 invoice.AddLineItem(new InvoiceLineItem
                 {
                     Description = "High-Value Cargo Insurance",
@@ -608,10 +632,11 @@ namespace HotshotLogistics.Application.Services
             }
 
             // Special handling charges
-            if ((job.Cargo?.IsFragile == true) || (job.Cargo?.IsHazardous == true) || (job.Cargo?.RequiresTemperatureControl == true))
+            if (job.Cargo.IsFragile || job.Cargo.IsHazardous || job.Cargo.RequiresTemperatureControl)
             {
-                var specialHandlingCharge = (job.Pricing?.BaseRate ?? 100) * 0.15m; // 15% surcharge
-                var requirements = job.Cargo.GetSpecialRequirements();
+                decimal specialHandlingCharge =
+                    (job.Pricing.BaseRate > 0 ? job.Pricing.BaseRate : 100) * 0.15m; // 15% surcharge
+                string requirements = job.Cargo.GetSpecialRequirements();
 
                 invoice.AddLineItem(new InvoiceLineItem
                 {
@@ -625,7 +650,9 @@ namespace HotshotLogistics.Application.Services
             // Priority surcharge
             if (job.Priority == JobPriority.High)
             {
-                var priorityCharge = (job.Pricing?.BaseRate ?? 100) * 0.25m; // 25% surcharge for high priority jobs
+                decimal priorityCharge =
+                    (job.Pricing.BaseRate > 0 ? job.Pricing.BaseRate : 100) *
+                    0.25m; // 25% surcharge for high priority jobs
                 invoice.AddLineItem(new InvoiceLineItem
                 {
                     Description = "High Priority Surcharge",
@@ -636,7 +663,7 @@ namespace HotshotLogistics.Application.Services
             }
 
             // Additional charges from pricing details
-            if (job.Pricing?.AdditionalCharges > 0)
+            if (job.Pricing.AdditionalCharges > 0)
             {
                 invoice.AddLineItem(new InvoiceLineItem
                 {
@@ -649,7 +676,7 @@ namespace HotshotLogistics.Application.Services
         }
 
         /// <summary>
-        /// Estimates the distance between two addresses.
+        ///     Estimates the distance between two addresses.
         /// </summary>
         /// <param name="fromAddress">The origin address.</param>
         /// <param name="toAddress">The destination address.</param>
@@ -664,14 +691,14 @@ namespace HotshotLogistics.Application.Services
             }
 
             // Simple heuristic: longer addresses are typically farther apart
-            var addressLengthFactor = (fromAddress.Length + toAddress.Length) / 10.0;
-            var estimatedDistance = Math.Max(10.0, Math.Min(500.0, addressLengthFactor * 5.0));
+            double addressLengthFactor = (fromAddress.Length + toAddress.Length) / 10.0;
+            double estimatedDistance = Math.Max(10.0, Math.Min(500.0, addressLengthFactor * 5.0));
 
             return Task.FromResult(estimatedDistance);
         }
 
         /// <summary>
-        /// Parses the payment method string to PaymentMethodType enum.
+        ///     Parses the payment method string to PaymentMethodType enum.
         /// </summary>
         /// <param name="paymentMethod">The payment method string.</param>
         /// <returns>The PaymentMethodType.</returns>
@@ -681,7 +708,7 @@ namespace HotshotLogistics.Application.Services
             {
                 "credit card" or "card" or "stripe" => PaymentMethodType.CreditCard,
                 "paypal" => PaymentMethodType.DigitalWallet,
-                "ach" or "bank transfer" => PaymentMethodType.ACH,
+                "ach" or "bank transfer" => PaymentMethodType.Ach,
                 "check" => PaymentMethodType.Check,
                 "wire transfer" => PaymentMethodType.WireTransfer,
                 "cash" => PaymentMethodType.Cash,

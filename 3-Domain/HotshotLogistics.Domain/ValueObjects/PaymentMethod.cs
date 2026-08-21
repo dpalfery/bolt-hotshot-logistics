@@ -1,22 +1,23 @@
-namespace HotshotLogistics.Domain.ValueObjects;
-
-/// <summary>
-/// Represents payment method options.
-/// </summary>
-public enum PaymentMethod
+namespace HotshotLogistics.Domain.ValueObjects
 {
     /// <summary>
-    /// Direct deposit to bank account.
+    ///     Represents payment method options.
     /// </summary>
-    DirectDeposit = 0,
+    public enum PaymentMethod
+    {
+        /// <summary>
+        ///     Direct deposit to bank account.
+        /// </summary>
+        DirectDeposit = 0,
 
-    /// <summary>
-    /// Paper check.
-    /// </summary>
-    Check = 1,
+        /// <summary>
+        ///     Paper check.
+        /// </summary>
+        Check = 1,
 
-    /// <summary>
-    /// PayPal or digital wallet.
-    /// </summary>
-    DigitalWallet = 2
+        /// <summary>
+        ///     PayPal or digital wallet.
+        /// </summary>
+        DigitalWallet = 2
+    }
 }

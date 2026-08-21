@@ -9,13 +9,13 @@ using FluentAssertions;
 namespace HotshotLogistics.IntegrationTests
 {
     /// <summary>
-    /// Integration tests for the TrackingController.
+    ///     Integration tests for the TrackingController.
     /// </summary>
     [Collection("DatabaseCollection")]
     public class TrackingControllerIntegrationTests : IntegrationTestBase
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TrackingControllerIntegrationTests"/> class.
+        ///     Initializes a new instance of the <see cref="TrackingControllerIntegrationTests" /> class.
         /// </summary>
         /// <param name="factory">The web application factory.</param>
         public TrackingControllerIntegrationTests(CustomWebApplicationFactory<Program> factory)
@@ -26,17 +26,17 @@ namespace HotshotLogistics.IntegrationTests
         }
 
         /// <summary>
-        /// Tests that GetCurrentLocation returns NotFound for a job that is not being tracked.
+        ///     Tests that GetCurrentLocation returns NotFound for a job that is not being tracked.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task GetCurrentLocation_WhenJobNotTracked_ReturnsNotFound()
         {
             // Arrange
-            var jobId = "job-cust-001-001"; // A job that exists but we assume is not tracked yet
+            string jobId = "job-cust-001-001"; // A job that exists but we assume is not tracked yet
 
             // Act
-            var response = await Client.GetAsync($"/api/Tracking/location/{jobId}");
+            HttpResponseMessage response = await Client.GetAsync($"/api/Tracking/location/{jobId}");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);

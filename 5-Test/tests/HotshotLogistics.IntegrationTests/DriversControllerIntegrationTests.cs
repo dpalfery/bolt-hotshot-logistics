@@ -1,9 +1,8 @@
 using System.Net;
-using System.Net.Http.Json;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using FluentAssertions;
 using HotshotLogistics.Domain.DTOs;
-using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace HotshotLogistics.IntegrationTests
 {
@@ -12,32 +11,23 @@ namespace HotshotLogistics.IntegrationTests
     // </copyright>
 
     [Collection("DatabaseCollection")]
-    public class DriversControllerIntegrationTests : IntegrationTestBase, IClassFixture<CustomWebApplicationFactory<Program>>
+    public class DriversControllerIntegrationTests : IntegrationTestBase
     {
-        private readonly HttpClient _client;
-        private readonly CustomWebApplicationFactory<Program> _factory;
-
         public DriversControllerIntegrationTests(CustomWebApplicationFactory<Program> factory) : base(factory)
         {
             // Set the test authentication header
             Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Test");
-
-            _factory = factory;
-            _client = factory.CreateClient(new WebApplicationFactoryClientOptions
-            {
-                AllowAutoRedirect = false,
-            });
         }
 
         [Fact]
         public async Task GetDrivers_ReturnsSuccessAndListOfDrivers()
         {
             // Act
-            var response = await Client.GetAsync("/api/Drivers");
+            HttpResponseMessage response = await Client.GetAsync("/api/Drivers");
 
             // Assert
             response.EnsureSuccessStatusCode();
-            var drivers = await response.Content.ReadFromJsonAsync<List<DriverDto>>();
+            List<DriverDto>? drivers = await response.Content.ReadFromJsonAsync<List<DriverDto>>();
             drivers.Should().NotBeNull();
             drivers.Should().HaveCountGreaterThan(100); // Should have plenty of seed drivers
         }
@@ -47,18 +37,18 @@ namespace HotshotLogistics.IntegrationTests
         {
             // Arrange — seed IDs are identity-generated, so look up a known seeded driver first.
             const string seededEmail = "seed.driver001@local.test";
-            var listResponse = await Client.GetAsync("/api/Drivers");
+            HttpResponseMessage listResponse = await Client.GetAsync("/api/Drivers");
             listResponse.EnsureSuccessStatusCode();
-            var drivers = await listResponse.Content.ReadFromJsonAsync<List<DriverDto>>();
+            List<DriverDto>? drivers = await listResponse.Content.ReadFromJsonAsync<List<DriverDto>>();
             drivers.Should().NotBeNull();
-            var expected = drivers.Should().ContainSingle(d => d.Email == seededEmail).Subject;
+            DriverDto expected = drivers.Should().ContainSingle(d => d.Email == seededEmail).Subject;
 
             // Act
-            var response = await Client.GetAsync($"/api/Drivers/{expected.Id}");
+            HttpResponseMessage response = await Client.GetAsync($"/api/Drivers/{expected.Id}");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            var driver = await response.Content.ReadFromJsonAsync<DriverDto>();
+            DriverDto? driver = await response.Content.ReadFromJsonAsync<DriverDto>();
             driver.Should().NotBeNull();
             driver.Id.Should().Be(expected.Id);
             driver.Email.Should().Be(seededEmail);
@@ -68,10 +58,10 @@ namespace HotshotLogistics.IntegrationTests
         public async Task GetDriver_WithInvalidId_ReturnsNotFound()
         {
             // Arrange
-            var invalidDriverId = int.MaxValue;
+            int invalidDriverId = int.MaxValue;
 
             // Act
-            var response = await Client.GetAsync($"/api/Drivers/{invalidDriverId}");
+            HttpResponseMessage response = await Client.GetAsync($"/api/Drivers/{invalidDriverId}");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -81,31 +71,33 @@ namespace HotshotLogistics.IntegrationTests
         public async Task CreateDriver_WithValidData_ReturnsCreated()
         {
             // Arrange
-            var uniqueEmail = $"test.driver.{Guid.NewGuid():N}@test.com";
-            var newDriver = new DriverDto
+            string uniqueEmail = $"test.driver.{Guid.NewGuid():N}@test.com";
+            DriverDto newDriver = new()
             {
                 FirstName = "Test",
                 LastName = "Driver",
                 Email = uniqueEmail,
                 PhoneNumber = "(555) 123-4567", // Valid US phone format
                 LicenseNumber = "DRV123456", // Valid format: uppercase letters, numbers, hyphens
-                LicenseExpiryDate = System.DateTime.UtcNow.AddYears(3), // Must be valid for at least 2 years (for age validation) and 6 months (for registration)
+                LicenseExpiryDate =
+                    DateTime.UtcNow
+                        .AddYears(3), // Must be valid for at least 2 years (for age validation) and 6 months (for registration)
                 IsActive = true
             };
 
             // Act
-            var response = await Client.PostAsJsonAsync("/api/Drivers", newDriver);
+            HttpResponseMessage response = await Client.PostAsJsonAsync("/api/Drivers", newDriver);
 
             // Debug: Check actual error response if not successful
             if (!response.IsSuccessStatusCode)
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
+                string errorContent = await response.Content.ReadAsStringAsync();
                 throw new Exception($"Driver creation failed with status {response.StatusCode}: {errorContent}");
             }
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.Created);
-            var createdDriver = await response.Content.ReadFromJsonAsync<DriverDto>();
+            DriverDto? createdDriver = await response.Content.ReadFromJsonAsync<DriverDto>();
             createdDriver.Should().NotBeNull();
             createdDriver.Email.Should().Be(uniqueEmail);
             createdDriver.Id.Should().BeGreaterThan(0);
@@ -115,8 +107,8 @@ namespace HotshotLogistics.IntegrationTests
         public async Task UpdateDriver_WithValidData_ReturnsOk()
         {
             // Arrange — create a driver to update so the test does not depend on seed identity values.
-            var uniqueCreateEmail = $"update.create.{Guid.NewGuid():N}@test.com";
-            var createResponse = await Client.PostAsJsonAsync("/api/Drivers", new DriverDto
+            string uniqueCreateEmail = $"update.create.{Guid.NewGuid():N}@test.com";
+            HttpResponseMessage createResponse = await Client.PostAsJsonAsync("/api/Drivers", new DriverDto
             {
                 FirstName = "Update",
                 LastName = "Target",
@@ -124,14 +116,14 @@ namespace HotshotLogistics.IntegrationTests
                 PhoneNumber = "(555) 123-4568",
                 LicenseNumber = $"DRV-{Guid.NewGuid():N}"[..12].ToUpperInvariant(),
                 LicenseExpiryDate = DateTime.UtcNow.AddYears(3),
-                IsActive = true,
+                IsActive = true
             });
             createResponse.EnsureSuccessStatusCode();
-            var createdDriver = await createResponse.Content.ReadFromJsonAsync<DriverDto>();
+            DriverDto? createdDriver = await createResponse.Content.ReadFromJsonAsync<DriverDto>();
             createdDriver.Should().NotBeNull();
 
-            var uniqueUpdateEmail = $"updated.driver.{Guid.NewGuid():N}@test.com";
-            var driverToUpdate = new DriverDto
+            string uniqueUpdateEmail = $"updated.driver.{Guid.NewGuid():N}@test.com";
+            DriverDto driverToUpdate = new()
             {
                 Id = createdDriver.Id,
                 FirstName = "Updated",
@@ -140,20 +132,21 @@ namespace HotshotLogistics.IntegrationTests
                 PhoneNumber = "(555) 987-6543",
                 LicenseNumber = "DRV654321",
                 LicenseExpiryDate = DateTime.UtcNow.AddYears(3),
-                IsActive = false,
+                IsActive = false
             };
 
             // Act
-            var response = await Client.PutAsJsonAsync($"/api/Drivers/{createdDriver.Id}", driverToUpdate);
+            HttpResponseMessage response =
+                await Client.PutAsJsonAsync($"/api/Drivers/{createdDriver.Id}", driverToUpdate);
 
             if (!response.IsSuccessStatusCode)
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
+                string errorContent = await response.Content.ReadAsStringAsync();
                 throw new Exception($"Driver update failed with status {response.StatusCode}: {errorContent}");
             }
 
             // Assert
-            var updatedDriver = await response.Content.ReadFromJsonAsync<DriverDto>();
+            DriverDto? updatedDriver = await response.Content.ReadFromJsonAsync<DriverDto>();
 
             updatedDriver.Should().NotBeNull();
             updatedDriver.FirstName.Should().Be("Updated");
@@ -165,35 +158,35 @@ namespace HotshotLogistics.IntegrationTests
         public async Task DeleteDriver_WithValidId_ReturnsNoContent()
         {
             // Arrange - First create a driver to delete
-            var uniqueDeleteEmail = $"delete.test.driver.{Guid.NewGuid():N}@example.com";
-            var testDriver = new DriverDto
+            string uniqueDeleteEmail = $"delete.test.driver.{Guid.NewGuid():N}@example.com";
+            DriverDto testDriver = new()
             {
                 FirstName = "Delete",
                 LastName = "TestDriver",
                 Email = uniqueDeleteEmail,
                 PhoneNumber = "(555) 123-9999", // Valid US phone format
                 LicenseNumber = "DRV-DELETE", // Valid format: uppercase letters, numbers, hyphens
-                LicenseExpiryDate = System.DateTime.UtcNow.AddYears(3), // Must meet validation requirements
+                LicenseExpiryDate = DateTime.UtcNow.AddYears(3), // Must meet validation requirements
                 IsActive = true
             };
 
             // Create the driver
-            var createResponse = await Client.PostAsJsonAsync("/api/Drivers", testDriver);
+            HttpResponseMessage createResponse = await Client.PostAsJsonAsync("/api/Drivers", testDriver);
             createResponse.EnsureSuccessStatusCode();
-            var createdDriver = await createResponse.Content.ReadFromJsonAsync<DriverDto>();
+            DriverDto? createdDriver = await createResponse.Content.ReadFromJsonAsync<DriverDto>();
             createdDriver.Should().NotBeNull();
-            var driverIdToDelete = createdDriver.Id;
+            int driverIdToDelete = createdDriver.Id;
 
             // Act - Delete the driver
-            var response = await Client.DeleteAsync($"/api/Drivers/{driverIdToDelete}");
+            HttpResponseMessage response = await Client.DeleteAsync($"/api/Drivers/{driverIdToDelete}");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
             // Verify it was soft-deleted (should still exist but IsActive = false)
-            var getResponse = await Client.GetAsync($"/api/Drivers/{driverIdToDelete}");
+            HttpResponseMessage getResponse = await Client.GetAsync($"/api/Drivers/{driverIdToDelete}");
             getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-            var deletedDriver = await getResponse.Content.ReadFromJsonAsync<DriverDto>();
+            DriverDto? deletedDriver = await getResponse.Content.ReadFromJsonAsync<DriverDto>();
             deletedDriver.Should().NotBeNull();
             deletedDriver.IsActive.Should().BeFalse(); // Should be soft-deleted (inactive)
         }

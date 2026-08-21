@@ -9,49 +9,53 @@ using Microsoft.Extensions.Configuration;
 namespace HotshotLogistics.Tests.Tracking
 {
     /// <summary>
-    /// Integration tests for LocationTrackingRepository.
+    ///     Integration tests for LocationTrackingRepository.
     /// </summary>
     public class LocationTrackingRepositoryTests : IClassFixture<DatabaseTestFixture>, IDisposable
     {
         private readonly LocationTrackingRepository _locationTrackingRepository;
-        private readonly IConfiguration _configuration;
-        private readonly List<long> _createdLocationTrackingIds = new();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocationTrackingRepositoryTests"/> class.
+        ///     Initializes a new instance of the <see cref="LocationTrackingRepositoryTests" /> class.
         /// </summary>
         public LocationTrackingRepositoryTests(DatabaseTestFixture fixture)
         {
             ArgumentNullException.ThrowIfNull(fixture);
             if (!TestDatabaseHelper.IsConfigured)
             {
-                _configuration = new ConfigurationBuilder().Build();
                 _locationTrackingRepository = null!;
                 return;
             }
 
-            var configBuilder = new ConfigurationBuilder()
+            IConfigurationBuilder configBuilder = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     ["ConnectionStrings:DefaultConnection"] = TestDatabaseHelper.GetConnectionString()
                 });
 
-            _configuration = configBuilder.Build();
-            _locationTrackingRepository = new LocationTrackingRepository(_configuration);
+            IConfiguration configuration = configBuilder.Build();
+            _locationTrackingRepository = new LocationTrackingRepository(configuration);
         }
 
         /// <summary>
-        /// Tests that AddAsync creates a new location tracking record successfully.
+        ///     Cleans up test data.
+        /// </summary>
+        public void Dispose()
+        {
+        }
+
+        /// <summary>
+        ///     Tests that AddAsync creates a new location tracking record successfully.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task AddAsync_CreatesLocationTrackingRecordSuccessfully()
         {
             // Arrange
-            var locationTracking = CreateTestLocationTracking();
+            LocationTracking locationTracking = CreateTestLocationTracking();
 
             // Act
-            var result = await _locationTrackingRepository.AddAsync(locationTracking);
+            LocationTracking result = await _locationTrackingRepository.AddAsync(locationTracking);
 
             // Assert
             result.Should().NotBeNull();
@@ -60,26 +64,24 @@ namespace HotshotLogistics.Tests.Tracking
             result.DriverId.Should().Be(locationTracking.DriverId);
             result.Latitude.Should().Be(locationTracking.Latitude);
             result.Longitude.Should().Be(locationTracking.Longitude);
-
-            _createdLocationTrackingIds.Add(result.Id);
         }
 
         /// <summary>
-        /// Tests that GetByIdAsync retrieves a location tracking record successfully.
+        ///     Tests that GetByIdAsync retrieves a location tracking record successfully.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GetByIdAsync_RetrievesLocationTrackingRecordSuccessfully()
         {
             // Arrange
-            var locationTracking = await CreateAndSaveTestLocationTrackingAsync();
+            LocationTracking locationTracking = await CreateAndSaveTestLocationTrackingAsync();
 
             // Act
-            var result = await _locationTrackingRepository.GetByIdAsync(locationTracking.Id);
+            LocationTracking? result = await _locationTrackingRepository.GetByIdAsync(locationTracking.Id);
 
             // Assert
             result.Should().NotBeNull();
-            result!.Id.Should().Be(locationTracking.Id);
+            result.Id.Should().Be(locationTracking.Id);
             result.JobId.Should().Be(locationTracking.JobId);
             result.DriverId.Should().Be(locationTracking.DriverId);
             result.Latitude.Should().Be(locationTracking.Latitude);
@@ -87,18 +89,18 @@ namespace HotshotLogistics.Tests.Tracking
         }
 
         /// <summary>
-        /// Tests that GetByJobIdAsync returns location tracking records for the correct job.
+        ///     Tests that GetByJobIdAsync returns location tracking records for the correct job.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GetByJobIdAsync_ReturnsLocationTrackingRecordsForCorrectJob()
         {
             // Arrange
-            var jobId = "JOB001";
+            string jobId = "JOB001";
             await CreateTestLocationTrackingRecordsAsync();
 
             // Act
-            var result = await _locationTrackingRepository.GetByJobIdAsync(jobId);
+            List<LocationTracking> result = (await _locationTrackingRepository.GetByJobIdAsync(jobId)).ToList();
 
             // Assert
             result.Should().NotBeNull();
@@ -108,18 +110,18 @@ namespace HotshotLogistics.Tests.Tracking
         }
 
         /// <summary>
-        /// Tests that GetByDriverIdAsync returns location tracking records for the correct driver.
+        ///     Tests that GetByDriverIdAsync returns location tracking records for the correct driver.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GetByDriverIdAsync_ReturnsLocationTrackingRecordsForCorrectDriver()
         {
             // Arrange
-            var driverId = 1;
+            int driverId = 1;
             await CreateTestLocationTrackingRecordsAsync();
 
             // Act
-            var result = await _locationTrackingRepository.GetByDriverIdAsync(driverId);
+            List<LocationTracking> result = (await _locationTrackingRepository.GetByDriverIdAsync(driverId)).ToList();
 
             // Assert
             result.Should().NotBeNull();
@@ -129,20 +131,21 @@ namespace HotshotLogistics.Tests.Tracking
         }
 
         /// <summary>
-        /// Tests that GetByJobIdAndTimeRangeAsync returns location tracking records within the time range.
+        ///     Tests that GetByJobIdAndTimeRangeAsync returns location tracking records within the time range.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GetByJobIdAndTimeRangeAsync_ReturnsLocationTrackingRecordsWithinTimeRange()
         {
             // Arrange
-            var jobId = "JOB001";
+            string jobId = "JOB001";
             await CreateTestLocationTrackingRecordsAsync();
-            var startTime = DateTime.UtcNow.AddHours(-2);
-            var endTime = DateTime.UtcNow.AddHours(2);
+            DateTime startTime = DateTime.UtcNow.AddHours(-2);
+            DateTime endTime = DateTime.UtcNow.AddHours(2);
 
             // Act
-            var result = await _locationTrackingRepository.GetByJobIdAndTimeRangeAsync(jobId, startTime, endTime);
+            List<LocationTracking> result =
+                (await _locationTrackingRepository.GetByJobIdAndTimeRangeAsync(jobId, startTime, endTime)).ToList();
 
             // Assert
             result.Should().NotBeNull();
@@ -154,20 +157,22 @@ namespace HotshotLogistics.Tests.Tracking
         }
 
         /// <summary>
-        /// Tests that GetByDriverIdAndTimeRangeAsync returns location tracking records within the time range.
+        ///     Tests that GetByDriverIdAndTimeRangeAsync returns location tracking records within the time range.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GetByDriverIdAndTimeRangeAsync_ReturnsLocationTrackingRecordsWithinTimeRange()
         {
             // Arrange
-            var driverId = 1;
+            int driverId = 1;
             await CreateTestLocationTrackingRecordsAsync();
-            var startTime = DateTime.UtcNow.AddHours(-2);
-            var endTime = DateTime.UtcNow.AddHours(2);
+            DateTime startTime = DateTime.UtcNow.AddHours(-2);
+            DateTime endTime = DateTime.UtcNow.AddHours(2);
 
             // Act
-            var result = await _locationTrackingRepository.GetByDriverIdAndTimeRangeAsync(driverId, startTime, endTime);
+            List<LocationTracking> result =
+                (await _locationTrackingRepository.GetByDriverIdAndTimeRangeAsync(driverId, startTime, endTime))
+                .ToList();
 
             // Assert
             result.Should().NotBeNull();
@@ -179,68 +184,69 @@ namespace HotshotLogistics.Tests.Tracking
         }
 
         /// <summary>
-        /// Tests that GetLatestByJobIdAsync returns the latest location tracking record for a job.
+        ///     Tests that GetLatestByJobIdAsync returns the latest location tracking record for a job.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GetLatestByJobIdAsync_ReturnsLatestLocationTrackingRecordForJob()
         {
             // Arrange
-            var jobId = "JOB001";
+            string jobId = "JOB001";
             await CreateTestLocationTrackingRecordsAsync();
 
             // Act
-            var result = await _locationTrackingRepository.GetLatestByJobIdAsync(jobId);
+            LocationTracking? result = await _locationTrackingRepository.GetLatestByJobIdAsync(jobId);
 
             // Assert
             result.Should().NotBeNull();
-            result!.JobId.Should().Be(jobId);
+            result.JobId.Should().Be(jobId);
         }
 
         /// <summary>
-        /// Tests that GetLatestByDriverIdAsync returns the latest location tracking record for a driver.
+        ///     Tests that GetLatestByDriverIdAsync returns the latest location tracking record for a driver.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GetLatestByDriverIdAsync_ReturnsLatestLocationTrackingRecordForDriver()
         {
             // Arrange
-            var driverId = 1;
+            int driverId = 1;
             await CreateTestLocationTrackingRecordsAsync();
 
             // Act
-            var result = await _locationTrackingRepository.GetLatestByDriverIdAsync(driverId);
+            LocationTracking? result = await _locationTrackingRepository.GetLatestByDriverIdAsync(driverId);
 
             // Assert
             result.Should().NotBeNull();
-            result!.DriverId.Should().Be(driverId);
+            result.DriverId.Should().Be(driverId);
         }
 
         /// <summary>
-        /// Tests that GetLatestByJobIdAsync with count returns the specified number of latest records.
+        ///     Tests that GetLatestByJobIdAsync with count returns the specified number of latest records.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GetLatestByJobIdAsync_WithCount_ReturnsSpecifiedNumberOfLatestRecords()
         {
             // Arrange
-            var jobId = "JOB001";
+            string jobId = "JOB001";
             await CreateTestLocationTrackingRecordsAsync();
-            var count = 3;
+            int count = 3;
 
             // Act
-            var result = await _locationTrackingRepository.GetLatestByJobIdAsync(jobId, count);
+            IEnumerable<LocationTracking> rawResult =
+                await _locationTrackingRepository.GetLatestByJobIdAsync(jobId, count);
+            List<LocationTracking> result = rawResult.ToList();
 
             // Assert
             result.Should().NotBeNull();
-            var records = result.ToList();
-            records.Count.Should().BeLessThanOrEqualTo(count);
-            records.Should().OnlyContain(lt => lt.JobId == jobId);
-            records.Should().BeInDescendingOrder(lt => lt.Timestamp);
+            result.Count.Should().BeLessThanOrEqualTo(count);
+            result.Should().OnlyContain(lt => lt.JobId == jobId);
+            result.Should().BeInDescendingOrder(lt => lt.Timestamp);
         }
 
         /// <summary>
-        /// Tests that GetByGeographicAreaAsync returns location tracking records within the geographic area.
+        ///     Tests that GetByGeographicAreaAsync returns location tracking records within the geographic area.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -248,13 +254,13 @@ namespace HotshotLogistics.Tests.Tracking
         {
             // Arrange
             await CreateTestLocationTrackingRecordsAsync();
-            var centerLatitude = 40.7128m; // New York City
-            var centerLongitude = -74.0060m;
-            var radiusMiles = 50.0;
+            decimal centerLatitude = 40.7128m; // New York City
+            decimal centerLongitude = -74.0060m;
+            double radiusMiles = 50.0;
 
             // Act
-            var result = await _locationTrackingRepository.GetByGeographicAreaAsync(
-                centerLatitude, centerLongitude, radiusMiles);
+            List<LocationTracking> result = (await _locationTrackingRepository.GetByGeographicAreaAsync(
+                centerLatitude, centerLongitude, radiusMiles)).ToList();
 
             // Assert
             result.Should().NotBeNull();
@@ -262,7 +268,7 @@ namespace HotshotLogistics.Tests.Tracking
         }
 
         /// <summary>
-        /// Tests that DeleteOlderThanAsync deletes location tracking records older than the cutoff date.
+        ///     Tests that DeleteOlderThanAsync deletes location tracking records older than the cutoff date.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -270,140 +276,136 @@ namespace HotshotLogistics.Tests.Tracking
         {
             // Arrange
             await CreateTestLocationTrackingRecordsAsync();
-            var cutoffDate = DateTime.UtcNow.AddDays(-30);
+            DateTime cutoffDate = DateTime.UtcNow.AddDays(-30);
 
             // Act
-            var result = await _locationTrackingRepository.DeleteOlderThanAsync(cutoffDate);
+            int result = await _locationTrackingRepository.DeleteOlderThanAsync(cutoffDate);
 
             // Assert
             result.Should().BeGreaterThanOrEqualTo(0);
         }
 
         /// <summary>
-        /// Tests that GetTotalDistanceByJobIdAsync returns the total distance for a job.
+        ///     Tests that GetTotalDistanceByJobIdAsync returns the total distance for a job.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GetTotalDistanceByJobIdAsync_ReturnsTotalDistanceForJob()
         {
             // Arrange
-            var jobId = "JOB001";
+            string jobId = "JOB001";
             await CreateTestLocationTrackingRecordsAsync();
 
             // Act
-            var result = await _locationTrackingRepository.GetTotalDistanceByJobIdAsync(jobId);
+            double result = await _locationTrackingRepository.GetTotalDistanceByJobIdAsync(jobId);
 
             // Assert
             result.Should().BeGreaterThanOrEqualTo(0);
         }
 
         /// <summary>
-        /// Tests that GetTotalDistanceByDriverIdAsync returns the total distance for a driver within a time range.
+        ///     Tests that GetTotalDistanceByDriverIdAsync returns the total distance for a driver within a time range.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GetTotalDistanceByDriverIdAsync_ReturnsTotalDistanceForDriverWithinTimeRange()
         {
             // Arrange
-            var driverId = 1;
+            int driverId = 1;
             await CreateTestLocationTrackingRecordsAsync();
-            var startTime = DateTime.UtcNow.AddDays(-1);
-            var endTime = DateTime.UtcNow.AddDays(1);
+            DateTime startTime = DateTime.UtcNow.AddDays(-1);
+            DateTime endTime = DateTime.UtcNow.AddDays(1);
 
             // Act
-            var result = await _locationTrackingRepository.GetTotalDistanceByDriverIdAsync(driverId, startTime, endTime);
+            double result =
+                await _locationTrackingRepository.GetTotalDistanceByDriverIdAsync(driverId, startTime, endTime);
 
             // Assert
             result.Should().BeGreaterThanOrEqualTo(0);
         }
 
         /// <summary>
-        /// Tests that ExistsAsync returns true for existing location tracking records.
+        ///     Tests that ExistsAsync returns true for existing location tracking records.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task ExistsAsync_ReturnsTrueForExistingLocationTrackingRecord()
         {
             // Arrange
-            var locationTracking = await CreateAndSaveTestLocationTrackingAsync();
+            LocationTracking locationTracking = await CreateAndSaveTestLocationTrackingAsync();
 
             // Act
-            var result = await _locationTrackingRepository.ExistsAsync(locationTracking.Id);
+            bool result = await _locationTrackingRepository.ExistsAsync(locationTracking.Id);
 
             // Assert
             result.Should().BeTrue();
         }
 
         /// <summary>
-        /// Tests that ExistsAsync returns false for non-existing location tracking records.
+        ///     Tests that ExistsAsync returns false for non-existing location tracking records.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task ExistsAsync_ReturnsFalseForNonExistingLocationTrackingRecord()
         {
             // Arrange
-            var nonExistingId = 999999L;
+            long nonExistingId = 999999L;
 
             // Act
-            var result = await _locationTrackingRepository.ExistsAsync(nonExistingId);
+            bool result = await _locationTrackingRepository.ExistsAsync(nonExistingId);
 
             // Assert
             result.Should().BeFalse();
         }
 
         /// <summary>
-        /// Tests that GetCountByJobIdAsync returns the correct count of location tracking records for a job.
+        ///     Tests that GetCountByJobIdAsync returns the correct count of location tracking records for a job.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GetCountByJobIdAsync_ReturnsCorrectCountOfLocationTrackingRecordsForJob()
         {
             // Arrange
-            var jobId = "JOB001";
+            string jobId = "JOB001";
             await CreateTestLocationTrackingRecordsAsync();
 
             // Act
-            var result = await _locationTrackingRepository.GetCountByJobIdAsync(jobId);
+            int result = await _locationTrackingRepository.GetCountByJobIdAsync(jobId);
 
             // Assert
             result.Should().BeGreaterThan(0);
         }
 
         /// <summary>
-        /// Tests that AddBatchAsync adds multiple location tracking records successfully.
+        ///     Tests that AddBatchAsync adds multiple location tracking records successfully.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task AddBatchAsync_AddsMultipleLocationTrackingRecordsSuccessfully()
         {
             // Arrange
-            var uniqueJobId = $"BATCH{Guid.NewGuid():N}";
-            var locationTrackingRecords = new List<LocationTracking>
-            {
-                CreateTestLocationTracking(uniqueJobId, 1, 40.7128m, -74.0060m),
+            string uniqueJobId = $"BATCH{Guid.NewGuid():N}";
+            List<LocationTracking> locationTrackingRecords =
+            [
+                CreateTestLocationTracking(uniqueJobId),
                 CreateTestLocationTracking(uniqueJobId, 1, 40.7130m, -74.0062m),
                 CreateTestLocationTracking(uniqueJobId, 1, 40.7132m, -74.0064m)
-            };
+            ];
 
             // Act
-            var result = await _locationTrackingRepository.AddBatchAsync(locationTrackingRecords);
+            int result = await _locationTrackingRepository.AddBatchAsync(locationTrackingRecords);
 
             // Assert
             result.Should().Be(locationTrackingRecords.Count);
 
             // Verify records were added
-            var addedRecords = await _locationTrackingRepository.GetByJobIdAsync(uniqueJobId);
+            List<LocationTracking> addedRecords =
+                (await _locationTrackingRepository.GetByJobIdAsync(uniqueJobId)).ToList();
             addedRecords.Should().HaveCount(locationTrackingRecords.Count);
-
-            // Track for cleanup
-            foreach (var record in addedRecords)
-            {
-                _createdLocationTrackingIds.Add(record.Id);
-            }
         }
 
         /// <summary>
-        /// Creates a test location tracking record.
+        ///     Creates a test location tracking record.
         /// </summary>
         /// <param name="jobId">The job identifier.</param>
         /// <param name="driverId">The driver identifier.</param>
@@ -430,25 +432,21 @@ namespace HotshotLogistics.Tests.Tracking
         }
 
         /// <summary>
-        /// Creates and saves a test location tracking record.
+        ///     Creates and saves a test location tracking record.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         private async Task<LocationTracking> CreateAndSaveTestLocationTrackingAsync()
         {
-            var locationTracking = CreateTestLocationTracking();
-            var result = await _locationTrackingRepository.AddAsync(locationTracking);
-            _createdLocationTrackingIds.Add(result.Id);
-            return result;
+            LocationTracking locationTracking = CreateTestLocationTracking();
+            return await _locationTrackingRepository.AddAsync(locationTracking);
         }
 
         /// <summary>
-        /// Creates multiple test location tracking records for testing purposes.
+        ///     Creates multiple test location tracking records for testing purposes.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        private async Task<List<LocationTracking>> CreateTestLocationTrackingRecordsAsync()
+        private async Task CreateTestLocationTrackingRecordsAsync()
         {
-            var locationTrackingRecords = new List<LocationTracking>();
-
             // Create location tracking records with different jobs and drivers
             var testData = new[]
             {
@@ -461,7 +459,7 @@ namespace HotshotLogistics.Tests.Tracking
 
             foreach (var data in testData)
             {
-                var locationTracking = new LocationTracking
+                LocationTracking locationTracking = new()
                 {
                     JobId = data.JobId,
                     DriverId = data.DriverId,
@@ -473,31 +471,7 @@ namespace HotshotLogistics.Tests.Tracking
                     Timestamp = DateTime.UtcNow.AddMinutes(data.TimeOffset)
                 };
 
-                var result = await _locationTrackingRepository.AddAsync(locationTracking);
-                locationTrackingRecords.Add(result);
-                _createdLocationTrackingIds.Add(result.Id);
-            }
-
-            return locationTrackingRecords;
-        }
-
-        /// <summary>
-        /// Cleans up test data.
-        /// </summary>
-        public void Dispose()
-        {
-            // Clean up created test location tracking records
-            foreach (var locationTrackingId in _createdLocationTrackingIds)
-            {
-                try
-                {
-                    // Note: We would need a DeleteAsync method in the repository for proper cleanup
-                    // For now, we'll rely on the test database being cleaned up between test runs
-                }
-                catch
-                {
-                    // Ignore cleanup errors
-                }
+                await _locationTrackingRepository.AddAsync(locationTracking);
             }
         }
     }

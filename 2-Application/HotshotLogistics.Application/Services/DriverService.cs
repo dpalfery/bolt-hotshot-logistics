@@ -1,59 +1,55 @@
 // <copyright file="DriverService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Domain.Entities;
 
 namespace HotshotLogistics.Application.Services
 {
-
     /// <summary>
-    /// Service for managing drivers.
+    ///     Service for managing drivers.
     /// </summary>
     public class DriverService : IDriverService
     {
         private readonly IDriverRepository _driverRepository;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DriverService"/> class.
+        ///     Initializes a new instance of the <see cref="DriverService" /> class.
         /// </summary>
         /// <param name="driverRepository">The driver repository.</param>
         public DriverService(IDriverRepository driverRepository)
         {
-            this._driverRepository = driverRepository;
+            _driverRepository = driverRepository;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public Task<Driver> CreateDriverAsync(Driver driver)
         {
-
-            return this._driverRepository.CreateDriverAsync(driver);
-
+            return _driverRepository.CreateDriverAsync(driver);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public Task<Driver?> GetDriverByIdAsync(int id)
         {
-            return this._driverRepository.GetDriverByIdAsync(id);
+            return _driverRepository.GetDriverByIdAsync(id);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public Task<IEnumerable<Driver>> GetDriversAsync()
         {
-
-            return this._driverRepository.GetDriversAsync();
-
+            return _driverRepository.GetDriversAsync();
         }
 
         public Task<Driver> UpdateDriverAsync(Driver driver)
         {
-            return this._driverRepository.UpdateDriverAsync(driver);
+            return _driverRepository.UpdateDriverAsync(driver);
         }
 
         public Task<bool> DeleteDriverAsync(int id)
         {
-            return this._driverRepository.DeleteDriverAsync(id);
+            return _driverRepository.DeleteDriverAsync(id);
         }
     }
 }

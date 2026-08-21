@@ -6,20 +6,21 @@ using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Domain.DTOs;
+using HotshotLogistics.Domain.Entities;
 
 namespace HotshotLogistics.Application.Services
 {
     /// <summary>
-    /// Service implementation for job assignment operations.
+    ///     Service implementation for job assignment operations.
     /// </summary>
     public class JobAssignmentService : IJobAssignmentService
     {
         private readonly IJobAssignmentRepository _assignmentRepository;
-        private readonly IJobRepository _jobRepository;
         private readonly IDriverRepository _driverRepository;
+        private readonly IJobRepository _jobRepository;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JobAssignmentService"/> class.
+        ///     Initializes a new instance of the <see cref="JobAssignmentService" /> class.
         /// </summary>
         /// <param name="assignmentRepository">The job assignment repository.</param>
         /// <param name="jobRepository">The job repository.</param>
@@ -29,12 +30,13 @@ namespace HotshotLogistics.Application.Services
             IJobRepository jobRepository,
             IDriverRepository driverRepository)
         {
-            _assignmentRepository = assignmentRepository ?? throw new ArgumentNullException(nameof(assignmentRepository));
+            _assignmentRepository =
+                assignmentRepository ?? throw new ArgumentNullException(nameof(assignmentRepository));
             _jobRepository = jobRepository ?? throw new ArgumentNullException(nameof(jobRepository));
             _driverRepository = driverRepository ?? throw new ArgumentNullException(nameof(driverRepository));
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<JobAssignmentDto?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -45,14 +47,15 @@ namespace HotshotLogistics.Application.Services
             return await _assignmentRepository.GetByIdAsync(id, cancellationToken);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<IEnumerable<JobAssignmentDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             return await _assignmentRepository.GetAllAsync(cancellationToken);
         }
 
-        /// <inheritdoc/>
-        public async Task<IEnumerable<JobAssignmentDto>> GetByDriverIdAsync(int driverId, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<IEnumerable<JobAssignmentDto>> GetByDriverIdAsync(int driverId,
+            CancellationToken cancellationToken = default)
         {
             if (driverId <= 0)
             {
@@ -62,8 +65,9 @@ namespace HotshotLogistics.Application.Services
             return await _assignmentRepository.GetByDriverIdAsync(driverId, cancellationToken);
         }
 
-        /// <inheritdoc/>
-        public async Task<IEnumerable<JobAssignmentDto>> GetByJobIdAsync(string jobId, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<IEnumerable<JobAssignmentDto>> GetByJobIdAsync(string jobId,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(jobId))
             {
@@ -73,14 +77,16 @@ namespace HotshotLogistics.Application.Services
             return await _assignmentRepository.GetByJobIdAsync(jobId, cancellationToken);
         }
 
-        /// <inheritdoc/>
-        public async Task<IEnumerable<JobAssignmentDto>> GetActiveAssignmentsAsync(CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<IEnumerable<JobAssignmentDto>> GetActiveAssignmentsAsync(
+            CancellationToken cancellationToken = default)
         {
             return await _assignmentRepository.GetActiveAssignmentsAsync(cancellationToken);
         }
 
-        /// <inheritdoc/>
-        public async Task<JobAssignmentDto> AssignJobAsync(string jobId, int driverId, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<JobAssignmentDto> AssignJobAsync(string jobId, int driverId,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(jobId))
             {
@@ -93,7 +99,7 @@ namespace HotshotLogistics.Application.Services
             }
 
             // Verify job exists
-            var job = await _jobRepository.GetJobByIdAsync(jobId, cancellationToken);
+            Job? job = await _jobRepository.GetJobByIdAsync(jobId, cancellationToken);
 
             if (job == null)
             {
@@ -101,22 +107,25 @@ namespace HotshotLogistics.Application.Services
             }
 
             // Verify driver exists
-            var driver = await _driverRepository.GetDriverByIdAsync(driverId, cancellationToken);
+            Driver? driver = await _driverRepository.GetDriverByIdAsync(driverId, cancellationToken);
             if (driver == null)
             {
                 throw new KeyNotFoundException($"Driver with ID {driverId} not found.");
             }
 
             // Check if assignment already exists
-            var existingAssignments = await _assignmentRepository.GetByJobIdAsync(jobId, cancellationToken);
-            var activeAssignment = existingAssignments.FirstOrDefault(a => a.Status == JobAssignmentStatus.Active);
+            IEnumerable<JobAssignmentDto> existingAssignments =
+                await _assignmentRepository.GetByJobIdAsync(jobId, cancellationToken);
+            JobAssignmentDto? activeAssignment =
+                existingAssignments.FirstOrDefault(a => a.Status == JobAssignmentStatus.Active);
 
             if (activeAssignment != null)
             {
-                throw new InvalidOperationException($"Job {jobId} is already assigned to driver {activeAssignment.DriverId}.");
+                throw new InvalidOperationException(
+                    $"Job {jobId} is already assigned to driver {activeAssignment.DriverId}.");
             }
 
-            var assignment = new JobAssignmentDto
+            JobAssignmentDto assignment = new()
             {
                 JobId = jobId,
                 DriverId = driverId,
@@ -127,23 +136,23 @@ namespace HotshotLogistics.Application.Services
             return await _assignmentRepository.CreateAsync(assignment, cancellationToken);
         }
 
-        /// <inheritdoc/>
-        public async Task<JobAssignmentDto> UpdateAssignmentStatusAsync(string id, JobAssignmentStatus status, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<JobAssignmentDto> UpdateAssignmentStatusAsync(string id, JobAssignmentStatus status,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
                 throw new ArgumentException("Assignment ID cannot be empty.", nameof(id));
             }
 
-            var assignment = await _assignmentRepository.GetByIdAsync(id, cancellationToken)
-                ?? throw new KeyNotFoundException($"Assignment with ID {id} not found.");
+            JobAssignmentDto assignment = await _assignmentRepository.GetByIdAsync(id, cancellationToken)
+                                          ?? throw new KeyNotFoundException($"Assignment with ID {id} not found.");
 
             assignment.Status = status;
             return await _assignmentRepository.UpdateAsync(assignment, cancellationToken);
-
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<bool> UnassignJobAsync(string id, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -152,7 +161,6 @@ namespace HotshotLogistics.Application.Services
             }
 
             return await _assignmentRepository.DeleteAsync(id, cancellationToken);
-
         }
     }
 }

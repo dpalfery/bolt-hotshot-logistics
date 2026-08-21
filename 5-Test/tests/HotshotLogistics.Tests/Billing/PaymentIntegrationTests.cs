@@ -5,7 +5,6 @@
 using FluentAssertions;
 using HotshotLogistics.Application.Services;
 using HotshotLogistics.Domain.Entities;
-using HotshotLogistics.Domain.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -13,74 +12,72 @@ using Moq;
 namespace HotshotLogistics.Tests.Billing
 {
     /// <summary>
-    /// Integration tests for payment processing functionality.
+    ///     Integration tests for payment processing functionality.
     /// </summary>
     public class PaymentIntegrationTests
     {
-        private readonly Mock<IPaymentProcessor> _mockStripeProcessor;
-        private readonly Mock<IPaymentProcessor> _mockPayPalProcessor;
-        private readonly HotshotLogistics.Contracts.Services.IPaymentProcessorFactory _paymentProcessorFactory;
-        private readonly Mock<HotshotLogistics.Contracts.Services.IPaymentProcessorFactory> _mockPaymentProcessorFactory;
-        private readonly Mock<IInvoiceRepository> _mockInvoiceRepository;
-        private readonly Mock<IPaymentRepository> _mockPaymentRepository;
         private readonly Mock<ICustomerRepository> _mockCustomerRepository;
-        private readonly Mock<INotificationService> _mockNotificationService;
+        private readonly Mock<IInvoiceRepository> _mockInvoiceRepository;
         private readonly Mock<ILogger<BillingService>> _mockLogger;
-        private readonly Mock<IServiceProvider> _mockServiceProvider;
-        private readonly Mock<IConfiguration> _mockConfiguration;
+        private readonly Mock<INotificationService> _mockNotificationService;
+        private readonly Mock<IPaymentProcessor> _mockPayPalProcessor;
+        private readonly Mock<IPaymentProcessorFactory> _mockPaymentProcessorFactory;
+        private readonly Mock<IPaymentRepository> _mockPaymentRepository;
+        private readonly Mock<IPaymentProcessor> _mockStripeProcessor;
+        private readonly IPaymentProcessorFactory _paymentProcessorFactory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PaymentIntegrationTests"/> class.
+        ///     Initializes a new instance of the <see cref="PaymentIntegrationTests" /> class.
         /// </summary>
         public PaymentIntegrationTests()
         {
             _mockStripeProcessor = new Mock<IPaymentProcessor>();
             _mockPayPalProcessor = new Mock<IPaymentProcessor>();
-            _mockPaymentProcessorFactory = new Mock<HotshotLogistics.Contracts.Services.IPaymentProcessorFactory>();
+            _mockPaymentProcessorFactory = new Mock<IPaymentProcessorFactory>();
             _mockInvoiceRepository = new Mock<IInvoiceRepository>();
             _mockPaymentRepository = new Mock<IPaymentRepository>();
             _mockCustomerRepository = new Mock<ICustomerRepository>();
             _mockNotificationService = new Mock<INotificationService>();
             _mockLogger = new Mock<ILogger<BillingService>>();
-            _mockServiceProvider = new Mock<IServiceProvider>();
-            _mockConfiguration = new Mock<IConfiguration>();
+            Mock<IServiceProvider> mockServiceProvider = new();
+            Mock<IConfiguration> mockConfiguration = new();
 
             // Setup service provider to return processors (kept for completeness)
             // Use GetService (the actual IServiceProvider method) instead of the GetRequiredService
             // extension to allow Moq to setup the call directly.
-            _mockServiceProvider.Setup(sp => sp.GetService(typeof(StripePaymentProcessor)))
+            mockServiceProvider.Setup(sp => sp.GetService(typeof(StripePaymentProcessor)))
                 .Returns(_mockStripeProcessor.Object);
-            _mockServiceProvider.Setup(sp => sp.GetService(typeof(PayPalPaymentProcessor)))
+            mockServiceProvider.Setup(sp => sp.GetService(typeof(PayPalPaymentProcessor)))
                 .Returns(_mockPayPalProcessor.Object);
 
             // Setup configuration
-            _mockConfiguration.Setup(c => c["Payment:DefaultProcessor"]).Returns("Stripe");
+            mockConfiguration.Setup(c => c["Payment:DefaultProcessor"]).Returns("Stripe");
 
             // Use the mocked factory in tests so Moq can create the proxy without hitting concrete ctor
             _paymentProcessorFactory = _mockPaymentProcessorFactory.Object;
         }
 
         /// <summary>
-        /// Tests successful payment processing with Stripe.
+        ///     Tests successful payment processing with Stripe.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task ProcessPayment_WithValidStripePayment_ReturnsSuccess()
         {
             // Arrange
-            var invoiceId = "invoice-123";
-            var paymentAmount = 1000.00m;
-            var paymentMethod = "Credit Card";
+            string invoiceId = "invoice-123";
+            decimal paymentAmount = 1000.00m;
+            string paymentMethod = "Credit Card";
 
-            var invoice = CreateTestInvoice(invoiceId, "customer-123", 1000.00m, 0.00m);
-            var customer = CreateTestCustomer("customer-123");
+            Invoice invoice = CreateTestInvoice(invoiceId, "customer-123", 1000.00m, 0.00m);
+            Customer customer = CreateTestCustomer("customer-123");
 
             _mockInvoiceRepository.Setup(r => r.GetByIdAsync(invoiceId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(invoice);
             _mockCustomerRepository.Setup(r => r.GetByIdAsync("customer-123", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(customer);
 
-            var paymentResult = new PaymentProcessingResult
+            PaymentProcessingResult paymentResult = new()
             {
                 Success = true,
                 TransactionId = "stripe_txn_123",
@@ -88,11 +85,11 @@ namespace HotshotLogistics.Tests.Billing
             };
 
             _mockStripeProcessor.Setup(p => p.ProcessPaymentAsync(
-                paymentAmount,
-                "USD",
-                It.IsAny<PaymentMethodDetails>(),
-                It.IsAny<Dictionary<string, string>>(),
-                It.IsAny<CancellationToken>()))
+                    paymentAmount,
+                    "USD",
+                    It.IsAny<PaymentMethodDetails>(),
+                    It.IsAny<Dictionary<string, string>>(),
+                    It.IsAny<CancellationToken>()))
                 .ReturnsAsync(paymentResult);
 
             _mockPaymentProcessorFactory.Setup(f => f.GetProcessorForPaymentMethod(PaymentMethodType.CreditCard))
@@ -102,10 +99,10 @@ namespace HotshotLogistics.Tests.Billing
             _mockInvoiceRepository.Setup(r => r.UpdatePaidAmountAsync(invoiceId, paymentAmount))
                 .ReturnsAsync(true);
 
-            var billingService = CreateBillingService();
+            BillingService billingService = CreateBillingService();
 
             // Act
-            var result = await billingService.ProcessPaymentAsync(invoiceId, paymentAmount, paymentMethod);
+            bool result = await billingService.ProcessPaymentAsync(invoiceId, paymentAmount, paymentMethod);
 
             // Assert
             result.Should().BeTrue();
@@ -121,19 +118,19 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests payment processing failure with retry logic.
+        ///     Tests payment processing failure with retry logic.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task ProcessPayment_WithFailedPayment_ImplementsRetryLogic()
         {
             // Arrange
-            var invoiceId = "invoice-123";
-            var paymentAmount = 1000.00m;
-            var paymentMethod = "Credit Card";
+            string invoiceId = "invoice-123";
+            decimal paymentAmount = 1000.00m;
+            string paymentMethod = "Credit Card";
 
-            var invoice = CreateTestInvoice(invoiceId, "customer-123", 1000.00m, 0.00m);
-            var customer = CreateTestCustomer("customer-123");
+            Invoice invoice = CreateTestInvoice(invoiceId, "customer-123", 1000.00m, 0.00m);
+            Customer customer = CreateTestCustomer("customer-123");
 
             _mockInvoiceRepository.Setup(r => r.GetByIdAsync(invoiceId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(invoice);
@@ -141,13 +138,13 @@ namespace HotshotLogistics.Tests.Billing
                 .ReturnsAsync(customer);
 
             // First two calls fail, third succeeds
-            var callCount = 0;
+            int callCount = 0;
             _mockStripeProcessor.Setup(p => p.ProcessPaymentAsync(
-                paymentAmount,
-                "USD",
-                It.IsAny<PaymentMethodDetails>(),
-                It.IsAny<Dictionary<string, string>>(),
-                It.IsAny<CancellationToken>()))
+                    paymentAmount,
+                    "USD",
+                    It.IsAny<PaymentMethodDetails>(),
+                    It.IsAny<Dictionary<string, string>>(),
+                    It.IsAny<CancellationToken>()))
                 .ReturnsAsync(() =>
                 {
                     callCount++;
@@ -160,6 +157,7 @@ namespace HotshotLogistics.Tests.Billing
                             ErrorCode = "TEMPORARY_ERROR"
                         };
                     }
+
                     return new PaymentProcessingResult
                     {
                         Success = true,
@@ -173,19 +171,18 @@ namespace HotshotLogistics.Tests.Billing
 
             // Fix: Ensure the factory returns the correct processor for the payment method
             _mockPaymentProcessorFactory.Setup(f => f.GetProcessorForPaymentMethod(It.IsAny<PaymentMethodType>()))
-                .Returns((PaymentMethodType method) =>
-                {
-                    return method == PaymentMethodType.CreditCard ? _mockStripeProcessor.Object : _mockPayPalProcessor.Object;
-                });
+                .Returns((PaymentMethodType method) => method == PaymentMethodType.CreditCard
+                    ? _mockStripeProcessor.Object
+                    : _mockPayPalProcessor.Object);
 
             // Fix: Setup UpdatePaidAmountAsync mock to return true
             _mockInvoiceRepository.Setup(r => r.UpdatePaidAmountAsync(invoiceId, paymentAmount))
                 .ReturnsAsync(true);
 
-            var billingService = CreateBillingService();
+            BillingService billingService = CreateBillingService();
 
             // Act
-            var result = await billingService.ProcessPaymentAsync(invoiceId, paymentAmount, paymentMethod);
+            bool result = await billingService.ProcessPaymentAsync(invoiceId, paymentAmount, paymentMethod);
 
             // Assert
             result.Should().BeTrue();
@@ -198,26 +195,26 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests PayPal payment processing.
+        ///     Tests PayPal payment processing.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task ProcessPayment_WithPayPalPayment_UsesPayPalProcessor()
         {
             // Arrange
-            var invoiceId = "invoice-456";
-            var paymentAmount = 500.00m;
-            var paymentMethod = "PayPal";
+            string invoiceId = "invoice-456";
+            decimal paymentAmount = 500.00m;
+            string paymentMethod = "PayPal";
 
-            var invoice = CreateTestInvoice(invoiceId, "customer-456", 500.00m, 0.00m);
-            var customer = CreateTestCustomer("customer-456");
+            Invoice invoice = CreateTestInvoice(invoiceId, "customer-456", 500.00m, 0.00m);
+            Customer customer = CreateTestCustomer("customer-456");
 
             _mockInvoiceRepository.Setup(r => r.GetByIdAsync(invoiceId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(invoice);
             _mockCustomerRepository.Setup(r => r.GetByIdAsync("customer-456", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(customer);
 
-            var paymentResult = new PaymentProcessingResult
+            PaymentProcessingResult paymentResult = new()
             {
                 Success = true,
                 TransactionId = "paypal_txn_456",
@@ -225,11 +222,11 @@ namespace HotshotLogistics.Tests.Billing
             };
 
             _mockPayPalProcessor.Setup(p => p.ProcessPaymentAsync(
-                paymentAmount,
-                "USD",
-                It.IsAny<PaymentMethodDetails>(),
-                It.IsAny<Dictionary<string, string>>(),
-                It.IsAny<CancellationToken>()))
+                    paymentAmount,
+                    "USD",
+                    It.IsAny<PaymentMethodDetails>(),
+                    It.IsAny<Dictionary<string, string>>(),
+                    It.IsAny<CancellationToken>()))
                 .ReturnsAsync(paymentResult);
 
             _mockPaymentProcessorFactory.Setup(f => f.GetProcessorForPaymentMethod(PaymentMethodType.DigitalWallet))
@@ -239,10 +236,10 @@ namespace HotshotLogistics.Tests.Billing
             _mockInvoiceRepository.Setup(r => r.UpdatePaidAmountAsync(invoiceId, paymentAmount))
                 .ReturnsAsync(true);
 
-            var billingService = CreateBillingService();
+            BillingService billingService = CreateBillingService();
 
             // Act
-            var result = await billingService.ProcessPaymentAsync(invoiceId, paymentAmount, paymentMethod);
+            bool result = await billingService.ProcessPaymentAsync(invoiceId, paymentAmount, paymentMethod);
 
             // Assert
             result.Should().BeTrue();
@@ -255,21 +252,21 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests webhook processing for Stripe.
+        ///     Tests webhook processing for Stripe.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task ProcessStripeWebhook_WithValidSignature_ProcessesEvent()
         {
             // Arrange
-            var webhookData = new WebhookEventData
+            WebhookEventData webhookData = new()
             {
                 EventType = "payment_intent.succeeded",
                 Payload = "{\"event\":\"payment_intent.succeeded\"}",
                 Signature = "valid_signature"
             };
 
-            var webhookResult = new WebhookProcessingResult
+            WebhookProcessingResult webhookResult = new()
             {
                 Success = true,
                 StatusUpdate = new PaymentStatusUpdate
@@ -282,18 +279,19 @@ namespace HotshotLogistics.Tests.Billing
             };
 
             _mockStripeProcessor.Setup(p => p.ValidateWebhookSignature(
-                webhookData.Payload,
-                webhookData.Signature,
-                It.IsAny<string>()))
+                    webhookData.Payload,
+                    webhookData.Signature,
+                    It.IsAny<string>()))
                 .Returns(true);
 
             _mockStripeProcessor.Setup(p => p.ProcessWebhookAsync(
-                webhookData,
-                It.IsAny<CancellationToken>()))
+                    webhookData,
+                    It.IsAny<CancellationToken>()))
                 .ReturnsAsync(webhookResult);
 
             // Act
-            var result = await _mockStripeProcessor.Object.ProcessWebhookAsync(webhookData, It.IsAny<CancellationToken>());
+            WebhookProcessingResult result =
+                await _mockStripeProcessor.Object.ProcessWebhookAsync(webhookData, It.IsAny<CancellationToken>());
 
             // Assert
             result.Success.Should().BeTrue();
@@ -303,14 +301,14 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests webhook processing with invalid signature.
+        ///     Tests webhook processing with invalid signature.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task ProcessStripeWebhook_WithInvalidSignature_RejectsEvent()
         {
             // Arrange
-            var webhookData = new WebhookEventData
+            WebhookEventData webhookData = new()
             {
                 EventType = "payment_intent.succeeded",
                 Payload = "{\"event\":\"payment_intent.succeeded\"}",
@@ -318,15 +316,15 @@ namespace HotshotLogistics.Tests.Billing
             };
 
             _mockStripeProcessor.Setup(p => p.ValidateWebhookSignature(
-                webhookData.Payload,
-                webhookData.Signature,
-                It.IsAny<string>()))
+                    webhookData.Payload,
+                    webhookData.Signature,
+                    It.IsAny<string>()))
                 .Returns(false);
 
             // Setup ProcessWebhookAsync to handle invalid signature case
             _mockStripeProcessor.Setup(p => p.ProcessWebhookAsync(
-                webhookData,
-                It.IsAny<CancellationToken>()))
+                    webhookData,
+                    It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new WebhookProcessingResult
                 {
                     Success = false,
@@ -334,7 +332,8 @@ namespace HotshotLogistics.Tests.Billing
                 });
 
             // Act
-            var result = await _mockStripeProcessor.Object.ProcessWebhookAsync(webhookData, It.IsAny<CancellationToken>());
+            WebhookProcessingResult result =
+                await _mockStripeProcessor.Object.ProcessWebhookAsync(webhookData, It.IsAny<CancellationToken>());
 
             // Assert
             result.Should().NotBeNull();
@@ -343,7 +342,7 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Creates a test invoice for testing.
+        ///     Creates a test invoice for testing.
         /// </summary>
         /// <param name="id">The invoice ID.</param>
         /// <param name="customerId">The customer ID.</param>
@@ -363,13 +362,13 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Creates a test customer for testing.
+        ///     Creates a test customer for testing.
         /// </summary>
         /// <param name="id">The customer ID.</param>
         /// <returns>A test customer.</returns>
-        private static HotshotLogistics.Domain.Entities.Customer CreateTestCustomer(string id)
+        private static Customer CreateTestCustomer(string id)
         {
-            return new HotshotLogistics.Domain.Entities.Customer
+            return new Customer
             {
                 Id = id,
                 CompanyName = $"Company {id}"
@@ -377,7 +376,7 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Creates a billing service instance with mocked dependencies.
+        ///     Creates a billing service instance with mocked dependencies.
         /// </summary>
         /// <returns>A billing service instance.</returns>
         private BillingService CreateBillingService()

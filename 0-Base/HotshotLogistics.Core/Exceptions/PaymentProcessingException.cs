@@ -4,32 +4,20 @@
 
 namespace HotshotLogistics.Core.Exceptions
 {
-    using System;
-
     /// <summary>
-    /// Exception thrown when payment processing fails.
+    ///     Exception thrown when payment processing fails.
     /// </summary>
     public class PaymentProcessingException : Exception
     {
         /// <summary>
-        /// Gets the payment transaction ID.
-        /// </summary>
-        public string? TransactionId { get; }
-
-        /// <summary>
-        /// Gets the payment provider error code.
-        /// </summary>
-        public string? ProviderErrorCode { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PaymentProcessingException"/> class.
+        ///     Initializes a new instance of the <see cref="PaymentProcessingException" /> class.
         /// </summary>
         public PaymentProcessingException()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PaymentProcessingException"/> class with a specified error message.
+        ///     Initializes a new instance of the <see cref="PaymentProcessingException" /> class with a specified error message.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
         public PaymentProcessingException(string message)
@@ -38,7 +26,8 @@ namespace HotshotLogistics.Core.Exceptions
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PaymentProcessingException"/> class with a specified error message and transaction ID.
+        ///     Initializes a new instance of the <see cref="PaymentProcessingException" /> class with a specified error message
+        ///     and transaction ID.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
         /// <param name="transactionId">The payment transaction ID.</param>
@@ -49,7 +38,8 @@ namespace HotshotLogistics.Core.Exceptions
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PaymentProcessingException"/> class with a specified error message, transaction ID, and provider error code.
+        ///     Initializes a new instance of the <see cref="PaymentProcessingException" /> class with a specified error message,
+        ///     transaction ID, and provider error code.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
         /// <param name="transactionId">The payment transaction ID.</param>
@@ -62,7 +52,8 @@ namespace HotshotLogistics.Core.Exceptions
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PaymentProcessingException"/> class with a specified error message and a reference to the inner exception that is the cause of this exception.
+        ///     Initializes a new instance of the <see cref="PaymentProcessingException" /> class with a specified error message
+        ///     and a reference to the inner exception that is the cause of this exception.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
         /// <param name="innerException">The exception that is the cause of the current exception.</param>
@@ -70,5 +61,15 @@ namespace HotshotLogistics.Core.Exceptions
             : base(message, innerException)
         {
         }
+
+        /// <summary>
+        ///     Gets the payment transaction ID.
+        /// </summary>
+        public string? TransactionId { get; }
+
+        /// <summary>
+        ///     Gets the payment provider error code.
+        /// </summary>
+        public string? ProviderErrorCode { get; }
     }
 }

@@ -7,17 +7,17 @@ using HotshotLogistics.Domain.Entities;
 namespace HotshotLogistics.Tests.Jobs
 {
     /// <summary>
-    /// Tests for the JobAssignment class.
+    ///     Tests for the JobAssignment class.
     /// </summary>
     public class JobAssignmentTests
     {
         /// <summary>
-        /// Tests that the default constructor sets appropriate default values.
+        ///     Tests that the default constructor sets appropriate default values.
         /// </summary>
         [Fact]
         public void Default_Constructor_Sets_Defaults()
         {
-            var assignment = new JobAssignment();
+            JobAssignment assignment = new();
             Assert.False(string.IsNullOrWhiteSpace(assignment.Id));
             Assert.Equal(string.Empty, assignment.JobId);
             Assert.Equal(0, assignment.DriverId);
@@ -27,12 +27,12 @@ namespace HotshotLogistics.Tests.Jobs
         }
 
         /// <summary>
-        /// Tests that properties can be assigned values.
+        ///     Tests that properties can be assigned values.
         /// </summary>
         [Fact]
         public void Can_Assign_Properties()
         {
-            var assignment = new JobAssignment
+            JobAssignment assignment = new()
             {
                 Id = "test-id",
                 JobId = "job-123",
@@ -50,30 +50,30 @@ namespace HotshotLogistics.Tests.Jobs
         }
 
         /// <summary>
-        /// Tests that the status can be transitioned.
+        ///     Tests that the status can be transitioned.
         /// </summary>
         [Fact]
         public void Can_Transition_Status()
         {
-            var assignment = new JobAssignment();
+            JobAssignment assignment = new();
             Assert.Equal(JobAssignmentStatus.Active, assignment.Status);
             assignment.Status = JobAssignmentStatus.Completed;
             Assert.Equal(JobAssignmentStatus.Completed, assignment.Status);
         }
 
         /// <summary>
-        /// Tests that navigation properties can be set.
+        ///     Tests that navigation properties can be set.
         /// </summary>
         [Fact]
         public void Can_Set_Navigation_Properties()
         {
-            var job = new Domain.Entities.Job { Id = "job-1", Title = "Test Job" };
-            var driver = new Driver
+            Job job = new() { Id = "job-1", Title = "Test Job" };
+            Driver driver = new()
             {
                 Id = 1,
                 PersonalInfo = new PersonalInfo { FirstName = "Alice", LastName = "Smith" }
             };
-            var assignment = new JobAssignment
+            JobAssignment assignment = new()
             {
                 Job = job,
                 Driver = driver

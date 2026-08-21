@@ -10,16 +10,16 @@ using Microsoft.Extensions.Configuration;
 namespace HotshotLogistics.Tests.Billing
 {
     /// <summary>
-    /// Integration tests for InvoiceRepository.
+    ///     Integration tests for InvoiceRepository.
     /// </summary>
     public class InvoiceRepositoryTests : IClassFixture<DatabaseTestFixture>, IDisposable
     {
-        private readonly InvoiceRepository _invoiceRepository;
         private readonly IConfiguration _configuration;
         private readonly List<string> _createdInvoiceIds = new();
+        private readonly InvoiceRepository _invoiceRepository;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InvoiceRepositoryTests"/> class.
+        ///     Initializes a new instance of the <see cref="InvoiceRepositoryTests" /> class.
         /// </summary>
         public InvoiceRepositoryTests(DatabaseTestFixture fixture)
         {
@@ -31,7 +31,7 @@ namespace HotshotLogistics.Tests.Billing
                 return;
             }
 
-            var configBuilder = new ConfigurationBuilder()
+            IConfigurationBuilder configBuilder = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     ["ConnectionStrings:DefaultConnection"] = TestDatabaseHelper.GetConnectionString()
@@ -42,17 +42,36 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests that AddAsync creates a new invoice successfully.
+        ///     Cleans up test data.
+        /// </summary>
+        public void Dispose()
+        {
+            // Clean up created test invoices
+            foreach (string invoiceId in _createdInvoiceIds)
+            {
+                try
+                {
+                    _invoiceRepository.DeleteAsync(invoiceId).Wait();
+                }
+                catch
+                {
+                    // Ignore cleanup errors
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Tests that AddAsync creates a new invoice successfully.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task AddAsync_CreatesInvoiceSuccessfully()
         {
             // Arrange
-            var invoice = CreateTestInvoice();
+            Invoice invoice = CreateTestInvoice();
 
             // Act
-            var result = await _invoiceRepository.AddAsync(invoice);
+            Invoice result = await _invoiceRepository.AddAsync(invoice);
 
             // Assert
             result.Should().NotBeNull();
@@ -65,40 +84,40 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests that GetByIdAsync retrieves an invoice successfully.
+        ///     Tests that GetByIdAsync retrieves an invoice successfully.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GetByIdAsync_RetrievesInvoiceSuccessfully()
         {
             // Arrange
-            var invoice = await CreateAndSaveTestInvoiceAsync();
+            Invoice invoice = await CreateAndSaveTestInvoiceAsync();
 
             // Act
-            var result = await _invoiceRepository.GetByIdAsync(invoice.Id);
+            Invoice? result = await _invoiceRepository.GetByIdAsync(invoice.Id);
 
             // Assert
             result.Should().NotBeNull();
-            result!.Id.Should().Be(invoice.Id);
+            result.Id.Should().Be(invoice.Id);
             result.InvoiceNumber.Should().Be(invoice.InvoiceNumber);
             result.CustomerId.Should().Be(invoice.CustomerId);
             result.TotalAmount.Should().Be(invoice.TotalAmount);
         }
 
         /// <summary>
-        /// Tests that UpdateAsync updates an invoice successfully.
+        ///     Tests that UpdateAsync updates an invoice successfully.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task UpdateAsync_UpdatesInvoiceSuccessfully()
         {
             // Arrange
-            var invoice = await CreateAndSaveTestInvoiceAsync();
+            Invoice invoice = await CreateAndSaveTestInvoiceAsync();
             invoice.Status = InvoiceStatus.Sent;
             invoice.Notes = "Updated notes";
 
             // Act
-            var result = await _invoiceRepository.UpdateAsync(invoice);
+            Invoice result = await _invoiceRepository.UpdateAsync(invoice);
 
             // Assert
             result.Should().NotBeNull();
@@ -108,18 +127,18 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests that GetByCustomerIdAsync returns invoices for the correct customer.
+        ///     Tests that GetByCustomerIdAsync returns invoices for the correct customer.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GetByCustomerIdAsync_ReturnsInvoicesForCorrectCustomer()
         {
             // Arrange
-            var customerId = "CUST001";
+            string customerId = "CUST001";
             await CreateTestInvoicesAsync();
 
             // Act
-            var result = await _invoiceRepository.GetByCustomerIdAsync(customerId);
+            List<Invoice> result = (await _invoiceRepository.GetByCustomerIdAsync(customerId)).ToList();
 
             // Assert
             result.Should().NotBeNull();
@@ -128,18 +147,18 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests that GetByJobIdAsync returns invoices for the correct job.
+        ///     Tests that GetByJobIdAsync returns invoices for the correct job.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GetByJobIdAsync_ReturnsInvoicesForCorrectJob()
         {
             // Arrange
-            var jobId = "JOB001";
+            string jobId = "JOB001";
             await CreateTestInvoicesAsync();
 
             // Act
-            var result = await _invoiceRepository.GetByJobIdAsync(jobId);
+            List<Invoice> result = (await _invoiceRepository.GetByJobIdAsync(jobId)).ToList();
 
             // Assert
             result.Should().NotBeNull();
@@ -148,7 +167,7 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests that GetByStatusAsync returns invoices with the correct status.
+        ///     Tests that GetByStatusAsync returns invoices with the correct status.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -156,10 +175,10 @@ namespace HotshotLogistics.Tests.Billing
         {
             // Arrange
             await CreateTestInvoicesAsync();
-            var status = InvoiceStatus.Sent;
+            InvoiceStatus status = InvoiceStatus.Sent;
 
             // Act
-            var result = await _invoiceRepository.GetByStatusAsync(status);
+            List<Invoice> result = (await _invoiceRepository.GetByStatusAsync(status)).ToList();
 
             // Assert
             result.Should().NotBeNull();
@@ -167,7 +186,7 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests that GetOverdueInvoicesAsync returns only overdue invoices.
+        ///     Tests that GetOverdueInvoicesAsync returns only overdue invoices.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -177,7 +196,7 @@ namespace HotshotLogistics.Tests.Billing
             await CreateOverdueTestInvoiceAsync();
 
             // Act
-            var result = await _invoiceRepository.GetOverdueInvoicesAsync();
+            List<Invoice> result = (await _invoiceRepository.GetOverdueInvoicesAsync()).ToList();
 
             // Assert
             result.Should().NotBeNull();
@@ -188,7 +207,7 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests that GetInvoicesDueWithinDaysAsync returns invoices due within specified days.
+        ///     Tests that GetInvoicesDueWithinDaysAsync returns invoices due within specified days.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -196,14 +215,14 @@ namespace HotshotLogistics.Tests.Billing
         {
             // Arrange
             await CreateTestInvoicesAsync();
-            var days = 30;
+            int days = 30;
 
             // Act
-            var result = await _invoiceRepository.GetInvoicesDueWithinDaysAsync(days);
+            List<Invoice> result = (await _invoiceRepository.GetInvoicesDueWithinDaysAsync(days)).ToList();
 
             // Assert
             result.Should().NotBeNull();
-            var futureDate = DateTime.UtcNow.Date.AddDays(days);
+            DateTime futureDate = DateTime.UtcNow.Date.AddDays(days);
             result.Should().OnlyContain(i =>
                 i.Status != InvoiceStatus.Paid &&
                 i.Status != InvoiceStatus.Cancelled &&
@@ -212,7 +231,7 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests that GetByDateRangeAsync returns invoices within the specified date range.
+        ///     Tests that GetByDateRangeAsync returns invoices within the specified date range.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -220,11 +239,11 @@ namespace HotshotLogistics.Tests.Billing
         {
             // Arrange
             await CreateTestInvoicesAsync();
-            var startDate = DateTime.UtcNow.Date.AddDays(-30);
-            var endDate = DateTime.UtcNow.Date;
+            DateTime startDate = DateTime.UtcNow.Date.AddDays(-30);
+            DateTime endDate = DateTime.UtcNow.Date;
 
             // Act
-            var result = await _invoiceRepository.GetByDateRangeAsync(startDate, endDate);
+            List<Invoice> result = (await _invoiceRepository.GetByDateRangeAsync(startDate, endDate)).ToList();
 
             // Assert
             result.Should().NotBeNull();
@@ -234,7 +253,7 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests that GetPagedAsync returns paginated results with filtering.
+        ///     Tests that GetPagedAsync returns paginated results with filtering.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -242,7 +261,7 @@ namespace HotshotLogistics.Tests.Billing
         {
             // Arrange
             await CreateTestInvoicesAsync();
-            var filter = new InvoiceFilter
+            InvoiceFilter filter = new()
             {
                 Status = InvoiceStatus.Draft,
                 PageNumber = 1,
@@ -252,7 +271,7 @@ namespace HotshotLogistics.Tests.Billing
             };
 
             // Act
-            var result = await _invoiceRepository.GetPagedAsync(filter);
+            PagedResult<Invoice> result = await _invoiceRepository.GetPagedAsync(filter);
 
             // Assert
             result.Should().NotBeNull();
@@ -265,14 +284,14 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests that GetNextInvoiceNumberAsync returns the next available invoice number.
+        ///     Tests that GetNextInvoiceNumberAsync returns the next available invoice number.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GetNextInvoiceNumberAsync_ReturnsNextAvailableInvoiceNumber()
         {
             // Act
-            var result = await _invoiceRepository.GetNextInvoiceNumberAsync();
+            string result = await _invoiceRepository.GetNextInvoiceNumberAsync();
 
             // Assert
             result.Should().NotBeNullOrEmpty();
@@ -280,25 +299,25 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests that GetOutstandingBalanceAsync returns correct outstanding balance for customer.
+        ///     Tests that GetOutstandingBalanceAsync returns correct outstanding balance for customer.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GetOutstandingBalanceAsync_ReturnsCorrectOutstandingBalance()
         {
             // Arrange
-            var customerId = "CUST001";
+            string customerId = "CUST001";
             await CreateTestInvoicesAsync();
 
             // Act
-            var result = await _invoiceRepository.GetOutstandingBalanceAsync(customerId);
+            decimal result = await _invoiceRepository.GetOutstandingBalanceAsync(customerId);
 
             // Assert
             result.Should().BeGreaterThanOrEqualTo(0);
         }
 
         /// <summary>
-        /// Tests that GetInvoiceSummaryAsync returns correct summary statistics.
+        ///     Tests that GetInvoiceSummaryAsync returns correct summary statistics.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -308,7 +327,7 @@ namespace HotshotLogistics.Tests.Billing
             await CreateTestInvoicesAsync();
 
             // Act
-            var result = await _invoiceRepository.GetInvoiceSummaryAsync();
+            InvoiceSummary result = await _invoiceRepository.GetInvoiceSummaryAsync();
 
             // Assert
             result.Should().NotBeNull();
@@ -318,7 +337,7 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests that SearchByInvoiceNumberAsync returns matching invoices.
+        ///     Tests that SearchByInvoiceNumberAsync returns matching invoices.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -326,10 +345,10 @@ namespace HotshotLogistics.Tests.Billing
         {
             // Arrange
             await CreateTestInvoicesAsync();
-            var searchTerm = "INV";
+            string searchTerm = "INV";
 
             // Act
-            var result = await _invoiceRepository.SearchByInvoiceNumberAsync(searchTerm);
+            List<Invoice> result = (await _invoiceRepository.SearchByInvoiceNumberAsync(searchTerm)).ToList();
 
             // Assert
             result.Should().NotBeNull();
@@ -337,51 +356,51 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests that UpdatePaidAmountAsync updates the paid amount successfully.
+        ///     Tests that UpdatePaidAmountAsync updates the paid amount successfully.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task UpdatePaidAmountAsync_UpdatesPaidAmountSuccessfully()
         {
             // Arrange
-            var invoice = await CreateAndSaveTestInvoiceAsync();
-            var paidAmount = 500.00m;
+            Invoice invoice = await CreateAndSaveTestInvoiceAsync();
+            decimal paidAmount = 500.00m;
 
             // Act
-            var result = await _invoiceRepository.UpdatePaidAmountAsync(invoice.Id, paidAmount);
+            bool result = await _invoiceRepository.UpdatePaidAmountAsync(invoice.Id, paidAmount);
 
             // Assert
             result.Should().BeTrue();
 
             // Verify the update
-            var updatedInvoice = await _invoiceRepository.GetByIdAsync(invoice.Id);
+            Invoice? updatedInvoice = await _invoiceRepository.GetByIdAsync(invoice.Id);
             updatedInvoice!.PaidAmount.Should().Be(paidAmount);
         }
 
         /// <summary>
-        /// Tests that UpdateStatusAsync updates the status successfully.
+        ///     Tests that UpdateStatusAsync updates the status successfully.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task UpdateStatusAsync_UpdatesStatusSuccessfully()
         {
             // Arrange
-            var invoice = await CreateAndSaveTestInvoiceAsync();
-            var newStatus = InvoiceStatus.Sent;
+            Invoice invoice = await CreateAndSaveTestInvoiceAsync();
+            InvoiceStatus newStatus = InvoiceStatus.Sent;
 
             // Act
-            var result = await _invoiceRepository.UpdateStatusAsync(invoice.Id, newStatus);
+            bool result = await _invoiceRepository.UpdateStatusAsync(invoice.Id, newStatus);
 
             // Assert
             result.Should().BeTrue();
 
             // Verify the update
-            var updatedInvoice = await _invoiceRepository.GetByIdAsync(invoice.Id);
+            Invoice? updatedInvoice = await _invoiceRepository.GetByIdAsync(invoice.Id);
             updatedInvoice!.Status.Should().Be(newStatus);
         }
 
         /// <summary>
-        /// Tests that GetAgingReportAsync returns aging report data.
+        ///     Tests that GetAgingReportAsync returns aging report data.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -391,7 +410,7 @@ namespace HotshotLogistics.Tests.Billing
             await CreateTestInvoicesAsync();
 
             // Act
-            var result = await _invoiceRepository.GetAgingReportAsync();
+            IEnumerable<AgingReportEntry> result = await _invoiceRepository.GetAgingReportAsync();
 
             // Assert
             result.Should().NotBeNull();
@@ -400,17 +419,17 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests that GenerateInvoiceAsync creates an invoice from job data.
+        ///     Tests that GenerateInvoiceAsync creates an invoice from job data.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GenerateInvoiceAsync_CreatesInvoiceFromJobData()
         {
             // Arrange
-            var jobId = await CreateTestJobAsync();
+            string jobId = await CreateTestJobAsync();
 
             // Act
-            var result = await _invoiceRepository.GenerateInvoiceAsync(jobId);
+            Invoice result = await _invoiceRepository.GenerateInvoiceAsync(jobId);
 
             // Assert
             result.Should().NotBeNull();
@@ -424,14 +443,14 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Tests that GenerateInvoiceAsync throws exception for non-existent job.
+        ///     Tests that GenerateInvoiceAsync throws exception for non-existent job.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GenerateInvoiceAsync_ThrowsExceptionForNonExistentJob()
         {
             // Arrange
-            var nonExistentJobId = "NONEXISTENT";
+            string nonExistentJobId = "NONEXISTENT";
 
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentException>(() =>
@@ -439,12 +458,12 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Creates a test invoice.
+        ///     Creates a test invoice.
         /// </summary>
         /// <returns>A test invoice.</returns>
         private Invoice CreateTestInvoice()
         {
-            var invoice = new Invoice
+            Invoice invoice = new()
             {
                 Id = Guid.NewGuid().ToString(),
                 InvoiceNumber = $"INV{DateTime.UtcNow.Ticks}",
@@ -483,37 +502,46 @@ namespace HotshotLogistics.Tests.Billing
         }
 
         /// <summary>
-        /// Creates and saves a test invoice.
+        ///     Creates and saves a test invoice.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         private async Task<Invoice> CreateAndSaveTestInvoiceAsync()
         {
-            var invoice = CreateTestInvoice();
-            var result = await _invoiceRepository.AddAsync(invoice);
+            Invoice invoice = CreateTestInvoice();
+            Invoice result = await _invoiceRepository.AddAsync(invoice);
             _createdInvoiceIds.Add(result.Id);
-            return (Invoice)result;
+            return result;
         }
 
         /// <summary>
-        /// Creates multiple test invoices for testing purposes.
+        ///     Creates multiple test invoices for testing purposes.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        private async Task<List<Invoice>> CreateTestInvoicesAsync()
+        private async Task CreateTestInvoicesAsync()
         {
-            var invoices = new List<Invoice>();
+            List<Invoice> invoices = new();
 
             // Create invoices with different statuses and customers
             var testData = new[]
             {
-                new { CustomerId = "CUST001", JobId = (string?)"JOB001", Status = InvoiceStatus.Draft, Amount = 1000.00m },
-                new { CustomerId = "CUST001", JobId = (string?)"JOB002", Status = InvoiceStatus.Sent, Amount = 1500.00m },
-                new { CustomerId = "CUST002", JobId = (string?)"JOB003", Status = InvoiceStatus.Draft, Amount = 800.00m },
+                new
+                {
+                    CustomerId = "CUST001", JobId = (string?)"JOB001", Status = InvoiceStatus.Draft, Amount = 1000.00m
+                },
+                new
+                {
+                    CustomerId = "CUST001", JobId = (string?)"JOB002", Status = InvoiceStatus.Sent, Amount = 1500.00m
+                },
+                new
+                {
+                    CustomerId = "CUST002", JobId = (string?)"JOB003", Status = InvoiceStatus.Draft, Amount = 800.00m
+                },
                 new { CustomerId = "CUST002", JobId = (string?)null, Status = InvoiceStatus.Paid, Amount = 1200.00m }
             };
 
             foreach (var data in testData)
             {
-                var invoice = new Invoice
+                Invoice invoice = new()
                 {
                     Id = Guid.NewGuid().ToString(),
                     InvoiceNumber = $"INV{DateTime.UtcNow.Ticks}{invoices.Count}",
@@ -541,21 +569,19 @@ namespace HotshotLogistics.Tests.Billing
                     TaxApplicable = true
                 });
 
-                var result = await _invoiceRepository.AddAsync(invoice);
-                invoices.Add((Invoice)result);
+                Invoice result = await _invoiceRepository.AddAsync(invoice);
+                invoices.Add(result);
                 _createdInvoiceIds.Add(result.Id);
             }
-
-            return invoices;
         }
 
         /// <summary>
-        /// Creates an overdue test invoice.
+        ///     Creates an overdue test invoice.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        private async Task<Invoice> CreateOverdueTestInvoiceAsync()
+        private async Task CreateOverdueTestInvoiceAsync()
         {
-            var invoice = new Invoice
+            Invoice invoice = new()
             {
                 Id = Guid.NewGuid().ToString(),
                 InvoiceNumber = $"INV{DateTime.UtcNow.Ticks}OVERDUE",
@@ -583,18 +609,17 @@ namespace HotshotLogistics.Tests.Billing
                 TaxApplicable = true
             });
 
-            var result = await _invoiceRepository.AddAsync(invoice);
+            Invoice result = await _invoiceRepository.AddAsync(invoice);
             _createdInvoiceIds.Add(result.Id);
-            return (Invoice)result;
         }
 
         /// <summary>
-        /// Creates a test job for invoice generation testing.
+        ///     Creates a test job for invoice generation testing.
         /// </summary>
         /// <returns>The job ID of the created test job.</returns>
         private async Task<string> CreateTestJobAsync()
         {
-            var jobId = Guid.NewGuid().ToString();
+            string jobId = Guid.NewGuid().ToString();
             const string sql = @"
                 INSERT INTO Jobs (
                     Id, CustomerId, Title, PickupAddress, PickupLatitude, PickupLongitude,
@@ -609,67 +634,48 @@ namespace HotshotLogistics.Tests.Billing
                     @EstimatedDelivery, @SpecialInstructions, @CreatedAt
                 )";
 
-            var parameters = new[]
-            {
-                new SqlParameter("@Id", jobId),
-                new SqlParameter("@CustomerId", "CUST001"),
-                new SqlParameter("@Title", "Test Job for Invoice Generation"),
-                new SqlParameter("@PickupAddress", "123 Pickup St"),
-                new SqlParameter("@PickupCity", "Pickup City"),
-                new SqlParameter("@PickupState", "PC"),
-                new SqlParameter("@PickupZip", "12345"),
-                new SqlParameter("@PickupLat", 40.7128m),
-                new SqlParameter("@PickupLng", -74.0060m),
-                new SqlParameter("@DeliveryAddress", "456 Delivery Ave"),
-                new SqlParameter("@DeliveryCity", "Delivery City"),
-                new SqlParameter("@DeliveryState", "DC"),
-                new SqlParameter("@DeliveryZip", "67890"),
-                new SqlParameter("@DeliveryLat", 34.0522m),
-                new SqlParameter("@DeliveryLng", -118.2437m),
-                new SqlParameter("@CargoDesc", "Test Cargo"),
-                new SqlParameter("@CargoWeight", 1000.0),
-                new SqlParameter("@CargoValue", 5000.00m),
-                new SqlParameter("@CargoSpecial", "Handle with care"),
-                new SqlParameter("@Status", (int)JobStatus.Received),
-                new SqlParameter("@Priority", (int)JobPriority.Normal),
-                new SqlParameter("@BaseRate", 500.00m),
-                new SqlParameter("@MileageRate", 200.00m),
-                new SqlParameter("@TotalAmount", 850.00m),
-                new SqlParameter("@ScheduledPickup", DateTime.UtcNow.AddDays(-1)),
-                new SqlParameter("@EstimatedDelivery", DateTime.UtcNow.AddDays(-1).AddHours(2)),
-                new SqlParameter("@SpecialInstructions", "Test instructions"),
-                new SqlParameter("@TrackingStatus", "Completed"),
-                new SqlParameter("@LastUpdate", DateTime.UtcNow.AddDays(-1)),
-                new SqlParameter("@CreatedAt", DateTime.UtcNow.AddDays(-1))
-            };
+            SqlParameter[] parameters =
+            [
+                new("@Id", jobId),
+                new("@CustomerId", "CUST001"),
+                new("@Title", "Test Job for Invoice Generation"),
+                new("@PickupAddress", "123 Pickup St"),
+                new("@PickupCity", "Pickup City"),
+                new("@PickupState", "PC"),
+                new("@PickupZip", "12345"),
+                new("@PickupLat", 40.7128m),
+                new("@PickupLng", -74.0060m),
+                new("@DeliveryAddress", "456 Delivery Ave"),
+                new("@DeliveryCity", "Delivery City"),
+                new("@DeliveryState", "DC"),
+                new("@DeliveryZip", "67890"),
+                new("@DeliveryLat", 34.0522m),
+                new("@DeliveryLng", -118.2437m),
+                new("@CargoDesc", "Test Cargo"),
+                new("@CargoWeight", 1000.0),
+                new("@CargoValue", 5000.00m),
+                new("@CargoSpecial", "Handle with care"),
+                new("@Status", (int)JobStatus.Received),
+                new("@Priority", (int)JobPriority.Normal),
+                new("@BaseRate", 500.00m),
+                new("@MileageRate", 200.00m),
+                new("@TotalAmount", 850.00m),
+                new("@ScheduledPickup", DateTime.UtcNow.AddDays(-1)),
+                new("@EstimatedDelivery", DateTime.UtcNow.AddDays(-1).AddHours(2)),
+                new("@SpecialInstructions", "Test instructions"),
+                new("@TrackingStatus", "Completed"),
+                new("@LastUpdate", DateTime.UtcNow.AddDays(-1)),
+                new("@CreatedAt", DateTime.UtcNow.AddDays(-1))
+            ];
 
-            await using var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            await using SqlConnection connection = new(_configuration.GetConnectionString("DefaultConnection"));
             await connection.OpenAsync();
 
-            await using var command = new SqlCommand(sql, connection);
+            await using SqlCommand command = new(sql, connection);
             command.Parameters.AddRange(parameters);
             await command.ExecuteNonQueryAsync();
 
             return jobId;
-        }
-
-        /// <summary>
-        /// Cleans up test data.
-        /// </summary>
-        public void Dispose()
-        {
-            // Clean up created test invoices
-            foreach (var invoiceId in _createdInvoiceIds)
-            {
-                try
-                {
-                    _invoiceRepository.DeleteAsync(invoiceId).Wait();
-                }
-                catch
-                {
-                    // Ignore cleanup errors
-                }
-            }
         }
     }
 }

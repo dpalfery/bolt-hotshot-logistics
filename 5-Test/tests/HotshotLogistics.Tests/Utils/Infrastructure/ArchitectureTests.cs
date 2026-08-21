@@ -1,9 +1,12 @@
 using HotshotLogistics.Application.Services;
+using HotshotLogistics.Domain.Entities;
 using NetArchTest.Rules;
+using TestResult = NetArchTest.Rules.TestResult;
+
 namespace HotshotLogistics.Tests.Utils.Infrastructure
 {
     /// <summary>
-    /// Architecture rules and layering tests.
+    ///     Architecture rules and layering tests.
     /// </summary>
     public class ArchitectureTests
     {
@@ -15,7 +18,7 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
         [Fact]
         public void Domain_should_not_depend_on_other_layers()
         {
-            var result = Types.InAssembly(typeof(HotshotLogistics.Domain.Entities.Driver).Assembly)
+            TestResult result = Types.InAssembly(typeof(Driver).Assembly)
                 .ShouldNot()
                 .HaveDependencyOnAny(s_application, s_data, s_infrastructure, s_presentation)
                 .GetResult();
@@ -26,7 +29,7 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
         [Fact]
         public void Application_should_not_depend_on_presentation()
         {
-            var result = Types.InAssembly(typeof(DriverService).Assembly)
+            TestResult result = Types.InAssembly(typeof(DriverService).Assembly)
                 .ShouldNot()
                 .HaveDependencyOn(s_presentation)
                 .GetResult();
@@ -37,7 +40,7 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
         [Fact]
         public void Repositories_should_be_internal()
         {
-            var result = Types.InAssembly(typeof(DriverRepository).Assembly)
+            TestResult result = Types.InAssembly(typeof(DriverRepository).Assembly)
                 .That().HaveNameEndingWith("Repository")
                 .Should().NotBePublic()
                 .GetResult();

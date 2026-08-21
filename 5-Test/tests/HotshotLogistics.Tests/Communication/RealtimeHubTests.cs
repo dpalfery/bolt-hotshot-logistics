@@ -3,16 +3,17 @@ using HotshotLogistics.Contracts.Hubs;
 using HotshotLogistics.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using Moq;
+
 namespace HotshotLogistics.Tests.Communication
 {
     /// <summary>
-    /// Unit tests for RealtimeHub.
+    ///     Unit tests for RealtimeHub.
     /// </summary>
     public class RealtimeHubTests
     {
+        private readonly Mock<IConnectionManagerService> _mockConnectionManager;
         private readonly Mock<ILogger<RealtimeHub>> _mockLogger;
         private readonly Mock<ISignalRClientWrapper> _mockSignalRClient;
-        private readonly Mock<IConnectionManagerService> _mockConnectionManager;
         private readonly RealtimeHub _realtimeHub;
 
         public RealtimeHubTests()
@@ -21,21 +22,23 @@ namespace HotshotLogistics.Tests.Communication
             _mockSignalRClient = new Mock<ISignalRClientWrapper>();
             _mockConnectionManager = new Mock<IConnectionManagerService>();
 
-            _realtimeHub = new RealtimeHub(_mockLogger.Object, _mockSignalRClient.Object, _mockConnectionManager.Object);
+            _realtimeHub =
+                new RealtimeHub(_mockLogger.Object, _mockSignalRClient.Object, _mockConnectionManager.Object);
         }
 
         [Fact]
         public async Task JobStatusUpdated_ShouldBroadcastToJobGroup()
         {
             // Arrange
-            var jobId = "job-123";
-            var status = JobStatus.EnRoute;
+            string jobId = "job-123";
+            JobStatus status = JobStatus.EnRoute;
 
             // Act
             await _realtimeHub.JobStatusUpdated(jobId, status);
 
             // Assert
-            _mockSignalRClient.Verify(x => x.SendToGroupAsync($"job-{jobId}", "JobStatusUpdated", jobId, status), Times.Once);
+            _mockSignalRClient.Verify(x => x.SendToGroupAsync($"job-{jobId}", "JobStatusUpdated", jobId, status),
+                Times.Once);
 
             // Verify logging
             _mockLogger.Verify(
@@ -52,8 +55,8 @@ namespace HotshotLogistics.Tests.Communication
         public async Task LocationUpdated_ShouldBroadcastToJobGroup()
         {
             // Arrange
-            var jobId = "job-123";
-            var location = new LocationUpdate
+            string jobId = "job-123";
+            LocationUpdate location = new()
             {
                 Latitude = 40.7128m,
                 Longitude = -74.0060m,
@@ -67,29 +70,33 @@ namespace HotshotLogistics.Tests.Communication
             await _realtimeHub.LocationUpdated(jobId, location);
 
             // Assert
-            _mockSignalRClient.Verify(x => x.SendToGroupAsync($"job-{jobId}", "LocationUpdated", jobId, location), Times.Once);
+            _mockSignalRClient.Verify(x => x.SendToGroupAsync($"job-{jobId}", "LocationUpdated", jobId, location),
+                Times.Once);
         }
 
         [Fact]
         public async Task DriverStatusChanged_ShouldBroadcastToDriverGroupAndAdmins()
         {
             // Arrange
-            var driverId = 123;
-            var status = DriverStatus.Available;
+            int driverId = 123;
+            DriverStatus status = DriverStatus.Available;
 
             // Act
             await _realtimeHub.DriverStatusChanged(driverId, status);
 
             // Assert
-            _mockSignalRClient.Verify(x => x.SendToGroupAsync($"driver-{driverId}", "DriverStatusChanged", driverId, status), Times.Once);
-            _mockSignalRClient.Verify(x => x.SendToGroupAsync("admins", "DriverStatusChanged", driverId, status), Times.Once);
+            _mockSignalRClient.Verify(
+                x => x.SendToGroupAsync($"driver-{driverId}", "DriverStatusChanged", driverId, status), Times.Once);
+            _mockSignalRClient.Verify(x => x.SendToGroupAsync("admins", "DriverStatusChanged", driverId, status),
+                Times.Once);
 
             // Verify logging
             _mockLogger.Verify(
                 x => x.Log(
                     LogLevel.Information,
                     It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"Driver status update sent for driver {driverId}")),
+                    It.Is<It.IsAnyType>((v, t) =>
+                        v.ToString()!.Contains($"Driver status update sent for driver {driverId}")),
                     It.IsAny<Exception>(),
                     It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                 Times.Once);
@@ -99,7 +106,7 @@ namespace HotshotLogistics.Tests.Communication
         public async Task NewJobAvailable_ShouldBroadcastToAvailableDrivers()
         {
             // Arrange
-            var job = new ContractsJobDto
+            ContractsJobDto job = new()
             {
                 Id = "job-123",
                 CustomerId = "customer-456",
@@ -119,7 +126,8 @@ namespace HotshotLogistics.Tests.Communication
                 x => x.Log(
                     LogLevel.Information,
                     It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"New job availability broadcast for job {job.Id}")),
+                    It.Is<It.IsAnyType>((v, t) =>
+                        v.ToString()!.Contains($"New job availability broadcast for job {job.Id}")),
                     It.IsAny<Exception>(),
                     It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                 Times.Once);
@@ -129,7 +137,7 @@ namespace HotshotLogistics.Tests.Communication
         public async Task NotificationReceived_WithUserId_ShouldSendToSpecificUser()
         {
             // Arrange
-            var message = new NotificationMessageDto
+            NotificationMessageDto message = new()
             {
                 Id = "notif-123",
                 Title = "Test Notification",
@@ -143,7 +151,8 @@ namespace HotshotLogistics.Tests.Communication
             await _realtimeHub.NotificationReceived(message);
 
             // Assert
-            _mockConnectionManager.Verify(x => x.SendToUserAsync(message.UserId, "NotificationReceived", message), Times.Once);
+            _mockConnectionManager.Verify(x => x.SendToUserAsync(message.UserId, "NotificationReceived", message),
+                Times.Once);
 
             // Verify logging
             _mockLogger.Verify(
@@ -160,7 +169,7 @@ namespace HotshotLogistics.Tests.Communication
         public async Task NotificationReceived_WithoutUserId_ShouldBroadcastToAll()
         {
             // Arrange
-            var message = new NotificationMessageDto
+            NotificationMessageDto message = new()
             {
                 Id = "notif-123",
                 Title = "System Alert",
@@ -181,9 +190,9 @@ namespace HotshotLogistics.Tests.Communication
         public async Task JobStatusUpdated_WhenExceptionThrown_ShouldLogError()
         {
             // Arrange
-            var jobId = "job-123";
-            var status = JobStatus.EnRoute;
-            var expectedException = new Exception("SignalR error");
+            string jobId = "job-123";
+            JobStatus status = JobStatus.EnRoute;
+            Exception expectedException = new("SignalR error");
 
             _mockSignalRClient.Setup(x => x.SendToGroupAsync($"job-{jobId}", "JobStatusUpdated", jobId, status))
                 .ThrowsAsync(expectedException);
@@ -196,7 +205,8 @@ namespace HotshotLogistics.Tests.Communication
                 x => x.Log(
                     LogLevel.Error,
                     It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"Error broadcasting job status update for job {jobId}")),
+                    It.Is<It.IsAnyType>((v, t) =>
+                        v.ToString()!.Contains($"Error broadcasting job status update for job {jobId}")),
                     expectedException,
                     It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                 Times.Once);
@@ -206,14 +216,14 @@ namespace HotshotLogistics.Tests.Communication
         public async Task LocationUpdated_WhenExceptionThrown_ShouldLogError()
         {
             // Arrange
-            var jobId = "job-123";
-            var location = new LocationUpdate
+            string jobId = "job-123";
+            LocationUpdate location = new()
             {
                 Latitude = 40.7128m,
                 Longitude = -74.0060m,
                 Timestamp = DateTime.UtcNow
             };
-            var expectedException = new Exception("SignalR error");
+            Exception expectedException = new("SignalR error");
 
             _mockSignalRClient.Setup(x => x.SendToGroupAsync($"job-{jobId}", "LocationUpdated", jobId, location))
                 .ThrowsAsync(expectedException);
@@ -226,7 +236,8 @@ namespace HotshotLogistics.Tests.Communication
                 x => x.Log(
                     LogLevel.Error,
                     It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"Error broadcasting location update for job {jobId}")),
+                    It.Is<It.IsAnyType>((v, t) =>
+                        v.ToString()!.Contains($"Error broadcasting location update for job {jobId}")),
                     expectedException,
                     It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                 Times.Once);
@@ -240,13 +251,14 @@ namespace HotshotLogistics.Tests.Communication
         public async Task JobStatusUpdated_WithDifferentStatuses_ShouldBroadcastCorrectly(JobStatus status)
         {
             // Arrange
-            var jobId = "job-123";
+            string jobId = "job-123";
 
             // Act
             await _realtimeHub.JobStatusUpdated(jobId, status);
 
             // Assert
-            _mockSignalRClient.Verify(x => x.SendToGroupAsync($"job-{jobId}", "JobStatusUpdated", jobId, status), Times.Once);
+            _mockSignalRClient.Verify(x => x.SendToGroupAsync($"job-{jobId}", "JobStatusUpdated", jobId, status),
+                Times.Once);
         }
 
         [Theory]
@@ -256,14 +268,16 @@ namespace HotshotLogistics.Tests.Communication
         public async Task DriverStatusChanged_WithDifferentStatuses_ShouldBroadcastCorrectly(DriverStatus status)
         {
             // Arrange
-            var driverId = 123;
+            int driverId = 123;
 
             // Act
             await _realtimeHub.DriverStatusChanged(driverId, status);
 
             // Assert
-            _mockSignalRClient.Verify(x => x.SendToGroupAsync($"driver-{driverId}", "DriverStatusChanged", driverId, status), Times.Once);
-            _mockSignalRClient.Verify(x => x.SendToGroupAsync("admins", "DriverStatusChanged", driverId, status), Times.Once);
+            _mockSignalRClient.Verify(
+                x => x.SendToGroupAsync($"driver-{driverId}", "DriverStatusChanged", driverId, status), Times.Once);
+            _mockSignalRClient.Verify(x => x.SendToGroupAsync("admins", "DriverStatusChanged", driverId, status),
+                Times.Once);
         }
     }
 }

@@ -14,12 +14,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Graph;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi;
+using Newtonsoft.Json;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // User secrets (Development, or optional elsewhere) supply App Config connection details locally.
-builder.Configuration.AddUserSecrets(typeof(Program).Assembly, optional: true);
-var azureAppConfigurationEnabled = builder.Configuration.AddAzureAppConfigurationIfConfigured();
+builder.Configuration.AddUserSecrets(typeof(Program).Assembly, true);
+bool azureAppConfigurationEnabled = builder.Configuration.AddAzureAppConfigurationIfConfigured();
 
 // Configure settings
 builder.Services.Configure<GoogleMapsSettings>(builder.Configuration.GetSection("Mapping:GoogleMaps"));
@@ -50,8 +51,8 @@ builder.Services.AddControllers()
     {
         // System.Text.Json 9+/10 requires PipeWriter.UnflushedBytes, which the ASP.NET Core 8
         // test host does not implement when tests roll forward to .NET 10.
-        options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
-        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+        options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
     });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -73,7 +74,7 @@ if (azureAppConfigurationEnabled)
 // Register GraphServiceClient
 builder.Services.AddScoped(_ =>
 {
-    var options = new DefaultAzureCredentialOptions
+    DefaultAzureCredentialOptions options = new()
     {
         ExcludeAzureCliCredential = true,
         ExcludeEnvironmentCredential = true,
@@ -81,7 +82,7 @@ builder.Services.AddScoped(_ =>
         ExcludeVisualStudioCredential = true,
         ExcludeInteractiveBrowserCredential = true
     };
-    var credential = new DefaultAzureCredential(options);
+    DefaultAzureCredential credential = new(options);
     return new GraphServiceClient(credential);
 });
 
@@ -94,14 +95,16 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Customer", policy => policy.RequireRole("Customer"));
     options.AddPolicy("ManagerOrAdmin", policy => policy.RequireRole("Admin", "Manager"));
     options.AddPolicy("ManagerOrDriver", policy => policy.RequireRole("Manager", "Driver"));
-    options.AddPolicy("OwnResource", policy => policy.RequireAuthenticatedUser()); // Placeholder for resource-based auth
-    options.AddPolicy("CustomerResource", policy => policy.RequireAuthenticatedUser()); // Placeholder for resource-based auth
+    options.AddPolicy("OwnResource",
+        policy => policy.RequireAuthenticatedUser()); // Placeholder for resource-based auth
+    options.AddPolicy("CustomerResource",
+        policy => policy.RequireAuthenticatedUser()); // Placeholder for resource-based auth
 });
 
 // Configure SignalR
 builder.Services.AddSignalR();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 if (azureAppConfigurationEnabled)
 {
@@ -118,14 +121,14 @@ if (app.Environment.IsDevelopment())
 // Configure CORS policy - must be after UseHttpsRedirection but before UseAuthentication
 app.UseHttpsRedirection();
 
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+string[] allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 
 app.UseCors(policy =>
 {
     policy.WithOrigins(allowedOrigins)
-          .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-          .WithHeaders("Content-Type", "Authorization", "X-Requested-With", "x-signalr-user-agent")
-          .AllowCredentials();
+        .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+        .WithHeaders("Content-Type", "Authorization", "X-Requested-With", "x-signalr-user-agent")
+        .AllowCredentials();
 });
 
 app.UseAuthentication();
@@ -135,4 +138,3 @@ app.MapControllers();
 app.MapHub<RealtimeHub>("/realtime");
 
 app.Run();
-

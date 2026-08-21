@@ -4,15 +4,13 @@
 
 namespace HotshotLogistics.Api.Middleware
 {
-    using Microsoft.AspNetCore.Builder;
-
     /// <summary>
-    /// Extension methods for adding exception handling middleware.
+    ///     Extension methods for adding exception handling middleware.
     /// </summary>
     public static class ExceptionHandlingMiddlewareExtensions
     {
         /// <summary>
-        /// Adds the exception handling middleware to the application pipeline.
+        ///     Adds the exception handling middleware to the application pipeline.
         /// </summary>
         /// <param name="app">The application builder.</param>
         /// <returns>The application builder with exception handling middleware added.</returns>

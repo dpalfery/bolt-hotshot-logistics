@@ -1,11 +1,11 @@
-using Microsoft.Extensions.Configuration;
 using HotshotLogistics.Core.Extensions;
+using Microsoft.Extensions.Configuration;
 
 namespace HotshotLogistics.IntegrationTests
 {
     /// <summary>
-    /// Resolves the test database connection string from Azure App Configuration when configured,
-    /// otherwise from .NET user secrets and environment variables.
+    ///     Resolves the test database connection string from Azure App Configuration when configured,
+    ///     otherwise from .NET user secrets and environment variables.
     /// </summary>
     public static class TestDatabaseHelper
     {
@@ -13,18 +13,18 @@ namespace HotshotLogistics.IntegrationTests
         private static string? s_cachedConnectionString;
 
         /// <summary>
-        /// Gets a value indicating whether a test database connection is configured.
+        ///     Gets a value indicating whether a test database connection is configured.
         /// </summary>
         public static bool IsConfigured => !string.IsNullOrWhiteSpace(TryGetConnectionString());
 
         /// <summary>
-        /// Gets the SQL Server connection string from user secrets or environment variables.
+        ///     Gets the SQL Server connection string from user secrets or environment variables.
         /// </summary>
         /// <returns>A valid SQL Server connection string.</returns>
         /// <exception cref="InvalidOperationException">Thrown when no connection string is configured.</exception>
         public static string GetConnectionString()
         {
-            var connectionString = TryGetConnectionString();
+            string? connectionString = TryGetConnectionString();
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 throw new InvalidOperationException(
@@ -49,14 +49,14 @@ namespace HotshotLogistics.IntegrationTests
                     return s_cachedConnectionString;
                 }
 
-                var configBuilder = new ConfigurationBuilder()
-                    .AddUserSecrets(typeof(Program).Assembly, optional: true)
+                IConfigurationBuilder configBuilder = new ConfigurationBuilder()
+                    .AddUserSecrets(typeof(Program).Assembly, true)
                     .AddEnvironmentVariables();
-                configBuilder.AddAzureAppConfigurationIfConfigured(useDefaultAzureCredential: false);
-                var config = configBuilder.Build();
+                configBuilder.AddAzureAppConfigurationIfConfigured(false);
+                IConfigurationRoot config = configBuilder.Build();
 
-                var connectionString = config.GetConnectionString("DefaultConnection")
-                    ?? config["DB_CONNECTION_STRING"];
+                string? connectionString = config.GetConnectionString("DefaultConnection")
+                                           ?? config["DB_CONNECTION_STRING"];
 
                 if (!string.IsNullOrWhiteSpace(connectionString))
                 {

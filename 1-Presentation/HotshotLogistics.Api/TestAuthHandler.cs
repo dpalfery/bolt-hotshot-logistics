@@ -2,24 +2,23 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Security.Claims;
+using System.Text.Encodings.Web;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
+
 namespace HotshotLogistics.Api
 {
-    using System.Security.Claims;
-    using System.Text.Encodings.Web;
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Authentication;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
-
     /// <summary>
-    /// Test authentication handler for development and integration testing.
+    ///     Test authentication handler for development and integration testing.
     /// </summary>
     public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
         private readonly string _defaultRole;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TestAuthHandler"/> class.
+        ///     Initializes a new instance of the <see cref="TestAuthHandler" /> class.
         /// </summary>
         /// <param name="options">The options.</param>
         /// <param name="logger">The logger.</param>
@@ -35,7 +34,7 @@ namespace HotshotLogistics.Api
             _defaultRole = defaultRole;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             // Require Authorization header and the 'Test' scheme for dev/testing
@@ -44,31 +43,32 @@ namespace HotshotLogistics.Api
                 return Task.FromResult(AuthenticateResult.Fail("Missing Authorization Header"));
             }
 
-            var authHeader = Request.Headers["Authorization"].ToString();
+            string authHeader = Request.Headers["Authorization"].ToString();
             if (!authHeader.StartsWith("Test", StringComparison.OrdinalIgnoreCase))
             {
                 return Task.FromResult(AuthenticateResult.Fail("Invalid Authorization Scheme"));
             }
 
             // Allow dynamic role per request via X-Test-Role header; default to configured _defaultRole
-            var requestedRole = _defaultRole;
-            if (Request.Headers.TryGetValue("X-Test-Role", out var roleHeader) && !string.IsNullOrWhiteSpace(roleHeader.ToString()))
+            string requestedRole = _defaultRole;
+            if (Request.Headers.TryGetValue("X-Test-Role", out StringValues roleHeader) &&
+                !string.IsNullOrWhiteSpace(roleHeader.ToString()))
             {
                 requestedRole = roleHeader.ToString().Trim();
             }
 
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, "test-user-id"),
-                new Claim(ClaimTypes.Name, "Test User"),
-                new Claim(ClaimTypes.Email, "test@example.com"),
-                new Claim(ClaimTypes.Role, requestedRole),
-                new Claim("roles", requestedRole),
-            };
+            Claim[] claims =
+            [
+                new(ClaimTypes.NameIdentifier, "test-user-id"),
+                new(ClaimTypes.Name, "Test User"),
+                new(ClaimTypes.Email, "test@example.com"),
+                new(ClaimTypes.Role, requestedRole),
+                new("roles", requestedRole)
+            ];
 
-            var identity = new ClaimsIdentity(claims, "Test");
-            var principal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(principal, "Test");
+            ClaimsIdentity identity = new(claims, "Test");
+            ClaimsPrincipal principal = new(identity);
+            AuthenticationTicket ticket = new(principal, "Test");
 
             return Task.FromResult(AuthenticateResult.Success(ticket));
         }

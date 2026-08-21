@@ -2,23 +2,17 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using HotshotLogistics.Application.Authorization;
+using HotshotLogistics.Contracts.Services;
+using HotshotLogistics.Domain.Entities;
+using HotshotLogistics.Domain.ValueObjects;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
 namespace HotshotLogistics.Api.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using HotshotLogistics.Application.Authorization;
-    using HotshotLogistics.Contracts.Services;
-    using HotshotLogistics.Domain.Entities;
-    using HotshotLogistics.Domain.ValueObjects;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Logging;
-
     /// <summary>
-    /// API controller for customer management operations.
+    ///     API controller for customer management operations.
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
@@ -29,7 +23,7 @@ namespace HotshotLogistics.Api.Controllers
         private readonly ILogger<CustomerController> _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CustomerController"/> class.
+        ///     Initializes a new instance of the <see cref="CustomerController" /> class.
         /// </summary>
         /// <param name="customerService">The customer service.</param>
         /// <param name="logger">The _logger.</param>
@@ -42,29 +36,31 @@ namespace HotshotLogistics.Api.Controllers
         }
 
         /// <summary>
-        /// Gets all customers.
+        ///     Gets all customers.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of customers.</returns>
         [HttpGet]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(IEnumerable<Customer>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers(CancellationToken cancellationToken = default)
+        public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers(
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                var customers = await _customerService.GetCustomersAsync(cancellationToken);
+                IEnumerable<Customer> customers = await _customerService.GetCustomersAsync(cancellationToken);
                 return Ok(customers);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving customers");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Gets a customer by ID.
+        ///     Gets a customer by ID.
         /// </summary>
         /// <param name="id">The customer ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -73,11 +69,12 @@ namespace HotshotLogistics.Api.Controllers
         [Authorize(Policy = AuthorizationPolicies.OwnResource)]
         [ProducesResponseType(typeof(Customer), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Customer>> GetCustomerById(string id, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<Customer>> GetCustomerById(string id,
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                var customer = await _customerService.GetCustomerByIdAsync(id, cancellationToken);
+                Customer? customer = await _customerService.GetCustomerByIdAsync(id, cancellationToken);
                 if (customer == null)
                 {
                     return NotFound($"Customer with ID {id} not found");
@@ -88,12 +85,13 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving customer");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Creates a new customer.
+        ///     Creates a new customer.
         /// </summary>
         /// <param name="customer">The customer data.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -104,7 +102,7 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<Customer>> CreateCustomer(
-            [FromBody] Customer customer,
+            [FromBody] Customer? customer,
             CancellationToken cancellationToken = default)
         {
             try
@@ -114,7 +112,7 @@ namespace HotshotLogistics.Api.Controllers
                     return BadRequest("Customer data is required");
                 }
 
-                var createdCustomer = await _customerService.CreateCustomerAsync(customer, cancellationToken);
+                Customer createdCustomer = await _customerService.CreateCustomerAsync(customer, cancellationToken);
                 return CreatedAtAction(
                     nameof(GetCustomerById),
                     new { id = createdCustomer.Id },
@@ -128,12 +126,13 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while creating customer");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Updates an existing customer.
+        ///     Updates an existing customer.
         /// </summary>
         /// <param name="id">The customer ID.</param>
         /// <param name="customer">The updated customer data.</param>
@@ -147,7 +146,7 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Customer>> UpdateCustomer(
             string id,
-            [FromBody] Customer customer,
+            [FromBody] Customer? customer,
             CancellationToken cancellationToken = default)
         {
             try
@@ -160,7 +159,7 @@ namespace HotshotLogistics.Api.Controllers
                 // Ensure the ID in the URL matches the customer data
                 customer.Id = id;
 
-                var updatedCustomer = await _customerService.UpdateCustomerAsync(id, customer, cancellationToken);
+                Customer? updatedCustomer = await _customerService.UpdateCustomerAsync(id, customer, cancellationToken);
                 if (updatedCustomer == null)
                 {
                     return NotFound($"Customer with ID {id} not found");
@@ -176,12 +175,13 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating customer");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Deletes a customer.
+        ///     Deletes a customer.
         /// </summary>
         /// <param name="id">The customer ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -195,7 +195,7 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-                var result = await _customerService.DeleteCustomerAsync(id, cancellationToken);
+                bool result = await _customerService.DeleteCustomerAsync(id, cancellationToken);
                 if (!result)
                 {
                     return NotFound($"Customer with ID {id} not found");
@@ -206,56 +206,61 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while deleting customer");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Gets active customers.
+        ///     Gets active customers.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of active customers.</returns>
         [HttpGet("active")]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(IEnumerable<Customer>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Customer>>> GetActiveCustomers(CancellationToken cancellationToken = default)
+        public async Task<ActionResult<IEnumerable<Customer>>> GetActiveCustomers(
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                var customers = await _customerService.GetActiveCustomersAsync(cancellationToken);
+                IEnumerable<Customer> customers = await _customerService.GetActiveCustomersAsync(cancellationToken);
                 return Ok(customers);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving active customers");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Gets customers with overdue invoices.
+        ///     Gets customers with overdue invoices.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of customers with overdue invoices.</returns>
         [HttpGet("overdue")]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(IEnumerable<Customer>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Customer>>> GetOverdueCustomers(CancellationToken cancellationToken = default)
+        public async Task<ActionResult<IEnumerable<Customer>>> GetOverdueCustomers(
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                var customers = await _customerService.GetOverdueCustomersAsync(cancellationToken);
+                IEnumerable<Customer> customers = await _customerService.GetOverdueCustomersAsync(cancellationToken);
                 return Ok(customers);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving overdue customers");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Gets jobs for a specific customer.
+        ///     Gets jobs for a specific customer.
         /// </summary>
         /// <param name="id">The customer ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -264,29 +269,31 @@ namespace HotshotLogistics.Api.Controllers
         [Authorize(Policy = AuthorizationPolicies.CustomerResource)]
         [ProducesResponseType(typeof(IEnumerable<Job>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<Job>>> GetCustomerJobs(string id, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<IEnumerable<Job>>> GetCustomerJobs(string id,
+            CancellationToken cancellationToken = default)
         {
             try
             {
                 // First check if customer exists
-                var customer = await _customerService.GetCustomerByIdAsync(id, cancellationToken);
+                Customer? customer = await _customerService.GetCustomerByIdAsync(id, cancellationToken);
                 if (customer == null)
                 {
                     return NotFound($"Customer with ID {id} not found");
                 }
 
-                var jobs = await _customerService.GetCustomerJobsAsync(id, cancellationToken);
+                IEnumerable<Job> jobs = await _customerService.GetCustomerJobsAsync(id, cancellationToken);
                 return Ok(jobs);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving jobs for customer");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Gets invoices for a specific customer.
+        ///     Gets invoices for a specific customer.
         /// </summary>
         /// <param name="id">The customer ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -295,29 +302,31 @@ namespace HotshotLogistics.Api.Controllers
         [Authorize(Policy = AuthorizationPolicies.CustomerResource)]
         [ProducesResponseType(typeof(IEnumerable<Invoice>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<Invoice>>> GetCustomerInvoices(string id, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<IEnumerable<Invoice>>> GetCustomerInvoices(string id,
+            CancellationToken cancellationToken = default)
         {
             try
             {
                 // First check if customer exists
-                var customer = await _customerService.GetCustomerByIdAsync(id, cancellationToken);
+                Customer? customer = await _customerService.GetCustomerByIdAsync(id, cancellationToken);
                 if (customer == null)
                 {
                     return NotFound($"Customer with ID {id} not found");
                 }
 
-                var invoices = await _customerService.GetCustomerInvoicesAsync(id, cancellationToken);
+                IEnumerable<Invoice> invoices = await _customerService.GetCustomerInvoicesAsync(id, cancellationToken);
                 return Ok(invoices);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving invoices for customer");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Updates a customer's credit limit.
+        ///     Updates a customer's credit limit.
         /// </summary>
         /// <param name="id">The customer ID.</param>
         /// <param name="request">The credit limit update request.</param>
@@ -330,7 +339,7 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateCreditLimit(
             string id,
-            [FromBody] UpdateCreditLimitRequest request,
+            [FromBody] UpdateCreditLimitRequest? request,
             CancellationToken cancellationToken = default)
         {
             try
@@ -345,7 +354,7 @@ namespace HotshotLogistics.Api.Controllers
                     return BadRequest("Credit limit cannot be negative");
                 }
 
-                var result = await _customerService.UpdateCreditLimitAsync(id, request.NewLimit, cancellationToken);
+                bool result = await _customerService.UpdateCreditLimitAsync(id, request.NewLimit, cancellationToken);
                 if (!result)
                 {
                     return NotFound($"Customer with ID {id} not found");
@@ -356,12 +365,13 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating credit limit for customer");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Updates a customer's credit terms.
+        ///     Updates a customer's credit terms.
         /// </summary>
         /// <param name="id">The customer ID.</param>
         /// <param name="creditTerms">The new credit terms.</param>
@@ -374,7 +384,7 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateCreditTerms(
             string id,
-            [FromBody] CreditTerms creditTerms,
+            [FromBody] CreditTerms? creditTerms,
             CancellationToken cancellationToken = default)
         {
             try
@@ -389,7 +399,7 @@ namespace HotshotLogistics.Api.Controllers
                     return BadRequest("Payment terms days must be greater than zero");
                 }
 
-                var result = await _customerService.UpdateCreditTermsAsync(id, creditTerms, cancellationToken);
+                bool result = await _customerService.UpdateCreditTermsAsync(id, creditTerms, cancellationToken);
                 if (!result)
                 {
                     return NotFound($"Customer with ID {id} not found");
@@ -400,18 +410,19 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating credit terms for customer");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
     }
 
     /// <summary>
-    /// Request model for updating customer credit limit.
+    ///     Request model for updating customer credit limit.
     /// </summary>
     public class UpdateCreditLimitRequest
     {
         /// <summary>
-        /// Gets or sets the new credit limit.
+        ///     Gets or sets the new credit limit.
         /// </summary>
         public decimal NewLimit { get; set; }
     }

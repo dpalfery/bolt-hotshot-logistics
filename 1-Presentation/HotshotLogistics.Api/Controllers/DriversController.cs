@@ -1,9 +1,11 @@
 // <copyright file="DriversController.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+
 using HotshotLogistics.Application.Authorization;
 using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Domain.DTOs;
+using HotshotLogistics.Domain.Entities;
 using HotshotLogistics.Domain.ValueObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HotshotLogistics.Api.Controllers
 {
     /// <summary>
-    /// API controller for driver management operations.
+    ///     API controller for driver management operations.
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
@@ -22,7 +24,7 @@ namespace HotshotLogistics.Api.Controllers
         private readonly ILogger<DriversController> _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DriversController"/> class.
+        ///     Initializes a new instance of the <see cref="DriversController" /> class.
         /// </summary>
         /// <param name="driverService">The driver service.</param>
         /// <param name="logger">The _logger.</param>
@@ -35,7 +37,7 @@ namespace HotshotLogistics.Api.Controllers
         }
 
         /// <summary>
-        /// Gets all drivers.
+        ///     Gets all drivers.
         /// </summary>
         /// <returns>A list of drivers.</returns>
         [HttpGet]
@@ -46,8 +48,8 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-                var drivers = await _driverService.GetDriversAsync();
-                var driverDtos = drivers.Select(d => new DriverDto
+                IEnumerable<Driver> drivers = await _driverService.GetDriversAsync();
+                IEnumerable<DriverDto> driverDtos = drivers.Select(d => new DriverDto
                 {
                     Id = d.Id,
                     FirstName = d.PersonalInfo.FirstName,
@@ -65,12 +67,13 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving drivers");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Gets a driver by ID.
+        ///     Gets a driver by ID.
         /// </summary>
         /// <param name="id">The driver ID.</param>
         /// <returns>The driver if found; otherwise, 404 Not Found.</returns>
@@ -82,12 +85,13 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-                var driver = await _driverService.GetDriverByIdAsync(id);
+                Driver? driver = await _driverService.GetDriverByIdAsync(id);
                 if (driver == null)
                 {
                     return NotFound($"Driver with ID {id} not found");
                 }
-                var driverDto = new DriverDto
+
+                DriverDto driverDto = new()
                 {
                     Id = driver.Id,
                     FirstName = driver.PersonalInfo.FirstName,
@@ -105,12 +109,13 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving driver");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Creates a new driver.
+        ///     Creates a new driver.
         /// </summary>
         /// <param name="driverDto">The driver data.</param>
         /// <returns>The created driver.</returns>
@@ -119,7 +124,7 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(typeof(DriverDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<DriverDto>> CreateDriver([FromBody] DriverDto driverDto)
+        public async Task<ActionResult<DriverDto>> CreateDriver([FromBody] DriverDto? driverDto)
         {
             try
             {
@@ -128,7 +133,7 @@ namespace HotshotLogistics.Api.Controllers
                     return BadRequest("Driver data is required");
                 }
 
-                var driver = new HotshotLogistics.Domain.Entities.Driver
+                Driver driver = new()
                 {
                     PersonalInfo = new PersonalInfo
                     {
@@ -146,9 +151,9 @@ namespace HotshotLogistics.Api.Controllers
                 };
 
 
-                var createdDriver = await _driverService.CreateDriverAsync(driver);
+                Driver createdDriver = await _driverService.CreateDriverAsync(driver);
 
-                var createdDriverDto = new DriverDto
+                DriverDto createdDriverDto = new()
                 {
                     Id = createdDriver.Id,
                     FirstName = createdDriver.PersonalInfo.FirstName,
@@ -176,12 +181,13 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while creating driver");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Updates an existing driver.
+        ///     Updates an existing driver.
         /// </summary>
         /// <param name="id">The ID of the driver to update.</param>
         /// <param name="driverDto">The updated driver data.</param>
@@ -201,7 +207,7 @@ namespace HotshotLogistics.Api.Controllers
 
             try
             {
-                var driver = new HotshotLogistics.Domain.Entities.Driver
+                Driver driver = new()
                 {
                     Id = driverDto.Id,
                     PersonalInfo = new PersonalInfo
@@ -219,13 +225,9 @@ namespace HotshotLogistics.Api.Controllers
                     IsActive = driverDto.IsActive
                 };
 
-                var updatedDriver = await _driverService.UpdateDriverAsync(driver);
-                if (updatedDriver == null)
-                {
-                    return NotFound();
-                }
+                Driver updatedDriver = await _driverService.UpdateDriverAsync(driver);
 
-                var updatedDriverDto = new DriverDto
+                DriverDto updatedDriverDto = new()
                 {
                     Id = updatedDriver.Id,
                     FirstName = updatedDriver.PersonalInfo.FirstName,
@@ -253,7 +255,7 @@ namespace HotshotLogistics.Api.Controllers
         }
 
         /// <summary>
-        /// Deletes a driver.
+        ///     Deletes a driver.
         /// </summary>
         /// <param name="id">The ID of the driver to delete.</param>
         /// <returns>A response indicating success or failure.</returns>
@@ -266,7 +268,7 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-                var success = await _driverService.DeleteDriverAsync(id);
+                bool success = await _driverService.DeleteDriverAsync(id);
                 if (!success)
                 {
                     return NotFound();
@@ -280,6 +282,5 @@ namespace HotshotLogistics.Api.Controllers
                 return StatusCode(500, "An internal error occurred.");
             }
         }
-
     }
 }

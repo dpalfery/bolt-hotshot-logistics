@@ -1,244 +1,175 @@
-using System.Diagnostics;
 using FluentMigrator.Runner;
+using HotshotLogistics.Data.Migrations;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace HotshotLogistics.IntegrationTests;
-
-/// <summary>
-/// Shared test fixture that provisions the SQL Server database using FluentMigrator before integration tests run.
-/// </summary>
-public sealed class DatabaseTestFixture : IAsyncLifetime
+namespace HotshotLogistics.IntegrationTests
 {
-    private static readonly SemaphoreSlim s_setupSemaphore = new(1, 1);
-    private static bool s_initialized;
-
-    /// <inheritdoc />
-    public async ValueTask InitializeAsync()
+    /// <summary>
+    ///     Shared test fixture that provisions the SQL Server database using FluentMigrator before integration tests run.
+    /// </summary>
+    public sealed class DatabaseTestFixture : IAsyncLifetime
     {
-        if (s_initialized)
-        {
-            return;
-        }
+        private static readonly SemaphoreSlim s_setupSemaphore = new(1, 1);
+        private static bool s_initialized;
 
-        await s_setupSemaphore.WaitAsync();
-        try
+        /// <inheritdoc />
+        public async ValueTask InitializeAsync()
         {
             if (s_initialized)
             {
                 return;
             }
 
-            // Use the pre-configured connection string from environment to match application behavior
-            var connectionString = TestDatabaseHelper.GetConnectionString();
-
-            // Verify the database is reachable
-            await VerifyConnectionAsync(connectionString);
-
-            // Skip problematic migrations before running them
-            SkipProblematicMigrations(connectionString);
-
-            // Run database migrations to ensure schema is up to date
-            await RunMigrationsAsync(connectionString);
-
-            s_initialized = true;
-        }
-        finally
-        {
-            s_setupSemaphore.Release();
-        }
-    }
-
-    private static void SkipProblematicMigrations(string connectionString)
-    {
-        // Skip the SeedContactsData migration since it has dependency issues
-        // (it tries to create contacts for cust-001 through cust-010 but those customers 
-        // don't exist until the SeedLargeTestData migration runs)
-        SkipMigration(connectionString, 20250106030100, "SeedContactsData - Skipped due to missing customers");
-    }
-
-    private static void SkipMigration(string connectionString, long migrationVersion, string description)
-    {
-        try
-        {
-            using var connection = new SqlConnection(connectionString);
-            connection.Open();
-
-            // Check if VersionInfo table exists
-            using var checkTableCmd = connection.CreateCommand();
-            checkTableCmd.CommandText = @"
-                IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'VersionInfo')
-                BEGIN
-                    CREATE TABLE [dbo].[VersionInfo] (
-                        [Version] bigint NOT NULL,
-                        [AppliedOn] datetime NOT NULL,
-                        [Description] nvarchar(1024) NULL,
-                        CONSTRAINT [PK_VersionInfo] PRIMARY KEY ([Version])
-                    )
-                END";
-            checkTableCmd.ExecuteNonQuery();
-
-            // Check if migration already exists
-            using var checkCmd = connection.CreateCommand();
-            checkCmd.CommandText = "SELECT COUNT(*) FROM [dbo].[VersionInfo] WHERE Version = @Version";
-            checkCmd.Parameters.AddWithValue("@Version", migrationVersion);
-
-            var exists = (int)checkCmd.ExecuteScalar() > 0;
-            if (exists)
+            await s_setupSemaphore.WaitAsync();
+            try
             {
-                Console.WriteLine($"Migration {migrationVersion} already marked as completed.");
-                return;
+                if (s_initialized)
+                {
+                    return;
+                }
+
+                // Use the pre-configured connection string from environment to match application behavior
+                string connectionString = TestDatabaseHelper.GetConnectionString();
+
+                // Verify the database is reachable
+                await VerifyConnectionAsync(connectionString);
+
+                // Skip problematic migrations before running them
+                SkipProblematicMigrations(connectionString);
+
+                // Run database migrations to ensure schema is up to date
+                RunMigrations(connectionString);
+
+                s_initialized = true;
             }
-
-            // Insert migration record to mark it as completed
-            using var insertCmd = connection.CreateCommand();
-            insertCmd.CommandText = @"
-                INSERT INTO [dbo].[VersionInfo] (Version, AppliedOn, Description)
-                VALUES (@Version, @AppliedOn, @Description)";
-
-            insertCmd.Parameters.AddWithValue("@Version", migrationVersion);
-            insertCmd.Parameters.AddWithValue("@AppliedOn", DateTime.UtcNow);
-            insertCmd.Parameters.AddWithValue("@Description", description);
-
-            insertCmd.ExecuteNonQuery();
-            Console.WriteLine($"Successfully marked migration {migrationVersion} ({description}) as completed.");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error marking migration as completed: {ex.Message}");
-        }
-    }
-
-    private static async Task RunMigrationsAsync(string connectionString)
-    {
-        var serviceProvider = new ServiceCollection()
-            .AddFluentMigratorCore()
-            .ConfigureRunner(rb => rb
-                .AddSqlServer()
-                .WithGlobalConnectionString(connectionString)
-                .ScanIn(typeof(HotshotLogistics.Data.Migrations.CreateCustomersTable).Assembly).For.Migrations())
-            .AddLogging(lb => lb.AddFluentMigratorConsole())
-            .BuildServiceProvider(false);
-
-        using var scope = serviceProvider.CreateScope();
-        var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-
-        // Run remaining migrations
-        runner.MigrateUp();
-    }
-
-    /// <inheritdoc />
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
-
-    private static async Task RunDbSetupCliAsync(string solutionRoot, string server, string database, string appUser, string appPassword, string saConnectionString)
-    {
-        var projectPath = Path.Combine(solutionRoot, "7-Deployment", "DbSetup", "HotshotLogistics.DbSetup", "HotshotLogistics.DbSetup.csproj");
-        if (!File.Exists(projectPath))
-        {
-            throw new FileNotFoundException("DbSetup CLI project file was not found.", projectPath);
+            finally
+            {
+                s_setupSemaphore.Release();
+            }
         }
 
-        Console.WriteLine($"[TestSetup] Ensuring database '{database}' is provisioned via DbSetup CLI.");
-
-        var startInfo = new ProcessStartInfo
+        /// <inheritdoc />
+        public ValueTask DisposeAsync()
         {
-            FileName = "dotnet",
-            WorkingDirectory = solutionRoot,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
+            return ValueTask.CompletedTask;
+        }
 
-        startInfo.ArgumentList.Add("run");
-        startInfo.ArgumentList.Add("--project");
-        startInfo.ArgumentList.Add(projectPath);
-        startInfo.ArgumentList.Add("--non-interactive");
-        startInfo.ArgumentList.Add("--server");
-        startInfo.ArgumentList.Add(server);
-        startInfo.ArgumentList.Add("--db-name");
-        startInfo.ArgumentList.Add(database);
-        startInfo.ArgumentList.Add("--app-user");
-        startInfo.ArgumentList.Add(appUser);
-        startInfo.ArgumentList.Add("--password");
-        startInfo.ArgumentList.Add(appPassword);
-        startInfo.ArgumentList.Add("--sa-connection-string");
-        startInfo.ArgumentList.Add(saConnectionString);
-
-        using var process = Process.Start(startInfo) ?? throw new InvalidOperationException("Failed to start DbSetup CLI process.");
-        var standardOutputTask = process.StandardOutput.ReadToEndAsync();
-        var standardErrorTask = process.StandardError.ReadToEndAsync();
-
-        var waitTask = process.WaitForExitAsync();
-        var completedTask = await Task.WhenAny(waitTask, Task.Delay(TimeSpan.FromMinutes(2)));
-        if (completedTask != waitTask)
+        private static void SkipProblematicMigrations(string connectionString)
         {
             try
             {
-                process.Kill(entireProcessTree: true);
+                using SqlConnection connection = new(connectionString);
+                connection.Open();
+
+                // Check if VersionInfo table exists
+                using SqlCommand checkTableCmd = new(
+                    "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'VersionInfo'",
+                    connection);
+                int tableExists = (int)(checkTableCmd.ExecuteScalar() ?? 0);
+
+                if (tableExists == 0)
+                {
+                    // Create VersionInfo table if it doesn't exist
+                    using SqlCommand createTableCmd = new(
+                        @"CREATE TABLE [dbo].[VersionInfo] (
+                            [Version] [bigint] NOT NULL,
+                            [AppliedOn] [datetime] NULL,
+                            [Description] [nvarchar](1024) NULL
+                        )",
+                        connection);
+                    createTableCmd.ExecuteNonQuery();
+                    Console.WriteLine("Created VersionInfo table.");
+                }
+
+                // Check and mark migrations that might fail in container environment
+                // 1. Mark SeedInitialData (20240101000002) if initial data already exists
+                MarkMigrationIfDataExists(connection, 20240101000002, "SeedInitialData",
+                    "SELECT COUNT(*) FROM Customers WHERE Email = 'billing@industrialcorp.example.com'");
+
+                // 2. Mark SeedHistoricalDriverLocations (20240616000002) if locations already exist
+                MarkMigrationIfDataExists(connection, 20240616000002, "SeedHistoricalDriverLocations",
+                    "SELECT COUNT(*) FROM LocationTracking WHERE DriverId = 1");
+
+                // 3. Mark SeedLargeTestData (20240616000003) if large dataset exists
+                MarkMigrationIfDataExists(connection, 20240616000003, "SeedLargeTestData",
+                    "SELECT COUNT(*) FROM Customers WHERE Id = 'cust-001'");
             }
-            catch
+            catch (Exception ex)
             {
-                // Ignore clean-up failures
+                Console.WriteLine($"Error during pre-migration check: {ex.Message}");
             }
-
-            throw new TimeoutException("DbSetup CLI timed out while provisioning the integration test database.");
         }
 
-        await waitTask;
-
-        var output = await standardOutputTask;
-        var error = await standardErrorTask;
-
-        if (process.ExitCode != 0)
+        private static void MarkMigrationIfDataExists(SqlConnection connection, long migrationVersion,
+            string description, string checkQuery)
         {
-            throw new InvalidOperationException($"DbSetup CLI exited with code {process.ExitCode}.{Environment.NewLine}Output:{Environment.NewLine}{output}{Environment.NewLine}Error:{Environment.NewLine}{error}");
-        }
-
-        Console.WriteLine("[TestSetup] DbSetup CLI completed successfully.");
-    }
-
-    private static async Task VerifyConnectionAsync(string connectionString)
-    {
-        await using var connection = new SqlConnection(connectionString);
-        await connection.OpenAsync();
-
-        await using var command = new SqlCommand("SELECT 1", connection);
-        _ = await command.ExecuteScalarAsync();
-    }
-
-    private static string ResolveSolutionRoot()
-    {
-        const string solutionFile = "HotshotLogistics.sln";
-        var directory = AppContext.BaseDirectory;
-
-        while (!string.IsNullOrEmpty(directory))
-        {
-            if (File.Exists(Path.Combine(directory, solutionFile)))
+            try
             {
-                return directory;
-            }
+                // Check if already marked
+                using SqlCommand checkVersionCmd = new(
+                    "SELECT COUNT(*) FROM VersionInfo WHERE Version = @version",
+                    connection);
+                checkVersionCmd.Parameters.AddWithValue("@version", migrationVersion);
+                int versionExists = (int)(checkVersionCmd.ExecuteScalar() ?? 0);
 
-            var parent = Directory.GetParent(directory);
-            if (parent is null)
+                if (versionExists > 0)
+                {
+                    return; // Already marked as applied
+                }
+
+                // Check if the data already exists
+                using SqlCommand checkDataCmd = new(checkQuery, connection);
+                int dataExists = (int)(checkDataCmd.ExecuteScalar() ?? 0);
+
+                if (dataExists <= 0)
+                {
+                    return; // Data doesn't exist, let migration run
+                }
+
+                Console.WriteLine(
+                    $"Data for migration {migrationVersion} ({description}) already exists. Marking as completed to prevent duplicate key errors.");
+
+                // Mark migration as applied
+                using SqlCommand insertCmd = new(
+                    "INSERT INTO VersionInfo (Version, AppliedOn, Description) VALUES (@version, GETUTCDATE(), @description)",
+                    connection);
+                insertCmd.Parameters.AddWithValue("@version", migrationVersion);
+                insertCmd.Parameters.AddWithValue("@description", description);
+                insertCmd.ExecuteNonQuery();
+                Console.WriteLine($"Successfully marked migration {migrationVersion} ({description}) as completed.");
+            }
+            catch (Exception ex)
             {
-                break;
+                Console.WriteLine($"Error marking migration as completed: {ex.Message}");
             }
-
-            directory = parent.FullName;
         }
 
-        throw new InvalidOperationException($"Unable to locate solution root containing '{solutionFile}'.");
-    }
-
-    private static string GetRequiredEnvironmentVariable(string name)
-    {
-        var value = Environment.GetEnvironmentVariable(name);
-        if (string.IsNullOrWhiteSpace(value))
+        private static void RunMigrations(string connectionString)
         {
-            throw new InvalidOperationException($"Environment variable '{name}' must be set for integration tests.");
+            ServiceProvider serviceProvider = new ServiceCollection()
+                .AddFluentMigratorCore()
+                .ConfigureRunner(rb => rb
+                    .AddSqlServer()
+                    .WithGlobalConnectionString(connectionString)
+                    .ScanIn(typeof(CreateCustomersTable).Assembly).For.Migrations())
+                .AddLogging(lb => lb.AddFluentMigratorConsole())
+                .BuildServiceProvider(false);
+
+            using IServiceScope scope = serviceProvider.CreateScope();
+            IMigrationRunner runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+
+            // Run remaining migrations
+            runner.MigrateUp();
         }
 
-        return value;
+        private static async Task VerifyConnectionAsync(string connectionString)
+        {
+            await using SqlConnection connection = new(connectionString);
+            await connection.OpenAsync();
+
+            await using SqlCommand command = new("SELECT 1", connection);
+            _ = await command.ExecuteScalarAsync();
+        }
     }
 }

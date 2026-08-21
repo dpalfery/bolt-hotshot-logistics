@@ -49,7 +49,7 @@ public class UserProfileServiceTests
             Department = "IT",
             OfficeLocation = "Building A",
             MobilePhone = "+1234567890",
-            BusinessPhones = new List<string> { "+0987654321" },
+            BusinessPhones = ["+0987654321"],
             PreferredLanguage = "en-US",
             LastModifiedDateTime = DateTimeOffset.Now
         };

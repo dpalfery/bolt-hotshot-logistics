@@ -1,39 +1,37 @@
-
-
 namespace HotshotLogistics.Core.Enums
 {
     /// <summary>
-    /// Represents payment method options for invoice payments.
+    ///     Represents payment method options for invoice payments.
     /// </summary>
     public enum PaymentMethodType
     {
         /// <summary>
-        /// Credit card payment.
+        ///     Credit card payment.
         /// </summary>
         CreditCard = 0,
 
         /// <summary>
-        /// ACH bank transfer.
+        ///     ACH bank transfer.
         /// </summary>
-        ACH = 1,
+        Ach = 1,
 
         /// <summary>
-        /// Paper check.
+        ///     Paper check.
         /// </summary>
         Check = 2,
 
         /// <summary>
-        /// Cash payment.
+        ///     Cash payment.
         /// </summary>
         Cash = 3,
 
         /// <summary>
-        /// Wire transfer.
+        ///     Wire transfer.
         /// </summary>
         WireTransfer = 4,
 
         /// <summary>
-        /// Digital wallet payment.
+        ///     Digital wallet payment.
         /// </summary>
         DigitalWallet = 5
     }

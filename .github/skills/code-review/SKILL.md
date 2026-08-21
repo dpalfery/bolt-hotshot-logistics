@@ -50,7 +50,15 @@ license: MIT
    - Emit section **IDE Problems Gate** with total count and per-finding disposition.
    - Default disposition: every finding in scope is fixed before Approve. Escalations are allowed only with file, line, and a defensible reason.
    - A green Pre-Merge test gate does not satisfy this step.
-8. **Compile Feedback:** Create a structured output of findings as requested, folding Pre-Merge Gate and security-review findings into the same report. The Pre-Merge Gate status (pass/fail) MUST appear in the Overall Assessment.
+7c. **ReSharper CLT Inspection Gate (.NET / C# changes — blocking):**
+   For any changes affecting .NET / C# files or projects, invoke the `resharper-clt` skill:
+   ```bash
+   dotnet jb inspectcode HotshotLogistics.sln --output=.agents-scratchpad/review-inspect.xml --format=Xml
+   ```
+   - Verify that no new `ERROR` or `WARNING` findings are introduced by the changes.
+   - If warnings or errors exist: issue `Changes Requested` with the specific findings.
+   - Record `ReSharper CLT Gate: PASSED (0 warnings/errors)` in the review report.
+8. **Compile Feedback:** Create a structured output of findings as requested, folding Pre-Merge Gate, ReSharper CLT Gate, and security-review findings into the same report. The Pre-Merge Gate status (pass/fail) MUST appear in the Overall Assessment.
 
 ## Universal Code Review Dimensions
 

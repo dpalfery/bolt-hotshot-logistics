@@ -6,18 +6,19 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using FluentAssertions;
+using HotshotLogistics.Domain.Entities;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace HotshotLogistics.Tests.Jobs
 {
     /// <summary>
-    /// Integration tests for the JobController.
+    ///     Integration tests for the JobController.
     /// </summary>
     [Collection("DatabaseCollection")]
     public class JobControllerIntegrationTests : IntegrationTestBase
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="JobControllerIntegrationTests"/> class.
+        ///     Initializes a new instance of the <see cref="JobControllerIntegrationTests" /> class.
         /// </summary>
         /// <param name="factory">The web application factory.</param>
         public JobControllerIntegrationTests(WebApplicationFactory<Program> factory)
@@ -28,7 +29,7 @@ namespace HotshotLogistics.Tests.Jobs
         }
 
         /// <summary>
-        /// Tests that GetJobById returns a specific job when it exists.
+        ///     Tests that GetJobById returns a specific job when it exists.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [DatabaseFact]
@@ -36,16 +37,17 @@ namespace HotshotLogistics.Tests.Jobs
         {
             // Arrange
             // This job ID is known to exist from the SeedLargeTestData migration
-            var jobId = "job-cust-001-001";
+            string jobId = "job-cust-001-001";
 
             // Act
-            var response = await Client.GetAsync($"/api/Job/{jobId}");
+            HttpResponseMessage response = await Client.GetAsync($"/api/Job/{jobId}");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var content = await response.Content.ReadAsStringAsync();
-            var job = JsonSerializer.Deserialize<Domain.Entities.Job>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            string content = await response.Content.ReadAsStringAsync();
+            Job? job = JsonSerializer.Deserialize<Job>(content,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             job.Should().NotBeNull();
             job.Id.Should().Be(jobId);
@@ -53,17 +55,17 @@ namespace HotshotLogistics.Tests.Jobs
         }
 
         /// <summary>
-        /// Tests that GetJobById returns NotFound for a non-existent job.
+        ///     Tests that GetJobById returns NotFound for a non-existent job.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [DatabaseFact]
         public async Task GetJobById_WhenJobDoesNotExist_ReturnsNotFound()
         {
             // Arrange
-            var jobId = "job-that-does-not-exist";
+            string jobId = "job-that-does-not-exist";
 
             // Act
-            var response = await Client.GetAsync($"/api/Job/{jobId}");
+            HttpResponseMessage response = await Client.GetAsync($"/api/Job/{jobId}");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);

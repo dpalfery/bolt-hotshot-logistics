@@ -2,44 +2,37 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Security.Claims;
+using FluentAssertions;
+using HotshotLogistics.Application.Authorization;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
+using Moq;
+
 namespace HotshotLogistics.Tests.Utils.Infrastructure
 {
-    using System.Security.Claims;
-    using System.Threading.Tasks;
-    using FluentAssertions;
-    using HotshotLogistics.Application.Authorization;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.Extensions.Logging;
-    using Moq;
-    using Xunit;
-
     /// <summary>
-    /// Integration tests for authorization policies and handlers.
+    ///     Integration tests for authorization policies and handlers.
     /// </summary>
     public class AuthorizationTests
     {
-        private readonly Mock<ILogger<ResourceOwnerAuthorizationHandler>> _loggerMock;
-
-        public AuthorizationTests()
-        {
-            _loggerMock = new Mock<ILogger<ResourceOwnerAuthorizationHandler>>();
-        }
+        private readonly Mock<ILogger<ResourceOwnerAuthorizationHandler>> _loggerMock = new();
 
         /// <summary>
-        /// Tests that Admin role grants access to all resources.
+        ///     Tests that Admin role grants access to all resources.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task ResourceOwnerAuthorizationHandler_AdminRole_GrantsAccess()
         {
             // Arrange
-            var handler = new ResourceOwnerAuthorizationHandler(_loggerMock.Object);
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
-            {
+            ResourceOwnerAuthorizationHandler handler = new(_loggerMock.Object);
+            ClaimsPrincipal user = new(new ClaimsIdentity(
+            [
                 new Claim("roles", "Admin")
-            }));
-            var context = new AuthorizationHandlerContext(
-                new[] { new ResourceOwnerRequirement("Customer") },
+            ]));
+            AuthorizationHandlerContext context = new(
+                [new ResourceOwnerRequirement("Customer")],
                 user,
                 "resource123");
 
@@ -51,20 +44,20 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
         }
 
         /// <summary>
-        /// Tests that Manager role grants access to non-system resources.
+        ///     Tests that Manager role grants access to non-system resources.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task ResourceOwnerAuthorizationHandler_ManagerRole_GrantsAccessToNonSystemResources()
         {
             // Arrange
-            var handler = new ResourceOwnerAuthorizationHandler(_loggerMock.Object);
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
-            {
+            ResourceOwnerAuthorizationHandler handler = new(_loggerMock.Object);
+            ClaimsPrincipal user = new(new ClaimsIdentity(
+            [
                 new Claim("roles", "Manager")
-            }));
-            var context = new AuthorizationHandlerContext(
-                new[] { new ResourceOwnerRequirement("Customer") },
+            ]));
+            AuthorizationHandlerContext context = new(
+                [new ResourceOwnerRequirement("Customer")],
                 user,
                 "resource123");
 
@@ -76,20 +69,20 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
         }
 
         /// <summary>
-        /// Tests that Manager role denies access to system resources.
+        ///     Tests that Manager role denies access to system resources.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task ResourceOwnerAuthorizationHandler_ManagerRole_DeniesAccessToSystemResources()
         {
             // Arrange
-            var handler = new ResourceOwnerAuthorizationHandler(_loggerMock.Object);
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
-            {
+            ResourceOwnerAuthorizationHandler handler = new(_loggerMock.Object);
+            ClaimsPrincipal user = new(new ClaimsIdentity(
+            [
                 new Claim("roles", "Manager")
-            }));
-            var context = new AuthorizationHandlerContext(
-                new[] { new ResourceOwnerRequirement("System") },
+            ]));
+            AuthorizationHandlerContext context = new(
+                [new ResourceOwnerRequirement("System")],
                 user,
                 "resource123");
 
@@ -101,20 +94,20 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
         }
 
         /// <summary>
-        /// Tests that users without appropriate roles are denied access.
+        ///     Tests that users without appropriate roles are denied access.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task ResourceOwnerAuthorizationHandler_NoAppropriateRole_DeniesAccess()
         {
             // Arrange
-            var handler = new ResourceOwnerAuthorizationHandler(_loggerMock.Object);
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
-            {
+            ResourceOwnerAuthorizationHandler handler = new(_loggerMock.Object);
+            ClaimsPrincipal user = new(new ClaimsIdentity(
+            [
                 new Claim("roles", "Driver")
-            }));
-            var context = new AuthorizationHandlerContext(
-                new[] { new ResourceOwnerRequirement("Customer") },
+            ]));
+            AuthorizationHandlerContext context = new(
+                [new ResourceOwnerRequirement("Customer")],
                 user,
                 "resource123");
 
@@ -126,16 +119,16 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
         }
 
         /// <summary>
-        /// Tests that null user denies access.
+        ///     Tests that null user denies access.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task ResourceOwnerAuthorizationHandler_NullUser_DeniesAccess()
         {
             // Arrange
-            var handler = new ResourceOwnerAuthorizationHandler(_loggerMock.Object);
-            var context = new AuthorizationHandlerContext(
-                new[] { new ResourceOwnerRequirement("Customer") },
+            ResourceOwnerAuthorizationHandler handler = new(_loggerMock.Object);
+            AuthorizationHandlerContext context = new(
+                [new ResourceOwnerRequirement("Customer")],
                 null!,
                 "resource123");
 
@@ -147,7 +140,7 @@ namespace HotshotLogistics.Tests.Utils.Infrastructure
         }
 
         /// <summary>
-        /// Tests authorization policies configuration.
+        ///     Tests authorization policies configuration.
         /// </summary>
         [Fact]
         public void AuthorizationPolicies_Constants_AreDefined()

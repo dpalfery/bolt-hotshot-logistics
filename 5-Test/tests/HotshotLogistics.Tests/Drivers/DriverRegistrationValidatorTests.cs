@@ -4,14 +4,14 @@ using HotshotLogistics.Application.Validators;
 namespace HotshotLogistics.Tests.Drivers
 {
     /// <summary>
-    /// Unit tests for DriverRegistrationValidator.
+    ///     Unit tests for DriverRegistrationValidator.
     /// </summary>
     public class DriverRegistrationValidatorTests
     {
         private readonly DriverRegistrationValidator _validator;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DriverRegistrationValidatorTests"/> class.
+        ///     Initializes a new instance of the <see cref="DriverRegistrationValidatorTests" /> class.
         /// </summary>
         public DriverRegistrationValidatorTests()
         {
@@ -19,196 +19,196 @@ namespace HotshotLogistics.Tests.Drivers
         }
 
         /// <summary>
-        /// Tests that validation passes for a valid driver registration.
+        ///     Tests that validation passes for a valid driver registration.
         /// </summary>
         [Fact]
         public void Validate_ValidDriverRegistration_ShouldPass()
         {
-            var driver = CreateValidDriver();
+            DriverDto driver = CreateValidDriver();
 
-            var result = _validator.TestValidate(driver);
+            TestValidationResult<DriverDto> result = _validator.TestValidate(driver);
 
             result.ShouldNotHaveAnyValidationErrors();
         }
 
         /// <summary>
-        /// Tests that validation fails when first name is empty.
+        ///     Tests that validation fails when first name is empty.
         /// </summary>
         [Fact]
         public void Validate_EmptyFirstName_ShouldFail()
         {
-            var driver = CreateValidDriver();
+            DriverDto driver = CreateValidDriver();
             driver.PersonalInfo.FirstName = string.Empty;
 
-            var result = _validator.TestValidate(driver);
+            TestValidationResult<DriverDto> result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.PersonalInfo.FirstName)
-                  .WithErrorMessage("First name is required.");
+                .WithErrorMessage("First name is required.");
         }
 
         /// <summary>
-        /// Tests that validation fails when first name contains invalid characters.
+        ///     Tests that validation fails when first name contains invalid characters.
         /// </summary>
         [Fact]
         public void Validate_InvalidFirstNameCharacters_ShouldFail()
         {
-            var driver = CreateValidDriver();
+            DriverDto driver = CreateValidDriver();
             driver.PersonalInfo.FirstName = "John123";
 
-            var result = _validator.TestValidate(driver);
+            TestValidationResult<DriverDto> result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.PersonalInfo.FirstName)
-                  .WithErrorMessage("First name can only contain letters, spaces, hyphens, and apostrophes.");
+                .WithErrorMessage("First name can only contain letters, spaces, hyphens, and apostrophes.");
         }
 
         /// <summary>
-        /// Tests that validation fails when last name is empty.
+        ///     Tests that validation fails when last name is empty.
         /// </summary>
         [Fact]
         public void Validate_EmptyLastName_ShouldFail()
         {
-            var driver = CreateValidDriver();
+            DriverDto driver = CreateValidDriver();
             driver.PersonalInfo.LastName = string.Empty;
 
-            var result = _validator.TestValidate(driver);
+            TestValidationResult<DriverDto> result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.PersonalInfo.LastName)
-                  .WithErrorMessage("Last name is required.");
+                .WithErrorMessage("Last name is required.");
         }
 
         /// <summary>
-        /// Tests that validation fails when email is empty.
+        ///     Tests that validation fails when email is empty.
         /// </summary>
         [Fact]
         public void Validate_EmptyEmail_ShouldFail()
         {
-            var driver = CreateValidDriver();
+            DriverDto driver = CreateValidDriver();
             driver.PersonalInfo.Email = string.Empty;
 
-            var result = _validator.TestValidate(driver);
+            TestValidationResult<DriverDto> result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.PersonalInfo.Email)
-                  .WithErrorMessage("Email address is required.");
+                .WithErrorMessage("Email address is required.");
         }
 
         /// <summary>
-        /// Tests that validation fails when email format is invalid.
+        ///     Tests that validation fails when email format is invalid.
         /// </summary>
         [Fact]
         public void Validate_InvalidEmailFormat_ShouldFail()
         {
-            var driver = CreateValidDriver();
+            DriverDto driver = CreateValidDriver();
             driver.PersonalInfo.Email = "invalid-email";
 
-            var result = _validator.TestValidate(driver);
+            TestValidationResult<DriverDto> result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.PersonalInfo.Email)
-                  .WithErrorMessage("A valid email address is required.");
+                .WithErrorMessage("A valid email address is required.");
         }
 
         /// <summary>
-        /// Tests that validation fails when phone number is empty.
+        ///     Tests that validation fails when phone number is empty.
         /// </summary>
         [Fact]
         public void Validate_EmptyPhoneNumber_ShouldFail()
         {
-            var driver = CreateValidDriver();
+            DriverDto driver = CreateValidDriver();
             driver.PersonalInfo.PhoneNumber = string.Empty;
 
-            var result = _validator.TestValidate(driver);
+            TestValidationResult<DriverDto> result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.PersonalInfo.PhoneNumber)
-                  .WithErrorMessage("Phone number is required.");
+                .WithErrorMessage("Phone number is required.");
         }
 
         /// <summary>
-        /// Tests that validation fails when phone number format is invalid.
+        ///     Tests that validation fails when phone number format is invalid.
         /// </summary>
         [Fact]
         public void Validate_InvalidPhoneNumberFormat_ShouldFail()
         {
-            var driver = CreateValidDriver();
+            DriverDto driver = CreateValidDriver();
             driver.PersonalInfo.PhoneNumber = "123-456-789";
 
-            var result = _validator.TestValidate(driver);
+            TestValidationResult<DriverDto> result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.PersonalInfo.PhoneNumber)
-                  .WithErrorMessage("A valid US phone number is required.");
+                .WithErrorMessage("A valid US phone number is required.");
         }
 
         /// <summary>
-        /// Tests that validation fails when license number is empty.
+        ///     Tests that validation fails when license number is empty.
         /// </summary>
         [Fact]
         public void Validate_EmptyLicenseNumber_ShouldFail()
         {
-            var driver = CreateValidDriver();
+            DriverDto driver = CreateValidDriver();
             driver.License.LicenseNumber = string.Empty;
 
-            var result = _validator.TestValidate(driver);
+            TestValidationResult<DriverDto> result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.License.LicenseNumber)
-                  .WithErrorMessage("Driver's license number is required.");
+                .WithErrorMessage("Driver's license number is required.");
         }
 
         /// <summary>
-        /// Tests that validation fails when license number contains invalid characters.
+        ///     Tests that validation fails when license number contains invalid characters.
         /// </summary>
         [Fact]
         public void Validate_InvalidLicenseNumberCharacters_ShouldFail()
         {
-            var driver = CreateValidDriver();
+            DriverDto driver = CreateValidDriver();
             driver.License.LicenseNumber = "DL@123";
 
-            var result = _validator.TestValidate(driver);
+            TestValidationResult<DriverDto> result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.License.LicenseNumber)
-                  .WithErrorMessage("License number can only contain letters, numbers, and hyphens.");
+                .WithErrorMessage("License number can only contain letters, numbers, and hyphens.");
         }
 
         /// <summary>
-        /// Tests that validation fails when license expiry date is not set.
+        ///     Tests that validation fails when license expiry date is not set.
         /// </summary>
         [Fact]
         public void Validate_MissingLicenseExpiryDate_ShouldFail()
         {
-            var driver = CreateValidDriver();
+            DriverDto driver = CreateValidDriver();
             driver.License.LicenseExpiryDate = default;
 
-            var result = _validator.TestValidate(driver);
+            TestValidationResult<DriverDto> result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.License.LicenseExpiryDate)
-                  .WithErrorMessage("License expiry date is required.");
+                .WithErrorMessage("License expiry date is required.");
         }
 
         /// <summary>
-        /// Tests that validation fails when license expires too soon.
+        ///     Tests that validation fails when license expires too soon.
         /// </summary>
         [Fact]
         public void Validate_LicenseExpiresTooSoon_ShouldFail()
         {
-            var driver = CreateValidDriver();
+            DriverDto driver = CreateValidDriver();
             driver.License.LicenseExpiryDate = DateTime.UtcNow.AddDays(20);
 
-            var result = _validator.TestValidate(driver);
+            TestValidationResult<DriverDto> result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x)
-                  .WithErrorMessage("License must be valid for at least 30 days.");
+                .WithErrorMessage("License must be valid for at least 30 days.");
         }
 
         /// <summary>
-        /// Tests that validation fails when license is not valid for registration.
+        ///     Tests that validation fails when license is not valid for registration.
         /// </summary>
         [Fact]
         public void Validate_LicenseNotValidForRegistration_ShouldFail()
         {
-            var driver = CreateValidDriver();
+            DriverDto driver = CreateValidDriver();
             driver.License.LicenseExpiryDate = DateTime.UtcNow.AddDays(100);
 
-            var result = _validator.TestValidate(driver);
+            TestValidationResult<DriverDto> result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x)
-                  .WithErrorMessage("License must be valid and meet minimum requirements for registration.");
+                .WithErrorMessage("License must be valid and meet minimum requirements for registration.");
         }
 
         private static DriverDto CreateValidDriver()
@@ -233,14 +233,14 @@ namespace HotshotLogistics.Tests.Drivers
     }
 
     /// <summary>
-    /// Unit tests for DriverUpdateValidator.
+    ///     Unit tests for DriverUpdateValidator.
     /// </summary>
     public class DriverUpdateValidatorTests
     {
         private readonly DriverUpdateValidator _validator;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DriverUpdateValidatorTests"/> class.
+        ///     Initializes a new instance of the <see cref="DriverUpdateValidatorTests" /> class.
         /// </summary>
         public DriverUpdateValidatorTests()
         {
@@ -248,12 +248,12 @@ namespace HotshotLogistics.Tests.Drivers
         }
 
         /// <summary>
-        /// Tests that validation passes for a valid driver update.
+        ///     Tests that validation passes for a valid driver update.
         /// </summary>
         [Fact]
         public void Validate_ValidDriverUpdate_ShouldPass()
         {
-            var driver = new DriverDto
+            DriverDto driver = new()
             {
                 Id = 1,
                 PersonalInfo = new PersonalInfo
@@ -270,23 +270,23 @@ namespace HotshotLogistics.Tests.Drivers
                 }
             };
 
-            var result = _validator.TestValidate(driver);
+            TestValidationResult<DriverDto> result = _validator.TestValidate(driver);
 
             result.ShouldNotHaveAnyValidationErrors();
         }
 
         /// <summary>
-        /// Tests that validation fails when driver ID is missing for update.
+        ///     Tests that validation fails when driver ID is missing for update.
         /// </summary>
         [Fact]
         public void Validate_MissingIdForUpdate_ShouldFail()
         {
-            var driver = new DriverDto { Id = 0 };
+            DriverDto driver = new() { Id = 0 };
 
-            var result = _validator.TestValidate(driver);
+            TestValidationResult<DriverDto> result = _validator.TestValidate(driver);
 
             result.ShouldHaveValidationErrorFor(x => x.Id)
-                  .WithErrorMessage("Driver ID is required for updates.");
+                .WithErrorMessage("Driver ID is required for updates.");
         }
     }
 }

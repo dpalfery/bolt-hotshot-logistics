@@ -2,24 +2,20 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using HotshotLogistics.Contracts.Services;
+using Microsoft.Extensions.Logging;
+
 namespace HotshotLogistics.Application.Services
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using HotshotLogistics.Contracts.Services;
-    using Microsoft.Extensions.Logging;
-
     /// <summary>
-    /// Factory for creating communication service instances.
+    ///     Factory for creating communication service instances.
     /// </summary>
     public class CommunicationServiceFactory : ICommunicationServiceFactory
     {
         private readonly Dictionary<string, ICommunicationService> _services;
-        private readonly ILogger<CommunicationServiceFactory> _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommunicationServiceFactory"/> class.
+        ///     Initializes a new instance of the <see cref="CommunicationServiceFactory" /> class.
         /// </summary>
         /// <param name="services">The collection of communication services.</param>
         /// <param name="logger">The logger.</param>
@@ -27,24 +23,24 @@ namespace HotshotLogistics.Application.Services
             IEnumerable<ICommunicationService> services,
             ILogger<CommunicationServiceFactory> logger)
         {
+            ArgumentNullException.ThrowIfNull(logger);
             _services = services.ToDictionary(s => s.Type);
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             // Validate that all communication types are registered
-            var expectedTypes = new[] { "Sms", "Email", "Push" };
-            foreach (var type in expectedTypes)
+            string[] expectedTypes = ["Sms", "Email", "Push"];
+            foreach (string type in expectedTypes)
             {
                 if (!_services.ContainsKey(type))
                 {
-                    _logger.LogWarning("Communication service for type {Type} is not registered", type);
+                    logger.LogWarning("Communication service for type {Type} is not registered", type);
                 }
             }
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public ICommunicationService GetService(string type)
         {
-            if (_services.TryGetValue(type, out var service))
+            if (_services.TryGetValue(type, out ICommunicationService? service))
             {
                 return service;
             }

@@ -9,15 +9,15 @@ using Microsoft.Extensions.Logging;
 namespace HotshotLogistics.IntegrationTests
 {
     /// <summary>
-    /// Middleware for capturing and logging detailed exception information during integration tests.
+    ///     Middleware for capturing and logging detailed exception information during integration tests.
     /// </summary>
     public class TestExceptionLoggingMiddleware
     {
-        private readonly RequestDelegate _next;
         private readonly ILogger<TestExceptionLoggingMiddleware> _logger;
+        private readonly RequestDelegate _next;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TestExceptionLoggingMiddleware"/> class.
+        ///     Initializes a new instance of the <see cref="TestExceptionLoggingMiddleware" /> class.
         /// </summary>
         /// <param name="next">The next middleware in the pipeline.</param>
         /// <param name="logger">The _logger.</param>
@@ -28,7 +28,7 @@ namespace HotshotLogistics.IntegrationTests
         }
 
         /// <summary>
-        /// Invokes the middleware.
+        ///     Invokes the middleware.
         /// </summary>
         /// <param name="context">The HTTP context.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
@@ -46,11 +46,12 @@ namespace HotshotLogistics.IntegrationTests
                 if (context.Request.Method == "POST" || context.Request.Method == "PUT")
                 {
                     context.Request.EnableBuffering();
-                    var requestBody = await ReadRequestBodyAsync(context.Request);
+                    string requestBody = await ReadRequestBodyAsync(context.Request);
                     if (!string.IsNullOrEmpty(requestBody))
                     {
                         _logger.LogInformation("TEST REQUEST BODY: {RequestBody}", requestBody);
                     }
+
                     context.Request.Body.Position = 0;
                 }
 
@@ -84,8 +85,8 @@ namespace HotshotLogistics.IntegrationTests
 
         private static async Task<string> ReadRequestBodyAsync(HttpRequest request)
         {
-            using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true);
-            var body = await reader.ReadToEndAsync();
+            using StreamReader reader = new(request.Body, Encoding.UTF8, leaveOpen: true);
+            string body = await reader.ReadToEndAsync();
             return body;
         }
     }

@@ -4,57 +4,83 @@ using HotshotLogistics.Domain.ValueObjects;
 namespace HotshotLogistics.Domain.Entities
 {
     /// <summary>
-    /// Represents a driver in the system.
+    ///     Represents a driver in the system.
     /// </summary>
     public class Driver
     {
-        /// <inheritdoc/>
-        public int Id { get; set; }
-
-        /// <inheritdoc/>
-        public PersonalInfo PersonalInfo { get; set; } = new PersonalInfo();
-
-        /// <inheritdoc/>
-        public LicenseInfo License { get; set; } = new LicenseInfo();
-
-        /// <inheritdoc/>
-        public VehicleInfo Vehicle { get; set; } = new VehicleInfo();
-
-        /// <inheritdoc/>
-        public List<Certification> Certifications { get; set; } = new List<Certification>();
-
-        /// <inheritdoc/>
-        public AvailabilitySchedule Availability { get; set; } = new AvailabilitySchedule();
-
-        /// <inheritdoc/>
-        public PerformanceMetrics Performance { get; set; } = new PerformanceMetrics();
-
-        /// <inheritdoc/>
-        public PaymentInfo PaymentDetails { get; set; } = new PaymentInfo();
-
-        /// <inheritdoc/>
-        public bool IsActive { get; set; } = true;
-
-        /// <inheritdoc/>
-        public DriverStatus CurrentStatus { get; set; } = DriverStatus.Offline;
-
-        /// <inheritdoc/>
-        public DateTime CreatedAt { get; set; }
-
-        /// <inheritdoc/>
-        public DateTime? UpdatedAt { get; set; }
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="Driver"/> class.
+        ///     Initializes a new instance of the <see cref="Driver" /> class.
         /// </summary>
         public Driver()
         {
             if (CreatedAt == default)
+            {
                 CreatedAt = DateTime.UtcNow;
+            }
         }
 
         /// <summary>
-        /// Gets the full name of the driver.
+        ///     Gets or sets the driver identifier.
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the driver personal information.
+        /// </summary>
+        public PersonalInfo PersonalInfo { get; set; } = new();
+
+        /// <summary>
+        ///     Gets or sets the driver license information.
+        /// </summary>
+        public LicenseInfo License { get; set; } = new();
+
+        /// <summary>
+        ///     Gets or sets the driver vehicle information.
+        /// </summary>
+        public VehicleInfo Vehicle { get; set; } = new();
+
+        /// <summary>
+        ///     Gets or sets the driver certifications.
+        /// </summary>
+        public List<Certification> Certifications { get; set; } = new();
+
+        /// <summary>
+        ///     Gets or sets the driver availability schedule.
+        /// </summary>
+        public AvailabilitySchedule Availability { get; set; } = new();
+
+        /// <summary>
+        ///     Gets or sets the driver performance metrics.
+        /// </summary>
+        public PerformanceMetrics Performance { get; set; } = new();
+
+        /// <summary>
+        ///     Gets or sets the driver payment details.
+        /// </summary>
+        public PaymentInfo PaymentDetails { get; set; } = new();
+
+        /// <summary>
+        ///     Gets or sets a value indicating whether the driver is active.
+        /// </summary>
+        public bool IsActive { get; set; } = true;
+
+        /// <summary>
+        ///     Gets or sets the current status of the driver.
+        /// </summary>
+        public DriverStatus CurrentStatus { get; set; } = DriverStatus.Offline;
+
+        /// <summary>
+        ///     Gets or sets the creation timestamp.
+        /// </summary>
+        public DateTime CreatedAt { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the last updated timestamp.
+        /// </summary>
+        public DateTime? UpdatedAt { get; set; }
+
+        /// <summary>
+        ///     Gets the full name of the driver.
         /// </summary>
         /// <returns>The full name.</returns>
         public string GetFullName()
@@ -63,7 +89,7 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Updates the driver's status.
+        ///     Updates the driver's status.
         /// </summary>
         /// <param name="newStatus">The new status.</param>
         public void UpdateStatus(DriverStatus newStatus)
@@ -73,7 +99,7 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Adds a certification to the driver.
+        ///     Adds a certification to the driver.
         /// </summary>
         /// <param name="certification">The certification to add.</param>
         public void AddCertification(Certification certification)
@@ -82,12 +108,13 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Removes a certification from the driver.
+        ///     Removes a certification from the driver.
         /// </summary>
         /// <param name="certificationName">The name of the certification to remove.</param>
         public void RemoveCertification(string certificationName)
         {
-            var certification = Certifications.FirstOrDefault(c => c.Name.Equals(certificationName, StringComparison.OrdinalIgnoreCase));
+            Certification? certification = Certifications.FirstOrDefault(c =>
+                c.Name.Equals(certificationName, StringComparison.OrdinalIgnoreCase));
             if (certification != null)
             {
                 Certifications.Remove(certification);
@@ -95,7 +122,7 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Updates the performance metrics.
+        ///     Updates the performance metrics.
         /// </summary>
         /// <param name="metrics">The new performance metrics.</param>
         public void UpdatePerformance(PerformanceMetrics metrics)
@@ -105,30 +132,36 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Checks if the driver is available for a job at the specified time.
+        ///     Checks if the driver is available for a job at the specified time.
         /// </summary>
         /// <param name="dateTime">The date and time to check availability for.</param>
         /// <returns>True if the driver is available, false otherwise.</returns>
         public bool IsAvailableAt(DateTime dateTime)
         {
             if (CurrentStatus != DriverStatus.Available)
+            {
                 return false;
+            }
 
             if (Availability.VacationDays.Any(v => v.Date == dateTime.Date))
+            {
                 return false;
+            }
 
-            var dayOfWeek = dateTime.DayOfWeek;
-            var workingHours = Availability.RegularHours.FirstOrDefault(h => h.DayOfWeek == dayOfWeek);
+            DayOfWeek dayOfWeek = dateTime.DayOfWeek;
+            WorkingHours? workingHours = Availability.RegularHours.FirstOrDefault(h => h.DayOfWeek == dayOfWeek);
 
             if (workingHours == null || !workingHours.IsAvailable)
+            {
                 return false;
+            }
 
-            var timeOfDay = dateTime.TimeOfDay;
+            TimeSpan timeOfDay = dateTime.TimeOfDay;
             return timeOfDay >= workingHours.StartTime && timeOfDay <= workingHours.EndTime;
         }
 
         /// <summary>
-        /// Checks if the driver's license is valid.
+        ///     Checks if the driver's license is valid.
         /// </summary>
         /// <returns>True if the license is valid, false otherwise.</returns>
         public bool IsLicenseValid()
@@ -137,7 +170,7 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Checks if the driver's insurance is valid.
+        ///     Checks if the driver's insurance is valid.
         /// </summary>
         /// <returns>True if the insurance is valid, false otherwise.</returns>
         public bool IsInsuranceValid()
@@ -146,14 +179,16 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Checks if the driver has required certifications.
+        ///     Checks if the driver has required certifications.
         /// </summary>
         /// <param name="requiredCertifications">The list of required certification names.</param>
         /// <returns>True if the driver has all required certifications, false otherwise.</returns>
-        public bool HasRequiredCertifications(List<string> requiredCertifications)
+        public bool HasRequiredCertifications(List<string>? requiredCertifications)
         {
-            if (requiredCertifications == null || !requiredCertifications.Any())
+            if (requiredCertifications == null || requiredCertifications.Count == 0)
+            {
                 return true;
+            }
 
             return requiredCertifications.All(required =>
                 Certifications.Any(cert =>
@@ -162,20 +197,23 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Calculates the driver's age.
+        ///     Calculates the driver's age.
         /// </summary>
         /// <returns>The driver's age in years.</returns>
         public int GetAge()
         {
-            var today = DateTime.UtcNow;
-            var age = today.Year - PersonalInfo.DateOfBirth.Year;
+            DateTime today = DateTime.UtcNow;
+            int age = today.Year - PersonalInfo.DateOfBirth.Year;
             if (PersonalInfo.DateOfBirth.Date > today.AddYears(-age))
+            {
                 age--;
+            }
+
             return age;
         }
 
         /// <summary>
-        /// Updates the driver's payment information.
+        ///     Updates the driver's payment information.
         /// </summary>
         /// <param name="paymentInfo">The new payment information.</param>
         public void UpdatePaymentInfo(PaymentInfo paymentInfo)
@@ -185,7 +223,7 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Deactivates the driver.
+        ///     Deactivates the driver.
         /// </summary>
         public void Deactivate()
         {
@@ -195,7 +233,7 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Reactivates the driver.
+        ///     Reactivates the driver.
         /// </summary>
         public void Reactivate()
         {
@@ -205,7 +243,7 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Validates the driver data.
+        ///     Validates the driver data.
         /// </summary>
         /// <returns>True if the driver data is valid, false otherwise.</returns>
         public bool IsValid()

@@ -1,12 +1,15 @@
 using FluentMigrator.Runner;
 using HotshotLogistics.Core.Extensions;
+using HotshotLogistics.Data.Migrations;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MigrationRunner;
 
 // Parse command line arguments
 bool rerunAll = args.Any(arg => arg.Equals("--rerun-all", StringComparison.OrdinalIgnoreCase));
-bool showHelp = args.Any(arg => arg.Equals("--help", StringComparison.OrdinalIgnoreCase) || arg.Equals("-h", StringComparison.OrdinalIgnoreCase));
+bool showHelp = args.Any(arg =>
+    arg.Equals("--help", StringComparison.OrdinalIgnoreCase) || arg.Equals("-h", StringComparison.OrdinalIgnoreCase));
 
 if (showHelp)
 {
@@ -19,17 +22,18 @@ if (showHelp)
     return;
 }
 
-var configurationBuilder = new ConfigurationBuilder()
+IConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-    .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
-    .AddUserSecrets(typeof(Program).Assembly, optional: true)
+    .AddJsonFile("appsettings.json", true, true)
+    .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json",
+        true)
+    .AddUserSecrets(typeof(Program).Assembly, true)
     .AddEnvironmentVariables();
 configurationBuilder.AddAzureAppConfigurationIfConfigured();
-var configuration = configurationBuilder.Build();
+IConfigurationRoot configuration = configurationBuilder.Build();
 
-var connectionString = configuration.GetConnectionString("DefaultConnection")
-    ?? configuration["DB_CONNECTION_STRING"];
+string? connectionString = configuration.GetConnectionString("DefaultConnection")
+                           ?? configuration["DB_CONNECTION_STRING"];
 
 if (string.IsNullOrWhiteSpace(connectionString))
 {
@@ -37,13 +41,13 @@ if (string.IsNullOrWhiteSpace(connectionString))
         "Connection string is not set. Set user secret ConnectionStrings:DefaultConnection or DB_CONNECTION_STRING.");
 }
 
-var serviceProvider = new ServiceCollection()
+ServiceProvider serviceProvider = new ServiceCollection()
     .AddSingleton<IConfiguration>(configuration)
     .AddFluentMigratorCore()
     .ConfigureRunner(rb => rb
         .AddSqlServer()
         .WithGlobalConnectionString(connectionString)
-        .ScanIn(typeof(HotshotLogistics.Data.Migrations.CreateCustomersTable).Assembly).For.Migrations())
+        .ScanIn(typeof(CreateCustomersTable).Assembly).For.Migrations())
     .AddLogging(lb => lb.AddFluentMigratorConsole())
     .BuildServiceProvider(false);
 
@@ -67,9 +71,9 @@ else
     Console.WriteLine();
 }
 
-using (var scope = serviceProvider.CreateScope())
+using (IServiceScope scope = serviceProvider.CreateScope())
 {
-    var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+    IMigrationRunner runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
 
     if (rerunAll)
     {
@@ -89,13 +93,13 @@ static void ClearMigrationHistory(string connectionString)
 {
     try
     {
-        using var connection = new SqlConnection(connectionString);
+        using SqlConnection connection = new(connectionString);
         connection.Open();
 
         // Clear the VersionInfo table to reset migration history
-        using var clearCmd = connection.CreateCommand();
+        using SqlCommand clearCmd = connection.CreateCommand();
         clearCmd.CommandText = "DELETE FROM [dbo].[VersionInfo]";
-        var deletedCount = clearCmd.ExecuteNonQuery();
+        int deletedCount = clearCmd.ExecuteNonQuery();
 
         Console.WriteLine($"Cleared migration history. Removed {deletedCount} migration records.");
     }

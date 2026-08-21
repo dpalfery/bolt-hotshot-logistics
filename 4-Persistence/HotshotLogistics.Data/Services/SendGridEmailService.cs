@@ -1,6 +1,8 @@
 // <copyright file="SendGridEmailService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+
+using System.Net;
 using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Domain.DTOs;
 using HotshotLogistics.Domain.ValueObjects;
@@ -12,15 +14,15 @@ using SendGrid.Helpers.Mail;
 namespace HotshotLogistics.Data.Services
 {
     /// <summary>
-    /// Service for sending emails via SendGrid.
+    ///     Service for sending emails via SendGrid.
     /// </summary>
     public class SendGridEmailService : ICommunicationService
     {
-        private readonly SendGridSettings _settings;
         private readonly ILogger<SendGridEmailService> _logger;
+        private readonly SendGridSettings _settings;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SendGridEmailService"/> class.
+        ///     Initializes a new instance of the <see cref="SendGridEmailService" /> class.
         /// </summary>
         /// <param name="settings">The SendGrid settings.</param>
         /// <param name="logger">The logger.</param>
@@ -28,14 +30,15 @@ namespace HotshotLogistics.Data.Services
             IOptions<SendGridSettings> settings,
             ILogger<SendGridEmailService> logger)
         {
-            _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
+            ArgumentNullException.ThrowIfNull(settings);
+            _settings = settings.Value ?? throw new ArgumentNullException(nameof(settings));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public string Type => "Email";
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<bool> SendAsync(CommunicationMessage message, CancellationToken cancellationToken = default)
         {
             if (message == null)
@@ -56,21 +59,22 @@ namespace HotshotLogistics.Data.Services
             try
             {
                 // Format message with template data
-                var formattedBody = FormatMessage(message.Body, message.TemplateData);
+                string formattedBody = FormatMessage(message.Body, message.TemplateData);
 
-                var client = new SendGridClient(_settings.ApiKey);
-                var from = new EmailAddress(_settings.FromEmail, _settings.FromName);
-                var to = new EmailAddress(message.To);
-                var subject = message.Subject ?? "Notification";
-                var plainTextContent = formattedBody;
-                var htmlContent = $"<p>{formattedBody.Replace("\n", "<br>")}</p>"; // Simple HTML conversion
+                SendGridClient client = new(_settings.ApiKey);
+                EmailAddress from = new(_settings.FromEmail, _settings.FromName);
+                EmailAddress to = new(message.To);
+                string subject = message.Subject ?? "Notification";
+                string plainTextContent = formattedBody;
+                string htmlContent = $"<p>{formattedBody.Replace("\n", "<br>")}</p>"; // Simple HTML conversion
 
-                var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
-                var response = await client.SendEmailAsync(msg, cancellationToken);
+                SendGridMessage msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+                Response response = await client.SendEmailAsync(msg, cancellationToken);
 
-                _logger.LogInformation("Email sent successfully to {To}. Status: {Status}", message.To, response.StatusCode);
+                _logger.LogInformation("Email sent successfully to {To}. Status: {Status}", message.To,
+                    response.StatusCode);
 
-                return response.StatusCode == System.Net.HttpStatusCode.Accepted;
+                return response.StatusCode == HttpStatusCode.Accepted;
             }
             catch (Exception ex)
             {
@@ -80,20 +84,20 @@ namespace HotshotLogistics.Data.Services
         }
 
         /// <summary>
-        /// Formats a message template with the provided data.
+        ///     Formats a message template with the provided data.
         /// </summary>
         /// <param name="template">The message template.</param>
         /// <param name="data">The template data.</param>
         /// <returns>The formatted message.</returns>
         private static string FormatMessage(string template, Dictionary<string, string> data)
         {
-            if (string.IsNullOrEmpty(template) || data == null || !data.Any())
+            if (string.IsNullOrEmpty(template) || data.Count == 0)
             {
                 return template;
             }
 
-            var result = template;
-            foreach (var kvp in data)
+            string result = template;
+            foreach (KeyValuePair<string, string> kvp in data)
             {
                 result = result.Replace($"{{{kvp.Key}}}", kvp.Value);
             }

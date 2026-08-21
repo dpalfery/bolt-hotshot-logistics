@@ -20,61 +20,62 @@ namespace HotshotLogistics.IntegrationTests
         public async Task GetCustomers_ReturnsSuccessAndListOfCustomers()
         {
             // Act
-            var response = await Client.GetAsync("/api/Customer");
+            HttpResponseMessage response = await Client.GetAsync("/api/Customer");
 
             // Assert
             response.EnsureSuccessStatusCode();
-            var customers = await response.Content.ReadFromJsonAsync<IEnumerable<Customer>>();
+            List<Customer>? customers = (await response.Content.ReadFromJsonAsync<IEnumerable<Customer>>())?.ToList();
             Assert.NotNull(customers);
             Assert.NotEmpty(customers);
             // Relaxed assertion - just verify we got some customers, not exact count
-            Assert.True(customers.Count() >= 10, $"Expected at least 10 customers, got {customers.Count()}");
+            Assert.True(customers.Count >= 10, $"Expected at least 10 customers, got {customers.Count}");
         }
 
         [Fact]
         public async Task GetCustomer_WithValidId_ReturnsCustomer()
         {
             // Arrange
-            var validCustomerId = "cust-001"; // From seed data
+            string validCustomerId = "cust-001"; // From seed data
 
             // Act
-            var response = await Client.GetAsync($"/api/Customer/{validCustomerId}");
+            HttpResponseMessage response = await Client.GetAsync($"/api/Customer/{validCustomerId}");
 
             // Assert
             response.EnsureSuccessStatusCode();
-            var customer = await response.Content.ReadFromJsonAsync<Customer>();
+            Customer? customer = await response.Content.ReadFromJsonAsync<Customer>();
             Assert.NotNull(customer);
             Assert.Equal(validCustomerId, customer.Id);
+            Assert.Equal("Acme Corporation", customer.CompanyName);
         }
 
         [Fact]
         public async Task GetCustomer_WithInvalidId_ReturnsNotFound()
         {
             // Arrange
-            var invalidCustomerId = "cust-999";
+            string invalidCustomerId = "cust-999";
 
             // Act
-            var response = await Client.GetAsync($"/api/Customer/{invalidCustomerId}");
+            HttpResponseMessage response = await Client.GetAsync($"/api/Customer/{invalidCustomerId}");
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Fact]
-        public async Task CreateCustomer_WithValidData_ReturnsCreated()
+        public async Task CreateCustomer_WithValidData_ReturnsCreatedCustomer()
         {
             // Arrange
-            var uniqueId = $"test-cust-{Guid.NewGuid():N}";
-            var newCustomer = new Customer
+            string uniqueId = $"test-{Guid.NewGuid():N}";
+            Customer newCustomer = new()
             {
                 Id = uniqueId,
-                CompanyName = "New Test Customer",
-                Email = "new.customer@test.com",
-                Phone = "555-1234",
-                TaxId = "TAX-TEST-001",
+                CompanyName = "Test Customer Integration",
+                Email = "integration.test@customer.com",
+                Phone = "555-0199",
+                TaxId = "TAX-INT-001",
                 BillingAddress = new Address
                 {
-                    Street = "123 Test St",
+                    Street = "123 Integration Way",
                     City = "Testville",
                     State = "TS",
                     ZipCode = "12345",
@@ -82,8 +83,8 @@ namespace HotshotLogistics.IntegrationTests
                     Latitude = 40.0,
                     Longitude = -75.0
                 },
-                Contacts = new List<Contact>
-                {
+                Contacts =
+                [
                     new Contact
                     {
                         Name = "John Test",
@@ -92,7 +93,7 @@ namespace HotshotLogistics.IntegrationTests
                         Title = "Operations Manager",
                         IsPrimary = true
                     }
-                },
+                ],
                 CreditTerms = new CreditTerms
                 {
                     PaymentTermsDays = 30,
@@ -104,12 +105,12 @@ namespace HotshotLogistics.IntegrationTests
             };
 
             // Act
-            var response = await Client.PostAsJsonAsync("/api/Customer", newCustomer);
+            HttpResponseMessage response = await Client.PostAsJsonAsync("/api/Customer", newCustomer);
 
             // Assert
             response.EnsureSuccessStatusCode();
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            var createdCustomer = await response.Content.ReadFromJsonAsync<Customer>();
+            Customer? createdCustomer = await response.Content.ReadFromJsonAsync<Customer>();
             Assert.NotNull(createdCustomer);
             Assert.Equal(newCustomer.CompanyName, createdCustomer.CompanyName);
             Assert.Equal(uniqueId, createdCustomer.Id);
@@ -119,8 +120,8 @@ namespace HotshotLogistics.IntegrationTests
         public async Task UpdateCustomer_WithValidData_ReturnsOk()
         {
             // Arrange - First create a customer to update
-            var uniqueId = $"test-update-{Guid.NewGuid():N}";
-            var initialCustomer = new Customer
+            string uniqueId = $"test-update-{Guid.NewGuid():N}";
+            Customer initialCustomer = new()
             {
                 Id = uniqueId,
                 CompanyName = "Customer To Update",
@@ -137,8 +138,8 @@ namespace HotshotLogistics.IntegrationTests
                     Latitude = 40.0,
                     Longitude = -75.0
                 },
-                Contacts = new List<Contact>
-                {
+                Contacts =
+                [
                     new Contact
                     {
                         Name = "Original Contact",
@@ -147,7 +148,7 @@ namespace HotshotLogistics.IntegrationTests
                         Title = "Original Title",
                         IsPrimary = true
                     }
-                },
+                ],
                 CreditTerms = new CreditTerms
                 {
                     PaymentTermsDays = 30,
@@ -159,11 +160,11 @@ namespace HotshotLogistics.IntegrationTests
             };
 
             // Create the customer first
-            var createResponse = await Client.PostAsJsonAsync("/api/Customer", initialCustomer);
+            HttpResponseMessage createResponse = await Client.PostAsJsonAsync("/api/Customer", initialCustomer);
             createResponse.EnsureSuccessStatusCode();
 
             // Now update it
-            var customerToUpdate = new Customer
+            Customer customerToUpdate = new()
             {
                 Id = uniqueId,
                 CompanyName = "Updated Customer Name",
@@ -180,8 +181,8 @@ namespace HotshotLogistics.IntegrationTests
                     Latitude = 41.0,
                     Longitude = -76.0
                 },
-                Contacts = new List<Contact>
-                {
+                Contacts =
+                [
                     new Contact
                     {
                         Name = "Jane Updated",
@@ -190,7 +191,7 @@ namespace HotshotLogistics.IntegrationTests
                         Title = "Account Manager",
                         IsPrimary = true
                     }
-                },
+                ],
                 CreditTerms = new CreditTerms
                 {
                     PaymentTermsDays = 45,
@@ -202,11 +203,11 @@ namespace HotshotLogistics.IntegrationTests
             };
 
             // Act
-            var response = await Client.PutAsJsonAsync($"/api/Customer/{uniqueId}", customerToUpdate);
+            HttpResponseMessage response = await Client.PutAsJsonAsync($"/api/Customer/{uniqueId}", customerToUpdate);
 
             // Assert
             response.EnsureSuccessStatusCode();
-            var updatedCustomer = await response.Content.ReadFromJsonAsync<Customer>();
+            Customer? updatedCustomer = await response.Content.ReadFromJsonAsync<Customer>();
 
             // Verify update
             Assert.NotNull(updatedCustomer);
@@ -218,8 +219,8 @@ namespace HotshotLogistics.IntegrationTests
         public async Task DeleteCustomer_WithValidId_ReturnsNoContent()
         {
             // Arrange - First create a customer to delete
-            var uniqueId = $"test-delete-{Guid.NewGuid():N}";
-            var testCustomer = new Customer
+            string uniqueId = $"test-delete-{Guid.NewGuid():N}";
+            Customer testCustomer = new()
             {
                 Id = uniqueId,
                 CompanyName = "Customer To Delete",
@@ -236,8 +237,8 @@ namespace HotshotLogistics.IntegrationTests
                     Latitude = 40.0,
                     Longitude = -75.0
                 },
-                Contacts = new List<Contact>
-                {
+                Contacts =
+                [
                     new Contact
                     {
                         Name = "Delete Test Contact",
@@ -246,7 +247,7 @@ namespace HotshotLogistics.IntegrationTests
                         Title = "Test Contact",
                         IsPrimary = true
                     }
-                },
+                ],
                 CreditTerms = new CreditTerms
                 {
                     PaymentTermsDays = 30,
@@ -258,17 +259,17 @@ namespace HotshotLogistics.IntegrationTests
             };
 
             // Create the customer
-            var createResponse = await Client.PostAsJsonAsync("/api/Customer", testCustomer);
+            HttpResponseMessage createResponse = await Client.PostAsJsonAsync("/api/Customer", testCustomer);
             createResponse.EnsureSuccessStatusCode();
 
             // Act - Delete the customer
-            var response = await Client.DeleteAsync($"/api/Customer/{uniqueId}");
+            HttpResponseMessage response = await Client.DeleteAsync($"/api/Customer/{uniqueId}");
 
             // Assert
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
 
             // Verify it was deleted
-            var getResponse = await Client.GetAsync($"/api/Customer/{uniqueId}");
+            HttpResponseMessage getResponse = await Client.GetAsync($"/api/Customer/{uniqueId}");
             Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
         }
 
@@ -276,11 +277,11 @@ namespace HotshotLogistics.IntegrationTests
         public async Task GetActiveCustomers_ReturnsOnlyActiveCustomers()
         {
             // Act
-            var response = await Client.GetAsync("/api/Customer/active");
+            HttpResponseMessage response = await Client.GetAsync("/api/Customer/active");
 
             // Assert
             response.EnsureSuccessStatusCode();
-            var customers = await response.Content.ReadFromJsonAsync<IEnumerable<Customer>>();
+            IEnumerable<Customer>? customers = await response.Content.ReadFromJsonAsync<IEnumerable<Customer>>();
             Assert.NotNull(customers);
             Assert.All(customers, c => Assert.True(c.IsActive));
         }
@@ -289,14 +290,14 @@ namespace HotshotLogistics.IntegrationTests
         public async Task GetCustomerJobs_WithValidId_ReturnsJobs()
         {
             // Arrange
-            var customerId = "cust-001"; // This customer has jobs based on seed data
+            string customerId = "cust-001"; // This customer has jobs based on seed data
 
             // Act
-            var response = await Client.GetAsync($"/api/Customer/{customerId}/jobs");
+            HttpResponseMessage response = await Client.GetAsync($"/api/Customer/{customerId}/jobs");
 
             // Assert
             response.EnsureSuccessStatusCode();
-            var jobs = await response.Content.ReadFromJsonAsync<IEnumerable<Domain.Entities.Job>>();
+            IEnumerable<Job>? jobs = await response.Content.ReadFromJsonAsync<IEnumerable<Job>>();
             Assert.NotNull(jobs);
             Assert.NotEmpty(jobs);
         }
@@ -305,14 +306,14 @@ namespace HotshotLogistics.IntegrationTests
         public async Task GetCustomerInvoices_WithValidId_ReturnsInvoices()
         {
             // Arrange
-            var customerId = "cust-001"; // This customer has invoices based on seed data
+            string customerId = "cust-001"; // This customer has invoices based on seed data
 
             // Act
-            var response = await Client.GetAsync($"/api/Customer/{customerId}/invoices");
+            HttpResponseMessage response = await Client.GetAsync($"/api/Customer/{customerId}/invoices");
 
             // Assert
             response.EnsureSuccessStatusCode();
-            var invoices = await response.Content.ReadFromJsonAsync<IEnumerable<Invoice>>();
+            IEnumerable<Invoice>? invoices = await response.Content.ReadFromJsonAsync<IEnumerable<Invoice>>();
             Assert.NotNull(invoices);
             Assert.NotEmpty(invoices);
         }
@@ -321,11 +322,12 @@ namespace HotshotLogistics.IntegrationTests
         public async Task UpdateCreditLimit_WithValidData_ReturnsNoContent()
         {
             // Arrange
-            var customerId = "cust-004";
+            string customerId = "cust-004";
             var request = new { NewLimit = 5000.00m };
 
             // Act
-            var response = await Client.PostAsJsonAsync($"/api/Customer/{customerId}/credit-limit", request);
+            HttpResponseMessage response =
+                await Client.PostAsJsonAsync($"/api/Customer/{customerId}/credit-limit", request);
 
             // Assert
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
@@ -335,11 +337,12 @@ namespace HotshotLogistics.IntegrationTests
         public async Task UpdateCreditTerms_WithValidData_ReturnsNoContent()
         {
             // Arrange
-            var customerId = "cust-005";
-            var creditTerms = new CreditTerms { PaymentTermsDays = 45, Status = CreditStatus.Approved };
+            string customerId = "cust-005";
+            CreditTerms creditTerms = new() { PaymentTermsDays = 45, Status = CreditStatus.Approved };
 
             // Act
-            var response = await Client.PutAsJsonAsync($"/api/Customer/{customerId}/credit-terms", creditTerms);
+            HttpResponseMessage response =
+                await Client.PutAsJsonAsync($"/api/Customer/{customerId}/credit-terms", creditTerms);
 
             // Assert
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);

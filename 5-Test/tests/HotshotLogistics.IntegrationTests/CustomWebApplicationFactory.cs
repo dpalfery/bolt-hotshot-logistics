@@ -11,26 +11,26 @@ using Microsoft.Extensions.Logging;
 namespace HotshotLogistics.IntegrationTests
 {
     /// <summary>
-    /// Custom web application factory for integration tests that configures test authentication.
+    ///     Custom web application factory for integration tests that configures test authentication.
     /// </summary>
     /// <typeparam name="TProgram">The program type.</typeparam>
     public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProgram>
         where TProgram : class
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             // Authentication scheme is configured in Program.cs for Development; avoid re-registering here to prevent "Scheme already exists: Test".
 
             builder.ConfigureAppConfiguration((_, config) =>
             {
-                config.AddUserSecrets(typeof(Program).Assembly, optional: true);
+                config.AddUserSecrets(typeof(Program).Assembly, true);
                 config.AddEnvironmentVariables();
                 config.AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    ["Mapping:Provider"] = "Mock",
+                    ["Mapping:Provider"] = "Mock"
                 });
-                config.AddAzureAppConfigurationIfConfigured(useDefaultAzureCredential: false);
+                config.AddAzureAppConfigurationIfConfigured(false);
             });
 
             // Enable detailed logging for debugging

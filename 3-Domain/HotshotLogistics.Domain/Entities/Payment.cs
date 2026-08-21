@@ -1,57 +1,80 @@
-
 using HotshotLogistics.Core.Enums;
 
 namespace HotshotLogistics.Domain.Entities
 {
     /// <summary>
-    /// Represents a payment in the system.
+    ///     Represents a payment in the system.
     /// </summary>
     public class Payment
     {
-        /// <inheritdoc/>
-        public string Id { get; set; } = string.Empty;
-
-        /// <inheritdoc/>
-        public string InvoiceId { get; set; } = string.Empty;
-
-        /// <inheritdoc/>
-        public DateTime PaymentDate { get; set; }
-
-        /// <inheritdoc/>
-        public decimal Amount { get; set; }
-
-        /// <inheritdoc/>
-        public PaymentMethodType PaymentMethod { get; set; }
-
-        /// <inheritdoc/>
-        public string TransactionId { get; set; } = string.Empty;
-
-        /// <inheritdoc/>
-        public string ProcessorResponse { get; set; } = string.Empty;
-
-        /// <inheritdoc/>
-        public PaymentStatus Status { get; set; }
-
-        /// <inheritdoc/>
-        public DateTime CreatedAt { get; set; }
-
-        /// <inheritdoc/>
-        public DateTime? UpdatedAt { get; set; }
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="Payment"/> class.
+        ///     Initializes a new instance of the <see cref="Payment" /> class.
         /// </summary>
         public Payment()
         {
             if (CreatedAt == default)
+            {
                 CreatedAt = DateTime.UtcNow;
+            }
 
             if (PaymentDate == default)
+            {
                 PaymentDate = DateTime.UtcNow;
+            }
         }
 
         /// <summary>
-        /// Marks the payment as completed.
+        ///     Gets or sets the payment identifier.
+        /// </summary>
+        public string Id { get; set; } = string.Empty;
+
+        /// <summary>
+        ///     Gets or sets the associated invoice identifier.
+        /// </summary>
+        public string InvoiceId { get; set; } = string.Empty;
+
+        /// <summary>
+        ///     Gets or sets the payment date.
+        /// </summary>
+        public DateTime PaymentDate { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the payment amount.
+        /// </summary>
+        public decimal Amount { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the payment method.
+        /// </summary>
+        public PaymentMethodType PaymentMethod { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the transaction identifier from the payment processor.
+        /// </summary>
+        public string TransactionId { get; set; } = string.Empty;
+
+        /// <summary>
+        ///     Gets or sets the raw response from the payment processor.
+        /// </summary>
+        public string ProcessorResponse { get; set; } = string.Empty;
+
+        /// <summary>
+        ///     Gets or sets the payment status.
+        /// </summary>
+        public PaymentStatus Status { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the creation timestamp.
+        /// </summary>
+        public DateTime CreatedAt { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the last updated timestamp.
+        /// </summary>
+        public DateTime? UpdatedAt { get; set; }
+
+        /// <summary>
+        ///     Marks the payment as completed.
         /// </summary>
         /// <param name="transactionId">The transaction identifier from the payment processor.</param>
         /// <param name="processorResponse">The response from the payment processor.</param>
@@ -64,7 +87,7 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Marks the payment as failed.
+        ///     Marks the payment as failed.
         /// </summary>
         /// <param name="processorResponse">The response from the payment processor.</param>
         public void MarkAsFailed(string processorResponse = "")
@@ -75,7 +98,7 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Marks the payment as processing.
+        ///     Marks the payment as processing.
         /// </summary>
         public void MarkAsProcessing()
         {
@@ -84,7 +107,7 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Marks the payment as refunded.
+        ///     Marks the payment as refunded.
         /// </summary>
         /// <param name="processorResponse">The response from the payment processor.</param>
         public void MarkAsRefunded(string processorResponse = "")
@@ -95,7 +118,7 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Cancels the payment.
+        ///     Cancels the payment.
         /// </summary>
         public void Cancel()
         {
@@ -104,7 +127,7 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Validates the payment data.
+        ///     Validates the payment data.
         /// </summary>
         /// <returns>True if the payment data is valid, false otherwise.</returns>
         public bool IsValid()
@@ -116,7 +139,7 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Gets a formatted description of the payment method.
+        ///     Gets a formatted description of the payment method.
         /// </summary>
         /// <returns>A human-readable description of the payment method.</returns>
         public string GetPaymentMethodDescription()
@@ -124,7 +147,7 @@ namespace HotshotLogistics.Domain.Entities
             return PaymentMethod switch
             {
                 PaymentMethodType.CreditCard => "Credit Card",
-                PaymentMethodType.ACH => "ACH Bank Transfer",
+                PaymentMethodType.Ach => "ACH Bank Transfer",
                 PaymentMethodType.Check => "Check",
                 PaymentMethodType.Cash => "Cash",
                 PaymentMethodType.WireTransfer => "Wire Transfer",
@@ -134,7 +157,7 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Gets a formatted description of the payment status.
+        ///     Gets a formatted description of the payment status.
         /// </summary>
         /// <returns>A human-readable description of the payment status.</returns>
         public string GetStatusDescription()
@@ -152,7 +175,7 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Checks if the payment is successful.
+        ///     Checks if the payment is successful.
         /// </summary>
         /// <returns>True if the payment was completed successfully, false otherwise.</returns>
         public bool IsSuccessful()
@@ -161,28 +184,28 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Checks if the payment is in a final state (completed, failed, or cancelled).
+        ///     Checks if the payment is in a final state (completed, failed, or cancelled).
         /// </summary>
         /// <returns>True if the payment is in a final state, false otherwise.</returns>
         public bool IsFinal()
         {
-            return Status == PaymentStatus.Completed ||
-                   Status == PaymentStatus.Failed ||
-                   Status == PaymentStatus.Cancelled ||
-                   Status == PaymentStatus.Refunded;
+            return Status is PaymentStatus.Completed or
+                PaymentStatus.Failed or
+                PaymentStatus.Cancelled or
+                PaymentStatus.Refunded;
         }
 
         /// <summary>
-        /// Creates a copy of the payment for retry attempts.
+        ///     Creates a copy of the payment for retry attempts.
         /// </summary>
         /// <returns>A new payment with copied data for retry.</returns>
         public Payment CreateRetryCopy()
         {
             return new Payment
             {
-                InvoiceId = this.InvoiceId,
-                Amount = this.Amount,
-                PaymentMethod = this.PaymentMethod,
+                InvoiceId = InvoiceId,
+                Amount = Amount,
+                PaymentMethod = PaymentMethod,
                 Status = PaymentStatus.Pending
             };
         }

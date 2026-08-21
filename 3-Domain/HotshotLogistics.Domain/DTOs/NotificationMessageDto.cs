@@ -1,10 +1,9 @@
 using HotshotLogistics.Core.Enums;
 
-
 namespace HotshotLogistics.Domain.DTOs
 {
     /// <summary>
-    /// Notification message model for real-time notifications
+    ///     Notification message model for real-time notifications
     /// </summary>
     public class NotificationMessageDto
     {

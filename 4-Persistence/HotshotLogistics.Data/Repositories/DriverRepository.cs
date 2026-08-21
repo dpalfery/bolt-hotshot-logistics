@@ -14,12 +14,12 @@ using Microsoft.Extensions.Configuration;
 namespace HotshotLogistics.Data.Repositories
 {
     /// <summary>
-    /// Repository for managing Driver entities using native ADO.NET.
+    ///     Repository for managing Driver entities using native ADO.NET.
     /// </summary>
     internal class DriverRepository : BaseRepository<Driver>, IDriverRepository
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DriverRepository"/> class.
+        ///     Initializes a new instance of the <see cref="DriverRepository" /> class.
         /// </summary>
         /// <param name="configuration">The application configuration.</param>
         public DriverRepository(IConfiguration configuration)
@@ -27,86 +27,109 @@ namespace HotshotLogistics.Data.Repositories
         {
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<IEnumerable<Driver>> GetDriversAsync(CancellationToken cancellationToken = default)
         {
             const string sql = "SELECT * FROM Drivers WHERE IsActive = 1 ORDER BY LastName, FirstName";
-            var drivers = await ExecuteQueryAsync(sql);
-            return drivers.Cast<Driver>();
+            IEnumerable<Driver> drivers = await ExecuteQueryAsync(sql);
+            return drivers;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<Driver?> GetDriverByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             const string sql = "SELECT * FROM Drivers WHERE Id = @Id";
-            var parameters = new[] { new SqlParameter("@Id", SqlDbType.Int) { Value = id } };
-            var drivers = await ExecuteQueryAsync(sql, parameters);
+            SqlParameter[] parameters = [new("@Id", SqlDbType.Int) { Value = id }];
+            IEnumerable<Driver> drivers = await ExecuteQueryAsync(sql, parameters);
             return drivers.FirstOrDefault();
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<Driver> CreateDriverAsync(Driver driver, CancellationToken cancellationToken = default)
         {
-            var domainDriver = (Driver)driver;
+            Driver domainDriver = driver;
             domainDriver.CreatedAt = DateTime.UtcNow;
             return await AddAsync(domainDriver);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<Driver> UpdateDriverAsync(Driver driver, CancellationToken cancellationToken = default)
         {
-            var domainDriver = (Driver)driver;
+            Driver domainDriver = driver;
             domainDriver.UpdatedAt = DateTime.UtcNow;
             return await UpdateAsync(domainDriver);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<bool> DeleteDriverAsync(int id, CancellationToken cancellationToken = default)
         {
             // Soft delete - mark as inactive
             const string sql = "UPDATE Drivers SET IsActive = 0, UpdatedAt = @UpdatedAt WHERE Id = @Id";
-            var parameters = new[]
-            {
-                new SqlParameter("@Id", SqlDbType.Int) { Value = id },
-                new SqlParameter("@UpdatedAt", SqlDbType.DateTime2) { Value = DateTime.UtcNow },
-            };
-            var rowsAffected = await ExecuteNonQueryAsync(sql, parameters);
+            SqlParameter[] parameters =
+            [
+                new("@Id", SqlDbType.Int) { Value = id },
+                new("@UpdatedAt", SqlDbType.DateTime2) { Value = DateTime.UtcNow }
+            ];
+            int rowsAffected = await ExecuteNonQueryAsync(sql, parameters);
             return rowsAffected > 0;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Gets all active drivers.
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A collection of active drivers.</returns>
         public async Task<IEnumerable<Driver>> GetActiveDriversAsync(CancellationToken cancellationToken = default)
         {
             const string sql = "SELECT * FROM Drivers WHERE IsActive = 1 ORDER BY LastName, FirstName";
-            var drivers = await ExecuteQueryAsync(sql);
-            return drivers.Cast<Driver>();
+            IEnumerable<Driver> drivers = await ExecuteQueryAsync(sql);
+            return drivers;
         }
 
-        /// <inheritdoc/>
-        public async Task<Driver?> GetDriverByLicenseNumberAsync(string licenseNumber, CancellationToken cancellationToken = default)
+        /// <summary>
+        ///     Gets a driver by license number.
+        /// </summary>
+        /// <param name="licenseNumber">The driver's license number.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The driver if found; otherwise, null.</returns>
+        public async Task<Driver?> GetDriverByLicenseNumberAsync(string licenseNumber,
+            CancellationToken cancellationToken = default)
         {
             const string sql = "SELECT * FROM Drivers WHERE LicenseNumber = @LicenseNumber";
-            var parameters = new[] { new SqlParameter("@LicenseNumber", SqlDbType.NVarChar) { Value = licenseNumber } };
-            var drivers = await ExecuteQueryAsync(sql, parameters);
+            SqlParameter[] parameters =
+                [new("@LicenseNumber", SqlDbType.NVarChar) { Value = licenseNumber }];
+            IEnumerable<Driver> drivers = await ExecuteQueryAsync(sql, parameters);
             return drivers.FirstOrDefault();
         }
 
-        /// <inheritdoc/>
-        public async Task<IEnumerable<Driver>> GetDriversByStatusAsync(DriverStatus status, CancellationToken cancellationToken = default)
+        /// <summary>
+        ///     Gets drivers by status.
+        /// </summary>
+        /// <param name="status">The driver status.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A collection of drivers with the specified status.</returns>
+        public async Task<IEnumerable<Driver>> GetDriversByStatusAsync(DriverStatus status,
+            CancellationToken cancellationToken = default)
         {
             // Note: CurrentStatus is not stored in the database, returning all active drivers
             const string sql = "SELECT * FROM Drivers WHERE IsActive = 1 ORDER BY LastName, FirstName";
-            var drivers = await ExecuteQueryAsync(sql);
-            return drivers.Cast<Driver>();
+            IEnumerable<Driver> drivers = await ExecuteQueryAsync(sql);
+            return drivers;
         }
 
-        /// <inheritdoc/>
-        protected override string GetTableName() => "Drivers";
+        /// <inheritdoc />
+        protected override string GetTableName()
+        {
+            return "Drivers";
+        }
 
-        /// <inheritdoc/>
-        protected override string GetPrimaryKeyColumnName() => "Id";
+        /// <inheritdoc />
+        protected override string GetPrimaryKeyColumnName()
+        {
+            return "Id";
+        }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override Driver MapReaderToEntity(SqlDataReader reader)
         {
             return new Driver
@@ -119,57 +142,73 @@ namespace HotshotLogistics.Data.Repositories
                     Email = reader.GetString(reader.GetOrdinal("Email")),
                     PhoneNumber = reader.IsDBNull(reader.GetOrdinal("PhoneNumber"))
                         ? string.Empty
-                        : reader.GetString(reader.GetOrdinal("PhoneNumber")),
+                        : reader.GetString(reader.GetOrdinal("PhoneNumber"))
                 },
                 License = new LicenseInfo
                 {
                     LicenseNumber = reader.GetString(reader.GetOrdinal("LicenseNumber")),
                     LicenseExpiryDate = reader.IsDBNull(reader.GetOrdinal("LicenseExpiryDate"))
                         ? DateTime.UtcNow.AddYears(1) // Default to 1 year from now if NULL
-                        : reader.GetDateTime(reader.GetOrdinal("LicenseExpiryDate")),
+                        : reader.GetDateTime(reader.GetOrdinal("LicenseExpiryDate"))
                 },
                 CurrentStatus = (DriverStatus)reader.GetInt32(reader.GetOrdinal("CurrentStatus")),
                 IsActive = reader.GetBoolean(reader.GetOrdinal("IsActive")),
                 CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
-                UpdatedAt = reader.IsDBNull(reader.GetOrdinal("UpdatedAt")) ? null : reader.GetDateTime(reader.GetOrdinal("UpdatedAt")),
+                UpdatedAt = reader.IsDBNull(reader.GetOrdinal("UpdatedAt"))
+                    ? null
+                    : reader.GetDateTime(reader.GetOrdinal("UpdatedAt"))
             };
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override SqlParameter[] GetInsertParameters(Driver entity)
         {
-            return new[]
-            {
+            return
+            [
                 new SqlParameter("@FirstName", SqlDbType.NVarChar) { Value = entity.PersonalInfo.FirstName },
                 new SqlParameter("@LastName", SqlDbType.NVarChar) { Value = entity.PersonalInfo.LastName },
                 new SqlParameter("@Email", SqlDbType.NVarChar) { Value = entity.PersonalInfo.Email },
-                new SqlParameter("@PhoneNumber", SqlDbType.NVarChar) { Value = (object?)entity.PersonalInfo.PhoneNumber ?? DBNull.Value },
+                new SqlParameter("@PhoneNumber", SqlDbType.NVarChar)
+                    { Value = (object?)entity.PersonalInfo.PhoneNumber ?? DBNull.Value },
                 new SqlParameter("@LicenseNumber", SqlDbType.NVarChar) { Value = entity.License.LicenseNumber },
-                new SqlParameter("@LicenseState", SqlDbType.NVarChar) { Value = (object?)entity.License.LicenseState ?? DBNull.Value },
-                new SqlParameter("@LicenseExpiryDate", SqlDbType.Date) { Value = (object?)entity.License.LicenseExpiryDate },
-                new SqlParameter("@InsuranceExpiryDate", SqlDbType.Date) { Value = entity.Vehicle?.InsuranceExpiryDate is DateTime date && date != DateTime.MinValue ? (object)date : DBNull.Value },
+                new SqlParameter("@LicenseState", SqlDbType.NVarChar)
+                    { Value = (object?)entity.License.LicenseState ?? DBNull.Value },
+                new SqlParameter("@LicenseExpiryDate", SqlDbType.Date) { Value = entity.License.LicenseExpiryDate },
+                new SqlParameter("@InsuranceExpiryDate", SqlDbType.Date)
+                {
+                    Value = entity.Vehicle.InsuranceExpiryDate != DateTime.MinValue
+                        ? entity.Vehicle.InsuranceExpiryDate
+                        : DBNull.Value
+                },
                 new SqlParameter("@CurrentStatus", SqlDbType.Int) { Value = (int)entity.CurrentStatus },
-                new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive },
-            };
+                new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive }
+            ];
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override SqlParameter[] GetUpdateParameters(Driver entity)
         {
-            return new[]
-            {
+            return
+            [
                 new SqlParameter("@Id", SqlDbType.Int) { Value = entity.Id },
                 new SqlParameter("@FirstName", SqlDbType.NVarChar) { Value = entity.PersonalInfo.FirstName },
                 new SqlParameter("@LastName", SqlDbType.NVarChar) { Value = entity.PersonalInfo.LastName },
                 new SqlParameter("@Email", SqlDbType.NVarChar) { Value = entity.PersonalInfo.Email },
-                new SqlParameter("@PhoneNumber", SqlDbType.NVarChar) { Value = (object?)entity.PersonalInfo.PhoneNumber ?? DBNull.Value },
+                new SqlParameter("@PhoneNumber", SqlDbType.NVarChar)
+                    { Value = (object?)entity.PersonalInfo.PhoneNumber ?? DBNull.Value },
                 new SqlParameter("@LicenseNumber", SqlDbType.NVarChar) { Value = entity.License.LicenseNumber },
-                new SqlParameter("@LicenseState", SqlDbType.NVarChar) { Value = (object?)entity.License.LicenseState ?? DBNull.Value },
-                new SqlParameter("@LicenseExpiryDate", SqlDbType.Date) { Value = (object?)entity.License.LicenseExpiryDate },
-                new SqlParameter("@InsuranceExpiryDate", SqlDbType.Date) { Value = entity.Vehicle?.InsuranceExpiryDate is DateTime date && date != DateTime.MinValue ? (object)date : DBNull.Value },
+                new SqlParameter("@LicenseState", SqlDbType.NVarChar)
+                    { Value = (object?)entity.License.LicenseState ?? DBNull.Value },
+                new SqlParameter("@LicenseExpiryDate", SqlDbType.Date) { Value = entity.License.LicenseExpiryDate },
+                new SqlParameter("@InsuranceExpiryDate", SqlDbType.Date)
+                {
+                    Value = entity.Vehicle.InsuranceExpiryDate != DateTime.MinValue
+                        ? entity.Vehicle.InsuranceExpiryDate
+                        : DBNull.Value
+                },
                 new SqlParameter("@CurrentStatus", SqlDbType.Int) { Value = (int)entity.CurrentStatus },
-                new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive },
-            };
+                new SqlParameter("@IsActive", SqlDbType.Bit) { Value = entity.IsActive }
+            ];
         }
     }
 }

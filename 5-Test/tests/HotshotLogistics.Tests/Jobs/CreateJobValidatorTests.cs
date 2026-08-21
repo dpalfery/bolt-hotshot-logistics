@@ -5,14 +5,14 @@ using HotshotLogistics.Domain.Entities;
 namespace HotshotLogistics.Tests.Jobs
 {
     /// <summary>
-    /// Unit tests for CreateJobValidator.
+    ///     Unit tests for CreateJobValidator.
     /// </summary>
     public class CreateJobValidatorTests
     {
         private readonly CreateJobValidator _validator;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CreateJobValidatorTests"/> class.
+        ///     Initializes a new instance of the <see cref="CreateJobValidatorTests" /> class.
         /// </summary>
         public CreateJobValidatorTests()
         {
@@ -20,13 +20,13 @@ namespace HotshotLogistics.Tests.Jobs
         }
 
         /// <summary>
-        /// Tests that validation passes for a valid job DTO.
+        ///     Tests that validation passes for a valid job DTO.
         /// </summary>
         [Fact]
         public void Validate_ValidJobDto_ShouldPass()
         {
             // Arrange
-            var jobDto = new ContractsJobDto
+            ContractsJobDto jobDto = new()
             {
                 Title = "Test Job",
                 PickupAddress = "123 Main St, City, ST 12345",
@@ -71,202 +71,202 @@ namespace HotshotLogistics.Tests.Jobs
             };
 
             // Act
-            var result = _validator.TestValidate(jobDto);
+            TestValidationResult<ContractsJobDto> result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldNotHaveAnyValidationErrors();
         }
 
         /// <summary>
-        /// Tests that validation fails when title is empty.
+        ///     Tests that validation fails when title is empty.
         /// </summary>
         [Fact]
         public void Validate_EmptyTitle_ShouldFail()
         {
             // Arrange
-            var jobDto = new ContractsJobDto { Title = string.Empty };
+            ContractsJobDto jobDto = new() { Title = string.Empty };
 
             // Act
-            var result = _validator.TestValidate(jobDto);
+            TestValidationResult<ContractsJobDto> result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.Title)
-                  .WithErrorMessage("Job title is required.");
+                .WithErrorMessage("Job title is required.");
         }
 
         /// <summary>
-        /// Tests that validation fails when title is too long.
+        ///     Tests that validation fails when title is too long.
         /// </summary>
         [Fact]
         public void Validate_TitleTooLong_ShouldFail()
         {
             // Arrange
-            var jobDto = new ContractsJobDto { Title = new string('A', 201) };
+            ContractsJobDto jobDto = new() { Title = new string('A', 201) };
 
             // Act
-            var result = _validator.TestValidate(jobDto);
+            TestValidationResult<ContractsJobDto> result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.Title)
-                  .WithErrorMessage("Job title cannot exceed 200 characters.");
+                .WithErrorMessage("Job title cannot exceed 200 characters.");
         }
 
         /// <summary>
-        /// Tests that validation fails when pickup address is empty.
+        ///     Tests that validation fails when pickup address is empty.
         /// </summary>
         [Fact]
         public void Validate_EmptyPickupAddress_ShouldFail()
         {
             // Arrange
-            var jobDto = new ContractsJobDto { PickupAddress = string.Empty };
+            ContractsJobDto jobDto = new() { PickupAddress = string.Empty };
 
             // Act
-            var result = _validator.TestValidate(jobDto);
+            TestValidationResult<ContractsJobDto> result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.PickupAddress)
-                  .WithErrorMessage("Pickup address is required.");
+                .WithErrorMessage("Pickup address is required.");
         }
 
         /// <summary>
-        /// Tests that validation fails when amount is zero.
+        ///     Tests that validation fails when amount is zero.
         /// </summary>
         [Fact]
         public void Validate_ZeroAmount_ShouldFail()
         {
             // Arrange
-            var jobDto = new ContractsJobDto { Amount = 0 };
+            ContractsJobDto jobDto = new() { Amount = 0 };
 
             // Act
-            var result = _validator.TestValidate(jobDto);
+            TestValidationResult<ContractsJobDto> result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.Amount)
-                  .WithErrorMessage("Job amount must be greater than zero.");
+                .WithErrorMessage("Job amount must be greater than zero.");
         }
 
         /// <summary>
-        /// Tests that validation fails when amount exceeds maximum.
+        ///     Tests that validation fails when amount exceeds maximum.
         /// </summary>
         [Fact]
         public void Validate_AmountTooHigh_ShouldFail()
         {
             // Arrange
-            var jobDto = new ContractsJobDto { Amount = 150000.00m };
+            ContractsJobDto jobDto = new() { Amount = 150000.00m };
 
             // Act
-            var result = _validator.TestValidate(jobDto);
+            TestValidationResult<ContractsJobDto> result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.Amount)
-                  .WithErrorMessage("Job amount cannot exceed $100,000.");
+                .WithErrorMessage("Job amount cannot exceed $100,000.");
         }
 
         /// <summary>
-        /// Tests that validation fails when scheduled pickup time is in the past.
+        ///     Tests that validation fails when scheduled pickup time is in the past.
         /// </summary>
         [Fact]
         public void Validate_PastPickupTime_ShouldFail()
         {
             // Arrange
-            var jobDto = new ContractsJobDto { ScheduledPickupTime = DateTime.UtcNow.AddHours(-1) };
+            ContractsJobDto jobDto = new() { ScheduledPickupTime = DateTime.UtcNow.AddHours(-1) };
 
             // Act
-            var result = _validator.TestValidate(jobDto);
+            TestValidationResult<ContractsJobDto> result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.ScheduledPickupTime)
-                  .WithErrorMessage("Scheduled pickup time must be in the future.");
+                .WithErrorMessage("Scheduled pickup time must be in the future.");
         }
 
         /// <summary>
-        /// Tests that validation fails when estimated delivery time is before pickup time.
+        ///     Tests that validation fails when estimated delivery time is before pickup time.
         /// </summary>
         [Fact]
         public void Validate_EarlyDeliveryTime_ShouldFail()
         {
             // Arrange
-            var pickupTime = DateTime.UtcNow.AddHours(2);
-            var jobDto = new ContractsJobDto
+            DateTime pickupTime = DateTime.UtcNow.AddHours(2);
+            ContractsJobDto jobDto = new()
             {
                 ScheduledPickupTime = pickupTime,
                 EstimatedDeliveryTime = pickupTime.AddHours(-1)
             };
 
             // Act
-            var result = _validator.TestValidate(jobDto);
+            TestValidationResult<ContractsJobDto> result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.EstimatedDeliveryTime)
-                  .WithErrorMessage("Estimated delivery time must be after scheduled pickup time.");
+                .WithErrorMessage("Estimated delivery time must be after scheduled pickup time.");
         }
 
         /// <summary>
-        /// Tests that validation fails when customer ID is empty.
+        ///     Tests that validation fails when customer ID is empty.
         /// </summary>
         [Fact]
         public void Validate_EmptyCustomerId_ShouldFail()
         {
             // Arrange
-            var jobDto = new ContractsJobDto { CustomerId = string.Empty };
+            ContractsJobDto jobDto = new() { CustomerId = string.Empty };
 
             // Act
-            var result = _validator.TestValidate(jobDto);
+            TestValidationResult<ContractsJobDto> result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.CustomerId)
-                  .WithErrorMessage("Customer ID is required.");
+                .WithErrorMessage("Customer ID is required.");
         }
 
         /// <summary>
-        /// Tests that validation fails when pickup location is null.
+        ///     Tests that validation fails when pickup location is null.
         /// </summary>
         [Fact]
         public void Validate_NullPickupLocation_ShouldFail()
         {
             // Arrange
-            var jobDto = new ContractsJobDto { PickupLocation = null! };
+            ContractsJobDto jobDto = new() { PickupLocation = null! };
 
             // Act
-            var result = _validator.TestValidate(jobDto);
+            TestValidationResult<ContractsJobDto> result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.PickupLocation)
-                  .WithErrorMessage("Pickup location is required.");
+                .WithErrorMessage("Pickup location is required.");
         }
 
         /// <summary>
-        /// Tests that validation fails when cargo details are null.
+        ///     Tests that validation fails when cargo details are null.
         /// </summary>
         [Fact]
         public void Validate_NullCargo_ShouldFail()
         {
             // Arrange
-            var jobDto = new ContractsJobDto { Cargo = null! };
+            ContractsJobDto jobDto = new() { Cargo = null! };
 
             // Act
-            var result = _validator.TestValidate(jobDto);
+            TestValidationResult<ContractsJobDto> result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.Cargo)
-                  .WithErrorMessage("Cargo details are required.");
+                .WithErrorMessage("Cargo details are required.");
         }
 
         /// <summary>
-        /// Tests that validation fails when pricing details are null.
+        ///     Tests that validation fails when pricing details are null.
         /// </summary>
         [Fact]
         public void Validate_NullPricing_ShouldFail()
         {
             // Arrange
-            var jobDto = new ContractsJobDto { Pricing = null! };
+            ContractsJobDto jobDto = new() { Pricing = null! };
 
             // Act
-            var result = _validator.TestValidate(jobDto);
+            TestValidationResult<ContractsJobDto> result = _validator.TestValidate(jobDto);
 
             // Assert
             result.ShouldHaveValidationErrorFor(x => x.Pricing)
-                  .WithErrorMessage("Pricing details are required.");
+                .WithErrorMessage("Pricing details are required.");
         }
     }
 }

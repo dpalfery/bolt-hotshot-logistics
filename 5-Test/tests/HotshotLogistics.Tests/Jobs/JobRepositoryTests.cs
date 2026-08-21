@@ -9,55 +9,72 @@ using Microsoft.Extensions.Configuration;
 namespace HotshotLogistics.Tests.Jobs
 {
     /// <summary>
-    /// Integration tests for JobRepository.
+    ///     Integration tests for JobRepository.
     /// </summary>
     public class JobRepositoryTests : IClassFixture<DatabaseTestFixture>, IDisposable
     {
-        private readonly JobRepository _jobRepository;
-        private readonly IConfiguration _configuration;
         private readonly List<string> _createdJobIds = new();
+        private readonly JobRepository _jobRepository;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JobRepositoryTests"/> class.
+        ///     Initializes a new instance of the <see cref="JobRepositoryTests" /> class.
         /// </summary>
         public JobRepositoryTests(DatabaseTestFixture fixture)
         {
             ArgumentNullException.ThrowIfNull(fixture);
             if (!TestDatabaseHelper.IsConfigured)
             {
-                _configuration = new ConfigurationBuilder().Build();
                 _jobRepository = null!;
                 return;
             }
 
-            var configBuilder = new ConfigurationBuilder()
+            IConfigurationBuilder configBuilder = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     ["ConnectionStrings:DefaultConnection"] = TestDatabaseHelper.GetConnectionString()
                 });
 
-            _configuration = configBuilder.Build();
-            _jobRepository = new JobRepository(_configuration);
+            IConfiguration configuration = configBuilder.Build();
+            _jobRepository = new JobRepository(configuration);
         }
 
         /// <summary>
-        /// Tests that GetJobsAsync with filtering returns correct results.
+        ///     Cleans up test data.
+        /// </summary>
+        public void Dispose()
+        {
+            // Clean up created test jobs
+            foreach (string jobId in _createdJobIds)
+            {
+                try
+                {
+                    _jobRepository.DeleteJobAsync(jobId).Wait();
+                }
+                catch
+                {
+                    // Ignore cleanup errors
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Tests that GetJobsAsync with filtering returns correct results.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
         public async Task GetJobsAsync_WithFiltering_ReturnsCorrectResults()
         {
             // Arrange
-            var testJobs = await CreateTestJobsAsync();
-            var filter = new JobFilterDto
+            await CreateTestJobsAsync();
+            JobFilterDto filter = new()
             {
                 Status = JobStatus.Pending,
                 Priority = JobPriority.High
             };
-            var pagination = new PaginationParameters { PageNumber = 1, PageSize = 10 };
+            PaginationParameters pagination = new() { PageNumber = 1, PageSize = 10 };
 
             // Act
-            var result = await _jobRepository.GetJobsAsync(filter, pagination);
+            PagedResult<Job> result = await _jobRepository.GetJobsAsync(filter, pagination);
 
             // Assert
             result.Should().NotBeNull();
@@ -69,7 +86,7 @@ namespace HotshotLogistics.Tests.Jobs
         }
 
         /// <summary>
-        /// Tests that GetJobsAsync with pagination returns correct page.
+        ///     Tests that GetJobsAsync with pagination returns correct page.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -77,11 +94,11 @@ namespace HotshotLogistics.Tests.Jobs
         {
             // Arrange
             await CreateTestJobsAsync();
-            var pagination = new PaginationParameters { PageNumber = 1, PageSize = 2 };
-            var sort = new SortParameters { SortBy = "CreatedAt", SortDirection = SortDirection.Descending };
+            PaginationParameters pagination = new() { PageNumber = 1, PageSize = 2 };
+            SortParameters sort = new() { SortBy = "CreatedAt", SortDirection = SortDirection.Descending };
 
             // Act
-            var result = await _jobRepository.GetJobsAsync(null, pagination, sort);
+            PagedResult<Job> result = await _jobRepository.GetJobsAsync(null, pagination, sort);
 
             // Assert
             result.Should().NotBeNull();
@@ -92,7 +109,7 @@ namespace HotshotLogistics.Tests.Jobs
         }
 
         /// <summary>
-        /// Tests that GetJobsAsync with sorting returns correctly ordered results.
+        ///     Tests that GetJobsAsync with sorting returns correctly ordered results.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -100,22 +117,22 @@ namespace HotshotLogistics.Tests.Jobs
         {
             // Arrange
             await CreateTestJobsAsync();
-            var sort = new SortParameters { SortBy = "Amount", SortDirection = SortDirection.Ascending };
-            var pagination = new PaginationParameters { PageNumber = 1, PageSize = 10 };
+            SortParameters sort = new() { SortBy = "Amount", SortDirection = SortDirection.Ascending };
+            PaginationParameters pagination = new() { PageNumber = 1, PageSize = 10 };
 
             // Act
-            var result = await _jobRepository.GetJobsAsync(null, pagination, sort);
+            PagedResult<Job> result = await _jobRepository.GetJobsAsync(null, pagination, sort);
 
             // Assert
             result.Should().NotBeNull();
             result.Items.Should().NotBeEmpty();
 
-            var amounts = result.Items.Select(j => j.Pricing.TotalAmount).ToList();
+            List<decimal> amounts = result.Items.Select(j => j.Pricing.TotalAmount).ToList();
             amounts.Should().BeInAscendingOrder();
         }
 
         /// <summary>
-        /// Tests that GetJobsAsync with search term returns matching results.
+        ///     Tests that GetJobsAsync with search term returns matching results.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -123,11 +140,11 @@ namespace HotshotLogistics.Tests.Jobs
         {
             // Arrange
             await CreateTestJobsAsync();
-            var filter = new JobFilterDto { SearchTerm = "Test" };
-            var pagination = new PaginationParameters { PageNumber = 1, PageSize = 10 };
+            JobFilterDto filter = new() { SearchTerm = "Test" };
+            PaginationParameters pagination = new() { PageNumber = 1, PageSize = 10 };
 
             // Act
-            var result = await _jobRepository.GetJobsAsync(filter, pagination);
+            PagedResult<Job> result = await _jobRepository.GetJobsAsync(filter, pagination);
 
             // Assert
             result.Should().NotBeNull();
@@ -140,7 +157,7 @@ namespace HotshotLogistics.Tests.Jobs
         }
 
         /// <summary>
-        /// Tests that GetJobsAsync with date range filter returns correct results.
+        ///     Tests that GetJobsAsync with date range filter returns correct results.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -148,15 +165,15 @@ namespace HotshotLogistics.Tests.Jobs
         {
             // Arrange
             await CreateTestJobsAsync();
-            var filter = new JobFilterDto
+            JobFilterDto filter = new()
             {
                 CreatedAfter = DateTime.UtcNow.AddDays(-1),
                 CreatedBefore = DateTime.UtcNow.AddDays(1)
             };
-            var pagination = new PaginationParameters { PageNumber = 1, PageSize = 10 };
+            PaginationParameters pagination = new() { PageNumber = 1, PageSize = 10 };
 
             // Act
-            var result = await _jobRepository.GetJobsAsync(filter, pagination);
+            PagedResult<Job> result = await _jobRepository.GetJobsAsync(filter, pagination);
 
             // Assert
             result.Should().NotBeNull();
@@ -167,7 +184,7 @@ namespace HotshotLogistics.Tests.Jobs
         }
 
         /// <summary>
-        /// Tests that GetJobsByStatusAsync returns jobs with correct status.
+        ///     Tests that GetJobsByStatusAsync returns jobs with correct status.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -175,10 +192,10 @@ namespace HotshotLogistics.Tests.Jobs
         {
             // Arrange
             await CreateTestJobsAsync();
-            var status = JobStatus.Pending;
+            JobStatus status = JobStatus.Pending;
 
             // Act
-            var result = await _jobRepository.GetJobsByStatusAsync(status);
+            List<Job> result = (await _jobRepository.GetJobsByStatusAsync(status)).ToList();
 
             // Assert
             result.Should().NotBeNull();
@@ -186,7 +203,7 @@ namespace HotshotLogistics.Tests.Jobs
         }
 
         /// <summary>
-        /// Tests that GetJobsByDriverAsync returns jobs for correct driver.
+        ///     Tests that GetJobsByDriverAsync returns jobs for correct driver.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -194,10 +211,10 @@ namespace HotshotLogistics.Tests.Jobs
         {
             // Arrange
             await CreateTestJobsAsync();
-            var driverId = 1;
+            int driverId = 1;
 
             // Act
-            var result = await _jobRepository.GetJobsByDriverAsync(driverId);
+            List<Job> result = (await _jobRepository.GetJobsByDriverAsync(driverId)).ToList();
 
             // Assert
             result.Should().NotBeNull();
@@ -205,7 +222,7 @@ namespace HotshotLogistics.Tests.Jobs
         }
 
         /// <summary>
-        /// Tests that GetJobsByCustomerAsync returns jobs for correct customer.
+        ///     Tests that GetJobsByCustomerAsync returns jobs for correct customer.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -213,10 +230,10 @@ namespace HotshotLogistics.Tests.Jobs
         {
             // Arrange
             await CreateTestJobsAsync();
-            var customerId = "CUST001";
+            string customerId = "CUST001";
 
             // Act
-            var result = await _jobRepository.GetJobsByCustomerAsync(customerId);
+            List<Job> result = (await _jobRepository.GetJobsByCustomerAsync(customerId)).ToList();
 
             // Assert
             result.Should().NotBeNull();
@@ -224,7 +241,7 @@ namespace HotshotLogistics.Tests.Jobs
         }
 
         /// <summary>
-        /// Tests that GetOverdueJobsAsync returns only overdue jobs.
+        ///     Tests that GetOverdueJobsAsync returns only overdue jobs.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -234,7 +251,7 @@ namespace HotshotLogistics.Tests.Jobs
             await CreateOverdueTestJobAsync();
 
             // Act
-            var result = await _jobRepository.GetOverdueJobsAsync();
+            List<Job> result = (await _jobRepository.GetOverdueJobsAsync()).ToList();
 
             // Assert
             result.Should().NotBeNull();
@@ -245,7 +262,7 @@ namespace HotshotLogistics.Tests.Jobs
         }
 
         /// <summary>
-        /// Tests that GetJobCountAsync returns correct count.
+        ///     Tests that GetJobCountAsync returns correct count.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -253,32 +270,32 @@ namespace HotshotLogistics.Tests.Jobs
         {
             // Arrange
             await CreateTestJobsAsync();
-            var filter = new JobFilterDto { Status = JobStatus.Pending };
+            JobFilterDto filter = new() { Status = JobStatus.Pending };
 
             // Act
-            var count = await _jobRepository.GetJobCountAsync(filter);
+            int count = await _jobRepository.GetJobCountAsync(filter);
 
             // Assert
             count.Should().BeGreaterThan(0);
         }
 
         /// <summary>
-        /// Tests that filtering by multiple statuses works correctly.
+        ///     Tests that filtering by multiple statuses works correctly.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
-        public async Task GetJobsAsync_WithMultipleStatuses_ReturnsCorrectResults()
+        public async Task GetJobsAsync_WithStatusFilter_ReturnsCorrectResults()
         {
             // Arrange
             await CreateTestJobsAsync();
-            var filter = new JobFilterDto
+            JobFilterDto filter = new()
             {
-                StatusList = new List<JobStatus> { JobStatus.Pending, JobStatus.Assigned }
+                StatusList = [JobStatus.Pending, JobStatus.Assigned]
             };
-            var pagination = new PaginationParameters { PageNumber = 1, PageSize = 10 };
+            PaginationParameters pagination = new() { PageNumber = 1, PageSize = 10 };
 
             // Act
-            var result = await _jobRepository.GetJobsAsync(filter, pagination);
+            PagedResult<Job> result = await _jobRepository.GetJobsAsync(filter, pagination);
 
             // Assert
             result.Should().NotBeNull();
@@ -288,7 +305,7 @@ namespace HotshotLogistics.Tests.Jobs
         }
 
         /// <summary>
-        /// Tests that filtering by amount range works correctly.
+        ///     Tests that filtering by amount range works correctly.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
         [DatabaseFact]
@@ -296,15 +313,15 @@ namespace HotshotLogistics.Tests.Jobs
         {
             // Arrange
             await CreateTestJobsAsync();
-            var filter = new JobFilterDto
+            JobFilterDto filter = new()
             {
                 MinAmount = 100m,
                 MaxAmount = 500m
             };
-            var pagination = new PaginationParameters { PageNumber = 1, PageSize = 10 };
+            PaginationParameters pagination = new() { PageNumber = 1, PageSize = 10 };
 
             // Act
-            var result = await _jobRepository.GetJobsAsync(filter, pagination);
+            PagedResult<Job> result = await _jobRepository.GetJobsAsync(filter, pagination);
 
             // Assert
             result.Should().NotBeNull();
@@ -313,14 +330,14 @@ namespace HotshotLogistics.Tests.Jobs
         }
 
         /// <summary>
-        /// Creates test jobs for testing purposes.
+        ///     Creates test jobs for testing purposes.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        private async Task<List<Domain.Entities.Job>> CreateTestJobsAsync()
+        private async Task CreateTestJobsAsync()
         {
-            var jobs = new List<Domain.Entities.Job>
-            {
-                new Domain.Entities.Job
+            List<Job> jobs =
+            [
+                new()
                 {
                     Id = Guid.NewGuid().ToString(),
                     CustomerId = "CUST001",
@@ -337,7 +354,7 @@ namespace HotshotLogistics.Tests.Jobs
                     CreatedAt = DateTime.UtcNow,
                     Pricing = new PricingDetails { TotalAmount = 250.00m }
                 },
-                new Domain.Entities.Job
+                new()
                 {
                     Id = Guid.NewGuid().ToString(),
                     CustomerId = "CUST002",
@@ -354,7 +371,7 @@ namespace HotshotLogistics.Tests.Jobs
                     CreatedAt = DateTime.UtcNow.AddMinutes(-30),
                     Pricing = new PricingDetails { TotalAmount = 150.00m }
                 },
-                new Domain.Entities.Job
+                new()
                 {
                     Id = Guid.NewGuid().ToString(),
                     CustomerId = "CUST001",
@@ -371,26 +388,22 @@ namespace HotshotLogistics.Tests.Jobs
                     CreatedAt = DateTime.UtcNow.AddMinutes(-60),
                     Pricing = new PricingDetails { TotalAmount = 350.00m }
                 }
-            };
+            ];
 
-            var createdJobs = new List<Domain.Entities.Job>();
-            foreach (var job in jobs)
+            foreach (Job job in jobs)
             {
-                var createdJob = await _jobRepository.CreateJobAsync(job);
-                createdJobs.Add(createdJob);
+                Job createdJob = await _jobRepository.CreateJobAsync(job);
                 _createdJobIds.Add(createdJob.Id);
             }
-
-            return createdJobs;
         }
 
         /// <summary>
-        /// Creates an overdue test job for testing purposes.
+        ///     Creates an overdue test job for testing purposes.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        private async Task<Domain.Entities.Job> CreateOverdueTestJobAsync()
+        private async Task CreateOverdueTestJobAsync()
         {
-            var job = new Domain.Entities.Job
+            Job job = new()
             {
                 Id = Guid.NewGuid().ToString(),
                 CustomerId = "CUST003",
@@ -408,28 +421,8 @@ namespace HotshotLogistics.Tests.Jobs
                 Pricing = new PricingDetails { TotalAmount = 400.00m }
             };
 
-            var createdJob = await _jobRepository.CreateJobAsync(job);
+            Job createdJob = await _jobRepository.CreateJobAsync(job);
             _createdJobIds.Add(createdJob.Id);
-            return createdJob;
-        }
-
-        /// <summary>
-        /// Cleans up test data.
-        /// </summary>
-        public void Dispose()
-        {
-            // Clean up created test jobs
-            foreach (var jobId in _createdJobIds)
-            {
-                try
-                {
-                    _jobRepository.DeleteJobAsync(jobId).Wait();
-                }
-                catch
-                {
-                    // Ignore cleanup errors
-                }
-            }
         }
     }
 }

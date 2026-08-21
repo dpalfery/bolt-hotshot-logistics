@@ -5,14 +5,13 @@
 
 namespace HotshotLogistics.Domain.Entities
 {
-
     /// <summary>
-    /// Represents a location tracking record in the system.
+    ///     Represents a location tracking record in the system.
     /// </summary>
     public class LocationTracking
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocationTracking"/> class.
+        ///     Initializes a new instance of the <see cref="LocationTracking" /> class.
         /// </summary>
         public LocationTracking()
         {
@@ -20,7 +19,7 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocationTracking"/> class with coordinates.
+        ///     Initializes a new instance of the <see cref="LocationTracking" /> class with coordinates.
         /// </summary>
         /// <param name="jobId">The job identifier.</param>
         /// <param name="driverId">The driver identifier.</param>
@@ -35,35 +34,53 @@ namespace HotshotLogistics.Domain.Entities
             Timestamp = DateTime.UtcNow;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Gets or sets the tracking identifier.
+        /// </summary>
         public long Id { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Gets or sets the associated job identifier.
+        /// </summary>
         public string JobId { get; set; } = string.Empty;
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Gets or sets the associated driver identifier.
+        /// </summary>
         public int DriverId { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Gets or sets the latitude coordinate.
+        /// </summary>
         public decimal Latitude { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Gets or sets the longitude coordinate.
+        /// </summary>
         public decimal Longitude { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Gets or sets the speed in miles per hour.
+        /// </summary>
         public decimal? Speed { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Gets or sets the heading/bearing in degrees (0-359).
+        /// </summary>
         public int? Heading { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Gets or sets the accuracy in meters.
+        /// </summary>
         public decimal? Accuracy { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Gets or sets the timestamp of the location record.
+        /// </summary>
         public DateTime Timestamp { get; set; }
 
         /// <summary>
-        /// Creates a LocationTracking instance from a LocationUpdate.
+        ///     Creates a LocationTracking instance from a LocationUpdate.
         /// </summary>
         /// <param name="jobId">The job identifier.</param>
         /// <param name="driverId">The driver identifier.</param>
@@ -72,7 +89,9 @@ namespace HotshotLogistics.Domain.Entities
         public static LocationTracking FromLocationUpdate(string jobId, int driverId, LocationUpdate locationUpdate)
         {
             if (locationUpdate == null)
+            {
                 throw new ArgumentNullException(nameof(locationUpdate));
+            }
 
             return new LocationTracking
             {
@@ -88,7 +107,7 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Converts this LocationTracking to a LocationUpdate.
+        ///     Converts this LocationTracking to a LocationUpdate.
         /// </summary>
         /// <returns>A LocationUpdate instance.</returns>
         public LocationUpdate ToLocationUpdate()
@@ -103,45 +122,47 @@ namespace HotshotLogistics.Domain.Entities
         }
 
         /// <summary>
-        /// Calculates the distance to another location tracking record.
+        ///     Calculates the distance to another location tracking record.
         /// </summary>
         /// <param name="other">The other location tracking record.</param>
         /// <returns>The distance in miles.</returns>
         public double DistanceTo(LocationTracking other)
         {
             if (other == null)
+            {
                 throw new ArgumentNullException(nameof(other));
+            }
 
             const double earthRadiusMiles = 3959.0;
 
-            var lat1Rad = (double)(Latitude * (decimal)Math.PI / 180);
-            var lat2Rad = (double)(other.Latitude * (decimal)Math.PI / 180);
-            var deltaLatRad = (double)((other.Latitude - Latitude) * (decimal)Math.PI / 180);
-            var deltaLonRad = (double)((other.Longitude - Longitude) * (decimal)Math.PI / 180);
+            double lat1Rad = (double)(Latitude * (decimal)Math.PI / 180);
+            double lat2Rad = (double)(other.Latitude * (decimal)Math.PI / 180);
+            double deltaLatRad = (double)((other.Latitude - Latitude) * (decimal)Math.PI / 180);
+            double deltaLonRad = (double)((other.Longitude - Longitude) * (decimal)Math.PI / 180);
 
-            var a = Math.Sin(deltaLatRad / 2) * Math.Sin(deltaLatRad / 2) +
-                    Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
-                    Math.Sin(deltaLonRad / 2) * Math.Sin(deltaLonRad / 2);
+            double a = (Math.Sin(deltaLatRad / 2) * Math.Sin(deltaLatRad / 2)) +
+                       (Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
+                        Math.Sin(deltaLonRad / 2) * Math.Sin(deltaLonRad / 2));
 
-            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
 
             return earthRadiusMiles * c;
         }
 
         /// <summary>
-        /// Validates the location tracking data.
+        ///     Validates the location tracking data.
         /// </summary>
         /// <returns>True if the location tracking is valid, false otherwise.</returns>
         public bool IsValid()
         {
             return !string.IsNullOrWhiteSpace(JobId) &&
                    DriverId > 0 &&
-                   Latitude >= -90 && Latitude <= 90 &&
-                   Longitude >= -180 && Longitude <= 180 &&
+                   Latitude is >= -90 and <= 90 &&
+                   Longitude is >= -180 and <= 180 &&
                    Timestamp != default &&
-                   (!Speed.HasValue || Speed >= 0) &&
-                   (!Heading.HasValue || (Heading >= 0 && Heading <= 359)) &&
-                   (!Accuracy.HasValue || Accuracy >= 0);
+                   Speed is null or >= 0 &&
+                   Heading is null or >= 0 and <= 359 &&
+                   Accuracy is null or >= 0;
         }
     }
 }

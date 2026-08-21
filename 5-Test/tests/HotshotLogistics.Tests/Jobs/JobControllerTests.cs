@@ -1,54 +1,57 @@
 // <copyright file="JobControllerTests.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+
+using System.Reflection;
 using FluentAssertions;
-using HotshotLogistics.Api.Controllers;
-using HotshotLogistics.Domain.Entities;
 using FluentValidation;
 using FluentValidation.Results;
+using HotshotLogistics.Api.Controllers;
+using HotshotLogistics.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
+
 namespace HotshotLogistics.Tests.Jobs
 {
     /// <summary>
-    /// Integration tests for the JobController.
+    ///     Integration tests for the JobController.
     /// </summary>
     public class JobControllerTests
     {
-        private readonly Mock<IJobService> _mockJobService;
-        private readonly Mock<IJobRepository> _mockJobRepository;
-        private readonly Mock<IValidator<Domain.Entities.Job>> _mockJobValidator;
-        private readonly Mock<ILogger<JobController>> _mockLogger;
         private readonly JobController _controller;
+        private readonly Mock<IJobRepository> _mockJobRepository;
+        private readonly Mock<IJobService> _mockJobService;
+        private readonly Mock<IValidator<Job>> _mockJobValidator;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JobControllerTests"/> class.
+        ///     Initializes a new instance of the <see cref="JobControllerTests" /> class.
         /// </summary>
         public JobControllerTests()
         {
             _mockJobService = new Mock<IJobService>();
             _mockJobRepository = new Mock<IJobRepository>();
-            _mockJobValidator = new Mock<IValidator<Domain.Entities.Job>>();
-            _mockLogger = new Mock<ILogger<JobController>>();
-            _controller = new JobController(_mockJobService.Object, _mockJobRepository.Object, _mockLogger.Object, _mockJobValidator.Object);
+            _mockJobValidator = new Mock<IValidator<Job>>();
+            Mock<ILogger<JobController>> mockLogger = new();
+            _controller = new JobController(_mockJobService.Object, _mockJobRepository.Object, mockLogger.Object,
+                _mockJobValidator.Object);
         }
 
         /// <summary>
-        /// Tests that GetJobs returns paged results with filtering.
+        ///     Tests that GetJobs returns paged results with filtering.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task GetJobs_WithFiltering_ReturnsPagedResults()
         {
             // Arrange
-            var expectedJobs = new List<Domain.Entities.Job>
-            {
+            List<Job> expectedJobs =
+            [
                 CreateTestJob("job1", JobStatus.Pending),
                 CreateTestJob("job2", JobStatus.Assigned)
-            };
+            ];
 
-            var pagedResult = new PagedResult<Domain.Entities.Job>
+            PagedResult<Job> pagedResult = new()
             {
                 Items = expectedJobs,
                 TotalCount = 2,
@@ -57,65 +60,65 @@ namespace HotshotLogistics.Tests.Jobs
             };
 
             _mockJobRepository.Setup(r => r.GetJobsAsync(
-                It.IsAny<JobFilterDto>(),
-                It.IsAny<PaginationParameters>(),
-                It.IsAny<SortParameters>(),
-                It.IsAny<CancellationToken>()))
+                    It.IsAny<JobFilterDto>(),
+                    It.IsAny<PaginationParameters>(),
+                    It.IsAny<SortParameters>(),
+                    It.IsAny<CancellationToken>()))
                 .ReturnsAsync(pagedResult);
 
             // Act
-            var result = await _controller.GetJobs(
-                status: JobStatus.Pending,
+            ActionResult<PagedResult<Job>> result = await _controller.GetJobs(
+                JobStatus.Pending,
                 pageNumber: 1,
                 pageSize: 10);
 
             // Assert
             result.Should().NotBeNull();
-            var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedResult = okResult.Value.Should().BeOfType<PagedResult<Domain.Entities.Job>>().Subject;
+            OkObjectResult okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+            PagedResult<Job> returnedResult = okResult.Value.Should().BeOfType<PagedResult<Job>>().Subject;
             returnedResult.Items.Should().HaveCount(2);
             returnedResult.TotalCount.Should().Be(2);
         }
 
         /// <summary>
-        /// Tests that GetJobById returns the job when found.
+        ///     Tests that GetJobById returns the job when found.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task GetJobById_WhenJobExists_ReturnsJob()
         {
             // Arrange
-            var jobId = "test-job-id";
-            var expectedJob = CreateTestJob(jobId, JobStatus.Pending);
+            string jobId = "test-job-id";
+            Job expectedJob = CreateTestJob(jobId, JobStatus.Pending);
 
             _mockJobService.Setup(s => s.GetJobByIdAsync(jobId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedJob);
 
             // Act
-            var result = await _controller.GetJobById(jobId);
+            ActionResult<Job> result = await _controller.GetJobById(jobId);
 
             // Assert
             result.Should().NotBeNull();
-            var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedJob = okResult.Value.Should().BeAssignableTo<Domain.Entities.Job>().Subject;
+            OkObjectResult okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+            Job returnedJob = okResult.Value.Should().BeAssignableTo<Job>().Subject;
             returnedJob.Id.Should().Be(jobId);
         }
 
         /// <summary>
-        /// Tests that GetJobById returns NotFound when job doesn't exist.
+        ///     Tests that GetJobById returns NotFound when job doesn't exist.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task GetJobById_WhenJobNotFound_ReturnsNotFound()
         {
             // Arrange
-            var jobId = "non-existent-job";
+            string jobId = "non-existent-job";
 
             _mockJobService.Setup(s => s.GetJobByIdAsync(jobId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Domain.Entities.Job?)null);
+                .ReturnsAsync((Job?)null);
 
             // Act
-            var result = await _controller.GetJobById(jobId);
+            ActionResult<Job> result = await _controller.GetJobById(jobId);
 
             // Assert
             result.Should().NotBeNull();
@@ -123,14 +126,14 @@ namespace HotshotLogistics.Tests.Jobs
         }
 
         /// <summary>
-        /// Tests that CreateJob creates and returns the new job.
+        ///     Tests that CreateJob creates and returns the new job.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task CreateJob_WithValidData_CreatesAndReturnsJob()
         {
             // Arrange
-            var jobDto = new Domain.Entities.Job
+            Job jobDto = new()
             {
                 Id = "new-job-id",
                 Title = "Test Job",
@@ -142,7 +145,7 @@ namespace HotshotLogistics.Tests.Jobs
                 EstimatedDeliveryTime = DateTime.UtcNow.AddHours(8) // <-- FIXED HERE
             };
 
-            var createdJob = CreateTestJob(jobDto.Id, jobDto.Status);
+            Job createdJob = CreateTestJob(jobDto.Id, jobDto.Status);
 
             _mockJobValidator.Setup(v => v.ValidateAsync(jobDto, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
@@ -151,27 +154,27 @@ namespace HotshotLogistics.Tests.Jobs
                 .ReturnsAsync(createdJob);
 
             // Act
-            var result = await _controller.CreateJob(jobDto);
+            ActionResult<Job> result = await _controller.CreateJob(jobDto);
 
             // Assert
             result.Should().NotBeNull();
-            var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
+            CreatedAtActionResult createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
             createdResult.Value.Should().NotBeNull();
-            var responseData = createdResult.Value;
-            var idProperty = responseData.GetType().GetProperty("Id");
+            object responseData = createdResult.Value;
+            PropertyInfo? idProperty = responseData.GetType().GetProperty("Id");
             idProperty.Should().NotBeNull();
             idProperty.GetValue(responseData).Should().Be(jobDto.Id);
         }
 
         /// <summary>
-        /// Tests that CreateJob returns BadRequest when job data is null.
+        ///     Tests that CreateJob returns BadRequest when job data is null.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task CreateJob_WithNullData_ReturnsBadRequest()
         {
             // Act
-            var result = await _controller.CreateJob(null!);
+            ActionResult<Job> result = await _controller.CreateJob(null!);
 
             // Assert
             result.Should().NotBeNull();
@@ -179,14 +182,14 @@ namespace HotshotLogistics.Tests.Jobs
         }
 
         /// <summary>
-        /// Tests that CreateJob returns BadRequest when validation fails.
+        ///     Tests that CreateJob returns BadRequest when validation fails.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task CreateJob_WithInvalidData_ReturnsBadRequest()
         {
             // Arrange
-            var jobDto = new Domain.Entities.Job
+            Job jobDto = new()
             {
                 Id = "invalid-job",
                 Title = "", // Invalid: empty title
@@ -194,39 +197,39 @@ namespace HotshotLogistics.Tests.Jobs
             };
 
             // Setup validator to return validation failures
-            var validationFailures = new List<FluentValidation.Results.ValidationFailure>
-            {
-                new FluentValidation.Results.ValidationFailure("Title", "Job title is required.")
-            };
-            var validationResult = new FluentValidation.Results.ValidationResult(validationFailures);
+            List<ValidationFailure> validationFailures =
+            [
+                new("Title", "Job title is required.")
+            ];
+            ValidationResult validationResult = new(validationFailures);
 
             _mockJobValidator.Setup(v => v.ValidateAsync(jobDto, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(validationResult);
 
             // Act
-            var result = await _controller.CreateJob(jobDto);
+            ActionResult<Job> result = await _controller.CreateJob(jobDto);
 
             // Assert
             result.Should().NotBeNull();
-            var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
-            var errorResponse = badRequestResult.Value.Should().BeAssignableTo<object>().Subject;
+            BadRequestObjectResult badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
+            object errorResponse = badRequestResult.Value.Should().BeAssignableTo<object>().Subject;
             // The controller returns an anonymous object with Message and Errors properties
-            var errorObj = errorResponse.GetType().GetProperties()
+            Dictionary<string, object?> errorObj = errorResponse.GetType().GetProperties()
                 .ToDictionary(p => p.Name, p => p.GetValue(errorResponse));
             errorObj.Should().ContainKey("Message");
             errorObj["Message"].Should().Be("Job validation failed");
         }
 
         /// <summary>
-        /// Tests that UpdateJob updates and returns the job.
+        ///     Tests that UpdateJob updates and returns the job.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task UpdateJob_WithValidData_UpdatesAndReturnsJob()
         {
             // Arrange
-            var jobId = "existing-job-id";
-            var jobDto = new Domain.Entities.Job
+            string jobId = "existing-job-id";
+            Job jobDto = new()
             {
                 Id = jobId,
                 Title = "Updated Job Title",
@@ -236,149 +239,149 @@ namespace HotshotLogistics.Tests.Jobs
                 Amount = 150.00m
             };
 
-            var updatedJob = CreateTestJob(jobId, JobStatus.Assigned);
+            Job updatedJob = CreateTestJob(jobId, JobStatus.Assigned);
 
-            _mockJobService.Setup(s => s.UpdateJobAsync(jobId, It.IsAny<Domain.Entities.Job>(), It.IsAny<CancellationToken>()))
+            _mockJobService.Setup(s => s.UpdateJobAsync(jobId, It.IsAny<Job>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(updatedJob);
 
             // Act
-            var result = await _controller.UpdateJob(jobId, jobDto);
+            ActionResult<Job> result = await _controller.UpdateJob(jobId, jobDto);
 
             // Assert
             result.Should().NotBeNull();
-            var objectResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
+            ObjectResult objectResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
             objectResult.StatusCode.Should().Be(500); // Internal Server Error
             // Note: The UpdateJob method currently returns 500 errors
         }
 
         /// <summary>
-        /// Tests that UpdateJob returns NotFound when job doesn't exist.
+        ///     Tests that UpdateJob returns NotFound when job doesn't exist.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task UpdateJob_WhenJobNotFound_ReturnsNotFound()
         {
             // Arrange
-            var jobId = "non-existent-job";
-            var jobDto = new Domain.Entities.Job { Id = jobId, Title = "Test" };
+            string jobId = "non-existent-job";
+            Job jobDto = new() { Id = jobId, Title = "Test" };
 
-            _mockJobService.Setup(s => s.UpdateJobAsync(jobId, It.IsAny<Domain.Entities.Job>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Domain.Entities.Job?)null);
+            _mockJobService.Setup(s => s.UpdateJobAsync(jobId, It.IsAny<Job>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((Job?)null);
 
             // Act
-            var result = await _controller.UpdateJob(jobId, jobDto);
+            ActionResult<Job> result = await _controller.UpdateJob(jobId, jobDto);
 
             // Assert
             result.Should().NotBeNull();
-            var objectResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
+            ObjectResult objectResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
             objectResult.StatusCode.Should().Be(500); // Internal Server Error
             // Note: The UpdateJob method currently returns 500 errors
         }
 
         /// <summary>
-        /// Tests that DeleteJob deletes the job and returns NoContent.
+        ///     Tests that DeleteJob deletes the job and returns NoContent.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task DeleteJob_WhenJobExists_ReturnsNoContent()
         {
             // Arrange
-            var jobId = "job-to-delete";
+            string jobId = "job-to-delete";
 
             _mockJobService.Setup(s => s.DeleteJobAsync(jobId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             // Act
-            var result = await _controller.DeleteJob(jobId);
+            IActionResult result = await _controller.DeleteJob(jobId);
 
             // Assert
             result.Should().BeOfType<NoContentResult>();
         }
 
         /// <summary>
-        /// Tests that DeleteJob returns NotFound when job doesn't exist.
+        ///     Tests that DeleteJob returns NotFound when job doesn't exist.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task DeleteJob_WhenJobNotFound_ReturnsNotFound()
         {
             // Arrange
-            var jobId = "non-existent-job";
+            string jobId = "non-existent-job";
 
             _mockJobService.Setup(s => s.DeleteJobAsync(jobId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
             // Act
-            var result = await _controller.DeleteJob(jobId);
+            IActionResult result = await _controller.DeleteJob(jobId);
 
             // Assert
             result.Should().BeOfType<NotFoundObjectResult>();
         }
 
         /// <summary>
-        /// Tests that DeleteJob returns BadRequest when job cannot be deleted.
+        ///     Tests that DeleteJob returns BadRequest when job cannot be deleted.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task DeleteJob_WhenJobCannotBeDeleted_ReturnsBadRequest()
         {
             // Arrange
-            var jobId = "job-in-progress";
+            string jobId = "job-in-progress";
 
             _mockJobService.Setup(s => s.DeleteJobAsync(jobId, It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new InvalidOperationException("Cannot delete job with status: InProgress"));
 
             // Act
-            var result = await _controller.DeleteJob(jobId);
+            IActionResult result = await _controller.DeleteJob(jobId);
 
             // Assert
             result.Should().BeOfType<BadRequestObjectResult>();
         }
 
         /// <summary>
-        /// Tests that AssignDriver assigns driver and returns updated job.
+        ///     Tests that AssignDriver assigns driver and returns updated job.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task AssignDriver_WithValidRequest_ReturnsUpdatedJob()
         {
             // Arrange
-            var jobId = "job-to-assign";
-            var driverId = 123;
-            var request = new AssignDriverRequest { DriverId = driverId };
-            var updatedJob = CreateTestJob(jobId, JobStatus.Assigned);
+            string jobId = "job-to-assign";
+            int driverId = 123;
+            AssignDriverRequest request = new() { DriverId = driverId };
+            Job updatedJob = CreateTestJob(jobId, JobStatus.Assigned);
             updatedJob.AssignedDriverId = driverId;
 
             _mockJobService.Setup(s => s.AssignDriverAsync(jobId, driverId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(updatedJob);
 
             // Act
-            var result = await _controller.AssignDriver(jobId, request);
+            ActionResult<Job> result = await _controller.AssignDriver(jobId, request);
 
             // Assert
             result.Should().NotBeNull();
-            var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedJob = okResult.Value.Should().BeAssignableTo<Domain.Entities.Job>().Subject;
+            OkObjectResult okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+            Job returnedJob = okResult.Value.Should().BeAssignableTo<Job>().Subject;
             returnedJob.AssignedDriverId.Should().Be(driverId);
         }
 
         /// <summary>
-        /// Tests that AssignDriver returns Conflict when driver is not available.
+        ///     Tests that AssignDriver returns Conflict when driver is not available.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task AssignDriver_WhenDriverNotAvailable_ReturnsConflict()
         {
             // Arrange
-            var jobId = "job-to-assign";
-            var driverId = 123;
-            var request = new AssignDriverRequest { DriverId = driverId };
+            string jobId = "job-to-assign";
+            int driverId = 123;
+            AssignDriverRequest request = new() { DriverId = driverId };
 
             _mockJobService.Setup(s => s.AssignDriverAsync(jobId, driverId, It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new InvalidOperationException("Driver is not available"));
 
             // Act
-            var result = await _controller.AssignDriver(jobId, request);
+            ActionResult<Job> result = await _controller.AssignDriver(jobId, request);
 
             // Assert
             result.Should().NotBeNull();
@@ -386,156 +389,156 @@ namespace HotshotLogistics.Tests.Jobs
         }
 
         /// <summary>
-        /// Tests that UpdateJobStatus updates status and returns updated job.
+        ///     Tests that UpdateJobStatus updates status and returns updated job.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task UpdateJobStatus_WithValidRequest_ReturnsUpdatedJob()
         {
             // Arrange
-            var jobId = "job-to-update";
-            var newStatus = JobStatus.EnRoute;
-            var request = new UpdateJobStatusRequest { Status = newStatus };
-            var updatedJob = CreateTestJob(jobId, newStatus);
+            string jobId = "job-to-update";
+            JobStatus newStatus = JobStatus.EnRoute;
+            UpdateJobStatusRequest request = new() { Status = newStatus };
+            Job updatedJob = CreateTestJob(jobId, newStatus);
 
             _mockJobService.Setup(s => s.UpdateJobStatusAsync(jobId, newStatus, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(updatedJob);
 
             // Act
-            var result = await _controller.UpdateJobStatus(jobId, request);
+            ActionResult<Job> result = await _controller.UpdateJobStatus(jobId, request);
 
             // Assert
             result.Should().NotBeNull();
-            var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedJob = okResult.Value.Should().BeAssignableTo<Domain.Entities.Job>().Subject;
+            OkObjectResult okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+            Job returnedJob = okResult.Value.Should().BeAssignableTo<Job>().Subject;
             returnedJob.Status.Should().Be(newStatus);
         }
 
         /// <summary>
-        /// Tests that GetJobsByStatus returns jobs with specified status.
+        ///     Tests that GetJobsByStatus returns jobs with specified status.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task GetJobsByStatus_ReturnsJobsWithStatus()
         {
             // Arrange
-            var status = JobStatus.Pending;
-            var expectedJobs = new List<Domain.Entities.Job>
-            {
+            JobStatus status = JobStatus.Pending;
+            List<Job> expectedJobs =
+            [
                 CreateTestJob("job1", status),
                 CreateTestJob("job2", status)
-            };
+            ];
 
             _mockJobRepository.Setup(r => r.GetJobsByStatusAsync(status, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedJobs);
 
             // Act
-            var result = await _controller.GetJobsByStatus(status);
+            ActionResult<IEnumerable<Job>> result = await _controller.GetJobsByStatus(status);
 
             // Assert
             result.Should().NotBeNull();
-            var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedJobs = okResult.Value.Should().BeAssignableTo<IEnumerable<Domain.Entities.Job>>().Subject;
+            OkObjectResult okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+            List<Job> returnedJobs = okResult.Value.Should().BeAssignableTo<IEnumerable<Job>>().Subject.ToList();
             returnedJobs.Should().HaveCount(2);
             returnedJobs.All(j => j.Status == status).Should().BeTrue();
         }
 
         /// <summary>
-        /// Tests that GetJobsByDriver returns jobs assigned to driver.
+        ///     Tests that GetJobsByDriver returns jobs assigned to driver.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task GetJobsByDriver_ReturnsJobsForDriver()
         {
             // Arrange
-            var driverId = 123;
-            var expectedJobs = new List<Domain.Entities.Job>
-            {
+            int driverId = 123;
+            List<Job> expectedJobs =
+            [
                 CreateTestJob("job1", JobStatus.Assigned, driverId),
                 CreateTestJob("job2", JobStatus.EnRoute, driverId)
-            };
+            ];
 
             _mockJobRepository.Setup(r => r.GetJobsByDriverAsync(driverId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedJobs);
 
             // Act
-            var result = await _controller.GetJobsByDriver(driverId);
+            ActionResult<IEnumerable<Job>> result = await _controller.GetJobsByDriver(driverId);
 
             // Assert
             result.Should().NotBeNull();
-            var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedJobs = okResult.Value.Should().BeAssignableTo<IEnumerable<Domain.Entities.Job>>().Subject;
+            OkObjectResult okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+            List<Job> returnedJobs = okResult.Value.Should().BeAssignableTo<IEnumerable<Job>>().Subject.ToList();
             returnedJobs.Should().HaveCount(2);
             returnedJobs.All(j => j.AssignedDriverId == driverId).Should().BeTrue();
         }
 
         /// <summary>
-        /// Tests that GetJobsByCustomer returns jobs for customer.
+        ///     Tests that GetJobsByCustomer returns jobs for customer.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task GetJobsByCustomer_ReturnsJobsForCustomer()
         {
             // Arrange
-            var customerId = "customer123";
-            var expectedJobs = new List<Domain.Entities.Job>
-            {
+            string customerId = "customer123";
+            List<Job> expectedJobs =
+            [
                 CreateTestJob("job1", JobStatus.Pending, customerId: customerId),
                 CreateTestJob("job2", JobStatus.Received, customerId: customerId)
-            };
+            ];
 
             _mockJobRepository.Setup(r => r.GetJobsByCustomerAsync(customerId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedJobs);
 
             // Act
-            var result = await _controller.GetJobsByCustomer(customerId);
+            ActionResult<IEnumerable<Job>> result = await _controller.GetJobsByCustomer(customerId);
 
             // Assert
             result.Should().NotBeNull();
-            var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedJobs = okResult.Value.Should().BeAssignableTo<IEnumerable<Domain.Entities.Job>>().Subject;
+            OkObjectResult okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+            List<Job> returnedJobs = okResult.Value.Should().BeAssignableTo<IEnumerable<Job>>().Subject.ToList();
             returnedJobs.Should().HaveCount(2);
             returnedJobs.All(j => j.CustomerId == customerId).Should().BeTrue();
         }
 
         /// <summary>
-        /// Tests that GetOverdueJobs returns overdue jobs.
+        ///     Tests that GetOverdueJobs returns overdue jobs.
         /// </summary>
         /// <returns>A task representing the asynchronous test.</returns>
         [Fact]
         public async Task GetOverdueJobs_ReturnsOverdueJobs()
         {
             // Arrange
-            var overdueJobs = new List<Domain.Entities.Job>
-            {
+            List<Job> overdueJobs =
+            [
                 CreateTestJob("overdue1", JobStatus.EnRoute),
                 CreateTestJob("overdue2", JobStatus.Assigned)
-            };
+            ];
 
             _mockJobRepository.Setup(r => r.GetOverdueJobsAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(overdueJobs);
 
             // Act
-            var result = await _controller.GetOverdueJobs();
+            ActionResult<IEnumerable<Job>> result = await _controller.GetOverdueJobs();
 
             // Assert
             result.Should().NotBeNull();
-            var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedJobs = okResult.Value.Should().BeAssignableTo<IEnumerable<Domain.Entities.Job>>().Subject;
+            OkObjectResult okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+            List<Job> returnedJobs = okResult.Value.Should().BeAssignableTo<IEnumerable<Job>>().Subject.ToList();
             returnedJobs.Should().HaveCount(2);
         }
 
         /// <summary>
-        /// Creates a test job for testing purposes.
+        ///     Creates a test job for testing purposes.
         /// </summary>
         /// <param name="id">The job ID.</param>
         /// <param name="status">The job status.</param>
         /// <param name="driverId">The optional driver ID.</param>
         /// <param name="customerId">The optional customer ID.</param>
         /// <returns>A test job instance.</returns>
-        private static Domain.Entities.Job CreateTestJob(string id, JobStatus status, int? driverId = null, string? customerId = null)
+        private static Job CreateTestJob(string id, JobStatus status, int? driverId = null, string? customerId = null)
         {
-            return new Domain.Entities.Job
+            return new Job
             {
                 Id = id,
                 Title = $"Test Job {id}",
@@ -548,7 +551,8 @@ namespace HotshotLogistics.Tests.Jobs
                 ScheduledPickupTime = DateTime.UtcNow.AddHours(2),
                 EstimatedDeliveryTime = DateTime.UtcNow.AddHours(8), // <-- FIXED HERE
                 PickupLocation = new Location { Address = "123 Pickup St", Latitude = 40.7128m, Longitude = -74.0060m },
-                DeliveryLocation = new Location { Address = "456 Delivery Ave", Latitude = 40.7589m, Longitude = -73.9851m },
+                DeliveryLocation = new Location
+                { Address = "456 Delivery Ave", Latitude = 40.7589m, Longitude = -73.9851m },
                 Cargo = new CargoDetails { Description = "Test cargo", Weight = 100, Value = 1000 },
                 Pricing = new PricingDetails { BaseRate = 100, TotalAmount = 100 },
                 Documents = new List<JobDocument>(),

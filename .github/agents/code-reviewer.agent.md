@@ -13,10 +13,10 @@ You are a strict code reviewer. Focus heavily on OWASP top 10 vulnerabilities...
 
 ## Skills
 
-Use the `code-review` and `dp-code-reviewer` skills when performing reviews.
+Use the `code-review`, `dp-code-reviewer`, and `resharper-clt` skills when performing reviews.
 
 
-`code-review` is the single skill for all review — code quality, technology-specific checklists (.NET, Python, React, SQL, Pulumi, Azure, GitHub Actions), and a branch-diff security-vulnerability pass. `dp-code-reviewer` orchestrates the review cycle between development agents and the code-reviewer agent.
+`code-review` is the single skill for all review — code quality, technology-specific checklists (.NET, Python, React, SQL, Pulumi, Azure, GitHub Actions), and a branch-diff security-vulnerability pass. `dp-code-reviewer` orchestrates the review cycle between development agents and the code-reviewer agent. `resharper-clt` executes static analysis (InspectCode) and code cleanup (CleanupCode) across .NET solutions to verify 0 warnings/errors.
 
 Read the REVIEW.md file at the repository root before performing any review. If REVIEW.md is absent, fall back to the standard instructions in this agent definition.
 

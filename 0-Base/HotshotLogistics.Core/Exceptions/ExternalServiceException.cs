@@ -4,30 +4,13 @@
 
 namespace HotshotLogistics.Core.Exceptions
 {
-    using System;
-
     /// <summary>
-    /// Exception thrown when an external service call fails.
+    ///     Exception thrown when an external service call fails.
     /// </summary>
     public class ExternalServiceException : Exception
     {
         /// <summary>
-        /// Gets the name of the external service.
-        /// </summary>
-        public string ServiceName { get; }
-
-        /// <summary>
-        /// Gets the HTTP status code returned by the external service.
-        /// </summary>
-        public int? StatusCode { get; }
-
-        /// <summary>
-        /// Gets the endpoint that was called.
-        /// </summary>
-        public string? Endpoint { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ExternalServiceException"/> class.
+        ///     Initializes a new instance of the <see cref="ExternalServiceException" /> class.
         /// </summary>
         /// <param name="serviceName">The name of the external service.</param>
         public ExternalServiceException(string serviceName)
@@ -37,7 +20,7 @@ namespace HotshotLogistics.Core.Exceptions
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExternalServiceException"/> class with a specified error message.
+        ///     Initializes a new instance of the <see cref="ExternalServiceException" /> class with a specified error message.
         /// </summary>
         /// <param name="serviceName">The name of the external service.</param>
         /// <param name="message">The message that describes the error.</param>
@@ -48,7 +31,8 @@ namespace HotshotLogistics.Core.Exceptions
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExternalServiceException"/> class with a specified error message and status code.
+        ///     Initializes a new instance of the <see cref="ExternalServiceException" /> class with a specified error message and
+        ///     status code.
         /// </summary>
         /// <param name="serviceName">The name of the external service.</param>
         /// <param name="message">The message that describes the error.</param>
@@ -61,7 +45,8 @@ namespace HotshotLogistics.Core.Exceptions
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExternalServiceException"/> class with a specified error message, status code, and endpoint.
+        ///     Initializes a new instance of the <see cref="ExternalServiceException" /> class with a specified error message,
+        ///     status code, and endpoint.
         /// </summary>
         /// <param name="serviceName">The name of the external service.</param>
         /// <param name="message">The message that describes the error.</param>
@@ -76,7 +61,8 @@ namespace HotshotLogistics.Core.Exceptions
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExternalServiceException"/> class with a specified error message and a reference to the inner exception that is the cause of this exception.
+        ///     Initializes a new instance of the <see cref="ExternalServiceException" /> class with a specified error message and
+        ///     a reference to the inner exception that is the cause of this exception.
         /// </summary>
         /// <param name="serviceName">The name of the external service.</param>
         /// <param name="message">The message that describes the error.</param>
@@ -86,5 +72,20 @@ namespace HotshotLogistics.Core.Exceptions
         {
             ServiceName = serviceName;
         }
+
+        /// <summary>
+        ///     Gets the name of the external service.
+        /// </summary>
+        public string ServiceName { get; }
+
+        /// <summary>
+        ///     Gets the HTTP status code returned by the external service.
+        /// </summary>
+        public int? StatusCode { get; }
+
+        /// <summary>
+        ///     Gets the endpoint that was called.
+        /// </summary>
+        public string? Endpoint { get; }
     }
 }

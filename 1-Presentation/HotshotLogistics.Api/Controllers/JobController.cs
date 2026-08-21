@@ -3,31 +3,35 @@
 // </copyright>
 
 using FluentValidation;
+using FluentValidation.Results;
 using HotshotLogistics.Application.Authorization;
 using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Domain.DTOs;
 using HotshotLogistics.Domain.Entities;
+using HotshotLogistics.Domain.ValueObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ValidationException = HotshotLogistics.Core.Exceptions.ValidationException;
+
 namespace HotshotLogistics.Api.Controllers
 {
     /// <summary>
-    /// API controller for managing jobs with CRUD operations.
+    ///     API controller for managing jobs with CRUD operations.
     /// </summary>
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class JobController : ControllerBase
     {
-        private readonly IJobService _jobService;
         private readonly IJobRepository _jobRepository;
-        private readonly ILogger<JobController> _logger;
+        private readonly IJobService _jobService;
         private readonly IValidator<Job> _jobValidator;
+        private readonly ILogger<JobController> _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JobController"/> class.
+        ///     Initializes a new instance of the <see cref="JobController" /> class.
         /// </summary>
         /// <param name="jobService">The job service.</param>
         /// <param name="jobRepository">The job repository.</param>
@@ -46,7 +50,7 @@ namespace HotshotLogistics.Api.Controllers
         }
 
         /// <summary>
-        /// Gets all jobs with optional filtering and pagination.
+        ///     Gets all jobs with optional filtering and pagination.
         /// </summary>
         /// <param name="status">Filter by job status.</param>
         /// <param name="priority">Filter by job priority.</param>
@@ -91,7 +95,7 @@ namespace HotshotLogistics.Api.Controllers
             [FromQuery] SortDirection sortDirection = SortDirection.Descending,
             CancellationToken cancellationToken = default)
         {
-            var filter = new JobFilterDto
+            JobFilterDto filter = new()
             {
                 Status = status,
                 Priority = priority,
@@ -108,31 +112,32 @@ namespace HotshotLogistics.Api.Controllers
                 IsOverdue = isOverdue
             };
 
-            var pagination = new PaginationParameters
+            PaginationParameters pagination = new()
             {
                 PageNumber = pageNumber,
                 PageSize = pageSize
             };
 
-            var sort = new HotshotLogistics.Domain.ValueObjects.SortParameters
+            SortParameters sort = new()
             {
                 SortBy = sortBy,
                 SortDirection = sortDirection
             };
 
-            _logger.LogInformation("JobController.GetJobs called with filter: {@Filter}, pagination: {@Pagination}, sort: {@Sort}",
+            _logger.LogInformation(
+                "JobController.GetJobs called with filter: {@Filter}, pagination: {@Pagination}, sort: {@Sort}",
                 filter, pagination, sort);
 
-            var result = await _jobRepository.GetJobsAsync(filter, pagination, sort, cancellationToken);
+            PagedResult<Job> result = await _jobRepository.GetJobsAsync(filter, pagination, sort, cancellationToken);
 
             _logger.LogInformation("JobController.GetJobs returned {TotalCount} jobs out of {ItemCount} items",
-                result.TotalCount, result.Items?.Count() ?? 0);
+                result.TotalCount, result.Items.Count());
 
             return Ok(result);
         }
 
         /// <summary>
-        /// Gets a job by ID.
+        ///     Gets a job by ID.
         /// </summary>
         /// <param name="id">The job ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -145,7 +150,7 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-                var job = await _jobService.GetJobByIdAsync(id, cancellationToken);
+                Job? job = await _jobService.GetJobByIdAsync(id, cancellationToken);
                 if (job == null)
                 {
                     return NotFound($"Job with ID {id} not found");
@@ -156,12 +161,13 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving job");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Creates a new job.
+        ///     Creates a new job.
         /// </summary>
         /// <param name="jobDto">The job data.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -172,7 +178,7 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Job>> CreateJob(
-            [FromBody] Job jobDto,
+            [FromBody] Job? jobDto,
             CancellationToken cancellationToken = default)
         {
             try
@@ -183,10 +189,11 @@ namespace HotshotLogistics.Api.Controllers
                 }
 
                 // Validate the job data
-                var validationResult = await _jobValidator.ValidateAsync(jobDto, cancellationToken);
+                ValidationResult validationResult = await _jobValidator.ValidateAsync(jobDto, cancellationToken);
                 if (!validationResult.IsValid)
                 {
-                    _logger.LogWarning("Job validation failed: {Errors}", string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)));
+                    _logger.LogWarning("Job validation failed: {Errors}",
+                        string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)));
                     return BadRequest(new
                     {
                         Message = "Job validation failed",
@@ -198,7 +205,7 @@ namespace HotshotLogistics.Api.Controllers
                     });
                 }
 
-                var createdJob = await _jobService.CreateJobAsync(jobDto, cancellationToken);
+                Job createdJob = await _jobService.CreateJobAsync(jobDto, cancellationToken);
                 return CreatedAtAction(nameof(GetJobById), new { id = createdJob.Id }, createdJob);
             }
             catch (ArgumentException ex)
@@ -211,7 +218,7 @@ namespace HotshotLogistics.Api.Controllers
                 _logger.LogWarning(ex, "Referenced entity not found: {Message}", ex.Message);
                 return NotFound(ex.Message);
             }
-            catch (HotshotLogistics.Core.Exceptions.ValidationException ex)
+            catch (ValidationException ex)
             {
                 _logger.LogWarning(ex, "Job validation failed: {Message}", ex.Message);
                 return BadRequest(new
@@ -227,12 +234,13 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while creating job");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Updates an existing job.
+        ///     Updates an existing job.
         /// </summary>
         /// <param name="id">The job ID.</param>
         /// <param name="jobDto">The updated job data.</param>
@@ -245,7 +253,7 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Job>> UpdateJob(
             string id,
-            [FromBody] Job jobDto,
+            [FromBody] Job? jobDto,
             CancellationToken cancellationToken = default)
         {
             try
@@ -259,10 +267,11 @@ namespace HotshotLogistics.Api.Controllers
                 jobDto.Id = id;
 
                 // Validate the job data using FluentValidation
-                var validationResult = await _jobValidator.ValidateAsync(jobDto, cancellationToken);
+                ValidationResult validationResult = await _jobValidator.ValidateAsync(jobDto, cancellationToken);
                 if (!validationResult.IsValid)
                 {
-                    _logger.LogWarning("Job validation failed during update: {Errors}", string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)));
+                    _logger.LogWarning("Job validation failed during update: {Errors}",
+                        string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)));
                     return BadRequest(new
                     {
                         Message = "Job validation failed",
@@ -274,7 +283,7 @@ namespace HotshotLogistics.Api.Controllers
                     });
                 }
 
-                var updatedJob = await _jobService.UpdateJobAsync(id, jobDto, cancellationToken);
+                Job? updatedJob = await _jobService.UpdateJobAsync(id, jobDto, cancellationToken);
                 if (updatedJob == null)
                 {
                     return NotFound($"Job with ID {id} not found");
@@ -287,7 +296,7 @@ namespace HotshotLogistics.Api.Controllers
                 _logger.LogWarning(ex, "Invalid job data provided: {Message}", ex.Message);
                 return BadRequest(ex.Message);
             }
-            catch (HotshotLogistics.Core.Exceptions.ValidationException ex)
+            catch (ValidationException ex)
             {
                 _logger.LogWarning(ex, "Job validation failed during update: {Message}", ex.Message);
                 return BadRequest(new
@@ -303,12 +312,13 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating job");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Deletes a job.
+        ///     Deletes a job.
         /// </summary>
         /// <param name="id">The job ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -322,7 +332,7 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-                var result = await _jobService.DeleteJobAsync(id, cancellationToken);
+                bool result = await _jobService.DeleteJobAsync(id, cancellationToken);
                 if (!result)
                 {
                     return NotFound($"Job with ID {id} not found");
@@ -338,12 +348,13 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while deleting job");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Assigns a driver to a job.
+        ///     Assigns a driver to a job.
         /// </summary>
         /// <param name="id">The job ID.</param>
         /// <param name="request">The driver assignment request.</param>
@@ -357,7 +368,7 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<Job>> AssignDriver(
             string id,
-            [FromBody] AssignDriverRequest request,
+            [FromBody] AssignDriverRequest? request,
             CancellationToken cancellationToken = default)
         {
             try
@@ -367,7 +378,7 @@ namespace HotshotLogistics.Api.Controllers
                     return BadRequest("Driver assignment request is required");
                 }
 
-                var updatedJob = await _jobService.AssignDriverAsync(id, request.DriverId, cancellationToken);
+                Job updatedJob = await _jobService.AssignDriverAsync(id, request.DriverId, cancellationToken);
                 return Ok(updatedJob);
             }
             catch (ArgumentException ex)
@@ -383,12 +394,13 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while assigning driver to job");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Updates the status of a job.
+        ///     Updates the status of a job.
         /// </summary>
         /// <param name="id">The job ID.</param>
         /// <param name="request">The status update request.</param>
@@ -401,7 +413,7 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Job>> UpdateJobStatus(
             string id,
-            [FromBody] UpdateJobStatusRequest request,
+            [FromBody] UpdateJobStatusRequest? request,
             CancellationToken cancellationToken = default)
         {
             try
@@ -411,7 +423,7 @@ namespace HotshotLogistics.Api.Controllers
                     return BadRequest("Status update request is required");
                 }
 
-                var updatedJob = await _jobService.UpdateJobStatusAsync(id, request.Status, cancellationToken);
+                Job updatedJob = await _jobService.UpdateJobStatusAsync(id, request.Status, cancellationToken);
                 return Ok(updatedJob);
             }
             catch (ArgumentException ex)
@@ -422,12 +434,13 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating job status");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Gets jobs by status.
+        ///     Gets jobs by status.
         /// </summary>
         /// <param name="status">The job status.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -441,18 +454,19 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-                var jobs = await _jobRepository.GetJobsByStatusAsync(status, cancellationToken);
+                IEnumerable<Job> jobs = await _jobRepository.GetJobsByStatusAsync(status, cancellationToken);
                 return Ok(jobs);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving jobs by status");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Gets jobs assigned to a specific driver.
+        ///     Gets jobs assigned to a specific driver.
         /// </summary>
         /// <param name="driverId">The driver ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -466,18 +480,19 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-                var jobs = await _jobRepository.GetJobsByDriverAsync(driverId, cancellationToken);
+                IEnumerable<Job> jobs = await _jobRepository.GetJobsByDriverAsync(driverId, cancellationToken);
                 return Ok(jobs);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving jobs for driver");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Gets jobs for a specific customer.
+        ///     Gets jobs for a specific customer.
         /// </summary>
         /// <param name="customerId">The customer ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -491,18 +506,19 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-                var jobs = await _jobRepository.GetJobsByCustomerAsync(customerId, cancellationToken);
+                IEnumerable<Job> jobs = await _jobRepository.GetJobsByCustomerAsync(customerId, cancellationToken);
                 return Ok(jobs);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving jobs for customer");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Gets overdue jobs.
+        ///     Gets overdue jobs.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of overdue jobs.</returns>
@@ -513,35 +529,36 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-                var jobs = await _jobRepository.GetOverdueJobsAsync(cancellationToken);
+                IEnumerable<Job> jobs = await _jobRepository.GetOverdueJobsAsync(cancellationToken);
                 return Ok(jobs);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving overdue jobs");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
     }
 
     /// <summary>
-    /// Request model for assigning a driver to a job.
+    ///     Request model for assigning a driver to a job.
     /// </summary>
     public class AssignDriverRequest
     {
         /// <summary>
-        /// Gets or sets the driver ID.
+        ///     Gets or sets the driver ID.
         /// </summary>
         public int DriverId { get; set; }
     }
 
     /// <summary>
-    /// Request model for updating job status.
+    ///     Request model for updating job status.
     /// </summary>
     public class UpdateJobStatusRequest
     {
         /// <summary>
-        /// Gets or sets the new job status.
+        ///     Gets or sets the new job status.
         /// </summary>
         public JobStatus Status { get; set; }
     }

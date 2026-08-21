@@ -2,26 +2,19 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using HotshotLogistics.Application.Authorization;
+using HotshotLogistics.Contracts.Services;
+using HotshotLogistics.Core.Enums;
+using HotshotLogistics.Domain.DTOs;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
 namespace HotshotLogistics.Api.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using HotshotLogistics.Application.Authorization;
-    using HotshotLogistics.Contracts.Services;
-    using HotshotLogistics.Core.Enums;
-    using HotshotLogistics.Domain.DTOs;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Logging;
-
-
     /// <summary>
-    /// API controller for managing job assignments.
-	/// </summary>
- 	[Authorize]
+    ///     API controller for managing job assignments.
+    /// </summary>
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class JobAssignmentsController : ControllerBase
@@ -30,7 +23,7 @@ namespace HotshotLogistics.Api.Controllers
         private readonly ILogger<JobAssignmentsController> _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JobAssignmentsController"/> class.
+        ///     Initializes a new instance of the <see cref="JobAssignmentsController" /> class.
         /// </summary>
         /// <param name="assignmentService">The job assignment service.</param>
         /// <param name="logger">The _logger.</param>
@@ -43,7 +36,7 @@ namespace HotshotLogistics.Api.Controllers
         }
 
         /// <summary>
-        /// Gets a job assignment by ID.
+        ///     Gets a job assignment by ID.
         /// </summary>
         /// <param name="id">The assignment ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -52,35 +45,35 @@ namespace HotshotLogistics.Api.Controllers
         [Authorize(Policy = AuthorizationPolicies.OwnResource)]
         [ProducesResponseType(typeof(JobAssignmentDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<JobAssignmentDto>> GetById(string id, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<JobAssignmentDto>> GetById(string id,
+            CancellationToken cancellationToken = default)
         {
-
-            var assignment = await _assignmentService.GetByIdAsync(id, cancellationToken);
+            JobAssignmentDto? assignment = await _assignmentService.GetByIdAsync(id, cancellationToken);
             if (assignment == null)
             {
                 return NotFound();
             }
 
             return Ok(assignment);
-
         }
 
         /// <summary>
-        /// Gets all job assignments.
+        ///     Gets all job assignments.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of job assignments.</returns>
         [HttpGet]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(IEnumerable<JobAssignmentDto>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<JobAssignmentDto>>> GetAll(CancellationToken cancellationToken = default)
+        public async Task<ActionResult<IEnumerable<JobAssignmentDto>>> GetAll(
+            CancellationToken cancellationToken = default)
         {
-            var assignments = await _assignmentService.GetAllAsync(cancellationToken);
+            IEnumerable<JobAssignmentDto> assignments = await _assignmentService.GetAllAsync(cancellationToken);
             return Ok(assignments);
         }
 
         /// <summary>
-        /// Gets job assignments by driver ID.
+        ///     Gets job assignments by driver ID.
         /// </summary>
         /// <param name="driverId">The driver ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -88,14 +81,16 @@ namespace HotshotLogistics.Api.Controllers
         [HttpGet("driver/{driverId}")]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrDriver)]
         [ProducesResponseType(typeof(IEnumerable<JobAssignmentDto>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<JobAssignmentDto>>> GetByDriverId(int driverId, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<IEnumerable<JobAssignmentDto>>> GetByDriverId(int driverId,
+            CancellationToken cancellationToken = default)
         {
-            var assignments = await _assignmentService.GetByDriverIdAsync(driverId, cancellationToken);
-            return this.Ok(assignments);
+            IEnumerable<JobAssignmentDto> assignments =
+                await _assignmentService.GetByDriverIdAsync(driverId, cancellationToken);
+            return Ok(assignments);
         }
 
         /// <summary>
-        /// Gets job assignments by job ID.
+        ///     Gets job assignments by job ID.
         /// </summary>
         /// <param name="jobId">The job ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -103,29 +98,32 @@ namespace HotshotLogistics.Api.Controllers
         [HttpGet("job/{jobId}")]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(IEnumerable<JobAssignmentDto>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<JobAssignmentDto>>> GetByJobId(string jobId, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<IEnumerable<JobAssignmentDto>>> GetByJobId(string jobId,
+            CancellationToken cancellationToken = default)
         {
-            var assignments = await _assignmentService.GetByJobIdAsync(jobId, cancellationToken);
-            return this.Ok(assignments);
+            IEnumerable<JobAssignmentDto> assignments =
+                await _assignmentService.GetByJobIdAsync(jobId, cancellationToken);
+            return Ok(assignments);
         }
 
         /// <summary>
-        /// Gets active job assignments.
+        ///     Gets active job assignments.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of active job assignments.</returns>
         [HttpGet("active")]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(IEnumerable<JobAssignmentDto>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<JobAssignmentDto>>> GetActive(CancellationToken cancellationToken = default)
+        public async Task<ActionResult<IEnumerable<JobAssignmentDto>>> GetActive(
+            CancellationToken cancellationToken = default)
         {
-
-            var assignments = await _assignmentService.GetActiveAssignmentsAsync(cancellationToken);
-            return this.Ok(assignments);
+            IEnumerable<JobAssignmentDto> assignments =
+                await _assignmentService.GetActiveAssignmentsAsync(cancellationToken);
+            return Ok(assignments);
         }
 
         /// <summary>
-        /// Assigns a job to a driver.
+        ///     Assigns a job to a driver.
         /// </summary>
         /// <param name="request">The assignment request.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -142,36 +140,36 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-                var assignment = await _assignmentService.AssignJobAsync(
+                JobAssignmentDto assignment = await _assignmentService.AssignJobAsync(
                     request.JobId,
                     request.DriverId,
                     cancellationToken);
 
-                return this.CreatedAtAction(
-                    nameof(this.GetById),
+                return CreatedAtAction(
+                    nameof(GetById),
                     new { id = assignment.Id },
                     assignment);
             }
             catch (KeyNotFoundException ex)
             {
-
                 _logger.LogWarning(ex, "Failed to assign job: {Message}", ex.Message);
-                return this.NotFound(ex.Message);
+                return NotFound(ex.Message);
             }
             catch (InvalidOperationException ex)
             {
                 _logger.LogWarning(ex, "Failed to assign job: {Message}", ex.Message);
-                return this.Conflict(ex.Message);
+                return Conflict(ex.Message);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while assigning job");
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Updates a job assignment status.
+        ///     Updates a job assignment status.
         /// </summary>
         /// <param name="id">The assignment ID.</param>
         /// <param name="status">The new status.</param>
@@ -189,24 +187,25 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-
-                var assignment = await _assignmentService.UpdateAssignmentStatusAsync(id, status, cancellationToken);
-                return this.Ok(assignment);
+                JobAssignmentDto assignment =
+                    await _assignmentService.UpdateAssignmentStatusAsync(id, status, cancellationToken);
+                return Ok(assignment);
             }
             catch (KeyNotFoundException ex)
             {
                 _logger.LogWarning(ex, "Failed to update assignment status: {Message}", ex.Message);
-                return this.NotFound(ex.Message);
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating assignment status");
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Unassigns a job from a driver.
+        ///     Unassigns a job from a driver.
         /// </summary>
         /// <param name="id">The assignment ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -217,28 +216,28 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UnassignJob(string id, CancellationToken cancellationToken = default)
         {
-            var result = await _assignmentService.UnassignJobAsync(id, cancellationToken);
+            bool result = await _assignmentService.UnassignJobAsync(id, cancellationToken);
             if (!result)
             {
-                return this.NotFound();
+                return NotFound();
             }
 
-            return this.NoContent();
+            return NoContent();
         }
     }
 
     /// <summary>
-    /// Request model for assigning a job to a driver.
+    ///     Request model for assigning a job to a driver.
     /// </summary>
     public class AssignJobRequest
     {
         /// <summary>
-        /// Gets or sets the job ID.
+        ///     Gets or sets the job ID.
         /// </summary>
         public string JobId { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the driver ID.
+        ///     Gets or sets the driver ID.
         /// </summary>
         public int DriverId { get; set; }
     }

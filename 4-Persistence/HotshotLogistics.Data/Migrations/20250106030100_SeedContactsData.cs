@@ -13,7 +13,7 @@ public class SeedContactsData : Migration
     public override void Up()
     {
         // Seed primary contacts for the existing customers (cust-1, cust-2)
-        var existingCustomerIds = new[] { "cust-1", "cust-2" };
+        string[] existingCustomerIds = ["cust-1", "cust-2"];
 
         for (int i = 0; i < existingCustomerIds.Length; i++)
         {

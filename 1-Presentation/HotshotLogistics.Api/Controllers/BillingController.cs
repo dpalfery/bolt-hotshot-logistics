@@ -1,7 +1,9 @@
 // <copyright file="BillingController.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+
 using HotshotLogistics.Application.Authorization;
+using HotshotLogistics.Contracts.Repositories;
 using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Core.Enums;
 using HotshotLogistics.Domain.Entities;
@@ -11,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HotshotLogistics.Api.Controllers
 {
     /// <summary>
-    /// API controller for billing and financial operations.
+    ///     API controller for billing and financial operations.
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
@@ -19,11 +21,11 @@ namespace HotshotLogistics.Api.Controllers
     public class BillingController : ControllerBase
     {
         private readonly IBillingService _billingService;
-        private readonly IPaymentProcessorFactory _paymentProcessorFactory;
         private readonly ILogger<BillingController> _logger;
+        private readonly IPaymentProcessorFactory _paymentProcessorFactory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BillingController"/> class.
+        ///     Initializes a new instance of the <see cref="BillingController" /> class.
         /// </summary>
         /// <param name="billingService">The billing service.</param>
         /// <param name="paymentProcessorFactory">The payment processor factory.</param>
@@ -34,12 +36,13 @@ namespace HotshotLogistics.Api.Controllers
             ILogger<BillingController> logger)
         {
             _billingService = billingService ?? throw new ArgumentNullException(nameof(billingService));
-            _paymentProcessorFactory = paymentProcessorFactory ?? throw new ArgumentNullException(nameof(paymentProcessorFactory));
+            _paymentProcessorFactory = paymentProcessorFactory ??
+                                       throw new ArgumentNullException(nameof(paymentProcessorFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
-        /// Generates an invoice for a completed job.
+        ///     Generates an invoice for a completed job.
         /// </summary>
         /// <param name="jobId">The job ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -49,11 +52,12 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(typeof(Invoice), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Invoice>> GenerateInvoice(string jobId, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<Invoice>> GenerateInvoice(string jobId,
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                var invoice = await _billingService.GenerateInvoiceAsync(jobId, cancellationToken);
+                Invoice invoice = await _billingService.GenerateInvoiceAsync(jobId, cancellationToken);
                 return CreatedAtAction(
                     nameof(GetInvoice),
                     new { id = invoice.Id },
@@ -72,12 +76,13 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while generating invoice for job");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Gets an invoice by ID.
+        ///     Gets an invoice by ID.
         /// </summary>
         /// <param name="id">The invoice ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -90,7 +95,7 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-                var invoice = await _billingService.GetInvoiceByIdAsync(id, cancellationToken);
+                Invoice? invoice = await _billingService.GetInvoiceByIdAsync(id, cancellationToken);
                 if (invoice == null)
                 {
                     return NotFound($"Invoice with ID {id} not found");
@@ -101,12 +106,13 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving invoice");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Gets invoices for a specific customer.
+        ///     Gets invoices for a specific customer.
         /// </summary>
         /// <param name="customerId">The customer ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -114,57 +120,64 @@ namespace HotshotLogistics.Api.Controllers
         [HttpGet("invoices/customer/{customerId}")]
         [Authorize(Policy = AuthorizationPolicies.CustomerResource)]
         [ProducesResponseType(typeof(IEnumerable<Invoice>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Invoice>>> GetCustomerInvoices(string customerId, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<IEnumerable<Invoice>>> GetCustomerInvoices(string customerId,
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                var invoices = await _billingService.GetCustomerInvoicesAsync(customerId, cancellationToken);
+                IEnumerable<Invoice> invoices =
+                    await _billingService.GetCustomerInvoicesAsync(customerId, cancellationToken);
                 return Ok(invoices);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving invoices for customer");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Gets invoice summary metrics for the dashboard.
+        ///     Gets invoice summary metrics for the dashboard.
         /// </summary>
         [HttpGet("/api/invoices/summary")]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(InvoiceSummaryMetricsResponse), StatusCodes.Status200OK)]
-        public async Task<ActionResult<InvoiceSummaryMetricsResponse>> GetInvoiceSummary(CancellationToken cancellationToken = default)
+        public async Task<ActionResult<InvoiceSummaryMetricsResponse>> GetInvoiceSummary(
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                var summary = await _billingService.GetInvoiceSummaryAsync(cancellationToken);
+                InvoiceSummary summary = await _billingService.GetInvoiceSummaryAsync(cancellationToken);
                 return Ok(new InvoiceSummaryMetricsResponse
                 {
                     TotalInvoiced = summary.TotalAmount,
                     TotalPaid = summary.TotalPaid,
                     TotalOutstanding = summary.TotalOutstanding,
-                    OverdueAmount = summary.OverdueAmount,
+                    OverdueAmount = summary.OverdueAmount
                 });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving invoice summary");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Gets invoice aging buckets for the dashboard.
+        ///     Gets invoice aging buckets for the dashboard.
         /// </summary>
         [HttpGet("/api/invoices/aging")]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(InvoiceAgingBucketsResponse), StatusCodes.Status200OK)]
-        public async Task<ActionResult<InvoiceAgingBucketsResponse>> GetInvoiceAging(CancellationToken cancellationToken = default)
+        public async Task<ActionResult<InvoiceAgingBucketsResponse>> GetInvoiceAging(
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                var entries = await _billingService.GetAgingReportAsync(cancellationToken);
+                List<AgingReportEntry> entries =
+                    (await _billingService.GetAgingReportAsync(cancellationToken)).ToList();
                 return Ok(new InvoiceAgingBucketsResponse
                 {
                     Current = entries.Sum(e => e.Current),
@@ -172,40 +185,43 @@ namespace HotshotLogistics.Api.Controllers
                     Days60 = 0,
                     Days90 = entries.Sum(e => e.Days61To90),
                     Over90 = entries.Sum(e => e.Over90Days),
-                    Total = entries.Sum(e => e.TotalBalance),
+                    Total = entries.Sum(e => e.TotalBalance)
                 });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving invoice aging");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Gets overdue invoices.
+        ///     Gets overdue invoices.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of overdue invoices.</returns>
         [HttpGet("invoices/overdue")]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(IEnumerable<Invoice>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Invoice>>> GetOverdueInvoices(CancellationToken cancellationToken = default)
+        public async Task<ActionResult<IEnumerable<Invoice>>> GetOverdueInvoices(
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                var invoices = await _billingService.GetOverdueInvoicesAsync(cancellationToken);
+                IEnumerable<Invoice> invoices = await _billingService.GetOverdueInvoicesAsync(cancellationToken);
                 return Ok(invoices);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving overdue invoices");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Processes a payment for an invoice.
+        ///     Processes a payment for an invoice.
         /// </summary>
         /// <param name="invoiceId">The invoice ID.</param>
         /// <param name="request">The payment request.</param>
@@ -218,7 +234,7 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<PaymentResult>> ProcessPayment(
             string invoiceId,
-            [FromBody] ProcessPaymentRequest request,
+            [FromBody] ProcessPaymentRequest? request,
             CancellationToken cancellationToken = default)
         {
             try
@@ -238,13 +254,13 @@ namespace HotshotLogistics.Api.Controllers
                     return BadRequest("Payment method is required");
                 }
 
-                var success = await _billingService.ProcessPaymentAsync(
+                bool success = await _billingService.ProcessPaymentAsync(
                     invoiceId,
                     request.Amount,
                     request.PaymentMethod,
                     cancellationToken);
 
-                var result = new PaymentResult
+                PaymentResult result = new()
                 {
                     Success = success,
                     InvoiceId = invoiceId,
@@ -268,12 +284,13 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while processing payment for invoice");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Calculates tax for a given amount and location.
+        ///     Calculates tax for a given amount and location.
         /// </summary>
         /// <param name="request">The tax calculation request.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -283,7 +300,7 @@ namespace HotshotLogistics.Api.Controllers
         [ProducesResponseType(typeof(TaxCalculationResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<TaxCalculationResult>> CalculateTax(
-            [FromBody] TaxCalculationRequest request,
+            [FromBody] TaxCalculationRequest? request,
             CancellationToken cancellationToken = default)
         {
             try
@@ -303,9 +320,10 @@ namespace HotshotLogistics.Api.Controllers
                     return BadRequest("State is required for tax calculation");
                 }
 
-                var taxAmount = await _billingService.CalculateTaxAsync(request.Amount, request.State, cancellationToken);
+                decimal taxAmount =
+                    await _billingService.CalculateTaxAsync(request.Amount, request.State, cancellationToken);
 
-                var result = new TaxCalculationResult
+                TaxCalculationResult result = new()
                 {
                     Amount = request.Amount,
                     State = request.State,
@@ -324,28 +342,31 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while calculating tax");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Gets accounts receivable report.
+        ///     Gets accounts receivable report.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>Accounts receivable summary.</returns>
         [HttpGet("reports/accounts-receivable")]
         [Authorize(Policy = AuthorizationPolicies.ManagerOrAdmin)]
         [ProducesResponseType(typeof(AccountsReceivableReport), StatusCodes.Status200OK)]
-        public async Task<ActionResult<AccountsReceivableReport>> GetAccountsReceivableReport(CancellationToken cancellationToken = default)
+        public async Task<ActionResult<AccountsReceivableReport>> GetAccountsReceivableReport(
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                var overdueInvoices = await _billingService.GetOverdueInvoicesAsync(cancellationToken);
+                List<Invoice> overdueInvoices =
+                    (await _billingService.GetOverdueInvoicesAsync(cancellationToken)).ToList();
 
-                var report = new AccountsReceivableReport
+                AccountsReceivableReport report = new()
                 {
                     TotalOverdueAmount = overdueInvoices.Sum(i => i.BalanceDue),
-                    OverdueInvoiceCount = overdueInvoices.Count(),
+                    OverdueInvoiceCount = overdueInvoices.Count,
                     GeneratedAt = DateTime.UtcNow,
                     OverdueInvoices = overdueInvoices.Select(i => new OverdueInvoiceSummary
                     {
@@ -364,12 +385,13 @@ namespace HotshotLogistics.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while generating accounts receivable report");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while processing your request.");
             }
         }
 
         /// <summary>
-        /// Handles Stripe webhook events.
+        ///     Handles Stripe webhook events.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The webhook processing result.</returns>
@@ -380,28 +402,26 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-                var processor = _paymentProcessorFactory.GetProcessor("Stripe");
+                IPaymentProcessor processor = _paymentProcessorFactory.GetProcessor("Stripe");
 
                 // Read the request body
-                using var reader = new StreamReader(Request.Body);
-                var payload = await reader.ReadToEndAsync(cancellationToken);
+                using StreamReader reader = new(Request.Body);
+                string payload = await reader.ReadToEndAsync(cancellationToken);
 
                 // Get the Stripe signature from headers
-                var signature = Request.Headers["Stripe-Signature"].FirstOrDefault() ?? string.Empty;
+                string signature = Request.Headers["Stripe-Signature"].FirstOrDefault() ?? string.Empty;
 
-                var webhookData = new WebhookEventData
+                WebhookEventData webhookData = new()
                 {
                     Payload = payload,
                     Signature = signature,
-                    Headers = Request.Headers.ToDictionary(h => h.Key, h => h.Value.FirstOrDefault() ?? string.Empty)
+                    Headers = Request.Headers.ToDictionary(h => h.Key, h => h.Value.FirstOrDefault() ?? string.Empty),
+                    EventType = ExtractStripeEventType(payload)
                 };
 
-                // Extract event type from payload (simplified)
-                webhookData.EventType = ExtractStripeEventType(payload);
+                WebhookProcessingResult result = await processor.ProcessWebhookAsync(webhookData, cancellationToken);
 
-                var result = await processor.ProcessWebhookAsync(webhookData, cancellationToken);
-
-                if (result.Success && result.StatusUpdate != null)
+                if (result is { Success: true, StatusUpdate: not null })
                 {
                     // Handle payment status update
                     await HandlePaymentStatusUpdateAsync(result.StatusUpdate, cancellationToken);
@@ -419,7 +439,7 @@ namespace HotshotLogistics.Api.Controllers
         }
 
         /// <summary>
-        /// Handles PayPal webhook events.
+        ///     Handles PayPal webhook events.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The webhook processing result.</returns>
@@ -430,28 +450,26 @@ namespace HotshotLogistics.Api.Controllers
         {
             try
             {
-                var processor = _paymentProcessorFactory.GetProcessor("PayPal");
+                IPaymentProcessor processor = _paymentProcessorFactory.GetProcessor("PayPal");
 
                 // Read the request body
-                using var reader = new StreamReader(Request.Body);
-                var payload = await reader.ReadToEndAsync(cancellationToken);
+                using StreamReader reader = new(Request.Body);
+                string payload = await reader.ReadToEndAsync(cancellationToken);
 
                 // Get PayPal signature from headers
-                var signature = Request.Headers["PayPal-Transmission-Signature"].FirstOrDefault() ?? string.Empty;
+                string signature = Request.Headers["PayPal-Transmission-Signature"].FirstOrDefault() ?? string.Empty;
 
-                var webhookData = new WebhookEventData
+                WebhookEventData webhookData = new()
                 {
                     Payload = payload,
                     Signature = signature,
-                    Headers = Request.Headers.ToDictionary(h => h.Key, h => h.Value.FirstOrDefault() ?? string.Empty)
+                    Headers = Request.Headers.ToDictionary(h => h.Key, h => h.Value.FirstOrDefault() ?? string.Empty),
+                    EventType = ExtractPayPalEventType(payload)
                 };
 
-                // Extract event type from payload (simplified)
-                webhookData.EventType = ExtractPayPalEventType(payload);
+                WebhookProcessingResult result = await processor.ProcessWebhookAsync(webhookData, cancellationToken);
 
-                var result = await processor.ProcessWebhookAsync(webhookData, cancellationToken);
-
-                if (result.Success && result.StatusUpdate != null)
+                if (result is { Success: true, StatusUpdate: not null })
                 {
                     // Handle payment status update
                     await HandlePaymentStatusUpdateAsync(result.StatusUpdate, cancellationToken);
@@ -469,12 +487,13 @@ namespace HotshotLogistics.Api.Controllers
         }
 
         /// <summary>
-        /// Handles payment status updates from webhooks.
+        ///     Handles payment status updates from webhooks.
         /// </summary>
         /// <param name="statusUpdate">The payment status update.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        private async Task HandlePaymentStatusUpdateAsync(PaymentStatusUpdate statusUpdate, CancellationToken cancellationToken)
+        private async Task HandlePaymentStatusUpdateAsync(PaymentStatusUpdate statusUpdate,
+            CancellationToken cancellationToken)
         {
             _logger.LogInformation("Handling payment status update: Status={Status}", statusUpdate.Status);
 
@@ -487,20 +506,23 @@ namespace HotshotLogistics.Api.Controllers
                 if (statusUpdate.Status == PaymentStatus.Completed)
                 {
                     // Update invoice with payment amount
-                    var invoice = await _billingService.GetCustomerInvoicesAsync(statusUpdate.InvoiceId, cancellationToken);
-                    var targetInvoice = invoice.FirstOrDefault(i => i.Id == statusUpdate.InvoiceId);
+                    IEnumerable<Invoice> invoice =
+                        await _billingService.GetCustomerInvoicesAsync(statusUpdate.InvoiceId, cancellationToken);
+                    Invoice? targetInvoice = invoice.FirstOrDefault(i => i.Id == statusUpdate.InvoiceId);
 
                     if (targetInvoice != null)
                     {
                         // Send payment confirmation notification
                         try
                         {
-                            await _billingService.GetCustomerInvoicesAsync(targetInvoice.CustomerId, cancellationToken); // Just to get customer context
+                            await _billingService.GetCustomerInvoicesAsync(targetInvoice.CustomerId,
+                                cancellationToken); // Just to get customer context
                             // Note: In real implementation, you'd have a method to send payment notifications
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning(ex, "Failed to send payment notification for invoice {InvoiceId}", statusUpdate.InvoiceId);
+                            _logger.LogWarning(ex, "Failed to send payment notification for invoice {InvoiceId}",
+                                statusUpdate.InvoiceId);
                         }
                     }
                 }
@@ -515,7 +537,7 @@ namespace HotshotLogistics.Api.Controllers
         }
 
         /// <summary>
-        /// Extracts the event type from a Stripe webhook payload.
+        ///     Extracts the event type from a Stripe webhook payload.
         /// </summary>
         /// <param name="payload">The webhook payload.</param>
         /// <returns>The event type.</returns>
@@ -523,14 +545,20 @@ namespace HotshotLogistics.Api.Controllers
         {
             // Simplified extraction - in real implementation, parse JSON properly
             if (payload.Contains("payment_intent.succeeded"))
+            {
                 return "payment_intent.succeeded";
+            }
+
             if (payload.Contains("payment_intent.payment_failed"))
+            {
                 return "payment_intent.payment_failed";
+            }
+
             return "unknown";
         }
 
         /// <summary>
-        /// Extracts the event type from a PayPal webhook payload.
+        ///     Extracts the event type from a PayPal webhook payload.
         /// </summary>
         /// <param name="payload">The webhook payload.</param>
         /// <returns>The event type.</returns>
@@ -538,114 +566,120 @@ namespace HotshotLogistics.Api.Controllers
         {
             // Simplified extraction - in real implementation, parse JSON properly
             if (payload.Contains("PAYMENT.CAPTURE.COMPLETED"))
+            {
                 return "PAYMENT.CAPTURE.COMPLETED";
+            }
+
             if (payload.Contains("PAYMENT.CAPTURE.DENIED"))
+            {
                 return "PAYMENT.CAPTURE.DENIED";
+            }
+
             return "unknown";
         }
     }
 
     /// <summary>
-    /// Request model for processing payments.
+    ///     Request model for processing payments.
     /// </summary>
     public class ProcessPaymentRequest
     {
         /// <summary>
-        /// Gets or sets the payment amount.
+        ///     Gets or sets the payment amount.
         /// </summary>
         public decimal Amount { get; set; }
 
         /// <summary>
-        /// Gets or sets the payment method.
+        ///     Gets or sets the payment method.
         /// </summary>
         public string PaymentMethod { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets optional payment reference.
+        ///     Gets or sets optional payment reference.
         /// </summary>
         public string? Reference { get; set; }
     }
 
     /// <summary>
-    /// Result model for payment processing.
+    ///     Result model for payment processing.
     /// </summary>
     public class PaymentResult
     {
         /// <summary>
-        /// Gets or sets a value indicating whether the payment was successful.
+        ///     Gets or sets a value indicating whether the payment was successful.
         /// </summary>
         public bool Success { get; set; }
 
         /// <summary>
-        /// Gets or sets the invoice ID.
+        ///     Gets or sets the invoice ID.
         /// </summary>
         public string InvoiceId { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the payment amount.
+        ///     Gets or sets the payment amount.
         /// </summary>
         public decimal Amount { get; set; }
 
         /// <summary>
-        /// Gets or sets the payment method.
+        ///     Gets or sets the payment method.
         /// </summary>
         public string PaymentMethod { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the processing timestamp.
+        ///     Gets or sets the processing timestamp.
         /// </summary>
         public DateTime ProcessedAt { get; set; }
     }
 
     /// <summary>
-    /// Request model for tax calculations.
+    ///     Request model for tax calculations.
     /// </summary>
     public class TaxCalculationRequest
     {
         /// <summary>
-        /// Gets or sets the amount to calculate tax for.
+        ///     Gets or sets the amount to calculate tax for.
         /// </summary>
         public decimal Amount { get; set; }
 
         /// <summary>
-        /// Gets or sets the state for tax calculation.
+        ///     Gets or sets the state for tax calculation.
         /// </summary>
         public string State { get; set; } = string.Empty;
     }
 
     /// <summary>
-    /// Result model for tax calculations.
+    ///     Result model for tax calculations.
     /// </summary>
     public class TaxCalculationResult
     {
         /// <summary>
-        /// Gets or sets the original amount.
+        ///     Gets or sets the original amount.
         /// </summary>
         public decimal Amount { get; set; }
 
         /// <summary>
-        /// Gets or sets the state.
+        ///     Gets or sets the state.
         /// </summary>
         public string State { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the calculated tax amount.
+        ///     Gets or sets the calculated tax amount.
         /// </summary>
         public decimal TaxAmount { get; set; }
 
         /// <summary>
-        /// Gets or sets the total amount including tax.
+        ///     Gets or sets the total amount including tax.
         /// </summary>
         public decimal TotalAmount { get; set; }
 
         /// <summary>
-        /// Gets or sets the tax rate applied.
+        ///     Gets or sets the tax rate applied.
         /// </summary>
         public decimal TaxRate { get; set; }
     }
 
     /// <summary>
-    /// Dashboard invoice summary metrics.
+    ///     Dashboard invoice summary metrics.
     /// </summary>
     public class InvoiceSummaryMetricsResponse
     {
@@ -659,7 +693,7 @@ namespace HotshotLogistics.Api.Controllers
     }
 
     /// <summary>
-    /// Dashboard invoice aging buckets.
+    ///     Dashboard invoice aging buckets.
     /// </summary>
     public class InvoiceAgingBucketsResponse
     {
@@ -677,68 +711,68 @@ namespace HotshotLogistics.Api.Controllers
     }
 
     /// <summary>
-    /// Report model for accounts receivable.
+    ///     Report model for accounts receivable.
     /// </summary>
     public class AccountsReceivableReport
     {
         /// <summary>
-        /// Gets or sets the total overdue amount.
+        ///     Gets or sets the total overdue amount.
         /// </summary>
         public decimal TotalOverdueAmount { get; set; }
 
         /// <summary>
-        /// Gets or sets the count of overdue invoices.
+        ///     Gets or sets the count of overdue invoices.
         /// </summary>
         public int OverdueInvoiceCount { get; set; }
 
         /// <summary>
-        /// Gets or sets the report generation timestamp.
+        ///     Gets or sets the report generation timestamp.
         /// </summary>
         public DateTime GeneratedAt { get; set; }
 
         /// <summary>
-        /// Gets or sets the list of overdue invoices.
+        ///     Gets or sets the list of overdue invoices.
         /// </summary>
-        public List<OverdueInvoiceSummary> OverdueInvoices { get; set; } = new List<OverdueInvoiceSummary>();
+        public List<OverdueInvoiceSummary> OverdueInvoices { get; set; } = new();
     }
 
     /// <summary>
-    /// Summary model for overdue invoices.
+    ///     Summary model for overdue invoices.
     /// </summary>
     public class OverdueInvoiceSummary
     {
         /// <summary>
-        /// Gets or sets the invoice ID.
+        ///     Gets or sets the invoice ID.
         /// </summary>
         public string InvoiceId { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the invoice number.
+        ///     Gets or sets the invoice number.
         /// </summary>
         public string InvoiceNumber { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the customer ID.
+        ///     Gets or sets the customer ID.
         /// </summary>
         public string CustomerId { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the invoice amount.
+        ///     Gets or sets the invoice amount.
         /// </summary>
         public decimal Amount { get; set; }
 
         /// <summary>
-        /// Gets or sets the balance due.
+        ///     Gets or sets the balance due.
         /// </summary>
         public decimal BalanceDue { get; set; }
 
         /// <summary>
-        /// Gets or sets the due date.
+        ///     Gets or sets the due date.
         /// </summary>
         public DateTime DueDate { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of days overdue.
+        ///     Gets or sets the number of days overdue.
         /// </summary>
         public int DaysOverdue { get; set; }
     }

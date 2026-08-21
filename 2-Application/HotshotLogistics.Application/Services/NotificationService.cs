@@ -2,36 +2,30 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Text.Json;
+using HotshotLogistics.Contracts.Services;
+using HotshotLogistics.Core.Enums;
+using HotshotLogistics.Domain.Entities;
+using HotshotLogistics.Domain.ValueObjects;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
+
 namespace HotshotLogistics.Application.Services
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text.Json;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using HotshotLogistics.Contracts.Services;
-    using HotshotLogistics.Core.Enums;
-    using HotshotLogistics.Domain.Entities;
-    using HotshotLogistics.Domain.ValueObjects;
-    using Microsoft.Extensions.Caching.Distributed;
-    using Microsoft.Extensions.Logging;
-
     /// <summary>
-    /// Service for notification operations with multi-channel support.
+    ///     Service for notification operations with multi-channel support.
     /// </summary>
     public class NotificationService : INotificationService
     {
-        private readonly IDistributedCache _cache;
-        private readonly ILogger<NotificationService> _logger;
-        private readonly ICommunicationServiceFactory _communicationFactory;
-
         // Retry configuration
         private const int s_maxRetryAttempts = 3;
         private static readonly TimeSpan s_baseRetryDelay = TimeSpan.FromSeconds(1);
+        private readonly IDistributedCache _cache;
+        private readonly ICommunicationServiceFactory _communicationFactory;
+        private readonly ILogger<NotificationService> _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="NotificationService"/> class.
+        ///     Initializes a new instance of the <see cref="NotificationService" /> class.
         /// </summary>
         /// <param name="cache">The distributed _cache.</param>
         /// <param name="logger">The _logger.</param>
@@ -43,11 +37,13 @@ namespace HotshotLogistics.Application.Services
         {
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _communicationFactory = communicationFactory ?? throw new ArgumentNullException(nameof(communicationFactory));
+            _communicationFactory =
+                communicationFactory ?? throw new ArgumentNullException(nameof(communicationFactory));
         }
 
-        /// <inheritdoc/>
-        public async Task<bool> SendSmsAsync(string phoneNumber, string message, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<bool> SendSmsAsync(string phoneNumber, string message,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(phoneNumber))
             {
@@ -60,22 +56,23 @@ namespace HotshotLogistics.Application.Services
             }
 
             return await ExecuteWithRetryAsync(async () =>
-            {
-                _logger.LogInformation("Sending SMS to {PhoneNumber}", phoneNumber);
-
-                var commMessage = new CommunicationMessage
                 {
-                    To = phoneNumber,
-                    Body = message
-                };
+                    _logger.LogInformation("Sending SMS to {PhoneNumber}", phoneNumber);
 
-                var service = _communicationFactory.GetService("Sms");
-                return await service.SendAsync(commMessage, cancellationToken);
-            }, $"SMS to {phoneNumber}");
+                    CommunicationMessage commMessage = new()
+                    {
+                        To = phoneNumber,
+                        Body = message
+                    };
+
+                    ICommunicationService service = _communicationFactory.GetService("Sms");
+                    return await service.SendAsync(commMessage, cancellationToken);
+                }, $"SMS to {phoneNumber}");
         }
 
-        /// <inheritdoc/>
-        public async Task<bool> SendEmailAsync(string emailAddress, string subject, string message, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<bool> SendEmailAsync(string emailAddress, string subject, string message,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(emailAddress))
             {
@@ -96,20 +93,21 @@ namespace HotshotLogistics.Application.Services
             {
                 _logger.LogInformation("Sending email with subject: {Subject} to recipient", subject);
 
-                var commMessage = new CommunicationMessage
+                CommunicationMessage commMessage = new()
                 {
                     To = emailAddress,
                     Subject = subject,
                     Body = message
                 };
 
-                var service = _communicationFactory.GetService("Email");
+                ICommunicationService service = _communicationFactory.GetService("Email");
                 return await service.SendAsync(commMessage, cancellationToken);
             }, "Email notification");
         }
 
-        /// <inheritdoc/>
-        public async Task<bool> SendPushNotificationAsync(string deviceToken, string title, string message, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<bool> SendPushNotificationAsync(string deviceToken, string title, string message,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(deviceToken))
             {
@@ -127,27 +125,29 @@ namespace HotshotLogistics.Application.Services
             }
 
             return await ExecuteWithRetryAsync(async () =>
-            {
-                _logger.LogInformation("Sending push notification to device {DeviceToken}", deviceToken);
-
-                var commMessage = new CommunicationMessage
                 {
-                    To = deviceToken,
-                    Title = title,
-                    Body = message
-                };
+                    _logger.LogInformation("Sending push notification to device {DeviceToken}", deviceToken);
 
-                var service = _communicationFactory.GetService("Push");
-                return await service.SendAsync(commMessage, cancellationToken);
-            }, $"Push notification to {deviceToken}");
+                    CommunicationMessage commMessage = new()
+                    {
+                        To = deviceToken,
+                        Title = title,
+                        Body = message
+                    };
+
+                    ICommunicationService service = _communicationFactory.GetService("Push");
+                    return await service.SendAsync(commMessage, cancellationToken);
+                }, $"Push notification to {deviceToken}");
         }
 
-        /// <inheritdoc/>
-        public async Task<bool> SendNotificationAsync(string userId, NotificationType notificationType, string title, string message, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<bool> SendNotificationAsync(string userId, NotificationType notificationType, string title,
+            string message, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("Sending {NotificationType} notification to user {UserId}", notificationType, userId);
+            _logger.LogInformation("Sending {NotificationType} notification to user {UserId}", notificationType,
+                userId);
 
-            var preferences = await GetNotificationPreferencesAsync(userId, cancellationToken);
+            NotificationPreferences? preferences = await GetNotificationPreferencesAsync(userId, cancellationToken);
             if (preferences == null)
             {
                 _logger.LogWarning("No notification preferences found for user {UserId}", userId);
@@ -157,33 +157,35 @@ namespace HotshotLogistics.Application.Services
             // Check if user wants to receive this type of notification
             if (!preferences.EnabledNotificationTypes.Contains(notificationType))
             {
-                _logger.LogDebug("User {UserId} has disabled {NotificationType} notifications", userId, notificationType);
+                _logger.LogDebug("User {UserId} has disabled {NotificationType} notifications", userId,
+                    notificationType);
                 return true; // Return true as it's not an error, just user preference
             }
 
-            var results = new List<bool>();
+            List<bool> results = new();
 
             // Send via enabled channels
             if (preferences.SmsEnabled && !string.IsNullOrWhiteSpace(preferences.PhoneNumber))
             {
-                var smsResult = await SendSmsAsync(preferences.PhoneNumber, message, cancellationToken);
+                bool smsResult = await SendSmsAsync(preferences.PhoneNumber, message, cancellationToken);
                 results.Add(smsResult);
             }
 
             if (preferences.EmailEnabled && !string.IsNullOrWhiteSpace(preferences.EmailAddress))
             {
-                var emailResult = await SendEmailAsync(preferences.EmailAddress, title, message, cancellationToken);
+                bool emailResult = await SendEmailAsync(preferences.EmailAddress, title, message, cancellationToken);
                 results.Add(emailResult);
             }
 
             if (preferences.PushEnabled && !string.IsNullOrWhiteSpace(preferences.DeviceToken))
             {
-                var pushResult = await SendPushNotificationAsync(preferences.DeviceToken, title, message, cancellationToken);
+                bool pushResult =
+                    await SendPushNotificationAsync(preferences.DeviceToken, title, message, cancellationToken);
                 results.Add(pushResult);
             }
 
             // Return true if at least one notification was sent successfully
-            var success = results.Any() && results.Any(r => r);
+            bool success = results.Any() && results.Any(r => r);
 
             // Log notification to history
             await LogNotificationAsync(userId, notificationType, title, message, success, cancellationToken);
@@ -200,11 +202,12 @@ namespace HotshotLogistics.Application.Services
             return success;
         }
 
-        /// <inheritdoc/>
-        public async Task<NotificationPreferences?> GetNotificationPreferencesAsync(string userId, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<NotificationPreferences?> GetNotificationPreferencesAsync(string userId,
+            CancellationToken cancellationToken = default)
         {
-            var cacheKey = $"notification_preferences:{userId}";
-            var preferencesJson = await _cache.GetStringAsync(cacheKey, cancellationToken);
+            string cacheKey = $"notification_preferences:{userId}";
+            string? preferencesJson = await _cache.GetStringAsync(cacheKey, cancellationToken);
 
             if (!string.IsNullOrEmpty(preferencesJson))
             {
@@ -220,7 +223,7 @@ namespace HotshotLogistics.Application.Services
 
             // In real implementation, get from database
             // For demo purposes, return default preferences
-            var defaultPreferences = new NotificationPreferences
+            NotificationPreferences defaultPreferences = new()
             {
                 UserId = userId,
                 SmsEnabled = true,
@@ -238,8 +241,9 @@ namespace HotshotLogistics.Application.Services
             return defaultPreferences;
         }
 
-        /// <inheritdoc/>
-        public async Task<bool> UpdateNotificationPreferencesAsync(string userId, NotificationPreferences preferences, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<bool> UpdateNotificationPreferencesAsync(string userId, NotificationPreferences preferences,
+            CancellationToken cancellationToken = default)
         {
             if (preferences == null)
             {
@@ -248,8 +252,8 @@ namespace HotshotLogistics.Application.Services
 
             try
             {
-                var cacheKey = $"notification_preferences:{userId}";
-                var preferencesJson = JsonSerializer.Serialize(preferences);
+                string cacheKey = $"notification_preferences:{userId}";
+                string preferencesJson = JsonSerializer.Serialize(preferences);
 
                 await _cache.SetStringAsync(cacheKey, preferencesJson, new DistributedCacheEntryOptions
                 {
@@ -267,27 +271,29 @@ namespace HotshotLogistics.Application.Services
         }
 
         /// <summary>
-        /// Gets notification history for a user.
+        ///     Gets notification history for a user.
         /// </summary>
         /// <param name="userId">The user identifier.</param>
         /// <param name="startDate">The start date for the history.</param>
         /// <param name="endDate">The end date for the history.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The notification history.</returns>
-        public async Task<List<NotificationHistory>> GetNotificationHistoryAsync(string userId, DateTime? startDate = null, DateTime? endDate = null, CancellationToken cancellationToken = default)
+        public async Task<List<NotificationHistory>> GetNotificationHistoryAsync(string userId,
+            DateTime? startDate = null, DateTime? endDate = null, CancellationToken cancellationToken = default)
         {
             _logger.LogDebug("Getting notification history for user {UserId}", userId);
 
-            var cacheKey = $"notification_history:{userId}";
-            var historyJson = await _cache.GetStringAsync(cacheKey, cancellationToken);
+            string cacheKey = $"notification_history:{userId}";
+            string? historyJson = await _cache.GetStringAsync(cacheKey, cancellationToken);
 
-            var history = new List<NotificationHistory>();
+            List<NotificationHistory> history = new();
 
             if (!string.IsNullOrEmpty(historyJson))
             {
                 try
                 {
-                    history = JsonSerializer.Deserialize<List<NotificationHistory>>(historyJson) ?? new List<NotificationHistory>();
+                    history = JsonSerializer.Deserialize<List<NotificationHistory>>(historyJson) ??
+                              new List<NotificationHistory>();
                 }
                 catch (JsonException ex)
                 {
@@ -309,7 +315,7 @@ namespace HotshotLogistics.Application.Services
         }
 
         /// <summary>
-        /// Sends batch notifications to multiple users.
+        ///     Sends batch notifications to multiple users.
         /// </summary>
         /// <param name="userIds">The list of user identifiers.</param>
         /// <param name="notificationType">The type of notification.</param>
@@ -317,28 +323,29 @@ namespace HotshotLogistics.Application.Services
         /// <param name="message">The notification message.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The number of notifications sent successfully.</returns>
-        public async Task<int> SendBatchNotificationAsync(List<string> userIds, NotificationType notificationType, string title, string message, CancellationToken cancellationToken = default)
+        public async Task<int> SendBatchNotificationAsync(List<string> userIds, NotificationType notificationType,
+            string title, string message, CancellationToken cancellationToken = default)
         {
             if (userIds == null || !userIds.Any())
             {
                 throw new ArgumentException("User IDs list cannot be empty", nameof(userIds));
             }
 
-            _logger.LogInformation("Sending batch {NotificationType} notification to {UserCount} users", notificationType, userIds.Count);
+            _logger.LogInformation("Sending batch {NotificationType} notification to {UserCount} users",
+                notificationType, userIds.Count);
 
-            var successCount = 0;
-            var tasks = new List<Task<bool>>();
+            int successCount = 0;
 
             // Throttle batch sending to prevent overwhelming the system
             const int batchSize = 10;
             for (int i = 0; i < userIds.Count; i += batchSize)
             {
-                var batch = userIds.Skip(i).Take(batchSize);
-                var batchTasks = batch.Select(userId => SendNotificationAsync(userId, notificationType, title, message, cancellationToken));
-                tasks.AddRange(batchTasks);
+                List<string> batch = userIds.Skip(i).Take(batchSize).ToList();
+                List<Task<bool>> batchTasks = batch.Select(userId =>
+                    SendNotificationAsync(userId, notificationType, title, message, cancellationToken)).ToList();
 
                 // Wait for current batch to complete before starting next batch
-                var batchResults = await Task.WhenAll(batchTasks);
+                bool[] batchResults = await Task.WhenAll(batchTasks);
                 successCount += batchResults.Count(r => r);
 
                 // Small delay between batches to prevent rate limiting
@@ -348,30 +355,32 @@ namespace HotshotLogistics.Application.Services
                 }
             }
 
-            _logger.LogInformation("Batch notification completed: {SuccessCount}/{TotalCount} sent successfully", successCount, userIds.Count);
+            _logger.LogInformation("Batch notification completed: {SuccessCount}/{TotalCount} sent successfully",
+                successCount, userIds.Count);
             return successCount;
         }
 
         /// <summary>
-        /// Sends an urgent notification using all available channels simultaneously.
+        ///     Sends an urgent notification using all available channels simultaneously.
         /// </summary>
         /// <param name="userId">The user identifier.</param>
         /// <param name="title">The notification title.</param>
         /// <param name="message">The notification message.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>True if at least one channel succeeded.</returns>
-        public async Task<bool> SendUrgentNotificationAsync(string userId, string title, string message, CancellationToken cancellationToken = default)
+        public async Task<bool> SendUrgentNotificationAsync(string userId, string title, string message,
+            CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Sending urgent notification to user {UserId}", userId);
 
-            var preferences = await GetNotificationPreferencesAsync(userId, cancellationToken);
+            NotificationPreferences? preferences = await GetNotificationPreferencesAsync(userId, cancellationToken);
             if (preferences == null)
             {
                 _logger.LogWarning("No notification preferences found for user {UserId}", userId);
                 return false;
             }
 
-            var tasks = new List<Task<bool>>();
+            List<Task<bool>> tasks = new();
 
             // Send via all available channels simultaneously for urgent notifications
             if (!string.IsNullOrWhiteSpace(preferences.PhoneNumber))
@@ -386,17 +395,18 @@ namespace HotshotLogistics.Application.Services
 
             if (!string.IsNullOrWhiteSpace(preferences.DeviceToken))
             {
-                tasks.Add(SendPushNotificationAsync(preferences.DeviceToken, $"URGENT: {title}", message, cancellationToken));
+                tasks.Add(SendPushNotificationAsync(preferences.DeviceToken, $"URGENT: {title}", message,
+                    cancellationToken));
             }
 
-            if (!tasks.Any())
+            if (tasks.Count == 0)
             {
                 _logger.LogWarning("No notification channels available for user {UserId}", userId);
                 return false;
             }
 
-            var results = await Task.WhenAll(tasks);
-            var success = results.Any(r => r);
+            bool[] results = await Task.WhenAll(tasks);
+            bool success = results.Any(r => r);
 
             // Log notification to history
             await LogNotificationAsync(userId, NotificationType.Emergency, title, message, success, cancellationToken);
@@ -414,17 +424,21 @@ namespace HotshotLogistics.Application.Services
         }
 
         /// <summary>
-        /// Validates notification preferences.
+        ///     Validates notification preferences.
         /// </summary>
         /// <param name="preferences">The notification preferences to validate.</param>
         /// <returns>True if preferences are valid, false otherwise.</returns>
-        public bool ValidateNotificationPreferences(NotificationPreferences preferences)
+        public bool ValidateNotificationPreferences(NotificationPreferences? preferences)
         {
             if (preferences == null)
+            {
                 return false;
+            }
 
             if (string.IsNullOrWhiteSpace(preferences.UserId))
+            {
                 return false;
+            }
 
             // Validate phone number format if SMS is enabled
             if (preferences.SmsEnabled && !string.IsNullOrWhiteSpace(preferences.PhoneNumber))
@@ -450,7 +464,7 @@ namespace HotshotLogistics.Application.Services
         }
 
         /// <summary>
-        /// Logs a notification to the user's history.
+        ///     Logs a notification to the user's history.
         /// </summary>
         /// <param name="userId">The user identifier.</param>
         /// <param name="notificationType">The notification type.</param>
@@ -459,13 +473,15 @@ namespace HotshotLogistics.Application.Services
         /// <param name="success">Whether the notification was sent successfully.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        private async Task LogNotificationAsync(string userId, NotificationType notificationType, string title, string message, bool success, CancellationToken cancellationToken)
+        private async Task LogNotificationAsync(string userId, NotificationType notificationType, string title,
+            string message, bool success, CancellationToken cancellationToken)
         {
             try
             {
-                var history = await GetNotificationHistoryAsync(userId, cancellationToken: cancellationToken);
+                List<NotificationHistory> history =
+                    await GetNotificationHistoryAsync(userId, cancellationToken: cancellationToken);
 
-                var notification = new NotificationHistory
+                NotificationHistory notification = new()
                 {
                     Id = Guid.NewGuid().ToString(),
                     UserId = userId,
@@ -484,8 +500,8 @@ namespace HotshotLogistics.Application.Services
                     history = history.OrderByDescending(h => h.SentAt).Take(100).ToList();
                 }
 
-                var cacheKey = $"notification_history:{userId}";
-                var historyJson = JsonSerializer.Serialize(history);
+                string cacheKey = $"notification_history:{userId}";
+                string historyJson = JsonSerializer.Serialize(history);
 
                 await _cache.SetStringAsync(cacheKey, historyJson, new DistributedCacheEntryOptions
                 {
@@ -499,7 +515,7 @@ namespace HotshotLogistics.Application.Services
         }
 
         /// <summary>
-        /// Validates a phone number format.
+        ///     Validates a phone number format.
         /// </summary>
         /// <param name="phoneNumber">The phone number to validate.</param>
         /// <returns>True if valid, false otherwise.</returns>
@@ -512,7 +528,7 @@ namespace HotshotLogistics.Application.Services
         }
 
         /// <summary>
-        /// Validates an email address format.
+        ///     Validates an email address format.
         /// </summary>
         /// <param name="email">The email address to validate.</param>
         /// <returns>True if valid, false otherwise.</returns>
@@ -526,7 +542,7 @@ namespace HotshotLogistics.Application.Services
         }
 
         /// <summary>
-        /// Executes an operation with exponential backoff retry logic.
+        ///     Executes an operation with exponential backoff retry logic.
         /// </summary>
         /// <param name="operation">The operation to execute.</param>
         /// <param name="operationName">The name of the operation for logging.</param>
@@ -537,7 +553,7 @@ namespace HotshotLogistics.Application.Services
             {
                 try
                 {
-                    var result = await operation();
+                    bool result = await operation();
                     if (result)
                     {
                         return true;
@@ -545,8 +561,10 @@ namespace HotshotLogistics.Application.Services
 
                     if (attempt < s_maxRetryAttempts)
                     {
-                        var delay = TimeSpan.FromMilliseconds(s_baseRetryDelay.TotalMilliseconds * Math.Pow(2, attempt - 1));
-                        _logger.LogInformation("Retrying {OperationName} in {Delay}ms (attempt {Attempt}/{MaxAttempts})",
+                        TimeSpan delay =
+                            TimeSpan.FromMilliseconds(s_baseRetryDelay.TotalMilliseconds * Math.Pow(2, attempt - 1));
+                        _logger.LogInformation(
+                            "Retrying {OperationName} in {Delay}ms (attempt {Attempt}/{MaxAttempts})",
                             operationName, delay.TotalMilliseconds, attempt, s_maxRetryAttempts);
                         await Task.Delay(delay);
                     }
@@ -562,7 +580,8 @@ namespace HotshotLogistics.Application.Services
                         return false;
                     }
 
-                    var delay = TimeSpan.FromMilliseconds(s_baseRetryDelay.TotalMilliseconds * Math.Pow(2, attempt - 1));
+                    TimeSpan delay =
+                        TimeSpan.FromMilliseconds(s_baseRetryDelay.TotalMilliseconds * Math.Pow(2, attempt - 1));
                     await Task.Delay(delay);
                 }
             }

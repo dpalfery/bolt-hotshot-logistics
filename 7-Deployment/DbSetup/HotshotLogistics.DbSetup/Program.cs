@@ -1,30 +1,30 @@
-using Microsoft.Extensions.Logging;
 using HotshotLogistics.DbSetup;
+using Microsoft.Extensions.Logging;
 
-var loggerFactory = LoggerFactory.Create(builder =>
+ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
 {
     builder.AddConsole();
     builder.SetMinimumLevel(LogLevel.Information);
 });
 
-var logger = loggerFactory.CreateLogger<Program>();
-var envManagerLogger = loggerFactory.CreateLogger<EnvironmentManager>();
-var environmentManager = new EnvironmentManager(envManagerLogger);
+ILogger<Program> logger = loggerFactory.CreateLogger<Program>();
+ILogger<EnvironmentManager> envManagerLogger = loggerFactory.CreateLogger<EnvironmentManager>();
+EnvironmentManager environmentManager = new(envManagerLogger);
 
-var passwordManagerLogger = loggerFactory.CreateLogger<PasswordManager>();
-var passwordManager = new PasswordManager(passwordManagerLogger);
+ILogger<PasswordManager> passwordManagerLogger = loggerFactory.CreateLogger<PasswordManager>();
+PasswordManager passwordManager = new(passwordManagerLogger);
 
-var provisionerLogger = loggerFactory.CreateLogger<SqlServerProvisioner>();
-var provisioner = new SqlServerProvisioner(provisionerLogger);
+ILogger<SqlServerProvisioner> provisionerLogger = loggerFactory.CreateLogger<SqlServerProvisioner>();
+SqlServerProvisioner provisioner = new(provisionerLogger);
 
 try
 {
     // Parse command line arguments
-    var commandLineArgs = Environment.GetCommandLineArgs().Skip(1).ToArray();
-    var parser = new ArgumentParser(commandLineArgs);
+    string[] commandLineArgs = Environment.GetCommandLineArgs().Skip(1).ToArray();
+    ArgumentParser parser = new(commandLineArgs);
     parser.ApplyEnvironmentOverrides();
 
-    if (!parser.Validate(out var errorMessage))
+    if (!parser.Validate(out string errorMessage))
     {
         logger.LogError("Validation failed: {ErrorMessage}", errorMessage);
         Environment.Exit(1);
@@ -34,6 +34,7 @@ try
     logger.LogInformation("Server: {Server}", parser.Server);
     logger.LogInformation("Database: {Database}", parser.DatabaseName);
     logger.LogInformation("App User: {AppUser}", parser.AppUser);
+    logger.LogInformation("Force: {Force}", parser.Force);
 
     // Check if running with administrator privileges
     if (environmentManager.IsAdministrator())
@@ -46,18 +47,18 @@ try
     }
 
     // Build SA connection string
-    var saConnectionString = parser.SaConnectionString ??
-        $"Server={parser.Server};Database=master;Integrated Security=true;TrustServerCertificate=true;";
+    string saConnectionString = parser.SaConnectionString ??
+                                $"Server={parser.Server};Database=master;Integrated Security=true;TrustServerCertificate=true;";
 
     logger.LogInformation("Using connection string for provisioning (password hidden)");
 
     // Generate or get password for app user
-    var appPassword = parser.Password ?? passwordManager.GeneratePassword();
+    string appPassword = parser.Password ?? passwordManager.GeneratePassword();
     logger.LogInformation("Generated password for application user (password hidden)");
 
     // Provision the database
     logger.LogInformation("Starting database provisioning...");
-    var success = await provisioner.ProvisionDatabaseAsync(
+    bool success = await provisioner.ProvisionDatabaseAsync(
         saConnectionString,
         parser.DatabaseName!,
         parser.AppUser!,
@@ -70,7 +71,8 @@ try
     }
 
     // Build application connection string
-    var appConnectionString = $"Server={parser.Server};Database={parser.DatabaseName};User Id={parser.AppUser};Password={appPassword};TrustServerCertificate=true;";
+    string appConnectionString =
+        $"Server={parser.Server};Database={parser.DatabaseName};User Id={parser.AppUser};Password={appPassword};TrustServerCertificate=true;";
 
     // Persist connection string with user consent if not in non-interactive mode
     if (parser.PersistEnvironment)

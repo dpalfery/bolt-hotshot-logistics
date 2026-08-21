@@ -1,22 +1,23 @@
-namespace HotshotLogistics.Core.Enums;
-
-/// <summary>
-/// Represents the type of communication channel.
-/// </summary>
-public enum CommunicationType
+namespace HotshotLogistics.Core.Enums
 {
     /// <summary>
-    /// SMS communication.
+    ///     Represents the type of communication channel.
     /// </summary>
-    Sms,
+    public enum CommunicationType
+    {
+        /// <summary>
+        ///     SMS communication.
+        /// </summary>
+        Sms,
 
-    /// <summary>
-    /// Email communication.
-    /// </summary>
-    Email,
+        /// <summary>
+        ///     Email communication.
+        /// </summary>
+        Email,
 
-    /// <summary>
-    /// Push notification communication.
-    /// </summary>
-    Push
+        /// <summary>
+        ///     Push notification communication.
+        /// </summary>
+        Push
+    }
 }

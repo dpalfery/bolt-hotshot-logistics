@@ -1,7 +1,9 @@
 // <copyright file="GoogleMapsService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Domain.DTOs;
 using HotshotLogistics.Domain.Entities;
@@ -12,45 +14,50 @@ using Microsoft.Extensions.Options;
 namespace HotshotLogistics.Data.Services
 {
     /// <summary>
-    /// Google Maps implementation of the mapping service.
+    ///     Google Maps implementation of the mapping service.
     /// </summary>
     public class GoogleMapsService : IMappingService
     {
+        private readonly string _apiKey;
         private readonly HttpClient _httpClient;
         private readonly ILogger<GoogleMapsService> _logger;
-        private readonly string _apiKey;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GoogleMapsService"/> class.
+        ///     Initializes a new instance of the <see cref="GoogleMapsService" /> class.
         /// </summary>
         /// <param name="httpClient">The HTTP client for API calls.</param>
         /// <param name="logger">The logger.</param>
         /// <param name="settings">The Google Maps settings.</param>
-        public GoogleMapsService(HttpClient httpClient, ILogger<GoogleMapsService> logger, IOptions<GoogleMapsSettings> settings)
+        public GoogleMapsService(HttpClient httpClient, ILogger<GoogleMapsService> logger,
+            IOptions<GoogleMapsSettings> settings)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            var googleMapsSettings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
+            ArgumentNullException.ThrowIfNull(settings);
+            GoogleMapsSettings googleMapsSettings = settings.Value;
             _apiKey = googleMapsSettings.ApiKey ?? throw new ArgumentNullException(nameof(googleMapsSettings.ApiKey));
         }
 
-        /// <inheritdoc/>
-        public async Task<GeocodingResult> GeocodeAddressAsync(string address, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<GeocodingResult> GeocodeAddressAsync(string address,
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                var url = $"https://maps.googleapis.com/maps/api/geocode/json?address={Uri.EscapeDataString(address)}&key={_apiKey}";
+                string url =
+                    $"https://maps.googleapis.com/maps/api/geocode/json?address={Uri.EscapeDataString(address)}&key={_apiKey}";
 
-                var response = await _httpClient.GetAsync(url, cancellationToken);
+                HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken);
                 response.EnsureSuccessStatusCode();
 
-                var content = await response.Content.ReadAsStringAsync(cancellationToken);
-                var result = JsonSerializer.Deserialize<GoogleMapsGeocodeResponse>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                string content = await response.Content.ReadAsStringAsync(cancellationToken);
+                GoogleMapsGeocodeResponse? result = JsonSerializer.Deserialize<GoogleMapsGeocodeResponse>(content,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                if (result?.Status == "OK" && result.Results?.Count > 0)
+                if (result is { Status: "OK", Results.Count: > 0 })
                 {
-                    var firstResult = result.Results[0];
-                    var location = firstResult.Geometry.Location;
+                    GeocodeResult firstResult = result.Results[0];
+                    Coordinate location = firstResult.Geometry.Location;
 
                     return new GeocodingResult
                     {
@@ -58,14 +65,14 @@ namespace HotshotLogistics.Data.Services
                         Longitude = (decimal)location.Lng,
                         FormattedAddress = firstResult.FormattedAddress,
                         IsValid = true,
-                        Confidence = 1.0, // Google Maps doesn't provide confidence scores
+                        Confidence = 1.0 // Google Maps doesn't provide confidence scores
                     };
                 }
 
                 return new GeocodingResult
                 {
                     IsValid = false,
-                    ErrorMessage = result?.Status ?? "Geocoding failed",
+                    ErrorMessage = result?.Status ?? "Geocoding failed"
                 };
             }
             catch (Exception ex)
@@ -74,45 +81,49 @@ namespace HotshotLogistics.Data.Services
                 return new GeocodingResult
                 {
                     IsValid = false,
-                    ErrorMessage = ex.Message,
+                    ErrorMessage = ex.Message
                 };
             }
         }
 
-        /// <inheritdoc/>
-        public async Task<ReverseGeocodingResult> ReverseGeocodeAsync(decimal latitude, decimal longitude, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<ReverseGeocodingResult> ReverseGeocodeAsync(decimal latitude, decimal longitude,
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                var url = $"https://maps.googleapis.com/maps/api/geocode/json?latlng={latitude},{longitude}&key={_apiKey}";
+                string url =
+                    $"https://maps.googleapis.com/maps/api/geocode/json?latlng={latitude},{longitude}&key={_apiKey}";
 
-                var response = await _httpClient.GetAsync(url, cancellationToken);
+                HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken);
                 response.EnsureSuccessStatusCode();
 
-                var content = await response.Content.ReadAsStringAsync(cancellationToken);
-                var result = JsonSerializer.Deserialize<GoogleMapsGeocodeResponse>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                string content = await response.Content.ReadAsStringAsync(cancellationToken);
+                GoogleMapsGeocodeResponse? result = JsonSerializer.Deserialize<GoogleMapsGeocodeResponse>(content,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                if (result?.Status == "OK" && result.Results?.Count > 0)
+                if (result is { Status: "OK", Results.Count: > 0 })
                 {
-                    var firstResult = result.Results[0];
-                    var components = firstResult.AddressComponents;
+                    GeocodeResult firstResult = result.Results[0];
+                    List<AddressComponent> components = firstResult.AddressComponents;
 
                     return new ReverseGeocodingResult
                     {
-                        Address = GetAddressComponent(components, "street_number") + " " + GetAddressComponent(components, "route"),
+                        Address = GetAddressComponent(components, "street_number") + " " +
+                                  GetAddressComponent(components, "route"),
                         City = GetAddressComponent(components, "locality"),
                         State = GetAddressComponent(components, "administrative_area_level_1"),
                         PostalCode = GetAddressComponent(components, "postal_code"),
                         Country = GetAddressComponent(components, "country"),
                         FormattedAddress = firstResult.FormattedAddress,
-                        IsValid = true,
+                        IsValid = true
                     };
                 }
 
                 return new ReverseGeocodingResult
                 {
                     IsValid = false,
-                    ErrorMessage = result?.Status ?? "Reverse geocoding failed",
+                    ErrorMessage = result?.Status ?? "Reverse geocoding failed"
                 };
             }
             catch (Exception ex)
@@ -121,20 +132,21 @@ namespace HotshotLogistics.Data.Services
                 return new ReverseGeocodingResult
                 {
                     IsValid = false,
-                    ErrorMessage = ex.Message,
+                    ErrorMessage = ex.Message
                 };
             }
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<bool> ValidateAddressAsync(string address, CancellationToken cancellationToken = default)
         {
-            var result = await GeocodeAddressAsync(address, cancellationToken);
+            GeocodingResult result = await GeocodeAddressAsync(address, cancellationToken);
             return result.IsValid;
         }
 
-        /// <inheritdoc/>
-        public async Task<RouteResult> CalculateRouteAsync(Location origin, Location destination, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<RouteResult> CalculateRouteAsync(Location origin, Location destination,
+            CancellationToken cancellationToken = default)
         {
             try
             {
@@ -143,53 +155,57 @@ namespace HotshotLogistics.Data.Services
                     return new RouteResult
                     {
                         IsValid = false,
-                        ErrorMessage = "Both origin and destination must have coordinates",
+                        ErrorMessage = "Both origin and destination must have coordinates"
                     };
                 }
 
-                var url = $"https://maps.googleapis.com/maps/api/directions/json?origin={origin.Latitude},{origin.Longitude}&destination={destination.Latitude},{destination.Longitude}&key={_apiKey}";
+                string url =
+                    $"https://maps.googleapis.com/maps/api/directions/json?origin={origin.Latitude},{origin.Longitude}&destination={destination.Latitude},{destination.Longitude}&key={_apiKey}";
 
-                var response = await _httpClient.GetAsync(url, cancellationToken);
+                HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken);
                 response.EnsureSuccessStatusCode();
 
-                var content = await response.Content.ReadAsStringAsync(cancellationToken);
-                var result = JsonSerializer.Deserialize<GoogleMapsDirectionsResponse>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                string content = await response.Content.ReadAsStringAsync(cancellationToken);
+                GoogleMapsDirectionsResponse? result = JsonSerializer.Deserialize<GoogleMapsDirectionsResponse>(content,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                if (result?.Status == "OK" && result.Routes?.Count > 0)
+                if (result is { Status: "OK", Routes.Count: > 0 })
                 {
-                    var route = result.Routes[0];
-                    var leg = route.Legs[0];
+                    DirectionsRoute route = result.Routes[0];
+                    DirectionsLeg leg = route.Legs[0];
 
                     return new RouteResult
                     {
                         Distance = leg.Distance.Value * 0.000621371, // Convert meters to miles
                         Duration = TimeSpan.FromSeconds(leg.Duration.Value),
-                        Waypoints = new List<Location> { origin, destination },
-                        Polyline = route.OverviewPolyline?.Points ?? string.Empty,
+                        Waypoints = [origin, destination],
+                        Polyline = route.OverviewPolyline.Points,
                         EstimatedArrival = DateTime.UtcNow.AddSeconds(leg.Duration.Value),
-                        IsValid = true,
+                        IsValid = true
                     };
                 }
 
                 return new RouteResult
                 {
                     IsValid = false,
-                    ErrorMessage = result?.Status ?? "No route found",
+                    ErrorMessage = result?.Status ?? "No route found"
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to calculate route between {Origin} and {Destination}", origin.FullAddress, destination.FullAddress);
+                _logger.LogError(ex, "Failed to calculate route between {Origin} and {Destination}", origin.FullAddress,
+                    destination.FullAddress);
                 return new RouteResult
                 {
                     IsValid = false,
-                    ErrorMessage = ex.Message,
+                    ErrorMessage = ex.Message
                 };
             }
         }
 
-        /// <inheritdoc/>
-        public async Task<OptimizedRouteResult> OptimizeRouteAsync(IList<Location> waypoints, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<OptimizedRouteResult> OptimizeRouteAsync(IList<Location> waypoints,
+            CancellationToken cancellationToken = default)
         {
             // For simplicity, return the waypoints in order without optimization
             // In a real implementation, this would use Google Maps Directions API with waypoints optimization
@@ -200,23 +216,23 @@ namespace HotshotLogistics.Data.Services
                     return new OptimizedRouteResult
                     {
                         IsValid = false,
-                        ErrorMessage = "At least 2 waypoints required",
+                        ErrorMessage = "At least 2 waypoints required"
                     };
                 }
 
-                var totalDistance = 0.0;
-                var totalDuration = TimeSpan.Zero;
-                var segments = new List<RouteResult>();
+                double totalDistance = 0.0;
+                TimeSpan totalDuration = TimeSpan.Zero;
+                List<RouteResult> segments = new();
 
                 for (int i = 0; i < waypoints.Count - 1; i++)
                 {
-                    var segment = await CalculateRouteAsync(waypoints[i], waypoints[i + 1], cancellationToken);
+                    RouteResult segment = await CalculateRouteAsync(waypoints[i], waypoints[i + 1], cancellationToken);
                     if (!segment.IsValid)
                     {
                         return new OptimizedRouteResult
                         {
                             IsValid = false,
-                            ErrorMessage = $"Failed to calculate route segment {i}",
+                            ErrorMessage = $"Failed to calculate route segment {i}"
                         };
                     }
 
@@ -232,7 +248,7 @@ namespace HotshotLogistics.Data.Services
                     TotalDuration = totalDuration,
                     RouteSegments = segments,
                     EstimatedArrival = DateTime.UtcNow.Add(totalDuration),
-                    IsValid = true,
+                    IsValid = true
                 };
             }
             catch (Exception ex)
@@ -241,100 +257,98 @@ namespace HotshotLogistics.Data.Services
                 return new OptimizedRouteResult
                 {
                     IsValid = false,
-                    ErrorMessage = ex.Message,
+                    ErrorMessage = ex.Message
                 };
             }
         }
 
-        /// <inheritdoc/>
-        public async Task<DistanceResult> CalculateDistanceAsync(Location origin, Location destination, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<DistanceResult> CalculateDistanceAsync(Location origin, Location destination,
+            CancellationToken cancellationToken = default)
         {
-            var route = await CalculateRouteAsync(origin, destination, cancellationToken);
+            RouteResult route = await CalculateRouteAsync(origin, destination, cancellationToken);
             return new DistanceResult
             {
                 Distance = route.Distance,
                 Duration = route.Duration,
                 IsValid = route.IsValid,
-                ErrorMessage = route.ErrorMessage,
+                ErrorMessage = route.ErrorMessage
             };
         }
 
         private static string GetAddressComponent(List<AddressComponent> components, string type)
         {
-            var component = components?.Find(c => c.Types.Contains(type));
+            AddressComponent? component = components.Find(c => c.Types.Contains(type));
             return component?.LongName ?? string.Empty;
         }
 
         // Internal classes for Google Maps API responses
-        private class GoogleMapsGeocodeResponse
+        private sealed class GoogleMapsGeocodeResponse
         {
-            public string Status { get; set; } = string.Empty;
-            public List<GeocodeResult> Results { get; set; } = new List<GeocodeResult>();
+            public string Status { get; init; } = string.Empty;
+            public List<GeocodeResult> Results { get; init; } = [];
         }
 
-        private class GeocodeResult
+        private sealed class GeocodeResult
         {
-            [System.Text.Json.Serialization.JsonPropertyName("formatted_address")]
-            public string FormattedAddress { get; set; } = string.Empty;
-            public Geometry Geometry { get; set; } = new Geometry();
-            public List<AddressComponent> AddressComponents { get; set; } = new List<AddressComponent>();
+            [JsonPropertyName("formatted_address")]
+            public string FormattedAddress { get; init; } = string.Empty;
+
+            public Geometry Geometry { get; init; } = new();
+            public List<AddressComponent> AddressComponents { get; init; } = [];
         }
 
-        private class Geometry
+        private sealed class Geometry
         {
-            [System.Text.Json.Serialization.JsonPropertyName("location")]
-            public Coordinate Location { get; set; } = new Coordinate();
+            [JsonPropertyName("location")] public Coordinate Location { get; init; } = new();
         }
 
-        private class Coordinate
+        private sealed class Coordinate
         {
-            [System.Text.Json.Serialization.JsonPropertyName("lat")]
-            public double Lat { get; set; }
-            [System.Text.Json.Serialization.JsonPropertyName("lng")]
-            public double Lng { get; set; }
+            [JsonPropertyName("lat")] public double Lat { get; init; }
+
+            [JsonPropertyName("lng")] public double Lng { get; init; }
         }
 
-        private class AddressComponent
+        private sealed class AddressComponent
         {
-            public string LongName { get; set; } = string.Empty;
-            public List<string> Types { get; set; } = new List<string>();
+            public string LongName { get; init; } = string.Empty;
+            public List<string> Types { get; init; } = [];
         }
 
-        private class GoogleMapsDirectionsResponse
+        private sealed class GoogleMapsDirectionsResponse
         {
-            public string Status { get; set; } = string.Empty;
-            public List<DirectionsRoute> Routes { get; set; } = new List<DirectionsRoute>();
+            public string Status { get; init; } = string.Empty;
+            public List<DirectionsRoute> Routes { get; init; } = [];
         }
 
-        private class DirectionsRoute
+        private sealed class DirectionsRoute
         {
-            public List<DirectionsLeg> Legs { get; set; } = new List<DirectionsLeg>();
-            [System.Text.Json.Serialization.JsonPropertyName("overview_polyline")]
-            public Polyline OverviewPolyline { get; set; } = new Polyline();
+            public List<DirectionsLeg> Legs { get; init; } = [];
+
+            [JsonPropertyName("overview_polyline")]
+            public Polyline OverviewPolyline { get; init; } = new();
         }
 
-        private class DirectionsLeg
+        private sealed class DirectionsLeg
         {
-            public Distance Distance { get; set; } = new Distance();
-            public Duration Duration { get; set; } = new Duration();
+            public Distance Distance { get; init; } = new();
+            public Duration Duration { get; init; } = new();
         }
 
-        private class Distance
+        private sealed class Distance
         {
-            [System.Text.Json.Serialization.JsonPropertyName("value")]
-            public int Value { get; set; } // meters
+            [JsonPropertyName("value")] public int Value { get; init; } // meters
         }
 
-        private class Duration
+        private sealed class Duration
         {
-            [System.Text.Json.Serialization.JsonPropertyName("value")]
-            public int Value { get; set; } // seconds
+            [JsonPropertyName("value")] public int Value { get; init; } // seconds
         }
 
-        private class Polyline
+        private sealed class Polyline
         {
-            [System.Text.Json.Serialization.JsonPropertyName("points")]
-            public string Points { get; set; } = string.Empty;
+            [JsonPropertyName("points")] public string Points { get; init; } = string.Empty;
         }
     }
 }

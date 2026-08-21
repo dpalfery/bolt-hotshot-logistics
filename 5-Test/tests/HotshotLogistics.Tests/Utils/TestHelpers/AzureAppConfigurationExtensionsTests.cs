@@ -2,24 +2,24 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace HotshotLogistics.Tests
-{
-    using FluentAssertions;
-    using HotshotLogistics.Core.Extensions;
-    using Microsoft.Extensions.Configuration;
+using FluentAssertions;
+using HotshotLogistics.Core.Extensions;
+using Microsoft.Extensions.Configuration;
 
+namespace HotshotLogistics.Tests.Utils.TestHelpers
+{
     /// <summary>
-    /// Tests for optional Azure App Configuration loading.
+    ///     Tests for optional Azure App Configuration loading.
     /// </summary>
     public class AzureAppConfigurationExtensionsTests
     {
         [Fact]
         public void AddAzureAppConfigurationIfConfigured_WhenNotConfigured_ReturnsFalse()
         {
-            var builder = new ConfigurationBuilder()
+            IConfigurationBuilder builder = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>());
 
-            var added = builder.AddAzureAppConfigurationIfConfigured();
+            bool added = builder.AddAzureAppConfigurationIfConfigured();
 
             added.Should().BeFalse();
         }
@@ -27,13 +27,13 @@ namespace HotshotLogistics.Tests
         [Fact]
         public void AddAzureAppConfigurationIfConfigured_WhenEndpointSetWithoutCredential_ReturnsFalse()
         {
-            var builder = new ConfigurationBuilder()
+            IConfigurationBuilder builder = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    [OptionalAzureAppConfigurationExtensions.EndpointKey] = "https://example.azconfig.io",
+                    [OptionalAzureAppConfigurationExtensions.EndpointKey] = "https://example.azconfig.io"
                 });
 
-            var added = builder.AddAzureAppConfigurationIfConfigured(useDefaultAzureCredential: false);
+            bool added = builder.AddAzureAppConfigurationIfConfigured(false);
 
             added.Should().BeFalse();
         }

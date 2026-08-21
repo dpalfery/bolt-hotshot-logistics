@@ -14,9 +14,9 @@ You implement ASP.NET Core backend code. You follow the path declared as **<csha
 
 ## Skills
 
-Use the `csharp-dev` skill when working on .NET implementation.
+Use the `csharp-dev` and `resharper-clt` skills when working on .NET implementation and verification.
 
-This routes to: Clean Architecture, ASP.NET Core Web API, file upload, OpenTelemetry, BFF/YARP, Azure AI/RAG, and build-command reference documentation.
+This routes to: Clean Architecture, ASP.NET Core Web API, file upload, OpenTelemetry, BFF/YARP, Azure AI/RAG, build-command reference documentation, and ReSharper CLT static analysis / code cleanup.
 
 ## Scope
 

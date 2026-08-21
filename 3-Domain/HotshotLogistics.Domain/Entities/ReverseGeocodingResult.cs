@@ -4,35 +4,49 @@
 
 namespace HotshotLogistics.Domain.Entities
 {
-
-
     /// <summary>
-    /// Represents the result of a reverse geocoding operation.
+    ///     Represents the result of a reverse geocoding operation.
     /// </summary>
     public class ReverseGeocodingResult
     {
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Gets or sets the street address.
+        /// </summary>
         public string Address { get; set; } = string.Empty;
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Gets or sets the city.
+        /// </summary>
         public string City { get; set; } = string.Empty;
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Gets or sets the state or province.
+        /// </summary>
         public string State { get; set; } = string.Empty;
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Gets or sets the postal code.
+        /// </summary>
         public string PostalCode { get; set; } = string.Empty;
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Gets or sets the country.
+        /// </summary>
         public string Country { get; set; } = string.Empty;
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Gets or sets the formatted address.
+        /// </summary>
         public string FormattedAddress { get; set; } = string.Empty;
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Gets or sets a value indicating whether the geocoding operation was valid.
+        /// </summary>
         public bool IsValid { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Gets or sets the error message if the operation failed.
+        /// </summary>
         public string ErrorMessage { get; set; } = string.Empty;
     }
 }

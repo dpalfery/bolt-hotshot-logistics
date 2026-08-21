@@ -13,12 +13,12 @@ namespace HotshotLogistics.Data.Repositories
 #pragma warning disable SA1202 // False positive - public members are correctly ordered before protected members
 {
     /// <summary>
-    /// Repository implementation for location tracking operations using native ADO.NET.
+    ///     Repository implementation for location tracking operations using native ADO.NET.
     /// </summary>
     internal class LocationTrackingRepository : BaseRepository<LocationTracking>, ILocationTrackingRepository
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LocationTrackingRepository"/> class.
+        ///     Initializes a new instance of the <see cref="LocationTrackingRepository" /> class.
         /// </summary>
         /// <param name="configuration">The application configuration.</param>
         public LocationTrackingRepository(IConfiguration configuration)
@@ -26,27 +26,24 @@ namespace HotshotLogistics.Data.Repositories
         {
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public new async Task<LocationTracking> AddAsync(LocationTracking locationTracking)
         {
-            if (locationTracking is not LocationTracking locationTrackingEntity)
-            {
-                throw new ArgumentException("LocationTracking must be of type LocationTracking", nameof(locationTracking));
-            }
+            ArgumentNullException.ThrowIfNull(locationTracking);
 
-            return await base.AddAsync(locationTrackingEntity);
+            return await base.AddAsync(locationTracking);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<LocationTracking?> GetByIdAsync(long id)
         {
             const string sql = "SELECT * FROM LocationTracking WHERE Id = @Id";
-            var parameters = new[] { new SqlParameter("@Id", id) };
-            var results = await ExecuteQueryAsync(sql, parameters);
+            SqlParameter[] parameters = [new("@Id", id)];
+            IEnumerable<LocationTracking> results = await ExecuteQueryAsync(sql, parameters);
             return results.FirstOrDefault();
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<IEnumerable<LocationTracking>> GetByJobIdAsync(string jobId)
         {
             const string sql = @"
@@ -54,12 +51,12 @@ namespace HotshotLogistics.Data.Repositories
                 WHERE JobId = @JobId
                 ORDER BY Timestamp ASC";
 
-            var parameters = new[] { new SqlParameter("@JobId", jobId) };
-            var results = await ExecuteQueryAsync(sql, parameters);
-            return results.Cast<LocationTracking>();
+            SqlParameter[] parameters = [new("@JobId", jobId)];
+            IEnumerable<LocationTracking> results = await ExecuteQueryAsync(sql, parameters);
+            return results;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<IEnumerable<LocationTracking>> GetByDriverIdAsync(int driverId)
         {
             const string sql = @"
@@ -67,13 +64,14 @@ namespace HotshotLogistics.Data.Repositories
                 WHERE DriverId = @DriverId
                 ORDER BY Timestamp DESC";
 
-            var parameters = new[] { new SqlParameter("@DriverId", driverId) };
-            var results = await ExecuteQueryAsync(sql, parameters);
-            return results.Cast<LocationTracking>();
+            SqlParameter[] parameters = [new("@DriverId", driverId)];
+            IEnumerable<LocationTracking> results = await ExecuteQueryAsync(sql, parameters);
+            return results;
         }
 
-        /// <inheritdoc/>
-        public async Task<IEnumerable<LocationTracking>> GetByJobIdAndTimeRangeAsync(string jobId, DateTime startTime, DateTime endTime)
+        /// <inheritdoc />
+        public async Task<IEnumerable<LocationTracking>> GetByJobIdAndTimeRangeAsync(string jobId, DateTime startTime,
+            DateTime endTime)
         {
             const string sql = @"
                 SELECT * FROM LocationTracking
@@ -81,19 +79,20 @@ namespace HotshotLogistics.Data.Repositories
                 AND Timestamp BETWEEN @StartTime AND @EndTime
                 ORDER BY Timestamp ASC";
 
-            var parameters = new[]
-            {
-                new SqlParameter("@JobId", jobId),
-                new SqlParameter("@StartTime", startTime),
-                new SqlParameter("@EndTime", endTime),
-            };
+            SqlParameter[] parameters =
+            [
+                new("@JobId", jobId),
+                new("@StartTime", startTime),
+                new("@EndTime", endTime)
+            ];
 
-            var results = await ExecuteQueryAsync(sql, parameters);
-            return results.Cast<LocationTracking>();
+            IEnumerable<LocationTracking> results = await ExecuteQueryAsync(sql, parameters);
+            return results;
         }
 
-        /// <inheritdoc/>
-        public async Task<IEnumerable<LocationTracking>> GetByDriverIdAndTimeRangeAsync(int driverId, DateTime startTime, DateTime endTime)
+        /// <inheritdoc />
+        public async Task<IEnumerable<LocationTracking>> GetByDriverIdAndTimeRangeAsync(int driverId,
+            DateTime startTime, DateTime endTime)
         {
             const string sql = @"
                 SELECT * FROM LocationTracking
@@ -101,18 +100,18 @@ namespace HotshotLogistics.Data.Repositories
                 AND Timestamp BETWEEN @StartTime AND @EndTime
                 ORDER BY Timestamp ASC";
 
-            var parameters = new[]
-            {
-                new SqlParameter("@DriverId", driverId),
-                new SqlParameter("@StartTime", startTime),
-                new SqlParameter("@EndTime", endTime),
-            };
+            SqlParameter[] parameters =
+            [
+                new("@DriverId", driverId),
+                new("@StartTime", startTime),
+                new("@EndTime", endTime)
+            ];
 
-            var results = await ExecuteQueryAsync(sql, parameters);
-            return results.Cast<LocationTracking>();
+            IEnumerable<LocationTracking> results = await ExecuteQueryAsync(sql, parameters);
+            return results;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<LocationTracking?> GetLatestByJobIdAsync(string jobId)
         {
             const string sql = @"
@@ -120,12 +119,12 @@ namespace HotshotLogistics.Data.Repositories
                 WHERE JobId = @JobId
                 ORDER BY Timestamp DESC";
 
-            var parameters = new[] { new SqlParameter("@JobId", jobId) };
-            var results = await ExecuteQueryAsync(sql, parameters);
+            SqlParameter[] parameters = [new("@JobId", jobId)];
+            IEnumerable<LocationTracking> results = await ExecuteQueryAsync(sql, parameters);
             return results.FirstOrDefault();
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<LocationTracking?> GetLatestByDriverIdAsync(int driverId)
         {
             const string sql = @"
@@ -133,25 +132,25 @@ namespace HotshotLogistics.Data.Repositories
                 WHERE DriverId = @DriverId
                 ORDER BY Timestamp DESC";
 
-            var parameters = new[] { new SqlParameter("@DriverId", driverId) };
-            var results = await ExecuteQueryAsync(sql, parameters);
+            SqlParameter[] parameters = [new("@DriverId", driverId)];
+            IEnumerable<LocationTracking> results = await ExecuteQueryAsync(sql, parameters);
             return results.FirstOrDefault();
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<IEnumerable<LocationTracking>> GetLatestByJobIdAsync(string jobId, int count)
         {
-            var sql = $@"
+            string sql = $@"
                 SELECT TOP {count} * FROM LocationTracking
                 WHERE JobId = @JobId
                 ORDER BY Timestamp DESC";
 
-            var parameters = new[] { new SqlParameter("@JobId", jobId) };
-            var results = await ExecuteQueryAsync(sql, parameters);
-            return results.Cast<LocationTracking>();
+            SqlParameter[] parameters = [new("@JobId", jobId)];
+            IEnumerable<LocationTracking> results = await ExecuteQueryAsync(sql, parameters);
+            return results;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<IEnumerable<LocationTracking>> GetByGeographicAreaAsync(
             decimal centerLatitude,
             decimal centerLongitude,
@@ -159,13 +158,13 @@ namespace HotshotLogistics.Data.Repositories
             DateTime? startTime = null,
             DateTime? endTime = null)
         {
-            var whereClause = new StringBuilder();
-            var parameters = new List<SqlParameter>
-            {
+            StringBuilder whereClause = new();
+            List<SqlParameter> parameters =
+            [
                 new SqlParameter("@CenterLat", centerLatitude),
                 new SqlParameter("@CenterLon", centerLongitude),
-                new SqlParameter("@RadiusMiles", radiusMiles),
-            };
+                new SqlParameter("@RadiusMiles", radiusMiles)
+            ];
 
             // Use the Haversine formula to calculate distance
             whereClause.Append(@"
@@ -189,24 +188,24 @@ namespace HotshotLogistics.Data.Repositories
                 parameters.Add(new SqlParameter("@EndTime", endTime.Value));
             }
 
-            var sql = $@"
+            string sql = $@"
                 SELECT * FROM LocationTracking
                 {whereClause}
                 ORDER BY Timestamp DESC";
 
-            var results = await ExecuteQueryAsync(sql, parameters.ToArray());
-            return results.Cast<LocationTracking>();
+            IEnumerable<LocationTracking> results = await ExecuteQueryAsync(sql, parameters.ToArray());
+            return results;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<int> DeleteOlderThanAsync(DateTime cutoffDate)
         {
             const string sql = "DELETE FROM LocationTracking WHERE Timestamp < @CutoffDate";
-            var parameters = new[] { new SqlParameter("@CutoffDate", cutoffDate) };
+            SqlParameter[] parameters = [new("@CutoffDate", cutoffDate)];
             return await ExecuteNonQueryAsync(sql, parameters);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<double> GetTotalDistanceByJobIdAsync(string jobId)
         {
             const string sql = @"
@@ -231,11 +230,11 @@ namespace HotshotLogistics.Data.Repositories
                 FROM OrderedLocations
                 WHERE PrevLatitude IS NOT NULL AND PrevLongitude IS NOT NULL";
 
-            var parameters = new[] { new SqlParameter("@JobId", jobId) };
+            SqlParameter[] parameters = [new("@JobId", jobId)];
             return await ExecuteScalarAsync<double>(sql, parameters);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<double> GetTotalDistanceByDriverIdAsync(int driverId, DateTime startTime, DateTime endTime)
         {
             const string sql = @"
@@ -261,37 +260,37 @@ namespace HotshotLogistics.Data.Repositories
                 FROM OrderedLocations
                 WHERE PrevLatitude IS NOT NULL AND PrevLongitude IS NOT NULL";
 
-            var parameters = new[]
-            {
-                new SqlParameter("@DriverId", driverId),
-                new SqlParameter("@StartTime", startTime),
-                new SqlParameter("@EndTime", endTime),
-            };
+            SqlParameter[] parameters =
+            [
+                new("@DriverId", driverId),
+                new("@StartTime", startTime),
+                new("@EndTime", endTime)
+            ];
 
             return await ExecuteScalarAsync<double>(sql, parameters);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<bool> ExistsAsync(long id)
         {
             const string sql = "SELECT COUNT(1) FROM LocationTracking WHERE Id = @Id";
-            var parameters = new[] { new SqlParameter("@Id", id) };
-            var count = await ExecuteScalarAsync<int>(sql, parameters);
+            SqlParameter[] parameters = [new("@Id", id)];
+            int count = await ExecuteScalarAsync<int>(sql, parameters);
             return count > 0;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<int> GetCountByJobIdAsync(string jobId)
         {
             const string sql = "SELECT COUNT(*) FROM LocationTracking WHERE JobId = @JobId";
-            var parameters = new[] { new SqlParameter("@JobId", jobId) };
+            SqlParameter[] parameters = [new("@JobId", jobId)];
             return await ExecuteScalarAsync<int>(sql, parameters);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<int> AddBatchAsync(IEnumerable<LocationTracking> locationTrackingRecords)
         {
-            var records = locationTrackingRecords.ToList();
+            List<LocationTracking> records = locationTrackingRecords.ToList();
             if (!records.Any())
             {
                 return 0;
@@ -301,30 +300,26 @@ namespace HotshotLogistics.Data.Repositories
                 INSERT INTO LocationTracking (JobId, DriverId, Latitude, Longitude, Speed, Heading, Accuracy, Timestamp)
                 VALUES (@JobId, @DriverId, @Latitude, @Longitude, @Speed, @Heading, @Accuracy, @Timestamp)";
 
-            var insertedCount = 0;
+            int insertedCount = 0;
 
-            await using var connection = new SqlConnection(ConnectionString);
+            await using SqlConnection connection = new(ConnectionString);
             await connection.OpenAsync();
 
-            await using var transaction = connection.BeginTransaction();
+            await using SqlTransaction transaction = connection.BeginTransaction();
             try
             {
-                foreach (var record in records)
+                foreach (LocationTracking record in records)
                 {
-                    if (record is not LocationTracking locationTracking)
-                    {
-                        continue;
-                    }
+                    await using SqlCommand command = new(sql, connection, transaction);
+                    command.Parameters.AddRange(GetInsertParameters(record));
 
-                    await using var command = new SqlCommand(sql, connection, transaction);
-                    command.Parameters.AddRange(GetInsertParameters(locationTracking));
-
-                    var rowsAffected = await command.ExecuteNonQueryAsync();
+                    int rowsAffected = await command.ExecuteNonQueryAsync();
                     if (rowsAffected > 0)
                     {
                         insertedCount++;
                     }
                 }
+
                 await transaction.CommitAsync();
             }
             catch
@@ -336,13 +331,19 @@ namespace HotshotLogistics.Data.Repositories
             return insertedCount;
         }
 
-        /// <inheritdoc/>
-        protected override string GetTableName() => "LocationTracking";
+        /// <inheritdoc />
+        protected override string GetTableName()
+        {
+            return "LocationTracking";
+        }
 
-        /// <inheritdoc/>
-        protected override string GetPrimaryKeyColumnName() => "Id";
+        /// <inheritdoc />
+        protected override string GetPrimaryKeyColumnName()
+        {
+            return "Id";
+        }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override LocationTracking MapReaderToEntity(SqlDataReader reader)
         {
             return new LocationTracking
@@ -352,18 +353,24 @@ namespace HotshotLogistics.Data.Repositories
                 DriverId = reader.GetInt32(reader.GetOrdinal("DriverId")),
                 Latitude = reader.GetDecimal(reader.GetOrdinal("Latitude")),
                 Longitude = reader.GetDecimal(reader.GetOrdinal("Longitude")),
-                Speed = reader.IsDBNull(reader.GetOrdinal("Speed")) ? null : reader.GetDecimal(reader.GetOrdinal("Speed")),
-                Heading = reader.IsDBNull(reader.GetOrdinal("Heading")) ? null : reader.GetInt32(reader.GetOrdinal("Heading")),
-                Accuracy = reader.IsDBNull(reader.GetOrdinal("Accuracy")) ? null : reader.GetDecimal(reader.GetOrdinal("Accuracy")),
-                Timestamp = reader.GetDateTime(reader.GetOrdinal("Timestamp")),
+                Speed = reader.IsDBNull(reader.GetOrdinal("Speed"))
+                    ? null
+                    : reader.GetDecimal(reader.GetOrdinal("Speed")),
+                Heading = reader.IsDBNull(reader.GetOrdinal("Heading"))
+                    ? null
+                    : reader.GetInt32(reader.GetOrdinal("Heading")),
+                Accuracy = reader.IsDBNull(reader.GetOrdinal("Accuracy"))
+                    ? null
+                    : reader.GetDecimal(reader.GetOrdinal("Accuracy")),
+                Timestamp = reader.GetDateTime(reader.GetOrdinal("Timestamp"))
             };
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override SqlParameter[] GetInsertParameters(LocationTracking entity)
         {
-            return new[]
-            {
+            return
+            [
                 new SqlParameter("@JobId", entity.JobId),
                 new SqlParameter("@DriverId", entity.DriverId),
                 new SqlParameter("@Latitude", entity.Latitude),
@@ -371,15 +378,15 @@ namespace HotshotLogistics.Data.Repositories
                 new SqlParameter("@Speed", (object?)entity.Speed ?? DBNull.Value),
                 new SqlParameter("@Heading", (object?)entity.Heading ?? DBNull.Value),
                 new SqlParameter("@Accuracy", (object?)entity.Accuracy ?? DBNull.Value),
-                new SqlParameter("@Timestamp", entity.Timestamp),
-            };
+                new SqlParameter("@Timestamp", entity.Timestamp)
+            ];
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override SqlParameter[] GetUpdateParameters(LocationTracking entity)
         {
-            return new[]
-            {
+            return
+            [
                 new SqlParameter("@Id", entity.Id),
                 new SqlParameter("@JobId", entity.JobId),
                 new SqlParameter("@DriverId", entity.DriverId),
@@ -388,8 +395,8 @@ namespace HotshotLogistics.Data.Repositories
                 new SqlParameter("@Speed", (object?)entity.Speed ?? DBNull.Value),
                 new SqlParameter("@Heading", (object?)entity.Heading ?? DBNull.Value),
                 new SqlParameter("@Accuracy", (object?)entity.Accuracy ?? DBNull.Value),
-                new SqlParameter("@Timestamp", entity.Timestamp),
-            };
+                new SqlParameter("@Timestamp", entity.Timestamp)
+            ];
         }
 #pragma warning restore SA1202
     }

@@ -1,6 +1,7 @@
 // <copyright file="TwilioSmsService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+
 using HotshotLogistics.Contracts.Services;
 using HotshotLogistics.Domain.DTOs;
 using HotshotLogistics.Domain.ValueObjects;
@@ -13,15 +14,15 @@ using Twilio.Types;
 namespace HotshotLogistics.Data.Services
 {
     /// <summary>
-    /// Service for sending SMS messages via Twilio.
+    ///     Service for sending SMS messages via Twilio.
     /// </summary>
     public class TwilioSmsService : ICommunicationService
     {
-        private readonly TwilioSettings _settings;
         private readonly ILogger<TwilioSmsService> _logger;
+        private readonly TwilioSettings _settings;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TwilioSmsService"/> class.
+        ///     Initializes a new instance of the <see cref="TwilioSmsService" /> class.
         /// </summary>
         /// <param name="settings">The Twilio settings.</param>
         /// <param name="logger">The logger.</param>
@@ -29,14 +30,15 @@ namespace HotshotLogistics.Data.Services
             IOptions<TwilioSettings> settings,
             ILogger<TwilioSmsService> logger)
         {
-            _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
+            ArgumentNullException.ThrowIfNull(settings);
+            _settings = settings.Value ?? throw new ArgumentNullException(nameof(settings));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public string Type => "Sms";
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<bool> SendAsync(CommunicationMessage message, CancellationToken cancellationToken = default)
         {
             if (message == null)
@@ -57,18 +59,18 @@ namespace HotshotLogistics.Data.Services
             try
             {
                 // Format message with template data
-                var formattedBody = FormatMessage(message.Body, message.TemplateData);
+                string formattedBody = FormatMessage(message.Body, message.TemplateData);
 
                 // Initialize Twilio client
                 TwilioClient.Init(_settings.AccountSid, _settings.AuthToken);
 
-                var messageOptions = new CreateMessageOptions(new PhoneNumber(message.To))
+                CreateMessageOptions messageOptions = new(new PhoneNumber(message.To))
                 {
                     From = new PhoneNumber(_settings.FromPhoneNumber),
-                    Body = formattedBody,
+                    Body = formattedBody
                 };
 
-                var result = await MessageResource.CreateAsync(messageOptions);
+                MessageResource result = await MessageResource.CreateAsync(messageOptions);
 
                 _logger.LogInformation("SMS sent successfully to {To}. SID: {Sid}", message.To, result.Sid);
 
@@ -84,20 +86,20 @@ namespace HotshotLogistics.Data.Services
         }
 
         /// <summary>
-        /// Formats a message template with the provided data.
+        ///     Formats a message template with the provided data.
         /// </summary>
         /// <param name="template">The message template.</param>
         /// <param name="data">The template data.</param>
         /// <returns>The formatted message.</returns>
         private static string FormatMessage(string template, Dictionary<string, string> data)
         {
-            if (string.IsNullOrEmpty(template) || data == null || !data.Any())
+            if (string.IsNullOrEmpty(template) || data.Count == 0)
             {
                 return template;
             }
 
-            var result = template;
-            foreach (var kvp in data)
+            string result = template;
+            foreach (KeyValuePair<string, string> kvp in data)
             {
                 result = result.Replace($"{{{kvp.Key}}}", kvp.Value);
             }
